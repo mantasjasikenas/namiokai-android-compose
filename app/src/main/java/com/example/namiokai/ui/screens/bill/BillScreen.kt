@@ -6,12 +6,14 @@ import androidx.compose.ui.Modifier
 import com.example.namiokai.ui.screens.common.FloatingAddButton
 
 @Composable
-fun FuelScreen(
+fun BillScreen(
     modifier: Modifier = Modifier
 ) {
+    Column {
 
-    Column() {
     }
 
     FloatingAddButton()
+
+
 }

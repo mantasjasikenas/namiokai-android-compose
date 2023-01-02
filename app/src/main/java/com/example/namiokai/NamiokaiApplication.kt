@@ -5,9 +5,6 @@ import dagger.hilt.android.HiltAndroidApp
 
 @HiltAndroidApp
 class NamiokaiApplication : Application() {
-    override fun onCreate() {
-        super.onCreate()
-    }
 
 
 }

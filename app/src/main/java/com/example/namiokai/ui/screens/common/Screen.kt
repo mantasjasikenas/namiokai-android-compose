@@ -18,19 +18,19 @@ sealed class Screen(
 ) {
     object Summary : Screen("start", R.string.app_name, Icons.Outlined.Payments)
     object Fuel : Screen("fuel", R.string.fuel_name, Icons.Outlined.LocalGasStation)
-    object Shopping : Screen("shopping", R.string.shopping_name, Icons.Outlined.ShoppingBag)
+    object Bill : Screen("bill", R.string.bill_name, Icons.Outlined.ShoppingBag)
     object Settings : Screen("settings", R.string.settings_name, Icons.Outlined.Settings)
-    object Auth : Screen("auth", R.string.settings_name, Icons.Outlined.Sync)
+    object Auth : Screen("auth", R.string.auth_name, Icons.Outlined.Sync)
 
     companion object {
         val navBarScreens = listOf(
             Summary,
-            Shopping,
+            Bill,
             Fuel
         )
         private val screens = listOf(
             Summary,
-            Shopping,
+            Bill,
             Fuel,
             Settings,
             Auth

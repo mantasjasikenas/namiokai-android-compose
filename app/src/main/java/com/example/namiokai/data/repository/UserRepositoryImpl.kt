@@ -27,18 +27,4 @@ class UserRepositoryImpl @Inject constructor(
             Response.Failure(e)
         }
     }
-
-    /* override suspend fun revokeAccess(): RevokeAccessResponse {
-         return try {
-             auth.currentUser?.apply {
-                 db.collection(USERS).document(uid).delete().await()
-                 signInClient.revokeAccess().await()
-                 oneTapClient.signOut().await()
-                 delete().await()
-             }
-             Response.Success(true)
-         } catch (e: Exception) {
-             Response.Failure(e)
-         }
-     }*/
 }

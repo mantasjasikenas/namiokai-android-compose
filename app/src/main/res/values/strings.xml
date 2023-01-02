@@ -2,7 +2,8 @@
     <string name="app_name">Namiokai</string>
     <string name="back_button">Back button\n</string>
     <string name="fuel_name">Fuel</string>
-    <string name="shopping_name">Shopping</string>
+    <string name="bill_name">Bill</string>
     <string name="settings_button">Settings</string>
     <string name="settings_name">Settings</string>
+    <string name="auth_name">Auth</string>
 </resources>

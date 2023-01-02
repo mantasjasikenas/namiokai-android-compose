@@ -12,25 +12,29 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material.icons.outlined.Person2
 import androidx.compose.material.icons.outlined.Wallet
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.example.namiokai.ui.screens.summary.SummaryUiState
-import com.example.namiokai.ui.theme.NamiokaiTheme
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.namiokai.model.User
+import com.example.namiokai.ui.screens.summary.SummaryViewModel
 
 @Composable
 fun SummaryScreen(
-    summaryUiState: SummaryUiState, modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: SummaryViewModel = hiltViewModel(),
 ) {
+    val summaryUiState by viewModel.uiState.collectAsState()
+
     LazyColumn(modifier = modifier.fillMaxSize()) {
         items(summaryUiState.users) { user ->
             UserCard(user)
@@ -39,9 +43,8 @@ fun SummaryScreen(
 }
 
 @Composable
-private fun UserCard(user: String, modifier: Modifier = Modifier) {
-    Card(
-        elevation = CardDefaults.elevatedCardElevation(8.dp),
+private fun UserCard(user: User, modifier: Modifier = Modifier) {
+    ElevatedCard(
         modifier = modifier
             .padding(20.dp)
             .fillMaxSize()
@@ -54,9 +57,7 @@ private fun UserCard(user: String, modifier: Modifier = Modifier) {
             horizontalArrangement = Arrangement.SpaceAround,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            SizedIcon(
-                imageVector = Icons.Outlined.Person2
-            )
+            Text(text = user.displayName)
             SizedIcon(
                 imageVector = Icons.Outlined.Wallet
             )
@@ -84,13 +85,4 @@ private fun SizedIcon(modifier: Modifier = Modifier, imageVector: ImageVector, s
         contentDescription = null,
         modifier = modifier.size(size)
     )
-}
-
-
-@Preview
-@Composable
-fun CardPreview() {
-    NamiokaiTheme {
-        UserCard(user = "Lolikas")
-    }
 }

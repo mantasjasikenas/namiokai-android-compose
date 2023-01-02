@@ -21,13 +21,13 @@ class SummaryViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            getNamiokai()
+            getUsers()
         }
     }
 
-    private suspend fun getNamiokai() {
+    private suspend fun getUsers() {
         _summaryUiState.update {
-            it.copy(users = repo.getNamiokai())
+            it.copy(users = repo.getUsers())
         }
 
         /*        viewModelScope.launch {

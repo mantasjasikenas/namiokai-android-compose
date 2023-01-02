@@ -19,6 +19,8 @@ import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Named
 
+private const val TAG = "AUTH"
+
 class AuthRepositoryImpl @Inject constructor(
     private val auth: FirebaseAuth,
     private var oneTapClient: SignInClient,
@@ -28,19 +30,24 @@ class AuthRepositoryImpl @Inject constructor(
     private var signUpRequest: BeginSignInRequest,
 ) : AuthRepository {
 
+
     override val isUserAuthenticatedInFirebase = auth.currentUser != null
 
     override suspend fun oneTapSignInWithGoogle(): OneTapSignInResponse {
         return try {
+            val authResult =
+                auth.signInWithEmailAndPassword("mantasjasikenas@gmail.com", "Mantelis354").await()
+            Log.d(TAG, authResult.user?.uid ?: "null")
+
             val signInResult = oneTapClient.beginSignIn(signInRequest).await()
             Response.Success(signInResult)
         } catch (e: Exception) {
-            Log.d("MANTEL", e.toString())
+            Log.e(TAG, e.toString())
             try {
                 val signUpResult = oneTapClient.beginSignIn(signUpRequest).await()
                 Response.Success(signUpResult)
             } catch (e: Exception) {
-                Log.d("MANTEL", e.toString())
+                Log.e(TAG, e.toString())
                 Response.Failure(e)
             }
         }

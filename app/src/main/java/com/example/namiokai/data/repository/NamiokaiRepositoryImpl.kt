@@ -1,13 +1,18 @@
 package com.example.namiokai.data.repository
 
 import com.example.namiokai.data.NamiokaiRepository
-import kotlinx.coroutines.flow.update
+import com.example.namiokai.model.User
 
 
 class NamiokaiRepositoryImpl : NamiokaiRepository {
 
-    override suspend fun getNamiokai(): List<String> =
-        listOf("Mantelis", "Klaidelis", "Klaidas")
+    override suspend fun getUsers(): List<User> =
+        listOf(
+            User("Mantelis"),
+            User("Klaidas"),
+            User("Klaidelis"),
+            User("Jurgis")
+        )
 
 
 }
