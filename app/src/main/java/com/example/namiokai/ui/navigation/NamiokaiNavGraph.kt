@@ -7,7 +7,8 @@ import com.example.namiokai.ui.screens.FuelScreen
 import com.example.namiokai.ui.screens.SettingsScreen
 import com.example.namiokai.ui.screens.SummaryScreen
 import com.example.namiokai.ui.screens.auth.AuthScreen
-import com.example.namiokai.ui.screens.common.Screen
+import com.example.namiokai.ui.navigation.Screen
+import com.example.namiokai.ui.screens.test.TestScreen
 
 
 fun NavGraphBuilder.namiokaiNavigationGraph() {
@@ -25,5 +26,8 @@ fun NavGraphBuilder.namiokaiNavigationGraph() {
     }
     composable(route = Screen.Auth.route) {
         AuthScreen()
+    }
+    composable(route = Screen.Test.route) {
+        TestScreen()
     }
 }

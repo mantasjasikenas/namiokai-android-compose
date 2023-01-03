@@ -4,9 +4,11 @@ import android.app.Application
 import android.content.Context
 import com.example.namiokai.R
 import com.example.namiokai.data.AuthRepository
+import com.example.namiokai.data.FirebaseRepository
 import com.example.namiokai.data.NamiokaiRepository
 import com.example.namiokai.data.UserRepository
 import com.example.namiokai.data.repository.AuthRepositoryImpl
+import com.example.namiokai.data.repository.FirebaseRepositoryImpl
 import com.example.namiokai.data.repository.NamiokaiRepositoryImpl
 import com.example.namiokai.data.repository.UserRepositoryImpl
 import com.example.namiokai.utils.Constants.SIGN_IN_REQUEST
@@ -30,14 +32,21 @@ import javax.inject.Named
 @Module
 @InstallIn(ViewModelComponent::class)
 class AppModule {
+
     @Provides
     fun provideFirebaseAuth() = Firebase.auth
+
+
+    @Provides
+    fun provideFirebaseRepository(): FirebaseRepository = FirebaseRepositoryImpl()
+
 
     @Provides
     fun provideOneTapClient(
         @ApplicationContext
         context: Context
     ) = Identity.getSignInClient(context)
+
 
     @Provides
     @Named(SIGN_IN_REQUEST)
@@ -54,6 +63,7 @@ class AppModule {
         .setAutoSelectEnabled(true)
         .build()
 
+
     @Provides
     @Named(SIGN_UP_REQUEST)
     fun provideSignUpRequest(
@@ -68,6 +78,7 @@ class AppModule {
         )
         .build()
 
+
     @Provides
     fun provideGoogleSignInOptions(
         app: Application
@@ -76,15 +87,18 @@ class AppModule {
         .requestEmail()
         .build()
 
+
     @Provides
     fun provideGoogleSignInClient(
         app: Application,
         options: GoogleSignInOptions
     ) = GoogleSignIn.getClient(app, options)
 
+
     @Provides
     fun provideNamiokaiRepository(
     ): NamiokaiRepository = NamiokaiRepositoryImpl()
+
 
     @Provides
     fun provideAuthRepository(
@@ -100,6 +114,7 @@ class AppModule {
         signInRequest = signInRequest,
         signUpRequest = signUpRequest,
     )
+
 
     @Provides
     fun provideProfileRepository(

@@ -6,13 +6,13 @@ import com.example.namiokai.model.User
 
 class NamiokaiRepositoryImpl : NamiokaiRepository {
 
-    override suspend fun getUsers(): List<User> =
-        listOf(
-            User("Mantelis"),
-            User("Klaidas"),
-            User("Klaidelis"),
-            User("Jurgis")
-        )
+    override suspend fun getUsers(): List<User> = emptyList()
+//        listOf(
+//            User("Mantelis"),
+//            User("Klaidas"),
+//            User("Klaidelis"),
+//            User("Jurgis")
+//        )
 
 
 }

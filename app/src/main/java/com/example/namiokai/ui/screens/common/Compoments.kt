@@ -17,7 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun FloatingAddButton(modifier: Modifier = Modifier) {
+fun FloatingAddButton(modifier: Modifier = Modifier, onClick: () -> Unit) {
     Column(
         modifier = modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Bottom,
@@ -25,7 +25,7 @@ fun FloatingAddButton(modifier: Modifier = Modifier) {
     ) {
         LargeFloatingActionButton(
             modifier = Modifier.padding(all = 16.dp),
-            onClick = {},
+            onClick = onClick,
             shape = CircleShape
         ) {
             Icon(

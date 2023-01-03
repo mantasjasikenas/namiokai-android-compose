@@ -1,4 +1,4 @@
-package com.example.namiokai.ui.screens.common
+package com.example.namiokai.ui.navigation
 
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
@@ -21,6 +21,7 @@ sealed class Screen(
     object Bill : Screen("bill", R.string.bill_name, Icons.Outlined.ShoppingBag)
     object Settings : Screen("settings", R.string.settings_name, Icons.Outlined.Settings)
     object Auth : Screen("auth", R.string.auth_name, Icons.Outlined.Sync)
+    object Test : Screen("test", R.string.test_name, Icons.Outlined.Sync)
 
     companion object {
         val navBarScreens = listOf(
@@ -33,7 +34,8 @@ sealed class Screen(
             Bill,
             Fuel,
             Settings,
-            Auth
+            Auth,
+            Test
         )
 
         fun fromRoute(route: String?): Screen =

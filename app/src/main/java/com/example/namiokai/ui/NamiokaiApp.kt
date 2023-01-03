@@ -5,7 +5,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.outlined.Login
+import androidx.compose.material.icons.outlined.BugReport
+import androidx.compose.material.icons.outlined.Key
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
@@ -35,7 +36,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.namiokai.R
 import com.example.namiokai.ui.namiokaiNavigationGraph
-import com.example.namiokai.ui.screens.common.Screen
+import com.example.namiokai.ui.navigation.Screen
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -128,6 +129,11 @@ fun NamiokaiTopAppBar(
                         navController.navigate(Screen.Auth.route) {
                             launchSingleTop = true
                         }
+                    },
+                    navigateToTest = {
+                        navController.navigate(Screen.Test.route) {
+                            launchSingleTop = true
+                        }
                     })
             })
     }
@@ -162,7 +168,8 @@ fun NamiokaiNavigationBar(
 @Composable
 fun TopBarDropdownMenu(
     navigateToSettings: () -> Unit,
-    navigateToAuth: () -> Unit
+    navigateToAuth: () -> Unit,
+    navigateToTest: () -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
 
@@ -187,7 +194,6 @@ fun TopBarDropdownMenu(
                     contentDescription = null
                 )
             })
-        Divider()
         DropdownMenuItem(
             text = { Text("Auth") },
             onClick = {
@@ -196,7 +202,21 @@ fun TopBarDropdownMenu(
             },
             leadingIcon = {
                 Icon(
-                    Icons.Outlined.Login,
+                    Icons.Outlined.Key,
+                    contentDescription = null
+                )
+            }
+        )
+        Divider()
+        DropdownMenuItem(
+            text = { Text("Test") },
+            onClick = {
+                navigateToTest()
+                expanded = false
+            },
+            leadingIcon = {
+                Icon(
+                    Icons.Outlined.BugReport,
                     contentDescription = null
                 )
             }

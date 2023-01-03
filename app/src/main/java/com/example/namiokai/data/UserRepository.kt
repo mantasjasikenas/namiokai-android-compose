@@ -11,5 +11,5 @@ interface UserRepository {
 
     suspend fun signOut(): SignOutResponse
 
-    //suspend fun revokeAccess(): RevokeAccessResponse
+
 }
