@@ -3,6 +3,7 @@ package com.example.namiokai.data.repository
 import com.example.namiokai.data.SignOutResponse
 import com.example.namiokai.data.UserRepository
 import com.example.namiokai.model.Response
+import com.example.namiokai.model.User
 import com.google.android.gms.auth.api.identity.SignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.firebase.auth.FirebaseAuth
@@ -15,8 +16,8 @@ class UserRepositoryImpl @Inject constructor(
     private var signInClient: GoogleSignInClient,
 ) : UserRepository {
 
-    override val displayName = auth.currentUser?.displayName.toString()
-    override val photoUrl = auth.currentUser?.photoUrl.toString()
+    override val user: User? = auth.currentUser?.toUser()
+
 
     override suspend fun signOut(): SignOutResponse {
         return try {

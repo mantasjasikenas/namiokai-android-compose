@@ -8,6 +8,8 @@ import androidx.lifecycle.viewModelScope
 import com.example.namiokai.data.AuthRepository
 import com.example.namiokai.data.OneTapSignInResponse
 import com.example.namiokai.data.SignInWithGoogleResponse
+import com.example.namiokai.data.SignOutResponse
+import com.example.namiokai.data.UserRepository
 import com.example.namiokai.model.Response
 import com.google.android.gms.auth.api.identity.SignInClient
 import com.google.firebase.auth.AuthCredential
@@ -18,7 +20,8 @@ import javax.inject.Inject
 @HiltViewModel
 class AuthViewModel @Inject constructor(
     private val repo: AuthRepository,
-    val oneTapClient: SignInClient
+    val oneTapClient: SignInClient,
+    private val userRepository: UserRepository
 ) : ViewModel() {
 //    private val _loginUiState = MutableStateFlow(AuthUiState())
 //    val loginUiState = _loginUiState.asStateFlow()
@@ -31,6 +34,8 @@ class AuthViewModel @Inject constructor(
         private set
     var signInWithGoogleResponse by mutableStateOf<SignInWithGoogleResponse>(Response.Success(false))
         private set
+    var signOutResponse by mutableStateOf<SignOutResponse>(Response.Success(false))
+        private set
 
     fun oneTapSignIn() = viewModelScope.launch {
         oneTapSignInResponse = Response.Loading
@@ -40,5 +45,10 @@ class AuthViewModel @Inject constructor(
     fun signInWithGoogle(googleCredential: AuthCredential) = viewModelScope.launch {
         oneTapSignInResponse = Response.Loading
         signInWithGoogleResponse = repo.firebaseSignInWithGoogle(googleCredential)
+    }
+
+    fun signOut() = viewModelScope.launch {
+        signOutResponse = Response.Loading
+        signOutResponse = userRepository.signOut()
     }
 }

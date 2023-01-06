@@ -1,10 +1,10 @@
 package com.example.namiokai.model
 
 data class Bill(
-    val date: String = "",
-    var paymaster: String = "",
+    var date: String = "",
+    var paymaster: User = User(),
     var shoppingList: String = "",
     var total: Double = 0.0,
-    val splitUsers: List<User> = emptyList()
+    var splitUsers: List<User> = emptyList()
 )
 

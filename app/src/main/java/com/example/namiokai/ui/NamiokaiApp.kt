@@ -27,6 +27,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -35,15 +36,18 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.namiokai.R
+import com.example.namiokai.ui.MainViewModel
 import com.example.namiokai.ui.namiokaiNavigationGraph
 import com.example.namiokai.ui.navigation.Screen
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
 
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
 fun NamiokaiApp(
     modifier: Modifier = Modifier,
-    navController: NavHostController = rememberNavController()
+    navController: NavHostController = rememberNavController(),
+    mainViewModel: MainViewModel = hiltViewModel()
 ) {
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -52,8 +56,11 @@ fun NamiokaiApp(
     val bottomBarState = rememberSaveable { (mutableStateOf(true)) }
     val topBarState = rememberSaveable { (mutableStateOf(true)) }
 
+    val isLoggedIn = mainViewModel.authRepository.isUserAuthenticatedInFirebase
+    val initialRoute = if (isLoggedIn) Screen.Summary.route else Screen.Auth.route
+
     when (navBackStackEntry?.destination?.route) {
-        Screen.Settings.route -> {
+        Screen.Settings.route, Screen.Auth.route -> {
             bottomBarState.value = false
             topBarState.value = true
         }
@@ -83,10 +90,10 @@ fun NamiokaiApp(
 
         NavHost(
             navController = navController,
-            startDestination = Screen.Summary.route,
+            startDestination = initialRoute,
             modifier = modifier.padding(innerPadding)
         ) {
-            namiokaiNavigationGraph()
+            namiokaiNavigationGraph(navController = navController)
         }
     }
 

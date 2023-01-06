@@ -97,11 +97,13 @@ class AppModule {
 
     @Provides
     fun provideNamiokaiRepository(
-    ): NamiokaiRepository = NamiokaiRepositoryImpl()
+        firebaseRepository: FirebaseRepository
+    ): NamiokaiRepository = NamiokaiRepositoryImpl(firebaseRepository = firebaseRepository)
 
 
     @Provides
     fun provideAuthRepository(
+        firebaseRepository: FirebaseRepository,
         auth: FirebaseAuth,
         oneTapClient: SignInClient,
         @Named(SIGN_IN_REQUEST)
@@ -113,6 +115,7 @@ class AppModule {
         oneTapClient = oneTapClient,
         signInRequest = signInRequest,
         signUpRequest = signUpRequest,
+        firebaseRepository = firebaseRepository
     )
 
 

@@ -1,18 +1,16 @@
 package com.example.namiokai.data.repository
 
+import com.example.namiokai.data.FirebaseRepository
 import com.example.namiokai.data.NamiokaiRepository
-import com.example.namiokai.model.User
+import javax.inject.Inject
 
 
-class NamiokaiRepositoryImpl : NamiokaiRepository {
+class NamiokaiRepositoryImpl @Inject constructor(private val firebaseRepository: FirebaseRepository) :
+    NamiokaiRepository {
 
-    override suspend fun getUsers(): List<User> = emptyList()
-//        listOf(
-//            User("Mantelis"),
-//            User("Klaidas"),
-//            User("Klaidelis"),
-//            User("Jurgis")
-//        )
+    override suspend fun getUsers() = firebaseRepository.getUsers()
+
+    override suspend fun getUser(uid: String) = firebaseRepository.getUser(uid)
 
 
 }
