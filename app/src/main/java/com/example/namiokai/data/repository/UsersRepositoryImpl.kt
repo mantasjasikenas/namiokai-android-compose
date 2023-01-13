@@ -1,12 +1,12 @@
 package com.example.namiokai.data.repository
 
 import com.example.namiokai.data.FirebaseRepository
-import com.example.namiokai.data.NamiokaiRepository
+import com.example.namiokai.data.UsersRepository
 import javax.inject.Inject
 
 
-class NamiokaiRepositoryImpl @Inject constructor(private val firebaseRepository: FirebaseRepository) :
-    NamiokaiRepository {
+class UsersRepositoryImpl @Inject constructor(private val firebaseRepository: FirebaseRepository) :
+    UsersRepository {
 
     override suspend fun getUsers() = firebaseRepository.getUsers()
 

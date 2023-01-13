@@ -1,4 +1,4 @@
-package com.example.namiokai.data.repository
+package com.example.namiokai.data.repository.auth
 
 import com.example.namiokai.data.SignOutResponse
 import com.example.namiokai.data.UserRepository

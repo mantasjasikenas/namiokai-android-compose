@@ -14,12 +14,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.namiokai.R
 import com.example.namiokai.model.Fuel
-import com.example.namiokai.ui.MainViewModel
+import com.example.namiokai.model.tripDestination
+import com.example.namiokai.ui.main.MainViewModel
 import com.example.namiokai.ui.screens.common.CardText
 import com.example.namiokai.ui.screens.common.CustomSpacer
+import com.example.namiokai.ui.screens.common.EmptyView
 import com.example.namiokai.ui.screens.common.FloatingAddButton
 import com.example.namiokai.ui.screens.fuel.AddFuelPopup
 import com.example.namiokai.ui.screens.fuel.FuelViewModel
@@ -36,11 +40,15 @@ fun FuelScreen(
         mutableStateOf(false)
     }
 
-    LazyColumn(modifier = modifier.fillMaxSize()) {
-        items(fuelUiState.fuels) { fuel ->
-            FuelCard(fuel)
+    if (fuelUiState.fuels.isEmpty()) {
+        EmptyView()
+    } else {
+        LazyColumn(modifier = modifier.fillMaxSize()) {
+            items(fuelUiState.fuels) { fuel ->
+                FuelCard(fuel)
+            }
+            item { CustomSpacer(height = 100) }
         }
-        item { CustomSpacer(height = 100) }
     }
 
     FloatingAddButton(onClick = { popupState.value = true })
@@ -72,15 +80,14 @@ private fun FuelCard(fuel: Fuel, modifier: Modifier = Modifier) {
             verticalArrangement = Arrangement.Center
         ) {
 
-            CardText(label = "Trip date", value = fuel.date)
-            CardText(label = "Driver", value = fuel.driver.displayName)
-            CardText(label = "Had happened", value = if (fuel.isValid) "Yes" else "No")
+            CardText(label = stringResource(R.string.trip_date), value = fuel.date)
+            CardText(label = stringResource(R.string.driver), value = fuel.driver.displayName)
             CardText(
-                label = "Split fuel to",
+                label = stringResource(R.string.split_fuel_to),
                 value = fuel.passengers.map { it.displayName }.joinToString { it })
             CardText(
-                label = "Trip destination",
-                value = if (fuel.tripToHome) "Kėdainiai" else "Kaunas"
+                label = stringResource(R.string.trip_destination),
+                value = fuel.tripDestination()
             )
 
         }

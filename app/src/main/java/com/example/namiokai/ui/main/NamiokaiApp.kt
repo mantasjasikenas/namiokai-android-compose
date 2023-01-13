@@ -36,7 +36,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.namiokai.R
-import com.example.namiokai.ui.MainViewModel
+import com.example.namiokai.ui.main.MainViewModel
 import com.example.namiokai.ui.namiokaiNavigationGraph
 import com.example.namiokai.ui.navigation.Screen
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -190,7 +190,7 @@ fun TopBarDropdownMenu(
     ) {
 
         DropdownMenuItem(
-            text = { Text("Settings") },
+            text = { Text(stringResource(R.string.settings_menu_label)) },
             onClick = {
                 navigateToSettings()
                 expanded = false
@@ -202,7 +202,7 @@ fun TopBarDropdownMenu(
                 )
             })
         DropdownMenuItem(
-            text = { Text("Auth") },
+            text = { Text(stringResource(R.string.auth_menu_label)) },
             onClick = {
                 navigateToAuth()
                 expanded = false
@@ -216,7 +216,7 @@ fun TopBarDropdownMenu(
         )
         Divider()
         DropdownMenuItem(
-            text = { Text("Test") },
+            text = { Text(stringResource(R.string.test_menu_label)) },
             onClick = {
                 navigateToTest()
                 expanded = false

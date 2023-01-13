@@ -1,4 +1,4 @@
-package com.example.namiokai.data.repository
+package com.example.namiokai.data.repository.auth
 
 import android.util.Log
 import com.example.namiokai.data.AuthRepository
@@ -78,6 +78,7 @@ fun FirebaseUser.toUser(): User =
 
 fun FirebaseUser.isAdmin(): Boolean {
 
+    // TODO: Implement this method to check if the user is an admin
     this.uid
 
 

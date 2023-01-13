@@ -43,7 +43,7 @@ class BillViewModel @Inject constructor(private val firebaseRepository: Firebase
     @SuppressLint("SimpleDateFormat")
     fun insertBill(bill: Bill) {
 
-        val format = SimpleDateFormat("yyyy/MM/dd HH:mm:ss:ms")
+        val format = SimpleDateFormat("yyyy/MM/dd HH:mm:ss")
         val currentDate = format.format(Date())
 
         bill.date = currentDate

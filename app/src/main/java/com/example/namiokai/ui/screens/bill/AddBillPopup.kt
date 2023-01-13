@@ -2,6 +2,7 @@
 
 package com.example.namiokai.ui.screens.bill
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,11 +12,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -30,7 +29,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
@@ -38,11 +39,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
+import com.example.namiokai.R
 import com.example.namiokai.model.Bill
 import com.example.namiokai.model.User
-import com.google.accompanist.flowlayout.FlowCrossAxisAlignment
-import com.google.accompanist.flowlayout.FlowRow
-import com.google.accompanist.flowlayout.MainAxisAlignment
+import com.example.namiokai.model.isValid
+import com.example.namiokai.ui.screens.common.UsersPicker
 
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -59,6 +60,7 @@ fun AddBillPopup(
     val paymasterHashMap = remember {
         users.map { it to false }.toMutableStateMap()
     }
+    val context = LocalContext.current
 
     Popup(
         alignment = Alignment.Center, onDismissRequest = { }, properties = PopupProperties(
@@ -77,100 +79,74 @@ fun AddBillPopup(
 
                 Spacer(modifier = Modifier.height(20.dp))
                 Text(
-                    text = "Select paymaster",
+                    text = stringResource(R.string.select_paymaster),
                     style = MaterialTheme.typography.labelLarge,
                     textAlign = TextAlign.Center
                 )
-                SplitBillPicker(paymasterHashMap)
-
-
-                // PopupTextField(label = "Paymaster", onValueChange = { bill.paymaster = it })
-
-
-                PopupTextField(label = "Shopping list", onValueChange = { bill.shoppingList = it })
+                UsersPicker(
+                    usersPickup = paymasterHashMap,
+                    isMultipleSelectEnabled = false
+                )
                 PopupTextField(
-                    label = "Total price",
+                    label = stringResource(R.string.shopping_list),
+                    onValueChange = { bill.shoppingList = it })
+                PopupTextField(
+                    label = stringResource(R.string.total_price),
                     onValueChange = { bill.total = it.replace(',', '.').toDoubleOrNull() ?: 0.0 },
                     keyboardType = KeyboardType.Number
                 )
-
                 Spacer(modifier = Modifier.height(20.dp))
                 Text(
-                    text = "Select split bill users",
+                    text = stringResource(R.string.select_split_bill_users),
                     style = MaterialTheme.typography.labelLarge,
                     textAlign = TextAlign.Center
                 )
-                SplitBillPicker(splitBillHashMap)
-
+                UsersPicker(
+                    usersPickup = splitBillHashMap,
+                    isMultipleSelectEnabled = true
+                )
                 Spacer(modifier = Modifier.height(30.dp))
                 Row {
-                    OutlinedButton(content = { Text(text = "Cancel") }, onClick = {
-                        onPopupStatusChange(false)
-                    })
+                    OutlinedButton(
+                        content = { Text(text = stringResource(R.string.cancel)) },
+                        onClick = {
+                            onPopupStatusChange(false)
+                        })
                     Spacer(modifier = Modifier.width(15.dp))
-                    OutlinedButton(content = { Text(text = "Save") }, onClick = {
-                        onPopupStatusChange(false)
-                        bill.splitUsers = splitBillHashMap.filter { it.value }.keys.toList()
-                        bill.paymaster =
-                            paymasterHashMap.filter { it.value }.keys.toList().firstOrNull()
-                                ?: User()
-                        onSaveClick(bill)
-                    })
+                    OutlinedButton(
+                        content = { Text(text = stringResource(R.string.save)) },
+                        onClick = {
+
+                            bill.splitUsers = splitBillHashMap.filter { it.value }.keys.toList()
+                            bill.paymaster =
+                                paymasterHashMap.filter { it.value }.keys.toList().firstOrNull()
+                                    ?: User()
+
+                            if (!bill.isValid()) {
+                                Toast.makeText(
+                                    context,
+                                    R.string.please_fill_all_fields,
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                                return@OutlinedButton
+                            }
+                            onPopupStatusChange(false)
+                            onSaveClick(bill)
+                            Toast.makeText(context, R.string.bill_saved, Toast.LENGTH_SHORT).show()
+                        })
 
                 }
-
                 Spacer(modifier = Modifier.height(20.dp))
             }
         }
     }
 }
 
-@Composable
-private fun SplitBillPicker(splitBillHashMap: SnapshotStateMap<User, Boolean>) {
-    FlowRow(
-        mainAxisAlignment = MainAxisAlignment.Center,
-        mainAxisSpacing = 8.dp,
-        crossAxisAlignment = FlowCrossAxisAlignment.Center,
-        crossAxisSpacing = 8.dp
-    ) {
-        splitBillHashMap.keys.forEach { user ->
-            FlowRowItemCard(user, onItemSelected = { status ->
-                splitBillHashMap[user] = status
-            })
-        }
-    }
-}
-
-@Composable
-private fun FlowRowItemCard(user: User, onItemSelected: (status: Boolean) -> Unit) {
-
-    val selectedStatus = remember {
-        mutableStateOf(false)
-    }
-
-    OutlinedCard(
-        colors = CardDefaults.outlinedCardColors(containerColor = if (selectedStatus.value) MaterialTheme.colorScheme.surfaceTint else MaterialTheme.colorScheme.surface),
-        onClick = {
-            selectedStatus.value = selectedStatus.value.not()
-            onItemSelected(selectedStatus.value)
-        },
-    ) {
-
-        Text(
-            text = user.displayName,
-            modifier = Modifier.padding(8.dp),
-            textAlign = TextAlign.Center,
-            maxLines = 1
-        )
-
-    }
-}
 
 @Composable
 private fun PopupTextField(
     modifier: Modifier = Modifier,
     label: String,
-    placeHolder: String = "",
     onValueChange: (String) -> Unit,
     keyboardType: KeyboardType = KeyboardType.Text,
 ) {
@@ -194,6 +170,3 @@ private fun PopupTextField(
         modifier = modifier.padding(20.dp)
     )
 }
-
-@Suppress("unused")
-fun <K, V> Map<K, V>.toMutableStateMap() = SnapshotStateMap<K, V>().also { it.putAll(this) }

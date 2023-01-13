@@ -2,6 +2,7 @@
 
 package com.example.namiokai.ui.screens.fuel
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,15 +12,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedCard
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -28,25 +24,21 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.runtime.toMutableStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusDirection
-import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
+import com.example.namiokai.R
 import com.example.namiokai.model.Fuel
 import com.example.namiokai.model.User
-import com.google.accompanist.flowlayout.FlowCrossAxisAlignment
-import com.google.accompanist.flowlayout.FlowRow
-import com.google.accompanist.flowlayout.MainAxisAlignment
+import com.example.namiokai.model.isValid
+import com.example.namiokai.ui.screens.common.UsersPicker
 
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -68,7 +60,7 @@ fun AddFuelPopup(
 
     val destRadioOptions = listOf("Kaunas", "Kėdainiai")
     val (selectedOption, onOptionSelected) = remember { mutableStateOf(destRadioOptions[0]) }
-
+    val context = LocalContext.current
 
 
     Popup(
@@ -91,21 +83,17 @@ fun AddFuelPopup(
 
                 Spacer(modifier = Modifier.height(30.dp))
                 Text(
-                    text = "Select driver",
+                    text = stringResource(R.string.select_driver),
                     style = MaterialTheme.typography.labelLarge
                 )
-                SplitFuelPicker(driverSelectHashMap)
+                UsersPicker(usersPickup = driverSelectHashMap, isMultipleSelectEnabled = false)
                 Spacer(modifier = Modifier.height(30.dp))
-
                 Text(
-                    text = "Select passengers",
+                    text = stringResource(R.string.select_passengers),
                     style = MaterialTheme.typography.labelLarge
                 )
-                SplitFuelPicker(splitFuelHashMap)
+                UsersPicker(usersPickup = splitFuelHashMap, isMultipleSelectEnabled = true)
                 Spacer(modifier = Modifier.height(30.dp))
-
-
-                PopupCheckBoxLabel(label = "Had happened", onCheckedChange = { fuel.isValid = it })
                 destRadioOptions.forEach { text ->
                     Row(
                         Modifier
@@ -133,19 +121,17 @@ fun AddFuelPopup(
 
                     }
                 }
-
                 Spacer(modifier = Modifier.height(40.dp))
                 Row {
                     OutlinedButton(
-                        content = { Text(text = "Cancel") },
+                        content = { Text(text = stringResource(R.string.cancel)) },
                         onClick = {
                             onPopupStatusChange(false)
                         })
                     Spacer(modifier = Modifier.width(15.dp))
                     OutlinedButton(
-                        content = { Text(text = "Save") },
+                        content = { Text(text = stringResource(R.string.save)) },
                         onClick = {
-                            onPopupStatusChange(false)
                             fuel.driver =
                                 driverSelectHashMap.filter { it.value }.keys.toList().firstOrNull()
                                     ?: User()
@@ -155,83 +141,24 @@ fun AddFuelPopup(
                             else
                                 fuel.tripToHome = true
 
+
+                            if (!fuel.isValid()) {
+                                Toast.makeText(
+                                    context,
+                                    R.string.please_fill_all_fields,
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                                return@OutlinedButton
+                            }
+                            onPopupStatusChange(false)
                             onSaveClick(fuel)
+                            Toast.makeText(context, R.string.fuel_saved, Toast.LENGTH_SHORT).show()
                         })
-
                 }
-
                 Spacer(modifier = Modifier.height(20.dp))
             }
         }
     }
-}
-
-@Composable
-private fun SplitFuelPicker(splitBillHashMap: SnapshotStateMap<User, Boolean>) {
-    FlowRow(
-        mainAxisAlignment = MainAxisAlignment.Center,
-        mainAxisSpacing = 8.dp,
-        crossAxisAlignment = FlowCrossAxisAlignment.Center,
-        crossAxisSpacing = 8.dp
-    ) {
-        splitBillHashMap.keys.forEach { user ->
-            FlowRowItemCard(user, onItemSelected = { status ->
-                splitBillHashMap[user] = status
-            })
-        }
-    }
-}
-
-@Composable
-private fun FlowRowItemCard(user: User, onItemSelected: (status: Boolean) -> Unit) {
-
-    val selectedStatus = remember {
-        mutableStateOf(false)
-    }
-
-    OutlinedCard(
-        colors = CardDefaults.outlinedCardColors(containerColor = if (selectedStatus.value) MaterialTheme.colorScheme.surfaceTint else MaterialTheme.colorScheme.surface),
-        onClick = {
-            selectedStatus.value = selectedStatus.value.not()
-            onItemSelected(selectedStatus.value)
-        },
-    ) {
-
-        Text(
-            text = user.displayName,
-            modifier = Modifier.padding(8.dp),
-            textAlign = TextAlign.Center,
-            maxLines = 1
-        )
-
-    }
-}
-
-@Composable
-private fun PopupTextField(
-    modifier: Modifier = Modifier,
-    label: String,
-    placeHolder: String = "",
-    onValueChange: (String) -> Unit,
-    keyboardType: KeyboardType = KeyboardType.Text,
-) {
-    var text by remember { mutableStateOf(TextFieldValue("")) }
-    val focusManager = LocalFocusManager.current
-
-    OutlinedTextField(
-        value = text,
-        label = { Text(text = label) },
-        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next, keyboardType = keyboardType),
-        keyboardActions = KeyboardActions(
-            onNext = {
-                focusManager.moveFocus(FocusDirection.Down)
-            }),
-        onValueChange = {
-            text = it
-            onValueChange(it.text)
-        },
-        modifier = modifier.padding(20.dp)
-    )
 }
 
 @Composable

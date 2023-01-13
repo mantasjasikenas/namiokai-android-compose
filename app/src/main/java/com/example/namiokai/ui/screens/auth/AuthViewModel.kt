@@ -23,9 +23,6 @@ class AuthViewModel @Inject constructor(
     val oneTapClient: SignInClient,
     private val userRepository: UserRepository
 ) : ViewModel() {
-//    private val _loginUiState = MutableStateFlow(AuthUiState())
-//    val loginUiState = _loginUiState.asStateFlow()
-
 
     val isUserAuthenticated
         get() = repo.isUserAuthenticatedInFirebase

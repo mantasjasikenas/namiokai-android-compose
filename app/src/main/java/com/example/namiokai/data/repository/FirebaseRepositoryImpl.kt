@@ -17,6 +17,8 @@ private const val BILLS_COLLECTION = "bills"
 private const val FUEL_COLLECTION = "fuel"
 private const val USERS_COLLECTION = "users"
 
+private const val ORDER_BY = "date"
+
 class FirebaseRepositoryImpl : FirebaseRepository {
 
     private val db = Firebase.firestore
@@ -29,7 +31,7 @@ class FirebaseRepositoryImpl : FirebaseRepository {
     }
 
     override suspend fun getBills(): Flow<List<Bill>> =
-        db.collection(BILLS_COLLECTION).orderBy("date", Query.Direction.DESCENDING).snapshots()
+        db.collection(BILLS_COLLECTION).orderBy(ORDER_BY, Query.Direction.DESCENDING).snapshots()
             .map {
                 it.documents.map { document ->
                     document.toObject<Bill>()!!
@@ -37,11 +39,12 @@ class FirebaseRepositoryImpl : FirebaseRepository {
             }
 
     override suspend fun getFuel(): Flow<List<Fuel>> =
-        db.collection(FUEL_COLLECTION).orderBy("date", Query.Direction.DESCENDING).snapshots().map {
-            it.documents.map { document ->
-                document.toObject<Fuel>()!!
+        db.collection(FUEL_COLLECTION).orderBy(ORDER_BY, Query.Direction.DESCENDING).snapshots()
+            .map {
+                it.documents.map { document ->
+                    document.toObject<Fuel>()!!
+                }
             }
-        }
 
 
     override suspend fun insertBill(bill: Bill) {
@@ -58,7 +61,7 @@ class FirebaseRepositoryImpl : FirebaseRepository {
     }
 
     override suspend fun deleteUser(user: User) {
-        // FIXME
+        // TODO Implement delete user
         //db.collection(USERS_COLLECTION).document("").delete()
     }
 

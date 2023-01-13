@@ -24,10 +24,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
+import com.example.namiokai.R
 import com.example.namiokai.model.Response
 import com.example.namiokai.ui.navigation.Screen
 import com.google.android.gms.common.api.ApiException
@@ -57,7 +59,7 @@ fun AuthScreen(
             }, shape = RoundedCornerShape(4.dp)) {
                 Icon(imageVector = Icons.Outlined.Login, contentDescription = null)
                 Text(
-                    text = "Sign in with Google",
+                    text = stringResource(R.string.sign_in_with_google),
                     modifier = Modifier.padding(6.dp),
                 )
             }
@@ -70,7 +72,7 @@ fun AuthScreen(
             }, shape = RoundedCornerShape(4.dp)) {
                 Icon(imageVector = Icons.Outlined.Logout, contentDescription = null)
                 Text(
-                    text = "Sign out",
+                    text = stringResource(R.string.sign_out),
                     modifier = Modifier.padding(6.dp),
                 )
             }

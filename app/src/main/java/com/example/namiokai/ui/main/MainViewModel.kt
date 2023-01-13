@@ -1,10 +1,10 @@
-package com.example.namiokai.ui
+package com.example.namiokai.ui.main
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.namiokai.data.AuthRepository
 import com.example.namiokai.data.FirebaseRepository
-import com.example.namiokai.data.NamiokaiRepository
+import com.example.namiokai.data.UsersRepository
 import com.example.namiokai.data.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -19,7 +19,7 @@ import javax.inject.Inject
 class MainViewModel @Inject constructor(
     val authRepository: AuthRepository,
     val firebaseRepository: FirebaseRepository,
-    private val namiokaiRepository: NamiokaiRepository,
+    private val usersRepository: UsersRepository,
     private val userRepository: UserRepository
 ) : ViewModel() {
 
@@ -33,7 +33,7 @@ class MainViewModel @Inject constructor(
     private fun getUsers() {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                namiokaiRepository.getUsers().collect { users ->
+                usersRepository.getUsers().collect { users ->
                     _mainUiState.update { it.copy(users = users) }
                 }
             }
@@ -42,7 +42,7 @@ class MainViewModel @Inject constructor(
 
 
     // TODO Implement admin claim
-    /*private fun getUser() {
+    private fun getUser() {
         if (!authRepository.isUserAuthenticatedInFirebase)
             return
 
@@ -56,5 +56,5 @@ class MainViewModel @Inject constructor(
             }
 
         }
-    }*/
+    }
 }

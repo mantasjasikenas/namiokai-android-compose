@@ -37,11 +37,11 @@ class FuelViewModel @Inject constructor(private val firebaseRepository: Firebase
         }
     }
 
-    //"MM-dd-yyyy HH:mm:ss"
+
     @SuppressLint("SimpleDateFormat")
     fun insertFuel(fuel: Fuel) {
 
-        val format = SimpleDateFormat("yyyy/MM/dd HH:mm:ss:ms")
+        val format = SimpleDateFormat("yyyy/MM/dd HH:mm:ss")
         val currentDate = format.format(Date())
 
         fuel.date = currentDate

@@ -1,4 +1,4 @@
-package com.example.namiokai.ui
+package com.example.namiokai.ui.main
 
 import com.example.namiokai.model.User
 

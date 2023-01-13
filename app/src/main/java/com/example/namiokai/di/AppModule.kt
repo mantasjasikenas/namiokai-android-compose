@@ -5,12 +5,14 @@ import android.content.Context
 import com.example.namiokai.R
 import com.example.namiokai.data.AuthRepository
 import com.example.namiokai.data.FirebaseRepository
-import com.example.namiokai.data.NamiokaiRepository
 import com.example.namiokai.data.UserRepository
-import com.example.namiokai.data.repository.AuthRepositoryImpl
+import com.example.namiokai.data.UsersRepository
 import com.example.namiokai.data.repository.FirebaseRepositoryImpl
-import com.example.namiokai.data.repository.NamiokaiRepositoryImpl
-import com.example.namiokai.data.repository.UserRepositoryImpl
+import com.example.namiokai.data.repository.PreferencesRepository
+import com.example.namiokai.data.repository.UsersRepositoryImpl
+import com.example.namiokai.data.repository.auth.AuthRepositoryImpl
+import com.example.namiokai.data.repository.auth.UserRepositoryImpl
+import com.example.namiokai.data.repository.debts.DebtsManager
 import com.example.namiokai.utils.Constants.SIGN_IN_REQUEST
 import com.example.namiokai.utils.Constants.SIGN_UP_REQUEST
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
@@ -28,6 +30,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ViewModelComponent
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Named
+import javax.inject.Singleton
 
 @Module
 @InstallIn(ViewModelComponent::class)
@@ -39,6 +42,12 @@ class AppModule {
 
     @Provides
     fun provideFirebaseRepository(): FirebaseRepository = FirebaseRepositoryImpl()
+
+    @Provides
+    fun provideDebtsManager(
+        usersRepository: UsersRepository,
+        firebaseRepository: FirebaseRepository
+    ): DebtsManager = DebtsManager(usersRepository, firebaseRepository)
 
 
     @Provides
@@ -98,7 +107,7 @@ class AppModule {
     @Provides
     fun provideNamiokaiRepository(
         firebaseRepository: FirebaseRepository
-    ): NamiokaiRepository = NamiokaiRepositoryImpl(firebaseRepository = firebaseRepository)
+    ): UsersRepository = UsersRepositoryImpl(firebaseRepository = firebaseRepository)
 
 
     @Provides
@@ -120,7 +129,7 @@ class AppModule {
 
 
     @Provides
-    fun provideProfileRepository(
+    fun provideUserRepository(
         auth: FirebaseAuth,
         oneTapClient: SignInClient,
         signInClient: GoogleSignInClient,
@@ -129,4 +138,10 @@ class AppModule {
         oneTapClient = oneTapClient,
         signInClient = signInClient,
     )
+
+    @Provides
+    @Singleton
+    fun providePreferencesRepository(@ApplicationContext context: Context): PreferencesRepository {
+        return PreferencesRepository(context)
+    }
 }

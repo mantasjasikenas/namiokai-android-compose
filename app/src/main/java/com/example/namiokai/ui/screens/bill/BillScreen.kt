@@ -14,14 +14,18 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.namiokai.R
 import com.example.namiokai.model.Bill
-import com.example.namiokai.ui.MainViewModel
+import com.example.namiokai.model.splitPricePerUser
+import com.example.namiokai.ui.main.MainViewModel
 import com.example.namiokai.ui.screens.bill.AddBillPopup
 import com.example.namiokai.ui.screens.bill.BillViewModel
 import com.example.namiokai.ui.screens.common.CardText
 import com.example.namiokai.ui.screens.common.CustomSpacer
+import com.example.namiokai.ui.screens.common.EmptyView
 import com.example.namiokai.ui.screens.common.FloatingAddButton
 
 
@@ -37,11 +41,15 @@ fun BillScreen(
         mutableStateOf(false)
     }
 
-    LazyColumn(modifier = modifier.fillMaxSize()) {
-        items(billUiState.bills) { bill ->
-            BillCard(bill)
+    if (billUiState.bills.isEmpty()) {
+        EmptyView()
+    } else {
+        LazyColumn(modifier = modifier.fillMaxSize()) {
+            items(billUiState.bills) { bill ->
+                BillCard(bill)
+            }
+            item { CustomSpacer(height = 100) }
         }
-        item { CustomSpacer(height = 100) }
     }
 
     FloatingAddButton {
@@ -75,16 +83,16 @@ private fun BillCard(bill: Bill, modifier: Modifier = Modifier) {
             verticalArrangement = Arrangement.Center
         ) {
 
-            CardText(label = "Bill date", value = bill.date)
-            CardText(label = "Paid by", value = bill.paymaster.displayName)
-            CardText(label = "Shopping list", value = bill.shoppingList)
+            CardText(label = stringResource(R.string.bill_date), value = bill.date)
+            CardText(label = stringResource(R.string.paid_by), value = bill.paymaster.displayName)
+            CardText(label = stringResource(R.string.shopping_list), value = bill.shoppingList)
             CardText(
-                label = "Split bill to",
+                label = stringResource(R.string.split_bill_to),
                 value = bill.splitUsers.map { it.displayName }.joinToString { it })
-            CardText(label = "Total price", value = bill.total.toString())
+            CardText(label = stringResource(R.string.total_price), value = "${bill.total} €")
             CardText(
-                label = "Price per person",
-                value = bill.total.div(bill.splitUsers.count()).toString()
+                label = stringResource(R.string.price_per_person),
+                value = "${bill.splitPricePerUser()} €"
             )
         }
 
