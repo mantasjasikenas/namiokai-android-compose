@@ -55,7 +55,7 @@ fun AuthScreen(
         AnimatedVisibility(visible = isVisible.value.not()) {
             Button(onClick = {
                 viewModel.oneTapSignIn()
-                isVisible.value = isVisible.value.not()
+                //isVisible.value = isVisible.value.not()
             }, shape = RoundedCornerShape(4.dp)) {
                 Icon(imageVector = Icons.Outlined.Login, contentDescription = null)
                 Text(
@@ -68,7 +68,7 @@ fun AuthScreen(
         AnimatedVisibility(visible = isVisible.value) {
             Button(onClick = {
                 viewModel.signOut()
-                isVisible.value = isVisible.value.not()
+                //isVisible.value = isVisible.value.not()
             }, shape = RoundedCornerShape(4.dp)) {
                 Icon(imageVector = Icons.Outlined.Logout, contentDescription = null)
                 Text(

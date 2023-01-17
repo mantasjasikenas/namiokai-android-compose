@@ -45,9 +45,8 @@ class AppModule {
 
     @Provides
     fun provideDebtsManager(
-        usersRepository: UsersRepository,
         firebaseRepository: FirebaseRepository
-    ): DebtsManager = DebtsManager(usersRepository, firebaseRepository)
+    ): DebtsManager = DebtsManager(firebaseRepository)
 
 
     @Provides

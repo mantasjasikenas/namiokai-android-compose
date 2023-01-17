@@ -6,21 +6,23 @@ import com.example.namiokai.model.User
 import com.example.namiokai.model.tripPricePerUser
 import kotlin.math.min
 
+typealias DebtsHashMap = HashMap<User, HashMap<User, Double>>
+typealias UserDebtsHashMap = HashMap<User, Double>
 
 class DebtsRepository {
 
-    private val debts = HashMap<User, HashMap<User, Double>>()
+    private val debts = DebtsHashMap()
 
 
-    private fun clearHashMap() {
+    private fun clear() {
         this.debts.clear()
     }
 
-    fun getDebts(): HashMap<User, HashMap<User, Double>> {
+    fun getDebts(): DebtsHashMap {
         return debts
     }
 
-    fun getUserDebts(user: User): HashMap<User, Double> {
+    fun getUserDebts(user: User): UserDebtsHashMap {
         return debts[user] ?: HashMap()
     }
 
@@ -32,9 +34,9 @@ class DebtsRepository {
         users: List<User>,
         bills: List<Bill>,
         fuels: List<Fuel>
-    ): HashMap<User, HashMap<User, Double>> {
+    ): DebtsHashMap {
 
-        clearHashMap()
+        clear()
         calculateBillDebts(bills)
         calculateFuelDebts(fuels)
 
@@ -46,7 +48,7 @@ class DebtsRepository {
      */
     private fun calculateBillDebts(
         bills: List<Bill>
-    ): HashMap<User, HashMap<User, Double>> {
+    ): DebtsHashMap {
 
         bills.forEach { bill ->
             val splitUsers = bill.splitUsers
@@ -80,7 +82,7 @@ class DebtsRepository {
     /**
      * Calculates debts for fuels
      */
-    private fun calculateFuelDebts(fuels: List<Fuel>): HashMap<User, HashMap<User, Double>> {
+    private fun calculateFuelDebts(fuels: List<Fuel>): DebtsHashMap {
 
         fuels.forEach { fuel ->
             val driver = fuel.driver

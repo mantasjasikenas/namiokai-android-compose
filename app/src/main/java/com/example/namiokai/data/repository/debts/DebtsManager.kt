@@ -15,14 +15,13 @@ import javax.inject.Inject
 
 
 class DebtsManager @Inject constructor(
-    private val repo: UsersRepository,
     private val firebaseRepository: FirebaseRepository
 ) {
 
     private val coroutineScope = CoroutineScope(Dispatchers.Default)
     private val debtsRepo = DebtsRepository()
 
-    val debtsChannelFlow: Flow<HashMap<User, HashMap<User, Double>>> = channelFlow {
+    val debtsChannelFlow: Flow<DebtsHashMap> = channelFlow {
         coroutineScope.launch {
             combine(
                 firebaseRepository.getUsers(),
