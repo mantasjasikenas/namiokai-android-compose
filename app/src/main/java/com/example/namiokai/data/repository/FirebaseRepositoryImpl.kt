@@ -12,6 +12,7 @@ import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import javax.inject.Singleton
 
 private const val BILLS_COLLECTION = "bills"
 private const val FUEL_COLLECTION = "fuel"
