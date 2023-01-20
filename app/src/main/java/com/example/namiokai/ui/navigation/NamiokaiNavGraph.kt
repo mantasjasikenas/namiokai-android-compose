@@ -6,9 +6,10 @@ import androidx.navigation.compose.composable
 import com.example.namiokai.ui.navigation.Screen
 import com.example.namiokai.ui.screens.BillScreen
 import com.example.namiokai.ui.screens.FuelScreen
-import com.example.namiokai.ui.screens.SettingsScreen
 import com.example.namiokai.ui.screens.SummaryScreen
+import com.example.namiokai.ui.screens.admin.AdminPanelScreen
 import com.example.namiokai.ui.screens.auth.AuthScreen
+import com.example.namiokai.ui.screens.settings.SettingsScreen
 import com.example.namiokai.ui.screens.test.TestScreen
 
 
@@ -30,5 +31,8 @@ fun NavGraphBuilder.namiokaiNavigationGraph(navController: NavHostController) {
     }
     composable(route = Screen.Test.route) {
         TestScreen()
+    }
+    composable(route = Screen.AdminPanel.route) {
+        AdminPanelScreen()
     }
 }

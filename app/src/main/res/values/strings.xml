@@ -38,4 +38,5 @@
     <string name="photo">Photo</string>
     <string name="uid">Uid</string>
     <string name="debtor">Debtor</string>
+    <string name="admin_panel_menu_label">Admin panel</string>
 </resources>

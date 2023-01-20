@@ -23,7 +23,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.namiokai"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 33
         versionCode = 1
         versionName = "1.0"
@@ -55,11 +55,11 @@ android {
 
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "17"
     }
     buildFeatures {
         compose = true
@@ -67,15 +67,13 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion = "1.4.0"
     }
-    packagingOptions {
-        resources {
+    packaging{
+        resources{
             excludes.add("/META-INF/{AL2.0,LGPL2.1}")
             excludes.add("META-INF/*")
             excludes.add("META-INF/*.version")
         }
     }
-
-
 }
 
 val composeVersion by extra { "1.3.3" }
@@ -103,6 +101,7 @@ dependencies {
     implementation("androidx.work:work-runtime-ktx:2.7.1")
     implementation("com.google.accompanist:accompanist-flowlayout:0.28.0")
 
+
     implementation("io.coil-kt:coil-compose:2.2.2")
 
     // Datastore
@@ -127,6 +126,8 @@ dependencies {
     implementation("com.google.firebase:firebase-auth-ktx")
     implementation("com.google.firebase:firebase-firestore-ktx")
     implementation("com.google.firebase:firebase-messaging-ktx")
+    implementation ("com.google.firebase:firebase-analytics-ktx")
+    implementation ("com.google.firebase:firebase-storage-ktx")
 
     //Dagger - Hilt
     implementation("com.google.dagger:hilt-android:2.44.2")

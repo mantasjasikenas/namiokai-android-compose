@@ -2,6 +2,7 @@ package com.example.namiokai.ui.navigation
 
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.AdminPanelSettings
 import androidx.compose.material.icons.outlined.BrokenImage
 import androidx.compose.material.icons.outlined.LocalGasStation
 import androidx.compose.material.icons.outlined.Payments
@@ -22,6 +23,7 @@ sealed class Screen(
     object Settings : Screen("settings", R.string.settings_name, Icons.Outlined.Settings)
     object Auth : Screen("auth", R.string.auth_name, Icons.Outlined.Sync)
     object Test : Screen("test", R.string.test_name, Icons.Outlined.Sync)
+    object AdminPanel : Screen("admin_panel", R.string.admin_panel_menu_label, Icons.Outlined.AdminPanelSettings)
 
     companion object {
         val navBarScreens = listOf(
@@ -35,7 +37,8 @@ sealed class Screen(
             Fuel,
             Settings,
             Auth,
-            Test
+            Test,
+            AdminPanel
         )
 
         fun fromRoute(route: String?): Screen =

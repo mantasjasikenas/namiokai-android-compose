@@ -4,25 +4,39 @@ import com.example.namiokai.data.FirebaseRepository
 import com.example.namiokai.model.Bill
 import com.example.namiokai.model.Fuel
 import com.example.namiokai.model.User
+import com.example.namiokai.utils.JsonBuilder
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.firestoreSettings
 import com.google.firebase.firestore.ktx.snapshots
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.ktx.storage
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
-import javax.inject.Singleton
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
+import java.time.LocalDateTime
 
 private const val BILLS_COLLECTION = "bills"
 private const val FUEL_COLLECTION = "fuel"
 private const val USERS_COLLECTION = "users"
+
+private const val BASE_PATH = "backup"
+private const val USERS_PATH = "${BASE_PATH}/users"
+private const val BILLS_PATH = "${BASE_PATH}/bills"
+private const val FUEL_PATH = "${BASE_PATH}/fuel"
 
 private const val ORDER_BY = "date"
 
 class FirebaseRepositoryImpl : FirebaseRepository {
 
     private val db = Firebase.firestore
+    private val storage = Firebase.storage
 
     init {
         val settings = firestoreSettings {
@@ -30,6 +44,7 @@ class FirebaseRepositoryImpl : FirebaseRepository {
         }
         db.firestoreSettings = settings
     }
+
 
     override suspend fun getBills(): Flow<List<Bill>> =
         db.collection(BILLS_COLLECTION).orderBy(ORDER_BY, Query.Direction.DESCENDING).snapshots()
@@ -61,9 +76,35 @@ class FirebaseRepositoryImpl : FirebaseRepository {
         db.collection(USERS_COLLECTION).add(user)
     }
 
-    override suspend fun deleteUser(user: User) {
-        // TODO Implement delete user
-        //db.collection(USERS_COLLECTION).document("").delete()
+
+    override suspend fun clearBills() {
+        db.collection(BILLS_COLLECTION).get().addOnSuccessListener { documents ->
+            for (document in documents) {
+                db.collection(BILLS_COLLECTION).document(document.id).delete()
+            }
+        }
+    }
+
+    override suspend fun clearFuel() {
+        db.collection(FUEL_COLLECTION).get().addOnSuccessListener { documents ->
+            for (document in documents) {
+                db.collection(FUEL_COLLECTION).document(document.id).delete()
+            }
+        }
+    }
+
+    override suspend fun clearUsers() {
+        db.collection(USERS_COLLECTION).get().addOnSuccessListener { documents ->
+            for (document in documents) {
+                db.collection(USERS_COLLECTION).document(document.id).delete()
+            }
+        }
+    }
+
+    override suspend fun clearAll() {
+        clearBills()
+        clearFuel()
+        clearUsers()
     }
 
     override suspend fun getUsers(): Flow<List<User>> =
@@ -75,6 +116,62 @@ class FirebaseRepositoryImpl : FirebaseRepository {
 
     override suspend fun getUser(uid: String): Flow<User> = getUsers().map { userList ->
         userList.first { it.uid == uid }
+    }
+
+    override suspend fun getCollections(): Flow<Triple<List<User>, List<Bill>, List<Fuel>>> =
+        combine(
+            getUsers(),
+            getBills(),
+            getFuel()
+        ) { users, bills, fuels ->
+            Triple(users, bills, fuels)
+        }
+
+    override suspend fun clearAndBackupCollections() =
+        coroutineScope {
+            val deferredUsers = async { backupCollection(USERS_COLLECTION) }
+            val deferredBills = async { backupCollection(BILLS_COLLECTION) }
+            val deferredFuel = async { backupCollection(FUEL_COLLECTION) }
+
+            val usersJson = deferredUsers.await()
+            val billsJson = deferredBills.await()
+            val fuelJson = deferredFuel.await()
+
+            val currentDateTime = LocalDateTime.now().toString()
+
+            uploadJsonToStorage(usersJson, "${USERS_PATH}/$currentDateTime.json")
+            uploadJsonToStorage(billsJson, "${BILLS_PATH}/$currentDateTime.json")
+            uploadJsonToStorage(fuelJson, "${FUEL_PATH}/$currentDateTime.json")
+
+        }
+
+    private suspend fun backupCollection(collectionPath: String): String {
+        val querySnapshot = db.collection(collectionPath).get().await()
+        val jsonBuilder = JsonBuilder()
+
+        querySnapshot.forEach { document -> jsonBuilder.append(document.data) }
+
+        return jsonBuilder.toString().replace("\\/", "/")
+    }
+
+    override suspend fun uploadJsonToStorage(json: String, fileName: String) {
+        val storageRef = storage.reference
+        val fileRef = storageRef.child(fileName)
+
+        val stream = json.byteInputStream()
+        fileRef.putStream(stream).await()
+
+        withContext(Dispatchers.IO) {
+            stream.close()
+        }
+    }
+
+    override suspend fun getFileFromStorage(fileName: String): String {
+        val storageRef = storage.reference
+        val fileRef = storageRef.child(fileName)
+        val taskSnapshot = fileRef.stream.await()
+
+        return taskSnapshot.stream.bufferedReader().use { it.readText() }
     }
 
 

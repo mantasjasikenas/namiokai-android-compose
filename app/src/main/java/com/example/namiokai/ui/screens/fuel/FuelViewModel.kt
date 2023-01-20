@@ -1,6 +1,5 @@
 package com.example.namiokai.ui.screens.fuel
 
-import android.annotation.SuppressLint
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.namiokai.data.FirebaseRepository
@@ -12,8 +11,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.text.SimpleDateFormat
-import java.util.Date
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 @HiltViewModel
@@ -37,14 +36,12 @@ class FuelViewModel @Inject constructor(private val firebaseRepository: Firebase
         }
     }
 
-
-    @SuppressLint("SimpleDateFormat")
     fun insertFuel(fuel: Fuel) {
 
-        val format = SimpleDateFormat("yyyy/MM/dd HH:mm:ss")
-        val currentDate = format.format(Date())
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+        val currentDateTime = LocalDateTime.now().format(formatter)
 
-        fuel.date = currentDate
+        fuel.date = currentDateTime
 
         viewModelScope.launch {
             withContext(Dispatchers.IO) {

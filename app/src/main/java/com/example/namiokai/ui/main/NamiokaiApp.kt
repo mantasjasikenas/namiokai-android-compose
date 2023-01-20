@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.outlined.AdminPanelSettings
 import androidx.compose.material.icons.outlined.BugReport
 import androidx.compose.material.icons.outlined.Key
 import androidx.compose.material.icons.outlined.Settings
@@ -20,6 +21,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -58,6 +60,7 @@ fun NamiokaiApp(
 
     val isLoggedIn = mainViewModel.authRepository.isUserAuthenticatedInFirebase
     val initialRoute = if (isLoggedIn) Screen.Summary.route else Screen.Auth.route
+    val currentUser by mainViewModel.currentUser.collectAsState()
 
     when (navBackStackEntry?.destination?.route) {
         Screen.Settings.route, Screen.Auth.route -> {
@@ -71,6 +74,8 @@ fun NamiokaiApp(
         }
     }
 
+
+
     Scaffold(topBar = {
         NamiokaiTopAppBar(
             navController = navController,
@@ -79,7 +84,9 @@ fun NamiokaiApp(
             canNavigateBack = navController.previousBackStackEntry != null && !Screen.navBarScreens.contains(
                 currentScreen
             ),
-            navigateUp = { navController.navigateUp() })
+            navigateUp = { navController.navigateUp() },
+            adminModeEnabled = currentUser.admin,
+        )
     }, bottomBar = {
         NamiokaiNavigationBar(
             navController = navController,
@@ -91,6 +98,7 @@ fun NamiokaiApp(
         NavHost(
             navController = navController,
             startDestination = initialRoute,
+            //startDestination = Screen.Settings.route,
             modifier = modifier.padding(innerPadding)
         ) {
             namiokaiNavigationGraph(navController = navController)
@@ -108,6 +116,7 @@ fun NamiokaiTopAppBar(
     modifier: Modifier = Modifier,
     navController: NavHostController,
     topBarState: Boolean,
+    adminModeEnabled: Boolean,
     currentScreen: Screen,
     canNavigateBack: Boolean,
     navigateUp: () -> Unit
@@ -141,7 +150,14 @@ fun NamiokaiTopAppBar(
                         navController.navigate(Screen.Test.route) {
                             launchSingleTop = true
                         }
-                    })
+                    },
+                    navigateToAdminPanel = {
+                        navController.navigate(Screen.AdminPanel.route) {
+                            launchSingleTop = true
+                        }
+                    },
+                    adminModeEnabled = adminModeEnabled
+                )
             })
     }
 }
@@ -176,7 +192,9 @@ fun NamiokaiNavigationBar(
 fun TopBarDropdownMenu(
     navigateToSettings: () -> Unit,
     navigateToAuth: () -> Unit,
-    navigateToTest: () -> Unit
+    navigateToTest: () -> Unit,
+    navigateToAdminPanel: () -> Unit,
+    adminModeEnabled: Boolean = false
 ) {
     var expanded by remember { mutableStateOf(false) }
 
@@ -201,6 +219,20 @@ fun TopBarDropdownMenu(
                     contentDescription = null
                 )
             })
+        AnimatedVisibility(visible = adminModeEnabled) {
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.admin_panel_menu_label)) },
+                onClick = {
+                    navigateToAdminPanel()
+                    expanded = false
+                },
+                leadingIcon = {
+                    Icon(
+                        Icons.Outlined.AdminPanelSettings,
+                        contentDescription = null
+                    )
+                })
+        }
         DropdownMenuItem(
             text = { Text(stringResource(R.string.auth_menu_label)) },
             onClick = {

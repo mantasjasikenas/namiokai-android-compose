@@ -76,13 +76,4 @@ fun FirebaseUser.toUser(): User =
     )
 
 
-fun FirebaseUser.isAdmin(): Boolean {
-
-    // TODO: Implement this method to check if the user is an admin
-    this.uid
-
-
-    return false
-}
-
 

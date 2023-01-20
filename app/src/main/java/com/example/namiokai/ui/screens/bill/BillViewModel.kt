@@ -13,8 +13,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.text.SimpleDateFormat
-import java.util.Date
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 private const val TAG = "BILL_VM"
@@ -40,13 +40,13 @@ class BillViewModel @Inject constructor(private val firebaseRepository: Firebase
         }
     }
 
-    @SuppressLint("SimpleDateFormat")
+
     fun insertBill(bill: Bill) {
 
-        val format = SimpleDateFormat("yyyy/MM/dd HH:mm:ss")
-        val currentDate = format.format(Date())
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+        val currentDateTime = LocalDateTime.now().format(formatter)
 
-        bill.date = currentDate
+        bill.date = currentDateTime
         Log.d(TAG, bill.toString())
 
         viewModelScope.launch {

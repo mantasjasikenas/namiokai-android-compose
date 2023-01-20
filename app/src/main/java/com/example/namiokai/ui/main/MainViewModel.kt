@@ -1,11 +1,13 @@
 package com.example.namiokai.ui.main
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.namiokai.data.AuthRepository
 import com.example.namiokai.data.FirebaseRepository
-import com.example.namiokai.data.UsersRepository
 import com.example.namiokai.data.UserRepository
+import com.example.namiokai.data.UsersRepository
+import com.example.namiokai.model.User
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,6 +16,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+
+const val TAG = "MainViewModel"
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
@@ -26,8 +30,13 @@ class MainViewModel @Inject constructor(
     private val _mainUiState = MutableStateFlow(MainUiState())
     val uiState = _mainUiState.asStateFlow()
 
+    private val _currentUser = MutableStateFlow(User())
+    val currentUser = _currentUser.asStateFlow()
+
     init {
+        Log.d(TAG, "Init MainViewModel")
         getUsers()
+        getUser()
     }
 
     private fun getUsers() {
@@ -40,17 +49,16 @@ class MainViewModel @Inject constructor(
         }
     }
 
-
-    // TODO Implement admin claim
     private fun getUser() {
-        if (!authRepository.isUserAuthenticatedInFirebase)
-            return
-
+        /*        if (!authRepository.isUserAuthenticatedInFirebase)
+                    return*/
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 userRepository.user?.let { userRepository ->
                     firebaseRepository.getUser(userRepository.uid).collect { user ->
-                        _mainUiState.update { it.copy(user = user) }
+                        //_mainUiState.update { it.copy(currentUser = user) }
+                        _currentUser.update {user }
+                        println("Is admin? ${user.admin}")
                     }
                 }
             }

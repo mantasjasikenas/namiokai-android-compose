@@ -28,7 +28,10 @@ class SummaryViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            debtsManager.debtsChannelFlow.collect { debts ->
+            /*debtsManager.debtsChannelFlow.collect { debts ->
+                _summaryUiState.update { it.copy(debts = debts) }
+            }*/
+            debtsManager.getDebts().collect { debts ->
                 _summaryUiState.update { it.copy(debts = debts) }
             }
         }

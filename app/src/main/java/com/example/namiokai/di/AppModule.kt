@@ -2,19 +2,22 @@ package com.example.namiokai.di
 
 import android.app.Application
 import android.content.Context
+import android.widget.Toast
 import com.example.namiokai.R
 import com.example.namiokai.data.AuthRepository
 import com.example.namiokai.data.FirebaseRepository
 import com.example.namiokai.data.UserRepository
 import com.example.namiokai.data.UsersRepository
 import com.example.namiokai.data.repository.FirebaseRepositoryImpl
-import com.example.namiokai.data.repository.PreferencesRepository
 import com.example.namiokai.data.repository.UsersRepositoryImpl
 import com.example.namiokai.data.repository.auth.AuthRepositoryImpl
 import com.example.namiokai.data.repository.auth.UserRepositoryImpl
 import com.example.namiokai.data.repository.debts.DebtsManager
+import com.example.namiokai.data.repository.preferences.PreferencesRepository
+import com.example.namiokai.di.annotations.DefaultDispatcher
 import com.example.namiokai.utils.Constants.SIGN_IN_REQUEST
 import com.example.namiokai.utils.Constants.SIGN_UP_REQUEST
+import com.example.namiokai.utils.ToastManager
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.auth.api.identity.SignInClient
@@ -29,6 +32,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ViewModelComponent
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineDispatcher
 import javax.inject.Named
 import javax.inject.Singleton
 
@@ -45,7 +49,7 @@ class AppModule {
 
     @Provides
     fun provideDebtsManager(
-        firebaseRepository: FirebaseRepository
+        firebaseRepository: FirebaseRepository,
     ): DebtsManager = DebtsManager(firebaseRepository)
 
 
@@ -143,4 +147,11 @@ class AppModule {
     fun providePreferencesRepository(@ApplicationContext context: Context): PreferencesRepository {
         return PreferencesRepository(context)
     }
+
+    @Provides
+    fun provideToastManager(@ApplicationContext context: Context): ToastManager {
+        return ToastManager(context)
+    }
+
+
 }
