@@ -116,7 +116,7 @@ fun AuthScreen(
             is Response.Success -> signInWithGoogleResponse.data?.let { signedIn ->
                 LaunchedEffect(signedIn) {
                     if (signedIn) {
-                        navController.navigate(Screen.Summary.route) {
+                        navController.navigate(Screen.Debts.route) {
                             popUpTo(navController.graph.findStartDestination().id) {
                                 saveState = true
                             }

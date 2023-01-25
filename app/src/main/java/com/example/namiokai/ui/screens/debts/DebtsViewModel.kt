@@ -1,4 +1,4 @@
-package com.example.namiokai.ui.screens.summary
+package com.example.namiokai.ui.screens.debts
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -14,28 +14,21 @@ import javax.inject.Inject
 
 
 @HiltViewModel
-class SummaryViewModel @Inject constructor(
+class DebtsViewModel @Inject constructor(
     private val repo: UsersRepository,
     private val firebaseRepository: FirebaseRepository,
     private val debtsManager: DebtsManager
 
 ) : ViewModel() {
 
-    // UI State
-    private val _summaryUiState = MutableStateFlow(SummaryUiState())
-    val uiState = _summaryUiState.asStateFlow()
-
+    private val _debtsUiState = MutableStateFlow(DebtsUiState())
+    val uiState = _debtsUiState.asStateFlow()
 
     init {
         viewModelScope.launch {
-            /*debtsManager.debtsChannelFlow.collect { debts ->
-                _summaryUiState.update { it.copy(debts = debts) }
-            }*/
             debtsManager.getDebts().collect { debts ->
-                _summaryUiState.update { it.copy(debts = debts) }
+                _debtsUiState.update { it.copy(debts = debts) }
             }
         }
     }
-
-
 }

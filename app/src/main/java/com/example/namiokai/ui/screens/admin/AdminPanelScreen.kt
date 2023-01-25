@@ -53,9 +53,15 @@ fun AdminPanelScreen(
             onClick = { viewModel.clearUser() })
 
 
+        SettingsGroupSpacer()
+        SettingsEntryGroupText(title = "Users")
+        SettingsEntry(
+            title = "Add user",
+            text = "Add user to database",
+            onClick = { viewModel.addUser() })
     }
 
-    SettingsGroupSpacer()
+
 
 }
 

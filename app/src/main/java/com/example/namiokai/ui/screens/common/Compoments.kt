@@ -3,10 +3,13 @@ package com.example.namiokai.ui.screens.common
 import android.Manifest
 import android.os.Build
 import android.util.Log
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -14,6 +17,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
@@ -26,7 +30,9 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -78,6 +84,14 @@ fun CardText(label: String, value: String) {
 }
 
 @Composable
+fun CardTextColumn(label: String, value: String) {
+    Column {
+        Text(text = label, style = MaterialTheme.typography.labelMedium)
+        Text(text = value)
+    }
+}
+
+@Composable
 fun UsersPicker(
     usersPickup: SnapshotStateMap<User, Boolean>,
     isMultipleSelectEnabled: Boolean = true
@@ -86,7 +100,7 @@ fun UsersPicker(
         mainAxisAlignment = MainAxisAlignment.Center,
         mainAxisSpacing = 8.dp,
         crossAxisAlignment = FlowCrossAxisAlignment.Center,
-        crossAxisSpacing = 8.dp
+        //crossAxisSpacing = 8.dp
     ) {
         usersPickup.forEach { (user, selected) ->
             FlowRowItemCard(user, selected, onItemSelected = { status ->
@@ -187,7 +201,11 @@ fun PermissionsHandler() {
         }
 
         !permissionState.status.isGranted && !permissionState.status.shouldShowRationale -> {
-            Log.d("PERMISSIONS", "POST_NOTIFICATIONS permission fully denied. Go to settings to enable")
+            Log.d(
+                "PERMISSIONS",
+                "POST_NOTIFICATIONS permission fully denied. Go to settings to enable"
+            )
         }
     }
 }
+

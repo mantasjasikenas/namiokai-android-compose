@@ -74,7 +74,10 @@ fun AddFuelPopup(
         Surface(
             color = MaterialTheme.colorScheme.background,
             shape = MaterialTheme.shapes.medium,
-            shadowElevation = 8.dp
+            shadowElevation = 8.dp,
+            modifier = Modifier
+                .padding(10.dp)
+                .fillMaxWidth()
         ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -84,44 +87,56 @@ fun AddFuelPopup(
                 Spacer(modifier = Modifier.height(30.dp))
                 Text(
                     text = stringResource(R.string.select_driver),
-                    style = MaterialTheme.typography.labelLarge
+                    style = MaterialTheme.typography.labelMedium,
+                    modifier = Modifier.padding(bottom = 5.dp)
                 )
                 UsersPicker(usersPickup = driverSelectHashMap, isMultipleSelectEnabled = false)
                 Spacer(modifier = Modifier.height(30.dp))
                 Text(
                     text = stringResource(R.string.select_passengers),
-                    style = MaterialTheme.typography.labelLarge
+                    style = MaterialTheme.typography.labelMedium,
+                    modifier = Modifier.padding(bottom = 5.dp)
                 )
                 UsersPicker(usersPickup = splitFuelHashMap, isMultipleSelectEnabled = true)
-                Spacer(modifier = Modifier.height(30.dp))
-                destRadioOptions.forEach { text ->
-                    Row(
-                        Modifier
-                            .fillMaxWidth()
-                            .selectable(
-                                selected = (text == selectedOption),
-                                onClick = {
-                                    onOptionSelected(text)
-                                }
-                            )
-                            .padding(top = 10.dp),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = text,
-                            style = MaterialTheme.typography.labelLarge,
-                            textAlign = TextAlign.Center
-                        )
-                        RadioButton(
-                            selected = (text == selectedOption),
-                            modifier = Modifier.padding(start = 16.dp),
-                            onClick = { onOptionSelected(text) }
-                        )
+                Spacer(modifier = Modifier.height(20.dp))
+                Text(
+                    text = stringResource(R.string.destination),
+                    style = MaterialTheme.typography.labelMedium,
+                    modifier = Modifier.padding(bottom = 5.dp)
+                )
 
+
+                Column()
+                 {
+                    destRadioOptions.forEach { text ->
+                        Row(
+                            Modifier
+                                .selectable(
+                                    selected = (text == selectedOption),
+                                    onClick = {
+                                        onOptionSelected(text)
+                                    }
+                                )
+                                .padding(vertical = 5.dp),
+                            horizontalArrangement = Arrangement.Start,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            RadioButton(
+                                selected = (text == selectedOption),
+                                onClick = { onOptionSelected(text) }
+                            )
+                            Text(
+                                text = text,
+                                style = MaterialTheme.typography.labelLarge,
+                                textAlign = TextAlign.Center
+                            )
+                        }
                     }
                 }
-                Spacer(modifier = Modifier.height(40.dp))
+
+
+
+                Spacer(modifier = Modifier.height(20.dp))
                 Row {
                     OutlinedButton(
                         content = { Text(text = stringResource(R.string.cancel)) },

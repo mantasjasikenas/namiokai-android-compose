@@ -59,4 +59,8 @@ class AdminPanelViewModel @Inject constructor(
         toastManager.show("Users cleared")
 
     }
+
+    fun addUser() {
+        TODO("Not yet implemented")
+    }
 }

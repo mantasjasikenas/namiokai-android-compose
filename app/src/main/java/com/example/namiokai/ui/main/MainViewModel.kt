@@ -34,7 +34,7 @@ class MainViewModel @Inject constructor(
     val currentUser = _currentUser.asStateFlow()
 
     init {
-        Log.d(TAG, "Init MainViewModel")
+        Log.d(TAG, "MainViewModel init")
         getUsers()
         getUser()
     }
@@ -50,15 +50,12 @@ class MainViewModel @Inject constructor(
     }
 
     private fun getUser() {
-        /*        if (!authRepository.isUserAuthenticatedInFirebase)
-                    return*/
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 userRepository.user?.let { userRepository ->
                     firebaseRepository.getUser(userRepository.uid).collect { user ->
-                        //_mainUiState.update { it.copy(currentUser = user) }
-                        _currentUser.update {user }
-                        println("Is admin? ${user.admin}")
+                        _currentUser.update { user }
+                        Log.d(TAG, "Is admin? ${user.admin}")
                     }
                 }
             }

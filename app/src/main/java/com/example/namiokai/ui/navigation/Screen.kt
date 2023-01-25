@@ -17,7 +17,7 @@ sealed class Screen(
     @StringRes val titleResourceId: Int,
     val imageVector: ImageVector = Icons.Outlined.BrokenImage
 ) {
-    object Summary : Screen("start", R.string.app_name, Icons.Outlined.Payments)
+    object Debts : Screen("debt", R.string.debts_name, Icons.Outlined.Payments)
     object Fuel : Screen("fuel", R.string.fuel_name, Icons.Outlined.LocalGasStation)
     object Bill : Screen("bill", R.string.bill_name, Icons.Outlined.ShoppingBag)
     object Settings : Screen("settings", R.string.settings_name, Icons.Outlined.Settings)
@@ -27,12 +27,12 @@ sealed class Screen(
 
     companion object {
         val navBarScreens = listOf(
-            Summary,
+            Debts,
             Bill,
             Fuel
         )
         private val screens = listOf(
-            Summary,
+            Debts,
             Bill,
             Fuel,
             Settings,
@@ -42,6 +42,6 @@ sealed class Screen(
         )
 
         fun fromRoute(route: String?): Screen =
-            screens.firstOrNull { it.route == route } ?: Summary
+            screens.firstOrNull { it.route == route } ?: Debts
     }
 }

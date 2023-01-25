@@ -39,6 +39,10 @@ fun SettingsScreen(
         PreferenceKeys.IS_DARK_MODE_ENABLED,
         isSystemInDarkTheme()
     )
+    var useSystemTheme by rememberPreference(
+        PreferenceKeys.USE_SYSTEM_DEFAULT_THEME,
+        false
+    )
 
     Column(
         modifier = Modifier
@@ -52,13 +56,14 @@ fun SettingsScreen(
             title = "Dark mode",
             text = "Toggles theme",
             isChecked = isDarkModeEnabled,
-            onCheckedChange = { isDarkModeEnabled = !isDarkModeEnabled }
+            onCheckedChange = { isDarkModeEnabled = !isDarkModeEnabled },
+            isEnabled = !useSystemTheme
         )
         SwitchSettingEntry(
-            title = "Dark mode",
-            text = "Toggles theme",
-            isChecked = isDarkModeEnabled,
-            onCheckedChange = { isDarkModeEnabled = !isDarkModeEnabled }
+            title = "Use system theme",
+            text = "Toggles system default theme",
+            isChecked = useSystemTheme,
+            onCheckedChange = { useSystemTheme = !useSystemTheme }
         )
         SettingsGroupSpacer()
     }
@@ -138,6 +143,7 @@ fun SwitchSettingEntry(
         onClick = { onCheckedChange(!isChecked) },
         trailingContent = {
             Switch(
+                enabled = isEnabled,
                 checked = isChecked,
                 onCheckedChange = { onCheckedChange(!isChecked) })
         },

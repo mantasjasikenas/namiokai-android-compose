@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -23,7 +24,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.runtime.toMutableStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -70,7 +70,10 @@ fun AddBillPopup(
         Surface(
             color = MaterialTheme.colorScheme.background,
             shape = MaterialTheme.shapes.medium,
-            shadowElevation = 8.dp
+            shadowElevation = 8.dp,
+            modifier = Modifier
+                .padding(10.dp)
+                .fillMaxWidth()
         ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -80,8 +83,9 @@ fun AddBillPopup(
                 Spacer(modifier = Modifier.height(20.dp))
                 Text(
                     text = stringResource(R.string.select_paymaster),
-                    style = MaterialTheme.typography.labelLarge,
-                    textAlign = TextAlign.Center
+                    style = MaterialTheme.typography.labelMedium,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(bottom = 5.dp)
                 )
                 UsersPicker(
                     usersPickup = paymasterHashMap,
@@ -98,8 +102,9 @@ fun AddBillPopup(
                 Spacer(modifier = Modifier.height(20.dp))
                 Text(
                     text = stringResource(R.string.select_split_bill_users),
-                    style = MaterialTheme.typography.labelLarge,
-                    textAlign = TextAlign.Center
+                    style = MaterialTheme.typography.labelMedium,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(bottom = 5.dp)
                 )
                 UsersPicker(
                     usersPickup = splitBillHashMap,
@@ -143,12 +148,14 @@ fun AddBillPopup(
 }
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun PopupTextField(
     modifier: Modifier = Modifier,
     label: String,
     onValueChange: (String) -> Unit,
     keyboardType: KeyboardType = KeyboardType.Text,
+    singleLine: Boolean = true
 ) {
     var text by remember { mutableStateOf(TextFieldValue("")) }
     val focusManager = LocalFocusManager.current
@@ -167,6 +174,7 @@ private fun PopupTextField(
             text = it
             onValueChange(it.text)
         },
-        modifier = modifier.padding(20.dp)
+        singleLine = singleLine,
+        modifier = modifier.padding(vertical = 10.dp, horizontal = 30.dp)
     )
 }

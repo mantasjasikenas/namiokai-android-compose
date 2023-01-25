@@ -3,18 +3,15 @@ package com.example.namiokai.ui.main
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.runtime.collectAsState
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.example.namiokai.data.repository.preferences.PreferenceKeys
 import com.example.namiokai.data.repository.preferences.PreferencesRepository
 import com.example.namiokai.data.repository.preferences.rememberPreference
-import com.example.namiokai.ui.screens.NamiokaiApp
 import com.example.namiokai.ui.screens.common.PermissionsHandler
 import com.example.namiokai.ui.theme.NamiokaiTheme
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 
@@ -30,14 +27,22 @@ class MainActivity : ComponentActivity() {
             //setKeepOnScreenCondition { true }
         }
         setContent {
-//            val themeState = remember {
-//                preferencesRepository.getPreference(PreferenceKeys.IS_DARK_MODE_ENABLED, true)
-//                    .map { it }
-//            }.collectAsState(initial = true)
+            val useSystemTheme by rememberPreference(
+                key = PreferenceKeys.USE_SYSTEM_DEFAULT_THEME,
+                defaultValue = false
+            )
+            val darkTheme by rememberPreference(
+                key = PreferenceKeys.IS_DARK_MODE_ENABLED,
+                defaultValue = true
+            )
 
-            val state by rememberPreference(key = PreferenceKeys.IS_DARK_MODE_ENABLED, defaultValue = true)
+            val currentTheme = if (useSystemTheme) {
+                isSystemInDarkTheme()
+            } else {
+                darkTheme
+            }
 
-            NamiokaiTheme(darkTheme = state) {
+            NamiokaiTheme(darkTheme = currentTheme) {
                 PermissionsHandler()
                 NamiokaiApp()
             }

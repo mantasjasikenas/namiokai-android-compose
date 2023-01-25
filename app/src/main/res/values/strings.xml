@@ -2,7 +2,7 @@
     <string name="app_name">Namiokai</string>
     <string name="back_button">Back button\n</string>
     <string name="fuel_name">Fuel</string>
-    <string name="bill_name">Bill</string>
+    <string name="bill_name">Bills</string>
     <string name="settings_button">Settings</string>
     <string name="settings_name">Settings</string>
     <string name="auth_name">Auth</string>
@@ -39,4 +39,6 @@
     <string name="uid">Uid</string>
     <string name="debtor">Debtor</string>
     <string name="admin_panel_menu_label">Admin panel</string>
+    <string name="debts_name">Debts</string>
+    <string name="destination">Destination</string>
 </resources>

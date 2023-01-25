@@ -1,4 +1,4 @@
-package com.example.namiokai.ui.screens
+package com.example.namiokai.ui.main
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.padding
@@ -38,13 +38,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.namiokai.R
-import com.example.namiokai.ui.main.MainViewModel
 import com.example.namiokai.ui.namiokaiNavigationGraph
 import com.example.namiokai.ui.navigation.Screen
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
 
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NamiokaiApp(
     modifier: Modifier = Modifier,
@@ -59,11 +57,11 @@ fun NamiokaiApp(
     val topBarState = rememberSaveable { (mutableStateOf(true)) }
 
     val isLoggedIn = mainViewModel.authRepository.isUserAuthenticatedInFirebase
-    val initialRoute = if (isLoggedIn) Screen.Summary.route else Screen.Auth.route
+    val initialRoute = if (isLoggedIn) Screen.Debts.route else Screen.Auth.route
     val currentUser by mainViewModel.currentUser.collectAsState()
 
     when (navBackStackEntry?.destination?.route) {
-        Screen.Settings.route, Screen.Auth.route -> {
+        Screen.Settings.route, Screen.Auth.route, Screen.AdminPanel.route -> {
             bottomBarState.value = false
             topBarState.value = true
         }
@@ -98,10 +96,9 @@ fun NamiokaiApp(
         NavHost(
             navController = navController,
             startDestination = initialRoute,
-            //startDestination = Screen.Settings.route,
             modifier = modifier.padding(innerPadding)
         ) {
-            namiokaiNavigationGraph(navController = navController)
+            namiokaiNavigationGraph(navController = navController, mainViewModel = mainViewModel)
         }
     }
 
