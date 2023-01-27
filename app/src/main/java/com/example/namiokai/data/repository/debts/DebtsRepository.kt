@@ -3,6 +3,7 @@ package com.example.namiokai.data.repository.debts
 import com.example.namiokai.model.Bill
 import com.example.namiokai.model.Fuel
 import com.example.namiokai.model.User
+import com.example.namiokai.model.splitPricePerUser
 import com.example.namiokai.model.tripPricePerUser
 import kotlin.math.min
 
@@ -54,7 +55,7 @@ class DebtsRepository {
             val splitUsers = bill.splitUsers
             val paymaster = bill.paymaster
             val total = bill.total
-            val amountPerUser = total / splitUsers.count()
+            val amountPerUser = bill.splitPricePerUser()
 
             splitUsers.forEach loop@{ splitUser ->
                 if (splitUser.uid == paymaster.uid)

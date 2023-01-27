@@ -37,6 +37,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import com.example.namiokai.R
@@ -62,10 +64,17 @@ fun AddBillPopup(
     }
     val context = LocalContext.current
 
-    Popup(
-        alignment = Alignment.Center, onDismissRequest = { }, properties = PopupProperties(
+    Dialog(
+        /*alignment = Alignment.Center, onDismissRequest = { }, properties = PopupProperties(
             focusable = true, usePlatformDefaultWidth = true
-        )
+        )*/
+        properties = DialogProperties(
+           usePlatformDefaultWidth = true,
+             dismissOnBackPress = true,
+        ),
+        onDismissRequest = {
+            onPopupStatusChange(false)
+        }
     ) {
         Surface(
             color = MaterialTheme.colorScheme.background,

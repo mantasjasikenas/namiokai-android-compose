@@ -1,9 +1,12 @@
 package com.example.namiokai.ui.screens.settings
 
-import android.annotation.SuppressLint
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -11,13 +14,19 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -25,15 +34,26 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.center
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
 import com.example.namiokai.data.repository.preferences.PreferenceKeys
 import com.example.namiokai.data.repository.preferences.rememberPreference
+import com.example.namiokai.model.MyColor
+import com.example.namiokai.ui.main.MainViewModel
+import com.example.namiokai.ui.navigation.Screen
+import com.example.namiokai.ui.theme.md_theme_dark_primary
 
 
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun SettingsScreen(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    mainViewModel: MainViewModel = hiltViewModel(),
+    settingsViewModel: SettingsViewModel = hiltViewModel(),
+    navController: NavHostController
 ) {
     var isDarkModeEnabled by rememberPreference(
         PreferenceKeys.IS_DARK_MODE_ENABLED,
@@ -44,12 +64,28 @@ fun SettingsScreen(
         false
     )
 
+    val currentUser by mainViewModel.currentUser.collectAsState()
+    val currentColor = remember {
+        mutableStateOf(MyColor.BLUE)
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
             .padding()
     ) {
+
+
+        EnumValueSelectorSettingsEntry(
+            title = "Test",
+            selectedValue = currentColor.value,
+            onValueSelected = { currentColor.value = it })
+
+
+
+
+
         SettingsGroupSpacer()
         SettingsEntryGroupText(title = "General")
         SwitchSettingEntry(
@@ -66,6 +102,23 @@ fun SettingsScreen(
             onCheckedChange = { useSystemTheme = !useSystemTheme }
         )
         SettingsGroupSpacer()
+        SettingsEntryGroupText(title = "Account")
+        SettingsEntry(
+            title = "Email",
+            text = currentUser.email.ifEmpty { "Not logged in" },
+            onClick = { })
+        AnimatedVisibility(visible = currentUser.uid.isNotEmpty()) {
+            SettingsEntry(
+                title = "Log out",
+                text = "You are logged in as ${currentUser.displayName.ifEmpty { "-" }}",
+                onClick = {
+                    settingsViewModel.logout()
+                    mainViewModel.resetCurrentUser()
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(0)
+                    }
+                })
+        }
     }
 }
 
@@ -106,7 +159,7 @@ inline fun <T> ValueSelectorSettingsEntry(
         mutableStateOf(false)
     }
 
-    /*if (isShowingDialog) {
+    if (isShowingDialog) {
         ValueSelectorDialog(
             onDismiss = { isShowingDialog = false },
             title = title,
@@ -115,7 +168,7 @@ inline fun <T> ValueSelectorSettingsEntry(
             onValueSelected = onValueSelected,
             valueText = valueText
         )
-    }*/
+    }
 
     SettingsEntry(
         title = title,
@@ -244,7 +297,7 @@ fun SettingsGroupSpacer(
     )
 }
 
-/*@Composable
+@Composable
 inline fun <T> ValueSelectorDialog(
     noinline onDismiss: () -> Unit,
     title: String,
@@ -256,87 +309,89 @@ inline fun <T> ValueSelectorDialog(
 ) {
 
     Dialog(onDismissRequest = onDismiss) {
-        Column(
-            modifier = modifier
-                .padding(all = 48.dp)
-                .clip(shape = RoundedCornerShape(8.dp))
-                .padding(vertical = 16.dp),
+        Surface(
+            color = colorScheme.background,
+            shape = MaterialTheme.shapes.medium,
+            shadowElevation = 8.dp,
+            modifier = Modifier
+                .padding(20.dp)
+                .fillMaxWidth()
         ) {
-            Text(
-                text = title,
-                style = typography.bodySmall,
-                modifier = Modifier
-                    .padding(vertical = 8.dp, horizontal = 24.dp)
-            )
-
-            Column(
-                modifier = Modifier
-                    .verticalScroll(rememberScrollState())
-            ) {
-                values.forEach { value ->
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(16.dp),
-                        modifier = Modifier
-                            .clickable(
-                                onClick = {
-                                    onDismiss()
-                                    onValueSelected(value)
+            Column(modifier = Modifier.padding(10.dp)) {
+                Text(
+                    text = title,
+                    modifier = Modifier
+                        .padding(vertical = 8.dp, horizontal = 24.dp)
+                )
+                Column(
+                    modifier = Modifier
+                        .verticalScroll(rememberScrollState())
+                ) {
+                    values.forEach { value ->
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(16.dp),
+                            modifier = Modifier
+                                .clickable(
+                                    onClick = {
+                                        onDismiss()
+                                        onValueSelected(value)
+                                    }
+                                )
+                                .padding(vertical = 12.dp, horizontal = 24.dp)
+                                .fillMaxWidth()
+                        ) {
+                            if (selectedValue == value) {
+                                Canvas(
+                                    modifier = Modifier
+                                        .size(18.dp)
+                                        .clip(CircleShape)
+//                                    .background(colorScheme.onSurface)
+                                        .border(
+                                            width = 1.dp,
+                                            color = colorScheme.primary,
+                                            shape = CircleShape
+                                        )
+                                ) {
+                                    drawCircle(
+                                        color = md_theme_dark_primary,
+                                        radius = 4.dp.toPx(),
+                                        center = size.center,
+                                    )
                                 }
-                            )
-                            .padding(vertical = 12.dp, horizontal = 24.dp)
-                            .fillMaxWidth()
-                    ) {
-                        if (selectedValue == value) {
-                            Canvas(
-                                modifier = Modifier
-                                    .size(18.dp)
-                                    .clip(CircleShape)
-                                    //.background()
-                            ) {
-                                drawCircle(
-                                    color = ,
-                                    radius = 4.dp.toPx(),
-                                    center = size.center,
-//                                    shadow = Shadow(
-//                                        color = Color.Black.copy(alpha = 0.4f),
-//                                        blurRadius = 4.dp.toPx(),
-//                                        offset = Offset(x = 0f, y = 1.dp.toPx())
-//                                    )
+                            } else {
+                                Spacer(
+                                    modifier = Modifier
+                                        .size(18.dp)
+                                        .border(
+                                            width = 1.dp,
+                                            color = colorScheme.primary,
+                                            shape = CircleShape
+                                        )
                                 )
                             }
-                        } else {
-                            Spacer(
-                                modifier = Modifier
-                                    .size(18.dp)
-                                    .border(
-                                        width = 1.dp,
-                                        color = colorPalette.textDisabled,
-                                        shape = CircleShape
-                                    )
+
+                            Text(
+                                text = valueText(value),
+                                style = typography.labelLarge
                             )
                         }
+                    }
+                }
 
-                        Text(
-                            text = valueText(value),
-                            style = typography.labelMedium
-                        )
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                ) {
+                    OutlinedButton(
+                        onClick = onDismiss,
+                        modifier = Modifier.padding(top = 16.dp)
+                    ) {
+                        Text(text = "Cancel")
                     }
                 }
             }
-
-            Box(
-                modifier = Modifier
-                    .align(Alignment.End)
-                    .padding(end = 24.dp)
-            ) {
-                DialogTextButton(
-                    text = "Cancel",
-                    onClick = onDismiss,
-                    modifier = Modifier
-                )
-            }
         }
     }
-}*/
+}
 

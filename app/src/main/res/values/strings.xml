@@ -41,4 +41,5 @@
     <string name="admin_panel_menu_label">Admin panel</string>
     <string name="debts_name">Debts</string>
     <string name="destination">Destination</string>
+    <string name="login_name">Login</string>
 </resources>

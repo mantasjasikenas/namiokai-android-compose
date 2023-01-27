@@ -1,13 +1,13 @@
 package com.example.namiokai.ui.main
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.AdminPanelSettings
 import androidx.compose.material.icons.outlined.BugReport
-import androidx.compose.material.icons.outlined.Key
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
@@ -57,13 +57,18 @@ fun NamiokaiApp(
     val topBarState = rememberSaveable { (mutableStateOf(true)) }
 
     val isLoggedIn = mainViewModel.authRepository.isUserAuthenticatedInFirebase
-    val initialRoute = if (isLoggedIn) Screen.Debts.route else Screen.Auth.route
+    val initialRoute = if (isLoggedIn) Screen.Debts.route else Screen.Login.route
     val currentUser by mainViewModel.currentUser.collectAsState()
 
     when (navBackStackEntry?.destination?.route) {
-        Screen.Settings.route, Screen.Auth.route, Screen.AdminPanel.route -> {
+        Screen.Settings.route, Screen.AdminPanel.route -> {
             bottomBarState.value = false
             topBarState.value = true
+        }
+
+        Screen.Login.route -> {
+            bottomBarState.value = false
+            topBarState.value = false
         }
 
         else -> {
@@ -138,11 +143,6 @@ fun NamiokaiTopAppBar(
                             launchSingleTop = true
                         }
                     },
-                    navigateToAuth = {
-                        navController.navigate(Screen.Auth.route) {
-                            launchSingleTop = true
-                        }
-                    },
                     navigateToTest = {
                         navController.navigate(Screen.Test.route) {
                             launchSingleTop = true
@@ -188,7 +188,6 @@ fun NamiokaiNavigationBar(
 @Composable
 fun TopBarDropdownMenu(
     navigateToSettings: () -> Unit,
-    navigateToAuth: () -> Unit,
     navigateToTest: () -> Unit,
     navigateToAdminPanel: () -> Unit,
     adminModeEnabled: Boolean = false
@@ -216,48 +215,38 @@ fun TopBarDropdownMenu(
                     contentDescription = null
                 )
             })
-        AnimatedVisibility(visible = adminModeEnabled) {
-            DropdownMenuItem(
-                text = { Text(stringResource(R.string.admin_panel_menu_label)) },
-                onClick = {
-                    navigateToAdminPanel()
-                    expanded = false
-                },
-                leadingIcon = {
-                    Icon(
-                        Icons.Outlined.AdminPanelSettings,
-                        contentDescription = null
-                    )
-                })
-        }
-        DropdownMenuItem(
-            text = { Text(stringResource(R.string.auth_menu_label)) },
-            onClick = {
-                navigateToAuth()
-                expanded = false
-            },
-            leadingIcon = {
-                Icon(
-                    Icons.Outlined.Key,
-                    contentDescription = null
-                )
-            }
-        )
-        Divider()
-        DropdownMenuItem(
-            text = { Text(stringResource(R.string.test_menu_label)) },
-            onClick = {
-                navigateToTest()
-                expanded = false
-            },
-            leadingIcon = {
-                Icon(
-                    Icons.Outlined.BugReport,
-                    contentDescription = null
-                )
-            }
-        )
 
+        AnimatedVisibility(visible = adminModeEnabled) {
+            Column() {
+                Divider()
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.admin_panel_menu_label)) },
+                    onClick = {
+                        navigateToAdminPanel()
+                        expanded = false
+                    },
+                    leadingIcon = {
+                        Icon(
+                            Icons.Outlined.AdminPanelSettings,
+                            contentDescription = null
+                        )
+                    }
+                )
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.test_menu_label)) },
+                    onClick = {
+                        navigateToTest()
+                        expanded = false
+                    },
+                    leadingIcon = {
+                        Icon(
+                            Icons.Outlined.BugReport,
+                            contentDescription = null
+                        )
+                    }
+                )
+            }
+        }
     }
 }
 

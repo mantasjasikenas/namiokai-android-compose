@@ -34,10 +34,10 @@ fun NavGraphBuilder.namiokaiNavigationGraph(navController: NavHostController, ma
         FuelScreen(mainViewModel = mainViewModel)
     }
     composable(route = Screen.Settings.route) {
-        SettingsScreen()
+        SettingsScreen(navController = navController, mainViewModel = mainViewModel)
     }
-    composable(route = Screen.Auth.route) {
-        AuthScreen(navController = navController)
+    composable(route = Screen.Login.route) {
+        AuthScreen(navController = navController, mainViewModel = mainViewModel)
     }
     composable(route = Screen.Test.route) {
         TestScreen()

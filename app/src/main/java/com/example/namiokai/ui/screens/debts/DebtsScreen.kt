@@ -10,7 +10,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -47,8 +49,8 @@ fun DebtsScreen(
     debtsViewModel: DebtsViewModel = hiltViewModel(),
     mainViewModel: MainViewModel = hiltViewModel(),
 ) {
-    //val mainUiState by mainViewModel.uiState.collectAsState()
     val summaryUiState by debtsViewModel.uiState.collectAsState()
+    val vertScrollState = rememberScrollState()
 
 
     if (summaryUiState.debts.isEmpty()) {
@@ -56,25 +58,6 @@ fun DebtsScreen(
         return
     }
 
-    /*LazyVerticalGrid(
-        columns = GridCells.Fixed(2),
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
-        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 5.dp),
-    ) {
-        item(span = { GridItemSpan(2) }) { CustomSpacer(height = 15) }
-        items(summaryUiState.debts.count()) { index ->
-            val user = summaryUiState.debts.keys.elementAtOrNull(index)
-            val debts = summaryUiState.debts.values.elementAtOrNull(index)
-
-            if (user != null && debts != null) {
-                ExpandableAvatarCard(
-                    debtorUser = user,
-                    userDebts = debts
-                )
-            }
-        }
-    }*/
 
     FlowRow(
         mainAxisAlignment = MainAxisAlignment.Center,
@@ -84,6 +67,7 @@ fun DebtsScreen(
         modifier = Modifier
             .fillMaxSize()
             .padding(20.dp)
+            .verticalScroll(vertScrollState)
     ) {
         summaryUiState.debts.forEach { (user, debts) ->
             ExpandableAvatarCard(

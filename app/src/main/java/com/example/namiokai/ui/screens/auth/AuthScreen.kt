@@ -31,6 +31,7 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import com.example.namiokai.R
 import com.example.namiokai.model.Response
+import com.example.namiokai.ui.main.MainViewModel
 import com.example.namiokai.ui.navigation.Screen
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.GoogleAuthProvider
@@ -38,6 +39,7 @@ import com.google.firebase.auth.GoogleAuthProvider
 @Composable
 fun AuthScreen(
     viewModel: AuthViewModel = hiltViewModel(),
+    mainViewModel: MainViewModel = hiltViewModel(),
     navController: NavHostController
 ) {
 
@@ -123,6 +125,8 @@ fun AuthScreen(
                             launchSingleTop = true
                             restoreState = true
                         }
+                        mainViewModel.getCurrentUserDetails()
+
                     }
                 }
             }

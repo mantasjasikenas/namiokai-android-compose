@@ -1,5 +1,7 @@
 package com.example.namiokai.model
 
+import com.example.namiokai.utils.round
+
 data class Bill(
     var date: String = "",
     var paymaster: User = User(),
@@ -13,7 +15,7 @@ fun Bill.isValid(): Boolean {
 }
 
 fun Bill.splitPricePerUser(): Double {
-    return total / splitUsers.count()
+    return (total / splitUsers.count()).round(2)
 }
 
 

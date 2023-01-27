@@ -60,6 +60,7 @@ fun FloatingAddButton(modifier: Modifier = Modifier, onClick: () -> Unit) {
         LargeFloatingActionButton(
             modifier = Modifier.padding(all = 16.dp),
             onClick = onClick,
+            containerColor = MaterialTheme.colorScheme.primary,
             shape = CircleShape
         ) {
             Icon(
