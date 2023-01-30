@@ -13,4 +13,4 @@ dependencyResolutionManagement {
     }
 }
 rootProject.name = "Namiokai"
-include ':app'
+include ':Namiokai'
