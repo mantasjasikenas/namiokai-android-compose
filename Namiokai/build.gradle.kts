@@ -1,4 +1,3 @@
-import org.jetbrains.kotlin.gradle.plugin.mpp.pm20.util.archivesName
 
 plugins {
     kotlin("android")
@@ -20,15 +19,15 @@ android {
             keyAlias = "androiddebugkey"
         }
     }
-    namespace = "com.example.namiokai"
+    namespace = "com.github.mantasjasikenas.namiokai"
     compileSdk = 33
 
     defaultConfig {
-        applicationId = "com.example.namiokai"
+        applicationId = "com.namiokai"
         minSdk = 26
         targetSdk = 33
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 2
+        versionName = "0.0.1"
 
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -45,9 +44,9 @@ android {
         }
 
         getByName("release") {
-            // FIXME fix rules
             isMinifyEnabled = false
             isShrinkResources = false
+            isDebuggable = false
             manifestPlaceholders["appName"] = "Namiokai"
             signingConfig = signingConfigs.getByName("debug")
             proguardFiles(
