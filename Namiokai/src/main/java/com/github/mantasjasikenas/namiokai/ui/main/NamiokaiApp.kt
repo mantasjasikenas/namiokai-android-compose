@@ -226,19 +226,6 @@ fun TopBarDropdownMenu(
                 )
             })
 
-        DropdownMenuItem(
-            text = { Text(stringResource(R.string.latest_version)) },
-            onClick = {
-                expanded = false
-                context.startActivity(urlIntent)
-
-            },
-            leadingIcon = {
-                Icon(
-                    Icons.Outlined.Update,
-                    contentDescription = null
-                )
-            })
 
         AnimatedVisibility(visible = adminModeEnabled) {
             Column {
@@ -256,6 +243,19 @@ fun TopBarDropdownMenu(
                         )
                     }
                 )
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.latest_version)) },
+                    onClick = {
+                        expanded = false
+                        context.startActivity(urlIntent)
+
+                    },
+                    leadingIcon = {
+                        Icon(
+                            Icons.Outlined.Update,
+                            contentDescription = null
+                        )
+                    })
                 DropdownMenuItem(
                     text = { Text(stringResource(R.string.test_menu_label)) },
                     onClick = {

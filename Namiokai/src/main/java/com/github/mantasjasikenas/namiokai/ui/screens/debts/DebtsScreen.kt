@@ -5,15 +5,24 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -26,20 +35,24 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontVariation.width
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.github.mantasjasikenas.namiokai.R
 import com.github.mantasjasikenas.namiokai.data.repository.debts.UserDebtsMap
 import com.github.mantasjasikenas.namiokai.model.User
-import com.github.mantasjasikenas.namiokai.ui.main.MainViewModel
-import com.github.mantasjasikenas.namiokai.ui.main.UsersMap
 import com.github.mantasjasikenas.namiokai.ui.common.CardText
+import com.github.mantasjasikenas.namiokai.ui.common.CardTextColumn
 import com.github.mantasjasikenas.namiokai.ui.common.CustomSpacer
 import com.github.mantasjasikenas.namiokai.ui.common.EmptyView
+import com.github.mantasjasikenas.namiokai.ui.main.MainViewModel
+import com.github.mantasjasikenas.namiokai.ui.main.UsersMap
 import com.google.accompanist.flowlayout.FlowCrossAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
 import com.google.accompanist.flowlayout.MainAxisAlignment
+import com.google.accompanist.flowlayout.SizeMode
 
 @Composable
 fun DebtsScreen(
@@ -91,7 +104,8 @@ private fun ExpandableAvatarCard(debtorUser: User, userDebts: UserDebtsMap, user
 
         Column(
             modifier = Modifier
-                .padding(20.dp),
+                .padding(20.dp)
+                .width(IntrinsicSize.Max),
             horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.Center
         ) {
@@ -106,27 +120,32 @@ private fun ExpandableAvatarCard(debtorUser: User, userDebts: UserDebtsMap, user
                     modifier = Modifier
                         .clip(RoundedCornerShape(50))
                         .clickable { expandedState = !expandedState }
-                        .size(50.dp),
+                        .size(40.dp),
                     contentScale = ContentScale.FillBounds,
                 )
-                CustomSpacer(height = 10)
-                Text(
-                    text = debtorUser.displayName,
+                CustomSpacer(width = 10)
+                CardTextColumn(
+                    label = stringResource(R.string.debtor),
+                    value = debtorUser.displayName,
                     modifier = Modifier.padding(start = 10.dp)
                 )
             }
 
             AnimatedVisibility(visible = expandedState) {
-                Column {
+                Column() {
                     CustomSpacer(height = 10)
-                    CustomSpacer(height = 10)
-                    CardText(
-                        label = stringResource(R.string.debtor),
-                        value = debtorUser.displayName
+                    Text(
+                        text = "pays to",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.Bold,
+                        //modifier = Modifier.align(Alignment.End)
                     )
+                    CustomSpacer(height = 15)
                     userDebts.forEach { (key, value) ->
                         CardText(label = usersMap[key]!!.displayName, value = "$value €")
                     }
+
                 }
             }
         }

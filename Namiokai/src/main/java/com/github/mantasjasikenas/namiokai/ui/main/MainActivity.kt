@@ -62,22 +62,32 @@ class MainActivity : ComponentActivity(), AnalyticsLogger by AnalyticsLoggerImpl
                 .value*/
             //endregion
 
-            val useSystemTheme by rememberPreference(
+            val useSystemThemePref by rememberPreference(
                 key = PreferenceKeys.USE_SYSTEM_DEFAULT_THEME,
                 defaultValue = false
             )
-            val darkTheme by rememberPreference(
+            val darkThemePref by rememberPreference(
                 key = PreferenceKeys.IS_DARK_MODE_ENABLED,
                 defaultValue = true
             )
+            val amoledThemePref by rememberPreference(
+                key = PreferenceKeys.IS_AMOLED_MODE_ENABLED,
+                defaultValue = false
+            )
 
-            val currentTheme = if (useSystemTheme) {
+            val isDarkThemeEnabled = if (useSystemThemePref) {
                 isSystemInDarkTheme()
             } else {
-                darkTheme
+                darkThemePref
             }
 
-            NamiokaiTheme(darkTheme = currentTheme) {
+            val isAmoledThemeEnabled = if (isDarkThemeEnabled) {
+                amoledThemePref
+            } else {
+                false
+            }
+
+            NamiokaiTheme(darkTheme = isDarkThemeEnabled, amoledTheme = isAmoledThemeEnabled) {
                 PermissionsHandler()
                 NamiokaiApp()
             }

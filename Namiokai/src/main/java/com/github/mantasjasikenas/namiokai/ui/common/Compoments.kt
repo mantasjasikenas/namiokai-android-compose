@@ -82,9 +82,14 @@ fun FloatingAddButton(modifier: Modifier = Modifier, onClick: () -> Unit) {
 }
 
 @Composable
-fun CustomSpacer(height: Int) {
-    Spacer(modifier = Modifier.height(height.dp))
+fun CustomSpacer(height: Int = 0, width: Int = 0) {
+    Spacer(
+        modifier = Modifier
+            .height(height.dp)
+            .width(width.dp)
+    )
 }
+
 
 @Composable
 fun CardText(label: String, value: String) {
@@ -94,8 +99,8 @@ fun CardText(label: String, value: String) {
 }
 
 @Composable
-fun CardTextColumn(label: String, value: String) {
-    Column {
+fun CardTextColumn(modifier: Modifier = Modifier, label: String, value: String) {
+    Column(modifier = modifier) {
         Text(text = label, style = MaterialTheme.typography.labelMedium)
         Text(text = value)
     }

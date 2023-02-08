@@ -66,6 +66,9 @@ fun SettingsScreen(
     var useSystemTheme by rememberPreference(
         PreferenceKeys.USE_SYSTEM_DEFAULT_THEME, false
     )
+    var isAmoledModeEnabled by rememberPreference(
+        PreferenceKeys.IS_AMOLED_MODE_ENABLED, false
+    )
     val mainUiState by mainViewModel.mainUiState.collectAsState()
     val currentUser = mainUiState.currentUser
     val (updateDisplayNameDialogState, setUpdateNameDialogState) = remember { mutableStateOf(false) }
@@ -84,6 +87,10 @@ fun SettingsScreen(
     ) {
         SettingsGroupSpacer()
         SettingsEntryGroupText(title = "General")
+        SwitchSettingEntry(title = "Use system theme",
+            text = "Toggles system default theme",
+            isChecked = useSystemTheme,
+            onCheckedChange = { useSystemTheme = !useSystemTheme })
         SwitchSettingEntry(
             title = "Dark mode",
             text = "Toggles theme",
@@ -91,10 +98,13 @@ fun SettingsScreen(
             onCheckedChange = { isDarkModeEnabled = !isDarkModeEnabled },
             isEnabled = !useSystemTheme
         )
-        SwitchSettingEntry(title = "Use system theme",
-            text = "Toggles system default theme",
-            isChecked = useSystemTheme,
-            onCheckedChange = { useSystemTheme = !useSystemTheme })
+        SwitchSettingEntry(
+            title = "Amoled mode",
+            text = "Toggles amoled mode",
+            isChecked = isAmoledModeEnabled,
+            onCheckedChange = { isAmoledModeEnabled = !isAmoledModeEnabled },
+            isEnabled = isDarkModeEnabled
+        )
         SettingsGroupSpacer()
         SettingsEntryGroupText(title = "Profile")
         SettingsEntry(title = "Change profile picture",

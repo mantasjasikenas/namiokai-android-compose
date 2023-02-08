@@ -26,8 +26,8 @@ android {
         applicationId = "com.namiokai"
         minSdk = 26
         targetSdk = 33
-        versionCode = 2
-        versionName = "0.0.1"
+        versionCode = 4
+        versionName = "0.0.3"
 
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -60,9 +60,7 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions {
-        jvmTarget = "17"
-    }
+    kotlinOptions { jvmTarget = "17" }
     buildFeatures {
         compose = true
     }

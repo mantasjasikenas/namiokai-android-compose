@@ -1,25 +1,29 @@
 package com.github.mantasjasikenas.namiokai.ui.screens.fuel
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Co2
 import androidx.compose.material.icons.outlined.ExpandMore
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -41,6 +45,7 @@ import com.github.mantasjasikenas.namiokai.ui.common.EmptyView
 import com.github.mantasjasikenas.namiokai.ui.common.FloatingAddButton
 import com.github.mantasjasikenas.namiokai.ui.main.MainViewModel
 import com.github.mantasjasikenas.namiokai.ui.main.UsersMap
+import com.google.accompanist.flowlayout.FlowRow
 
 @Composable
 fun FuelScreen(
@@ -109,24 +114,32 @@ private fun FuelCard(fuel: Fuel, usersMap: UsersMap, modifier: Modifier = Modifi
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
+                horizontalArrangement = Arrangement.Start,
                 modifier = Modifier
                     .fillMaxSize()
             ) {
+                Icon(
+                    imageVector = Icons.Outlined.Co2,
+                    contentDescription = null,
+                    modifier = Modifier.size(40.dp)
+                )
+                CustomSpacer(width = 20)
                 CardTextColumn(
                     label = stringResource(R.string.trip_destination),
                     value = fuel.tripDestination
                 )
-                AnimatedVisibility(
+                /*AnimatedVisibility(
                     visible = !expandedState,
                     enter = fadeIn(),
                     exit = fadeOut(),
-                ) {
-                    CardTextColumn(
-                        label = stringResource(R.string.trip_date),
-                        value = fuel.date.split(' ').getOrNull(0) ?: "-"
-                    )
-                }
+                ) {*/
+                CustomSpacer(width = 20)
+                CardTextColumn(
+                    label = stringResource(R.string.trip_date),
+                    value = fuel.date.split(' ').getOrNull(0) ?: "-"
+                )
+                //}
+                Spacer(modifier = Modifier.weight(1f))
                 IconButton(
                     modifier = Modifier
                         .rotate(rotationState),
@@ -141,18 +154,35 @@ private fun FuelCard(fuel: Fuel, usersMap: UsersMap, modifier: Modifier = Modifi
             }
 
             if (expandedState) {
-                CardText(label = stringResource(R.string.trip_date), value = fuel.date)
+                //CardText(label = stringResource(R.string.trip_date), value = fuel.date)
                 CardText(
                     label = stringResource(R.string.driver),
                     value = usersMap[fuel.driverUid]?.displayName ?: "-"
                 )
-                CardText(
+                /*CardText(
                     label = stringResource(R.string.split_fuel_to),
-                    value = usersMap.filter { fuel.passengersUid.contains(it.key) }.values.joinToString { it.displayName })
+                    value = usersMap.filter { fuel.passengersUid.contains(it.key) }.values.joinToString { it.displayName })*/
                 CardText(
                     label = stringResource(R.string.trip_destination),
                     value = fuel.tripDestination
                 )
+                Text(
+                    text = stringResource(R.string.split_fuel_with),
+                    style = MaterialTheme.typography.labelMedium
+                )
+                CustomSpacer(height = 7)
+                FlowRow(mainAxisSpacing = 7.dp, crossAxisSpacing = 7.dp) {
+                    usersMap.filter { fuel.passengersUid.contains(it.key) }.values.forEach {
+                        OutlinedCard(shape = RoundedCornerShape(25)) {
+                            Text(
+                                text = it.displayName,
+                                modifier = Modifier.padding(7.dp),
+                                style = MaterialTheme.typography.labelMedium
+                            )
+                        }
+                    }
+                }
+                CustomSpacer(height = 10)
             }
         }
     }
