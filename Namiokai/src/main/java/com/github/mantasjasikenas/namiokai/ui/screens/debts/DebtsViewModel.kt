@@ -20,10 +20,15 @@ class DebtsViewModel @Inject constructor(
     val debtsUiState = _debtsUiState.asStateFlow()
 
     init {
+        getDebts()
+    }
+
+    private fun getDebts() {
         viewModelScope.launch {
             debtsManager.getDebts().collect { debts ->
                 _debtsUiState.update { it.copy(debts = debts) }
             }
         }
     }
+
 }

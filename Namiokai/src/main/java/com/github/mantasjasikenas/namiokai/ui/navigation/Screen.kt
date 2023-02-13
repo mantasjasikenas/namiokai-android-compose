@@ -4,6 +4,7 @@ import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AdminPanelSettings
 import androidx.compose.material.icons.outlined.BrokenImage
+import androidx.compose.material.icons.outlined.Cottage
 import androidx.compose.material.icons.outlined.LocalGasStation
 import androidx.compose.material.icons.outlined.Payments
 import androidx.compose.material.icons.outlined.Settings
@@ -23,18 +24,23 @@ sealed class Screen(
     object Settings : Screen("settings", R.string.settings_name, Icons.Outlined.Settings)
     object Login : Screen("login", R.string.login_name, Icons.Outlined.Sync)
     object Test : Screen("test", R.string.test_name, Icons.Outlined.Sync)
-    object AdminPanel : Screen("admin_panel", R.string.admin_panel_menu_label, Icons.Outlined.AdminPanelSettings)
+    object AdminPanel :
+        Screen("admin_panel", R.string.admin_panel_menu_label, Icons.Outlined.AdminPanelSettings)
+
+    object Flat : Screen("flat", R.string.flat_label, Icons.Outlined.Cottage)
 
     companion object {
         val navBarScreens = listOf(
             Debts,
             Bill,
-            Fuel
+            Fuel,
+            Flat
         )
         private val screens = listOf(
             Debts,
             Bill,
             Fuel,
+            Flat,
             Settings,
             Login,
             Test,

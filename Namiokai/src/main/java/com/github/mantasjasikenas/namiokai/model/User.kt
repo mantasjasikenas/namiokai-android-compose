@@ -1,8 +1,11 @@
 package com.github.mantasjasikenas.namiokai.model
 
+import kotlinx.serialization.Serializable
+
 typealias Uid = String
 typealias DisplayName = String
 
+@Serializable
 data class User(
     val displayName: String = "",
     val email: String = "",

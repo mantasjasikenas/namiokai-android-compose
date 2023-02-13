@@ -27,9 +27,9 @@ import com.github.mantasjasikenas.namiokai.model.Destination
 import com.github.mantasjasikenas.namiokai.model.Fuel
 import com.github.mantasjasikenas.namiokai.model.isValid
 import com.github.mantasjasikenas.namiokai.model.toUidAndDisplayNamePair
-import com.github.mantasjasikenas.namiokai.ui.main.UsersMap
 import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiDialog
 import com.github.mantasjasikenas.namiokai.ui.common.UsersPicker
+import com.github.mantasjasikenas.namiokai.ui.main.UsersMap
 
 @Composable
 fun AddFuelPopup(

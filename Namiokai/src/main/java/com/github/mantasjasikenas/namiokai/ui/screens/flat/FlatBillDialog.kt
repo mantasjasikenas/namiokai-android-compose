@@ -1,4 +1,4 @@
-package com.github.mantasjasikenas.namiokai.ui.screens.bill
+package com.github.mantasjasikenas.namiokai.ui.screens.flat
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.Spacer
@@ -18,26 +18,28 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.github.mantasjasikenas.namiokai.R
-import com.github.mantasjasikenas.namiokai.model.Bill
+import com.github.mantasjasikenas.namiokai.model.FlatBill
 import com.github.mantasjasikenas.namiokai.model.isValid
 import com.github.mantasjasikenas.namiokai.model.toUidAndDisplayNamePair
-import com.github.mantasjasikenas.namiokai.ui.main.UsersMap
 import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiDialog
 import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiTextField
 import com.github.mantasjasikenas.namiokai.ui.common.UsersPicker
-
+import com.github.mantasjasikenas.namiokai.ui.main.UsersMap
+import com.github.mantasjasikenas.namiokai.utils.Constants
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 @Composable
-fun AddBillPopup(
-    onSaveClick: (Bill) -> Unit, onDismiss: () -> Unit, usersMap: UsersMap
+fun FlatBillDialog(
+    onSaveClick: (FlatBill) -> Unit, onDismiss: () -> Unit, usersMap: UsersMap
 ) {
-    val bill by remember {
-        mutableStateOf(Bill())
-    }
-    val splitBillHashMap = remember {
-        usersMap.map { it.value.toUidAndDisplayNamePair() to false }.toMutableStateMap()
+    val flatBill by remember {
+        mutableStateOf(FlatBill())
     }
     val paymasterHashMap = remember {
+        usersMap.map { it.value.toUidAndDisplayNamePair() to false }.toMutableStateMap()
+    }
+    val splitBillHashMap = remember {
         usersMap.map { it.value.toUidAndDisplayNamePair() to false }.toMutableStateMap()
     }
     val context = LocalContext.current
@@ -45,14 +47,18 @@ fun AddBillPopup(
 
 
     NamiokaiDialog(
-        title = "Select bill details",
-        selectedValue = bill,
+        title = "Select flat bill details",
+        selectedValue = flatBill,
         onSaveClick = {
-            bill.splitUsersUid = splitBillHashMap.filter { it.value }.keys.map { it.first }
-            bill.paymasterUid =
+            flatBill.splitUsersUid = splitBillHashMap.filter { it.value }.keys.map { it.first }
+            flatBill.paymasterUid =
                 paymasterHashMap.filter { it.value }.keys.map { it.first }.firstOrNull() ?: ""
 
-            if (!bill.isValid()) {
+            val formatter = DateTimeFormatter.ofPattern(Constants.DATE_FORMAT_DISPLAY)
+            val currentDateTime = LocalDateTime.now().format(formatter)
+            flatBill.paymentDate = currentDateTime
+
+            if (!flatBill.isValid()) {
                 Toast.makeText(
                     context,
                     R.string.please_fill_all_fields,
@@ -61,7 +67,7 @@ fun AddBillPopup(
                 return@NamiokaiDialog
             }
             onDismiss()
-            onSaveClick(bill)
+            onSaveClick(flatBill)
             Toast.makeText(context, R.string.bill_saved, Toast.LENGTH_SHORT).show()
         },
         onDismiss = onDismiss
@@ -78,11 +84,12 @@ fun AddBillPopup(
             isMultipleSelectEnabled = false
         )
         NamiokaiTextField(
-            label = stringResource(R.string.shopping_list),
-            onValueChange = { bill.shoppingList = it })
+            label = "Rent",
+            onValueChange = { flatBill.rentTotal = it.replace(',', '.').toDoubleOrNull() ?: 0.0 },
+            keyboardType = KeyboardType.Number)
         NamiokaiTextField(
-            label = stringResource(R.string.total_price),
-            onValueChange = { bill.total = it.replace(',', '.').toDoubleOrNull() ?: 0.0 },
+            label = "Taxes",
+            onValueChange = { flatBill.taxesTotal = it.replace(',', '.').toDoubleOrNull() ?: 0.0 },
             keyboardType = KeyboardType.Number
         )
         Spacer(modifier = Modifier.height(20.dp))
@@ -98,5 +105,3 @@ fun AddBillPopup(
         )
     }
 }
-
-

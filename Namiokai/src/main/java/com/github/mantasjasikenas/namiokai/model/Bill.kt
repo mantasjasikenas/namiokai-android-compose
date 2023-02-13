@@ -1,7 +1,9 @@
 package com.github.mantasjasikenas.namiokai.model
 
 import com.github.mantasjasikenas.namiokai.utils.round
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class Bill(
     var date: String = "",
     var paymasterUid: String = "",

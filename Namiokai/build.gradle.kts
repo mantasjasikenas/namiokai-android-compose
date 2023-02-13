@@ -5,6 +5,7 @@ plugins {
     id("com.google.gms.google-services")
     id("kotlin-kapt")
     id("com.google.dagger.hilt.android")
+    kotlin("plugin.serialization") version "1.8.10"
 }
 
 
@@ -26,8 +27,8 @@ android {
         applicationId = "com.namiokai"
         minSdk = 26
         targetSdk = 33
-        versionCode = 4
-        versionName = "0.0.3"
+        versionCode = 6
+        versionName = "0.0.5"
 
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -81,6 +82,7 @@ val lifecycleVersion by extra { "2.5.1" }
 
 dependencies {
 
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
     implementation("androidx.core:core-ktx:1.9.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.5.1")
     implementation("androidx.activity:activity-compose:1.6.1")
@@ -121,12 +123,12 @@ dependencies {
     debugImplementation ("androidx.customview:customview:1.2.0-alpha02")
     debugImplementation ("androidx.customview:customview-poolingcontainer:1.0.0")
 
-    implementation("com.google.android.gms:play-services-auth:20.4.0")
+    implementation("com.google.android.gms:play-services-auth:20.4.1")
 
 
 
     // Firebase
-    implementation(platform("com.google.firebase:firebase-bom:31.1.1"))
+    implementation(platform("com.google.firebase:firebase-bom:31.2.0"))
     implementation("com.google.firebase:firebase-auth-ktx")
     implementation("com.google.firebase:firebase-firestore-ktx")
     implementation("com.google.firebase:firebase-messaging-ktx")

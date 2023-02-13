@@ -1,5 +1,8 @@
 package com.github.mantasjasikenas.namiokai.model
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class Fuel(
     var date: String = "",
     var driverUid: String = "",

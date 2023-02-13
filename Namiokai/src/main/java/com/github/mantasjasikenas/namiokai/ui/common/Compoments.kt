@@ -107,6 +107,19 @@ fun CardTextColumn(modifier: Modifier = Modifier, label: String, value: String) 
 }
 
 @Composable
+fun CardTextRow(modifier: Modifier = Modifier, label: String, value: String) {
+    Row(
+        modifier = modifier, verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(text = label, style = MaterialTheme.typography.labelLarge)
+        CustomSpacer(width = 10)
+        Spacer(modifier = Modifier.weight(1F))
+        Text(text = value)
+    }
+}
+
+@Composable
 fun UsersPicker(
     usersPickup: SnapshotStateMap<Pair<Uid, DisplayName>, Boolean>,
     isMultipleSelectEnabled: Boolean = true

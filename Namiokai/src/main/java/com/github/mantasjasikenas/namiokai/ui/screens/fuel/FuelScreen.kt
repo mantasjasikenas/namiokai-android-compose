@@ -17,6 +17,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Co2
 import androidx.compose.material.icons.outlined.ExpandMore
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -128,17 +129,11 @@ private fun FuelCard(fuel: Fuel, usersMap: UsersMap, modifier: Modifier = Modifi
                     label = stringResource(R.string.trip_destination),
                     value = fuel.tripDestination
                 )
-                /*AnimatedVisibility(
-                    visible = !expandedState,
-                    enter = fadeIn(),
-                    exit = fadeOut(),
-                ) {*/
                 CustomSpacer(width = 20)
                 CardTextColumn(
                     label = stringResource(R.string.trip_date),
                     value = fuel.date.split(' ').getOrNull(0) ?: "-"
                 )
-                //}
                 Spacer(modifier = Modifier.weight(1f))
                 IconButton(
                     modifier = Modifier
@@ -154,17 +149,12 @@ private fun FuelCard(fuel: Fuel, usersMap: UsersMap, modifier: Modifier = Modifi
             }
 
             if (expandedState) {
-                //CardText(label = stringResource(R.string.trip_date), value = fuel.date)
+                CustomSpacer(height = 15)
+                Divider()
+                CustomSpacer(height = 15)
                 CardText(
                     label = stringResource(R.string.driver),
                     value = usersMap[fuel.driverUid]?.displayName ?: "-"
-                )
-                /*CardText(
-                    label = stringResource(R.string.split_fuel_to),
-                    value = usersMap.filter { fuel.passengersUid.contains(it.key) }.values.joinToString { it.displayName })*/
-                CardText(
-                    label = stringResource(R.string.trip_destination),
-                    value = fuel.tripDestination
                 )
                 Text(
                     text = stringResource(R.string.split_fuel_with),

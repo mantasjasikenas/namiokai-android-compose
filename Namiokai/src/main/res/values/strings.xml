@@ -49,4 +49,7 @@
     <string name="trips_name">Trips</string>
     <string name="latest_version">Latest version</string>
     <string name="split_fuel_with">Split trip costs</string>
+    <string name="flat_label">Flat</string>
+    <string name="payment_date">Payment date</string>
+    <string name="rent_total">Rent</string>
 </resources>

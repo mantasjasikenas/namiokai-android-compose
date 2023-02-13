@@ -10,3 +10,8 @@ fun Double.round(decimals: Int): Double {
     repeat(decimals) { multiplier *= 10 }
     return round(this * multiplier) / multiplier
 }
+
+fun Double.format(digits:Int) = String.Companion.format(
+    "%#,.${digits}f",
+    this
+)
