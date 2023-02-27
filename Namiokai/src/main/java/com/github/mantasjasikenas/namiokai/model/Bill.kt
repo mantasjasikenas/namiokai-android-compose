@@ -1,15 +1,19 @@
 package com.github.mantasjasikenas.namiokai.model
 
 import com.github.mantasjasikenas.namiokai.utils.round
+import com.google.firebase.firestore.DocumentId
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class Bill(
+    @DocumentId
+    val documentId: String = "",
     var date: String = "",
     var paymasterUid: String = "",
     var shoppingList: String = "",
     var total: Double = 0.0,
-    var splitUsersUid: List<String> = emptyList()
+    var splitUsersUid: List<String> = emptyList(),
+    var createdByUid : String = "",
 )
 
 fun Bill.isValid(): Boolean {

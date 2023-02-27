@@ -119,6 +119,41 @@ class FirebaseRepositoryImpl : FirebaseRepository {
         db.collection(FLAT_BILLS_COLLECTION).add(flatBill)
     }
 
+    override suspend fun updateBill(bill: Bill) {
+        if (bill.documentId.isNotEmpty()) {
+            db.collection(BILLS_COLLECTION).document(bill.documentId).set(bill)
+        }
+    }
+
+    override suspend fun updateFuel(fuel: Fuel) {
+        if (fuel.documentId.isNotEmpty()) {
+            db.collection(FUEL_COLLECTION).document(fuel.documentId).set(fuel)
+        }
+    }
+
+    override suspend fun updateFlatBill(flatBill: FlatBill) {
+        if (flatBill.documentId.isNotEmpty()) {
+            db.collection(FLAT_BILLS_COLLECTION).document(flatBill.documentId).set(flatBill)
+        }
+    }
+
+    override suspend fun deleteBill(bill: Bill) {
+        if (bill.documentId.isNotEmpty()) {
+            db.collection(BILLS_COLLECTION).document(bill.documentId).delete()
+        }
+    }
+
+    override suspend fun deleteFuel(fuel: Fuel) {
+        if (fuel.documentId.isNotEmpty()) {
+            db.collection(FUEL_COLLECTION).document(fuel.documentId).delete()
+        }
+    }
+
+    override suspend fun deleteFlatBill(flatBill: FlatBill) {
+        if(flatBill.documentId.isNotEmpty()) {
+            db.collection(FLAT_BILLS_COLLECTION).document(flatBill.documentId).delete()
+        }
+    }
 
     override suspend fun clearBills() {
         db.collection(BILLS_COLLECTION).get().addOnSuccessListener { documents ->

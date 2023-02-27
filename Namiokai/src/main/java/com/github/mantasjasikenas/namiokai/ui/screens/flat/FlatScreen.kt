@@ -1,5 +1,6 @@
 package com.github.mantasjasikenas.namiokai.ui.screens.flat
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
@@ -7,6 +8,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -21,6 +23,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -56,6 +59,7 @@ fun FlatScreen(
     val popupState = remember {
         mutableStateOf(false)
     }
+    val currentUser = mainUiState.currentUser
 
 
 
@@ -67,21 +71,18 @@ fun FlatScreen(
             items(flatUiState.flatBills) { flatBill ->
                 FlatCard(
                     flatBill = flatBill,
-                    usersMap = mainUiState.usersMap
+                    isAllowedModification = (currentUser.admin || flatBill.createdByUid == currentUser.uid),
+                    usersMap = mainUiState.usersMap,
+                    viewModel = flatViewModel
                 )
             }
             item { CustomSpacer(height = 120) }
-        }
-
-
-        flatUiState.flatBills.forEach { flatBill ->
-
         }
     }
 
     FloatingAddButton(onClick = { popupState.value = true })
     if (popupState.value) {
-        FlatBillDialog(
+        FlatBillPopup(
             onSaveClick = { flatViewModel.insertFlatBill(it) },
             onDismiss = { popupState.value = false },
             usersMap = mainUiState.usersMap
@@ -93,8 +94,17 @@ fun FlatScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun FlatCard(flatBill: FlatBill, usersMap: UsersMap, modifier: Modifier = Modifier) {
+private fun FlatCard(
+    flatBill: FlatBill,
+    isAllowedModification: Boolean,
+    usersMap: UsersMap,
+    viewModel: FlatViewModel,
+    modifier: Modifier = Modifier
+) {
     var expandedState by remember { mutableStateOf(false) }
+    val modifyPopupState = remember {
+        mutableStateOf(false)
+    }
 
     ElevatedCard(
         modifier = modifier
@@ -191,10 +201,34 @@ private fun FlatCard(flatBill: FlatBill, usersMap: UsersMap, modifier: Modifier 
                     }
                 }
                 CustomSpacer(height = 10)
+                AnimatedVisibility(visible = isAllowedModification) {
+                    Row(
+                        horizontalArrangement = Arrangement.End,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
 
+                        TextButton(
+                            onClick = { modifyPopupState.value = true }) {
+                            Text(text = "Edit")
+                        }
+                        TextButton(
+                            onClick = { viewModel.deleteFlatBill(flatBill) }) {
+                            Text(text = "Delete")
+                        }
+                    }
+                }
             }
 
 
+        }
+
+        if (modifyPopupState.value) {
+            FlatBillPopup(
+                initialFlatBill = flatBill.copy(),
+                onSaveClick = { viewModel.updateFlatBill(it) },
+                onDismiss = { modifyPopupState.value = false },
+                usersMap = usersMap
+            )
         }
 
     }

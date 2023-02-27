@@ -1,5 +1,6 @@
 package com.github.mantasjasikenas.namiokai.ui.screens.bill
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
@@ -9,6 +10,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -24,6 +26,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -53,7 +56,6 @@ import com.github.mantasjasikenas.namiokai.utils.format
 import com.google.accompanist.flowlayout.FlowRow
 
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BillScreen(
     modifier: Modifier = Modifier,
@@ -65,6 +67,7 @@ fun BillScreen(
     val popupState = remember {
         mutableStateOf(false)
     }
+    val currentUser = mainUiState.currentUser
 
     if (billUiState.bills.isEmpty()) {
         EmptyView()
@@ -72,7 +75,12 @@ fun BillScreen(
         LazyColumn(modifier = modifier.fillMaxSize()) {
             item { CustomSpacer(height = 15) }
             items(billUiState.bills) { bill ->
-                BillCard(bill, mainUiState.usersMap)
+                BillCard(
+                    bill = bill,
+                    isAllowedModification = (currentUser.admin || bill.createdByUid == currentUser.uid),
+                    usersMap = mainUiState.usersMap,
+                    viewModel = viewModel
+                )
             }
             item { CustomSpacer(height = 120) }
         }
@@ -83,7 +91,7 @@ fun BillScreen(
     }
 
     if (popupState.value) {
-        AddBillPopup(
+        BillPopup(
             onSaveClick = { viewModel.insertBill(it) },
             onDismiss = { popupState.value = false },
             usersMap = mainUiState.usersMap
@@ -96,11 +104,20 @@ fun BillScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun BillCard(bill: Bill, usersMap: UsersMap, modifier: Modifier = Modifier) {
+private fun BillCard(
+    bill: Bill,
+    isAllowedModification: Boolean,
+    usersMap: UsersMap,
+    viewModel: BillViewModel,
+    modifier: Modifier = Modifier
+) {
     var expandedState by remember { mutableStateOf(false) }
     val rotationState by animateFloatAsState(
         targetValue = if (expandedState) 180f else 0f
     )
+    val modifyPopupState = remember {
+        mutableStateOf(false)
+    }
 
     ElevatedCard(
         modifier = modifier
@@ -147,16 +164,6 @@ private fun BillCard(bill: Bill, usersMap: UsersMap, modifier: Modifier = Modifi
                     label = stringResource(R.string.bill_date),
                     value = bill.date.split(' ').getOrNull(0) ?: "-"
                 )
-                /*AnimatedVisibility(
-                    visible = !expandedState,
-                    enter = fadeIn(),
-                    exit = fadeOut(),
-                ) {
-                    CardTextColumn(
-                        label = stringResource(R.string.bill_date),
-                        value = bill.date.split(' ').getOrNull(0) ?: "-"
-                    )
-                }*/
                 Spacer(modifier = Modifier.weight(1f))
                 IconButton(
                     modifier = Modifier
@@ -172,7 +179,6 @@ private fun BillCard(bill: Bill, usersMap: UsersMap, modifier: Modifier = Modifi
             }
 
             if (expandedState) {
-                //CustomSpacer(height = 10)
                 CustomSpacer(height = 15)
                 Divider()
                 CustomSpacer(height = 15)
@@ -191,21 +197,56 @@ private fun BillCard(bill: Bill, usersMap: UsersMap, modifier: Modifier = Modifi
                     )
                 }
                 CustomSpacer(height = 10)
-                Text(text = stringResource(R.string.split_bill_with), style = MaterialTheme.typography.labelMedium)
+                Text(
+                    text = stringResource(R.string.split_bill_with),
+                    style = MaterialTheme.typography.labelMedium
+                )
                 CustomSpacer(height = 7)
                 FlowRow(mainAxisSpacing = 7.dp, crossAxisSpacing = 7.dp) {
                     usersMap.filter { bill.splitUsersUid.contains(it.key) }.values.forEach {
                         OutlinedCard(shape = RoundedCornerShape(25)) {
-                            Text(text = it.displayName, modifier = Modifier.padding(7.dp), style = MaterialTheme.typography.labelMedium)
+                            Text(
+                                text = it.displayName,
+                                modifier = Modifier.padding(7.dp),
+                                style = MaterialTheme.typography.labelMedium
+                            )
                         }
                     }
                 }
                 CustomSpacer(height = 10)
+
+
+
+                AnimatedVisibility(visible = isAllowedModification) {
+                    Row(
+                        horizontalArrangement = Arrangement.End,
+                        modifier = Modifier.fillMaxWidth()) {
+
+                        TextButton(
+                            onClick = { modifyPopupState.value = true }) {
+                            Text(text = "Edit")
+                        }
+                        TextButton(
+                            onClick = { viewModel.deleteBill(bill) }) {
+                            Text(text = "Delete")
+                        }
+                    }
+                }
+
             }
 
 
         }
 
+
+        if (modifyPopupState.value) {
+            BillPopup(
+                initialBill = bill.copy(),
+                onSaveClick = { viewModel.updateBill(it) },
+                onDismiss = { modifyPopupState.value = false },
+                usersMap = usersMap
+            )
+        }
     }
 
 }

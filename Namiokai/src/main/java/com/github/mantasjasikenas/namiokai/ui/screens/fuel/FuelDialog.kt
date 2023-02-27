@@ -12,6 +12,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -26,41 +27,54 @@ import com.github.mantasjasikenas.namiokai.R
 import com.github.mantasjasikenas.namiokai.model.Destination
 import com.github.mantasjasikenas.namiokai.model.Fuel
 import com.github.mantasjasikenas.namiokai.model.isValid
-import com.github.mantasjasikenas.namiokai.model.toUidAndDisplayNamePair
 import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiDialog
 import com.github.mantasjasikenas.namiokai.ui.common.UsersPicker
 import com.github.mantasjasikenas.namiokai.ui.main.UsersMap
 
 @Composable
-fun AddFuelPopup(
+fun FuelPopup(
+    initialFuel: Fuel = Fuel(),
     onSaveClick: (Fuel) -> Unit,
     onDismiss: () -> Unit,
-    users: UsersMap,
+    usersMap: UsersMap,
     destinations: List<Destination>
 ) {
-    val fuel by remember {
-        mutableStateOf(Fuel())
-    }
+    // OPTIMIZE: This is a mess, refactor OK?
     val splitFuelHashMap = remember {
-        users.map { it.value.toUidAndDisplayNamePair() to false }.toMutableStateMap()
+        usersMap.map { it.value.uid to false }.toMutableStateMap()
     }
     val driverSelectHashMap = remember {
-        users.map { it.value.toUidAndDisplayNamePair() to false }.toMutableStateMap()
+        usersMap.map { it.value.uid to false }.toMutableStateMap()
     }
-
     val (selectedOption, onOptionSelected) = remember { mutableStateOf(destinations[0]) }
     val context = LocalContext.current
+    val fuel by remember {
+        mutableStateOf(initialFuel)
+    }
+
+    LaunchedEffect(Unit) {
+        if (fuel.isValid()) {
+            fuel.passengersUid.forEach { uid ->
+                splitFuelHashMap[uid] = true
+            }
+
+            driverSelectHashMap[fuel.driverUid] = true
+            onOptionSelected(destinations.first { it.name == initialFuel.tripDestination })
+        }
+
+    }
+
+
 
     NamiokaiDialog(
         title = "Select trip details",
         selectedValue = fuel,
         onSaveClick = {
             fuel.driverUid =
-                driverSelectHashMap.filter { it.value }.keys.map { it.first }
-                    .firstOrNull()
-                    ?: ""
-            fuel.passengersUid =
-                splitFuelHashMap.filter { it.value }.keys.map { it.first }
+                driverSelectHashMap.filter { it.value }.keys.map { it }.firstOrNull() ?: ""
+            fuel.passengersUid = splitFuelHashMap.filter { it.value }.keys.map { it }
+
+
             fuel.tripDestination = selectedOption.name
             fuel.tripPricePerUser = when (fuel.passengersUid.count()) {
                 1 -> selectedOption.tripPriceAlone
@@ -88,14 +102,22 @@ fun AddFuelPopup(
             style = MaterialTheme.typography.titleSmall,
             modifier = Modifier.padding(bottom = 5.dp)
         )
-        UsersPicker(usersPickup = driverSelectHashMap, isMultipleSelectEnabled = false)
+        UsersPicker(
+            usersMap = usersMap,
+            usersPickup = driverSelectHashMap,
+            isMultipleSelectEnabled = false
+        )
         Spacer(modifier = Modifier.height(30.dp))
         Text(
             text = stringResource(R.string.passengers),
             style = MaterialTheme.typography.titleSmall,
             modifier = Modifier.padding(bottom = 5.dp)
         )
-        UsersPicker(usersPickup = splitFuelHashMap, isMultipleSelectEnabled = true)
+        UsersPicker(
+            usersMap = usersMap,
+            usersPickup = splitFuelHashMap,
+            isMultipleSelectEnabled = true
+        )
         Spacer(modifier = Modifier.height(20.dp))
         Text(
             text = stringResource(R.string.destination),

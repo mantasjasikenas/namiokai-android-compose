@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -20,7 +21,6 @@ import androidx.compose.ui.unit.dp
 import com.github.mantasjasikenas.namiokai.R
 import com.github.mantasjasikenas.namiokai.model.Bill
 import com.github.mantasjasikenas.namiokai.model.isValid
-import com.github.mantasjasikenas.namiokai.model.toUidAndDisplayNamePair
 import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiDialog
 import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiTextField
 import com.github.mantasjasikenas.namiokai.ui.common.UsersPicker
@@ -28,19 +28,35 @@ import com.github.mantasjasikenas.namiokai.ui.main.UsersMap
 
 
 @Composable
-fun AddBillPopup(
-    onSaveClick: (Bill) -> Unit, onDismiss: () -> Unit, usersMap: UsersMap
+fun BillPopup(
+    initialBill: Bill = Bill(),
+    onSaveClick: (Bill) -> Unit,
+    onDismiss: () -> Unit,
+    usersMap: UsersMap
 ) {
-    val bill by remember {
-        mutableStateOf(Bill())
-    }
     val splitBillHashMap = remember {
-        usersMap.map { it.value.toUidAndDisplayNamePair() to false }.toMutableStateMap()
+        usersMap.map { it.value.uid to false }.toMutableStateMap()
     }
     val paymasterHashMap = remember {
-        usersMap.map { it.value.toUidAndDisplayNamePair() to false }.toMutableStateMap()
+        usersMap.map { it.value.uid to false }.toMutableStateMap()
     }
     val context = LocalContext.current
+    val bill by remember {
+        mutableStateOf(initialBill)
+    }
+
+    LaunchedEffect(Unit) {
+        if (bill.isValid()) {
+
+            bill.splitUsersUid.forEach { uid ->
+                splitBillHashMap[uid] = true
+            }
+
+            bill.paymasterUid.let { uid ->
+                paymasterHashMap[uid] = true
+            }
+        }
+    }
 
 
 
@@ -48,9 +64,8 @@ fun AddBillPopup(
         title = "Select bill details",
         selectedValue = bill,
         onSaveClick = {
-            bill.splitUsersUid = splitBillHashMap.filter { it.value }.keys.map { it.first }
-            bill.paymasterUid =
-                paymasterHashMap.filter { it.value }.keys.map { it.first }.firstOrNull() ?: ""
+            bill.splitUsersUid = splitBillHashMap.filter { it.value }.keys.map { it }
+            bill.paymasterUid = paymasterHashMap.filter { it.value }.keys.map { it }.firstOrNull() ?: ""
 
             if (!bill.isValid()) {
                 Toast.makeText(
@@ -74,14 +89,17 @@ fun AddBillPopup(
             modifier = Modifier.padding(bottom = 5.dp)
         )
         UsersPicker(
+            usersMap = usersMap,
             usersPickup = paymasterHashMap,
             isMultipleSelectEnabled = false
         )
         NamiokaiTextField(
             label = stringResource(R.string.shopping_list),
+            initialTextFieldValue = bill.shoppingList,
             onValueChange = { bill.shoppingList = it })
         NamiokaiTextField(
             label = stringResource(R.string.total_price),
+            initialTextFieldValue = (if (bill.total == 0.0) "" else bill.total.toString()),
             onValueChange = { bill.total = it.replace(',', '.').toDoubleOrNull() ?: 0.0 },
             keyboardType = KeyboardType.Number
         )
@@ -93,6 +111,7 @@ fun AddBillPopup(
             modifier = Modifier.padding(bottom = 5.dp)
         )
         UsersPicker(
+            usersMap = usersMap,
             usersPickup = splitBillHashMap,
             isMultipleSelectEnabled = true
         )

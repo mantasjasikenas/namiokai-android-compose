@@ -5,6 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.github.mantasjasikenas.namiokai.data.FirebaseRepository
 import com.github.mantasjasikenas.namiokai.model.Fuel
 import com.github.mantasjasikenas.namiokai.utils.Constants.DATE_FORMAT_DISPLAY
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -53,12 +55,30 @@ class FuelViewModel @Inject constructor(private val firebaseRepository: Firebase
         val currentDateTime = LocalDateTime.now().format(formatter)
 
         fuel.date = currentDateTime
+        fuel.createdByUid = Firebase.auth.uid ?: ""
 
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 firebaseRepository.insertFuel(fuel)
             }
         }
+    }
+
+    fun updateFuel(fuel: Fuel) {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                firebaseRepository.updateFuel(fuel)
+            }
+        }
+    }
+
+    fun deleteFuel(fuel: Fuel) {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                firebaseRepository.deleteFuel(fuel)
+            }
+        }
+
     }
 
 }

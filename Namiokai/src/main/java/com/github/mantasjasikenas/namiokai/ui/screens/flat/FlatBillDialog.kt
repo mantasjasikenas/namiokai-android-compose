@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -20,57 +21,51 @@ import androidx.compose.ui.unit.dp
 import com.github.mantasjasikenas.namiokai.R
 import com.github.mantasjasikenas.namiokai.model.FlatBill
 import com.github.mantasjasikenas.namiokai.model.isValid
-import com.github.mantasjasikenas.namiokai.model.toUidAndDisplayNamePair
 import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiDialog
 import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiTextField
 import com.github.mantasjasikenas.namiokai.ui.common.UsersPicker
 import com.github.mantasjasikenas.namiokai.ui.main.UsersMap
-import com.github.mantasjasikenas.namiokai.utils.Constants
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 @Composable
-fun FlatBillDialog(
+fun FlatBillPopup(
+    initialFlatBill: FlatBill = FlatBill(),
     onSaveClick: (FlatBill) -> Unit, onDismiss: () -> Unit, usersMap: UsersMap
 ) {
     val flatBill by remember {
-        mutableStateOf(FlatBill())
+        mutableStateOf(initialFlatBill)
     }
     val paymasterHashMap = remember {
-        usersMap.map { it.value.toUidAndDisplayNamePair() to false }.toMutableStateMap()
+        usersMap.map { it.value.uid to false }.toMutableStateMap()
     }
     val splitBillHashMap = remember {
-        usersMap.map { it.value.toUidAndDisplayNamePair() to false }.toMutableStateMap()
+        usersMap.map { it.value.uid to false }.toMutableStateMap()
     }
     val context = LocalContext.current
 
+    LaunchedEffect(Unit) {
+        if (flatBill.isValid()) {
+            paymasterHashMap[flatBill.paymasterUid] = true
+            flatBill.splitUsersUid.forEach { splitBillHashMap[it] = true }
+        }
+    }
 
 
     NamiokaiDialog(
-        title = "Select flat bill details",
-        selectedValue = flatBill,
-        onSaveClick = {
-            flatBill.splitUsersUid = splitBillHashMap.filter { it.value }.keys.map { it.first }
-            flatBill.paymasterUid =
-                paymasterHashMap.filter { it.value }.keys.map { it.first }.firstOrNull() ?: ""
+        title = "Select flat bill details", selectedValue = flatBill, onSaveClick = {
+            flatBill.splitUsersUid = splitBillHashMap.filter { it.value }.keys.map { it }
+            flatBill.paymasterUid = paymasterHashMap.filter { it.value }.keys.map { it }.firstOrNull() ?: ""
 
-            val formatter = DateTimeFormatter.ofPattern(Constants.DATE_FORMAT_DISPLAY)
-            val currentDateTime = LocalDateTime.now().format(formatter)
-            flatBill.paymentDate = currentDateTime
 
             if (!flatBill.isValid()) {
                 Toast.makeText(
-                    context,
-                    R.string.please_fill_all_fields,
-                    Toast.LENGTH_SHORT
+                    context, R.string.please_fill_all_fields, Toast.LENGTH_SHORT
                 ).show()
                 return@NamiokaiDialog
             }
             onDismiss()
             onSaveClick(flatBill)
             Toast.makeText(context, R.string.bill_saved, Toast.LENGTH_SHORT).show()
-        },
-        onDismiss = onDismiss
+        }, onDismiss = onDismiss
     ) {
 
         Text(
@@ -80,15 +75,17 @@ fun FlatBillDialog(
             modifier = Modifier.padding(bottom = 5.dp)
         )
         UsersPicker(
-            usersPickup = paymasterHashMap,
-            isMultipleSelectEnabled = false
+            usersMap = usersMap, usersPickup = paymasterHashMap, isMultipleSelectEnabled = false
         )
         NamiokaiTextField(
             label = "Rent",
+            initialTextFieldValue = (if (flatBill.rentTotal == 0.0) "" else flatBill.rentTotal.toString()),
             onValueChange = { flatBill.rentTotal = it.replace(',', '.').toDoubleOrNull() ?: 0.0 },
-            keyboardType = KeyboardType.Number)
+            keyboardType = KeyboardType.Number
+        )
         NamiokaiTextField(
             label = "Taxes",
+            initialTextFieldValue = (if (flatBill.taxesTotal == 0.0) "" else flatBill.taxesTotal.toString()),
             onValueChange = { flatBill.taxesTotal = it.replace(',', '.').toDoubleOrNull() ?: 0.0 },
             keyboardType = KeyboardType.Number
         )
@@ -100,8 +97,7 @@ fun FlatBillDialog(
             modifier = Modifier.padding(bottom = 5.dp)
         )
         UsersPicker(
-            usersPickup = splitBillHashMap,
-            isMultipleSelectEnabled = true
+            usersMap = usersMap, usersPickup = splitBillHashMap, isMultipleSelectEnabled = true
         )
     }
 }

@@ -1,5 +1,6 @@
 package com.github.mantasjasikenas.namiokai.ui.screens.fuel
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
@@ -9,6 +10,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -25,6 +27,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -38,6 +41,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.github.mantasjasikenas.namiokai.R
+import com.github.mantasjasikenas.namiokai.model.Destination
 import com.github.mantasjasikenas.namiokai.model.Fuel
 import com.github.mantasjasikenas.namiokai.ui.common.CardText
 import com.github.mantasjasikenas.namiokai.ui.common.CardTextColumn
@@ -59,7 +63,7 @@ fun FuelScreen(
     val popupState = remember {
         mutableStateOf(false)
     }
-
+    val currentUser = mainUiState.currentUser
 
     if (fuelUiState.fuels.isEmpty()) {
         EmptyView()
@@ -67,18 +71,25 @@ fun FuelScreen(
         LazyColumn(modifier = modifier.fillMaxSize()) {
             item { CustomSpacer(height = 15) }
             items(fuelUiState.fuels) { fuel ->
-                FuelCard(fuel, mainUiState.usersMap)
+                FuelCard(
+                    fuel = fuel,
+                    isAllowedModification = (currentUser.admin || fuel.createdByUid == currentUser.uid),
+                    destinations = fuelUiState.destinations,
+                    usersMap = mainUiState.usersMap,
+                    viewModel = viewModel
+                )
             }
             item { CustomSpacer(height = 120) }
         }
     }
 
     FloatingAddButton(onClick = { popupState.value = true })
+
     if (popupState.value) {
-        AddFuelPopup(
+        FuelPopup(
             onSaveClick = { viewModel.insertFuel(it) },
             onDismiss = { popupState.value = false },
-            users = mainUiState.usersMap,
+            usersMap = mainUiState.usersMap,
             destinations = fuelUiState.destinations
         )
     }
@@ -88,11 +99,21 @@ fun FuelScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun FuelCard(fuel: Fuel, usersMap: UsersMap, modifier: Modifier = Modifier) {
+private fun FuelCard(
+    fuel: Fuel,
+    isAllowedModification: Boolean,
+    destinations: List<Destination>,
+    usersMap: UsersMap,
+    viewModel: FuelViewModel,
+    modifier: Modifier = Modifier
+) {
     var expandedState by remember { mutableStateOf(false) }
     val rotationState by animateFloatAsState(
         targetValue = if (expandedState) 180f else 0f
     )
+    val modifyPopupState = remember {
+        mutableStateOf(false)
+    }
 
     ElevatedCard(
         modifier = modifier
@@ -173,7 +194,33 @@ private fun FuelCard(fuel: Fuel, usersMap: UsersMap, modifier: Modifier = Modifi
                     }
                 }
                 CustomSpacer(height = 10)
+                AnimatedVisibility(visible = isAllowedModification) {
+                    Row(
+                        horizontalArrangement = Arrangement.End,
+                        modifier = Modifier.fillMaxWidth()) {
+
+                        TextButton(
+                            onClick = { modifyPopupState.value = true }) {
+                            Text(text = "Edit")
+                        }
+                        TextButton(
+                            onClick = { viewModel.deleteFuel(fuel) }) {
+                            Text(text = "Delete")
+                        }
+                    }
+                }
             }
+        }
+
+
+        if (modifyPopupState.value) {
+            FuelPopup(
+                initialFuel = fuel.copy(),
+                onSaveClick = { viewModel.updateFuel(it) },
+                onDismiss = { modifyPopupState.value = false },
+                destinations = destinations,
+                usersMap = usersMap,
+            )
         }
     }
 }

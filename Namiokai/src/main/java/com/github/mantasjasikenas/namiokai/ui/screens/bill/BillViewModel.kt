@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.mantasjasikenas.namiokai.model.Bill
 import com.github.mantasjasikenas.namiokai.utils.Constants.DATE_FORMAT_DISPLAY
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -44,10 +46,27 @@ class BillViewModel @Inject constructor(private val firebaseRepository: com.gith
         val currentDateTime = LocalDateTime.now().format(formatter)
 
         bill.date = currentDateTime
+        bill.createdByUid = Firebase.auth.uid ?: ""
 
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 firebaseRepository.insertBill(bill)
+            }
+        }
+    }
+
+    fun updateBill(bill: Bill) {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                firebaseRepository.updateBill(bill)
+            }
+        }
+    }
+
+    fun deleteBill(bill: Bill) {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                firebaseRepository.deleteBill(bill)
             }
         }
     }

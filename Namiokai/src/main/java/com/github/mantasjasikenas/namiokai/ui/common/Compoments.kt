@@ -51,9 +51,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import coil.compose.AsyncImage
 import com.github.mantasjasikenas.namiokai.R
-import com.github.mantasjasikenas.namiokai.model.DisplayName
 import com.github.mantasjasikenas.namiokai.model.Uid
 import com.github.mantasjasikenas.namiokai.model.User
+import com.github.mantasjasikenas.namiokai.ui.main.UsersMap
 import com.github.mantasjasikenas.namiokai.ui.theme.NamiokaiTheme
 import com.google.accompanist.flowlayout.FlowCrossAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
@@ -119,6 +119,8 @@ fun CardTextRow(modifier: Modifier = Modifier, label: String, value: String) {
     }
 }
 
+/*
+> OLD VERSION
 @Composable
 fun UsersPicker(
     usersPickup: SnapshotStateMap<Pair<Uid, DisplayName>, Boolean>,
@@ -135,6 +137,28 @@ fun UsersPicker(
                     usersPickup.forEach { (user, _) -> usersPickup[user] = false }
                 }
                 usersPickup[pair] = status.not()
+            })
+        }
+    }
+}*/
+
+@Composable
+fun UsersPicker(
+    usersMap: UsersMap,
+    usersPickup: SnapshotStateMap<Uid, Boolean>,
+    isMultipleSelectEnabled: Boolean = true
+) {
+    FlowRow(
+        mainAxisAlignment = MainAxisAlignment.Center,
+        mainAxisSpacing = 7.dp,
+        crossAxisAlignment = FlowCrossAxisAlignment.Center,
+    ) {
+        usersPickup.forEach { (uid, selected) ->
+            FlowRowItemCard(usersMap[uid]?.displayName ?: "Missing display name" , selected, onItemSelected = { status ->
+                if (!isMultipleSelectEnabled) {
+                    usersPickup.forEach { (uid, _) -> usersPickup[uid] = false }
+                }
+                usersPickup[uid] = status.not()
             })
         }
     }
@@ -322,11 +346,12 @@ fun NamiokaiDialogPreview() {
 fun NamiokaiTextField(
     modifier: Modifier = Modifier,
     label: String,
+    initialTextFieldValue: String = "",
     onValueChange: (String) -> Unit,
     keyboardType: KeyboardType = KeyboardType.Text,
     singleLine: Boolean = true
 ) {
-    var text by remember { mutableStateOf(TextFieldValue("")) }
+    var text by remember { mutableStateOf(TextFieldValue(initialTextFieldValue)) }
     val focusManager = LocalFocusManager.current
 
     OutlinedTextField(
