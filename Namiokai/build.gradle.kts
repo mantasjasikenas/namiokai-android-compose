@@ -27,9 +27,8 @@ android {
         applicationId = "com.namiokai"
         minSdk = 26
         targetSdk = 33
-        versionCode = 6
-        versionName = "0.0.5"
-
+        versionCode = 8
+        versionName = "0.0.7"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -83,24 +82,24 @@ val lifecycleVersion by extra { "2.5.1" }
 dependencies {
 
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
-    implementation("androidx.core:core-ktx:1.9.0")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.5.1")
-    implementation("androidx.activity:activity-compose:1.6.1")
+    implementation("androidx.core:core-ktx:1.10.1")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")
+    implementation("androidx.activity:activity-compose:1.7.2")
     implementation(platform("androidx.compose:compose-bom:2023.01.00"))
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
-    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.5.1")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.5.1")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-savedstate:2.5.1")
-    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.5.1")
-    implementation("androidx.navigation:navigation-compose:2.5.3")
-    implementation("org.jetbrains.kotlin:kotlin-reflect:1.8.0")
-    implementation("androidx.compose.material:material-icons-extended:1.3.1")
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.1")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-savedstate:2.6.1")
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.1")
+    implementation("androidx.navigation:navigation-compose:2.6.0")
+    implementation("org.jetbrains.kotlin:kotlin-reflect:1.8.10")
+    implementation("androidx.compose.material:material-icons-extended:1.4.3")
     implementation("com.google.accompanist:accompanist-permissions:0.25.1")
-    implementation("androidx.work:work-runtime-ktx:2.7.1")
+    implementation("androidx.work:work-runtime-ktx:2.8.1")
     implementation("com.google.accompanist:accompanist-flowlayout:0.28.0")
 
 
@@ -123,7 +122,7 @@ dependencies {
     debugImplementation ("androidx.customview:customview:1.2.0-alpha02")
     debugImplementation ("androidx.customview:customview-poolingcontainer:1.0.0")
 
-    implementation("com.google.android.gms:play-services-auth:20.4.1")
+    implementation("com.google.android.gms:play-services-auth:20.5.0")
 
 
 
@@ -148,7 +147,7 @@ dependencies {
     testImplementation("com.google.dagger:hilt-android-testing:2.44.2")
     kaptTest("com.google.dagger:hilt-compiler:2.44.2")
 
-    implementation("androidx.core:core-splashscreen:1.0.0")
+    implementation("androidx.core:core-splashscreen:1.0.1")
 }
 
 

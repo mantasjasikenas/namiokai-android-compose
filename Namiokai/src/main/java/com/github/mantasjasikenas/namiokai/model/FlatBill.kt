@@ -17,7 +17,7 @@ data class FlatBill(
 )
 
 fun FlatBill.isValid(): Boolean {
-    return paymasterUid.isNotEmpty() && paymentDate.isNotEmpty() && total() > 0.0 && splitUsersUid.isNotEmpty()
+    return paymasterUid.isNotEmpty() && total() > 0.0 && splitUsersUid.isNotEmpty()
 }
 
 fun FlatBill.splitPricePerUser(): Double {
