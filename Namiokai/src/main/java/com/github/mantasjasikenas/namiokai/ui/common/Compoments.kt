@@ -325,7 +325,7 @@ fun <T> NamiokaiDialog(
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun NamiokaiDialogPreview() {
-    NamiokaiTheme(darkTheme = true) {
+    NamiokaiTheme(useDarkTheme = true) {
         val status = remember { mutableStateOf(true) }
 
         if (status.value) {

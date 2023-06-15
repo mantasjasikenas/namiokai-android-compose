@@ -170,18 +170,8 @@ fun NamiokaiAppTopBar(
             },
             actions = {
                 TopBarDropdownMenu(
-                    navigateToSettings = {
-                        navController.navigate(Screen.Settings.route) {
-                            launchSingleTop = true
-                        }
-                    },
-                    navigateToTest = {
-                        navController.navigate(Screen.Test.route) {
-                            launchSingleTop = true
-                        }
-                    },
-                    navigateToAdminPanel = {
-                        navController.navigate(Screen.AdminPanel.route) {
+                    navigateScreen = { screen ->
+                        navController.navigate(screen.route) {
                             launchSingleTop = true
                         }
                     },
@@ -194,9 +184,7 @@ fun NamiokaiAppTopBar(
 
 @Composable
 fun TopBarDropdownMenu(
-    navigateToSettings: () -> Unit,
-    navigateToTest: () -> Unit,
-    navigateToAdminPanel: () -> Unit,
+    navigateScreen: (Screen) -> Unit,
     adminModeEnabled: Boolean = false
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -216,7 +204,7 @@ fun TopBarDropdownMenu(
         DropdownMenuItem(
             text = { Text(stringResource(R.string.settings_menu_label)) },
             onClick = {
-                navigateToSettings()
+                navigateScreen(Screen.Settings)
                 expanded = false
             },
             leadingIcon = {
@@ -233,7 +221,7 @@ fun TopBarDropdownMenu(
                 DropdownMenuItem(
                     text = { Text(stringResource(R.string.admin_panel_menu_label)) },
                     onClick = {
-                        navigateToAdminPanel()
+                        navigateScreen(Screen.AdminPanel)
                         expanded = false
                     },
                     leadingIcon = {
@@ -244,7 +232,7 @@ fun TopBarDropdownMenu(
                     }
                 )
                 DropdownMenuItem(
-                    text = { Text(stringResource(R.string.latest_version)) },
+                    text = { Text(stringResource(R.string.github)) },
                     onClick = {
                         expanded = false
                         context.startActivity(urlIntent)
@@ -257,9 +245,9 @@ fun TopBarDropdownMenu(
                         )
                     })
                 DropdownMenuItem(
-                    text = { Text(stringResource(R.string.test_menu_label)) },
+                    text = { Text(stringResource(R.string.debug_menu_label)) },
                     onClick = {
-                        navigateToTest()
+                        navigateScreen(Screen.Test)
                         expanded = false
                     },
                     leadingIcon = {

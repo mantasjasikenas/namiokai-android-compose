@@ -115,32 +115,49 @@ private val AmoledColorScheme = darkColorScheme(
 
 @Composable
 fun NamiokaiTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    amoledTheme: Boolean = false,
-    dynamicColor: Boolean = false,
+    useSystemTheme: Boolean = true,
+    useDarkTheme: Boolean = false,
+    useAmoledTheme: Boolean = false,
+    useDynamicColorTheme: Boolean = false,
     content: @Composable () -> Unit
 ) {
+    val lightTheme = useDarkTheme.not()
+    val useCustomTheme = useSystemTheme.not()
+    val dynamicColorTheme = useDynamicColorTheme && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+
     val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+        useSystemTheme -> {
+            when {
+                isSystemInDarkTheme() -> DarkColorScheme
+                else -> LightColorScheme
+            }
         }
-        darkTheme && amoledTheme -> AmoledColorScheme
-        darkTheme -> DarkColorScheme
+
+        useCustomTheme -> {
+            when {
+                useDarkTheme && useAmoledTheme -> AmoledColorScheme
+                useDarkTheme && dynamicColorTheme -> dynamicDarkColorScheme(LocalContext.current)
+                useDarkTheme -> DarkColorScheme
+                lightTheme && dynamicColorTheme -> dynamicLightColorScheme(LocalContext.current)
+                lightTheme -> LightColorScheme
+                else -> LightColorScheme
+            }
+        }
+
         else -> LightColorScheme
+
     }
+
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
             window.statusBarColor = colorScheme.primary.toArgb()
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = darkTheme
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = useDarkTheme
         }
     }
 
     MaterialTheme(
-        colorScheme = colorScheme,
-        typography = Typography,
-        content = content
+        colorScheme = colorScheme, typography = Typography, content = content
     )
 }

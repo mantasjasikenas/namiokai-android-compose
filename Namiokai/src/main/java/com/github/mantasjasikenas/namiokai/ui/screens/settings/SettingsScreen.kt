@@ -69,6 +69,9 @@ fun SettingsScreen(
     var isAmoledModeEnabled by rememberPreference(
         PreferenceKeys.IS_AMOLED_MODE_ENABLED, false
     )
+    var isDynamicColorEnabled by rememberPreference(
+        PreferenceKeys.IS_DYNAMIC_COLOR_ENABLED, false
+    )
     val mainUiState by mainViewModel.mainUiState.collectAsState()
     val currentUser = mainUiState.currentUser
     val (updateDisplayNameDialogState, setUpdateNameDialogState) = remember { mutableStateOf(false) }
@@ -91,20 +94,37 @@ fun SettingsScreen(
             text = "Toggles system default theme",
             isChecked = useSystemTheme,
             onCheckedChange = { useSystemTheme = !useSystemTheme })
-        SwitchSettingEntry(
-            title = "Dark mode",
-            text = "Toggles theme",
-            isChecked = isDarkModeEnabled,
-            onCheckedChange = { isDarkModeEnabled = !isDarkModeEnabled },
-            isEnabled = !useSystemTheme
-        )
-        SwitchSettingEntry(
-            title = "Amoled mode",
-            text = "Toggles amoled mode",
-            isChecked = isAmoledModeEnabled,
-            onCheckedChange = { isAmoledModeEnabled = !isAmoledModeEnabled },
-            isEnabled = isDarkModeEnabled
-        )
+        AnimatedVisibility(visible = !useSystemTheme) {
+            Column {
+                SwitchSettingEntry(
+                    title = "Dark mode",
+                    text = "Toggles theme",
+                    isChecked = isDarkModeEnabled,
+                    onCheckedChange = { isDarkModeEnabled = !isDarkModeEnabled },
+                    isEnabled = !useSystemTheme
+                )
+                SwitchSettingEntry(
+                    title = "Amoled mode",
+                    text = "Toggles amoled mode",
+                    isChecked = isAmoledModeEnabled,
+                    onCheckedChange = {
+                        isAmoledModeEnabled = !isAmoledModeEnabled
+                        isDynamicColorEnabled = false
+                    },
+                    isEnabled = isDarkModeEnabled
+                )
+                SwitchSettingEntry(
+                    title = "Dynamic color",
+                    text = "Toggles dynamic color",
+                    isChecked = isDynamicColorEnabled,
+                    onCheckedChange = {
+                        isDynamicColorEnabled = !isDynamicColorEnabled
+                        isAmoledModeEnabled = false
+                    },
+                    isEnabled = true
+                )
+            }
+        }
         SettingsGroupSpacer()
         SettingsEntryGroupText(title = "Profile")
         SettingsEntry(title = "Change profile picture",

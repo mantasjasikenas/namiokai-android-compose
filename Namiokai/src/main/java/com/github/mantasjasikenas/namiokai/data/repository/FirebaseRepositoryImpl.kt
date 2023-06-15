@@ -10,6 +10,7 @@ import com.github.mantasjasikenas.namiokai.model.Response
 import com.github.mantasjasikenas.namiokai.model.User
 import com.github.mantasjasikenas.namiokai.utils.JsonBuilder
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.PersistentCacheSettings
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.firestoreSettings
@@ -25,7 +26,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import java.time.LocalDateTime
 
@@ -64,7 +64,10 @@ class FirebaseRepositoryImpl : FirebaseRepository {
 
     init {
         val settings = firestoreSettings {
-            isPersistenceEnabled = true
+            setLocalCacheSettings (
+                PersistentCacheSettings.newBuilder()
+                    .build()
+            )
         }
         db.firestoreSettings = settings
     }
@@ -150,7 +153,7 @@ class FirebaseRepositoryImpl : FirebaseRepository {
     }
 
     override suspend fun deleteFlatBill(flatBill: FlatBill) {
-        if(flatBill.documentId.isNotEmpty()) {
+        if (flatBill.documentId.isNotEmpty()) {
             db.collection(FLAT_BILLS_COLLECTION).document(flatBill.documentId).delete()
         }
     }

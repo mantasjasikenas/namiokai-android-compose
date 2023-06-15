@@ -5,7 +5,7 @@ plugins {
     id("com.google.gms.google-services")
     id("kotlin-kapt")
     id("com.google.dagger.hilt.android")
-    kotlin("plugin.serialization") version "1.8.10"
+    kotlin("plugin.serialization") version "1.8.21"
 }
 
 
@@ -65,7 +65,7 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.4.0"
+        kotlinCompilerExtensionVersion = "1.4.7"
     }
     packaging{
         resources{
@@ -76,34 +76,31 @@ android {
     }
 }
 
-val composeVersion by extra { "1.3.3" }
-val lifecycleVersion by extra { "2.5.1" }
-
 dependencies {
 
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
     implementation("androidx.core:core-ktx:1.10.1")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")
     implementation("androidx.activity:activity-compose:1.7.2")
-    implementation(platform("androidx.compose:compose-bom:2023.01.00"))
-    implementation("androidx.compose.ui:ui")
-    implementation("androidx.compose.ui:ui-graphics")
-    implementation("androidx.compose.ui:ui-tooling-preview")
-    implementation("androidx.compose.material3:material3")
+    implementation(platform("androidx.compose:compose-bom:2023.06.00"))
+    implementation("androidx.compose.ui:ui:1.5.0-beta02")
+    implementation("androidx.compose.ui:ui-graphics:1.5.0-beta02")
+    implementation("androidx.compose.ui:ui-tooling-preview:1.5.0-beta02")
+    implementation("androidx.compose.material3:material3:1.2.0-alpha02")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.1")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1")
     implementation("androidx.lifecycle:lifecycle-viewmodel-savedstate:2.6.1")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.1")
     implementation("androidx.navigation:navigation-compose:2.6.0")
-    implementation("org.jetbrains.kotlin:kotlin-reflect:1.8.10")
+    implementation("org.jetbrains.kotlin:kotlin-reflect:1.8.22")
     implementation("androidx.compose.material:material-icons-extended:1.4.3")
-    implementation("com.google.accompanist:accompanist-permissions:0.25.1")
+    implementation("com.google.accompanist:accompanist-permissions:0.30.1")
     implementation("androidx.work:work-runtime-ktx:2.8.1")
-    implementation("com.google.accompanist:accompanist-flowlayout:0.28.0")
+    implementation("com.google.accompanist:accompanist-flowlayout:0.30.1")
 
 
-    implementation("io.coil-kt:coil-compose:2.2.2")
+    implementation("io.coil-kt:coil-compose:2.4.0")
 
     // Datastore
     implementation("androidx.datastore:datastore-preferences:1.0.0")
@@ -113,11 +110,11 @@ dependencies {
 
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
-    androidTestImplementation(platform("androidx.compose:compose-bom:2023.01.00"))
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
+    androidTestImplementation(platform("androidx.compose:compose-bom:2023.06.00"))
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.5.0-beta02")
 
-    debugImplementation("androidx.compose.ui:ui-tooling")
-    debugImplementation("androidx.compose.ui:ui-test-manifest")
+    debugImplementation("androidx.compose.ui:ui-tooling:1.5.0-beta02")
+    debugImplementation("androidx.compose.ui:ui-test-manifest:1.5.0-beta02")
 
     debugImplementation ("androidx.customview:customview:1.2.0-alpha02")
     debugImplementation ("androidx.customview:customview-poolingcontainer:1.0.0")
@@ -127,27 +124,30 @@ dependencies {
 
 
     // Firebase
-    implementation(platform("com.google.firebase:firebase-bom:31.2.0"))
-    implementation("com.google.firebase:firebase-auth-ktx")
-    implementation("com.google.firebase:firebase-firestore-ktx")
-    implementation("com.google.firebase:firebase-messaging-ktx")
-    implementation ("com.google.firebase:firebase-analytics-ktx")
-    implementation ("com.google.firebase:firebase-storage-ktx")
+    implementation(platform("com.google.firebase:firebase-bom:32.1.0"))
+    implementation("com.google.firebase:firebase-auth-ktx:22.0.0")
+    implementation("com.google.firebase:firebase-firestore-ktx:24.6.1")
+    implementation("com.google.firebase:firebase-messaging-ktx:23.1.2")
+    implementation ("com.google.firebase:firebase-analytics-ktx:21.3.0")
+    implementation ("com.google.firebase:firebase-storage-ktx:20.2.0")
 
     //Dagger - Hilt
-    implementation("com.google.dagger:hilt-android:2.44.2")
-    kapt("com.google.dagger:hilt-compiler:2.44.2")
+    implementation("com.google.dagger:hilt-android:2.46.1")
+    kapt("com.google.dagger:hilt-compiler:2.46.1")
     implementation("androidx.hilt:hilt-navigation-compose:1.1.0-alpha01")
 
     // For instrumentation tests
-    androidTestImplementation("com.google.dagger:hilt-android-testing:2.44.2")
-    kaptAndroidTest("com.google.dagger:hilt-compiler:2.44.2")
+    androidTestImplementation("com.google.dagger:hilt-android-testing:2.46.1")
+    kaptAndroidTest("com.google.dagger:hilt-compiler:2.46.1")
 
     // For local unit tests
-    testImplementation("com.google.dagger:hilt-android-testing:2.44.2")
-    kaptTest("com.google.dagger:hilt-compiler:2.44.2")
+    testImplementation("com.google.dagger:hilt-android-testing:2.46.1")
+    kaptTest("com.google.dagger:hilt-compiler:2.46.1")
 
     implementation("androidx.core:core-splashscreen:1.0.1")
+
+    implementation("com.google.android.play:app-update:2.1.0")
+    implementation("com.google.android.play:app-update-ktx:2.1.0")
 }
 
 
