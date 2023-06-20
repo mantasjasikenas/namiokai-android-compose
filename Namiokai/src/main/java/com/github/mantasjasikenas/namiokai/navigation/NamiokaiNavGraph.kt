@@ -1,4 +1,4 @@
-package com.github.mantasjasikenas.namiokai.ui.navigation
+package com.github.mantasjasikenas.namiokai.navigation
 
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
@@ -10,6 +10,7 @@ import com.github.mantasjasikenas.namiokai.ui.screens.bill.BillScreen
 import com.github.mantasjasikenas.namiokai.ui.screens.debts.DebtsScreen
 import com.github.mantasjasikenas.namiokai.ui.screens.flat.FlatScreen
 import com.github.mantasjasikenas.namiokai.ui.screens.fuel.FuelScreen
+import com.github.mantasjasikenas.namiokai.ui.screens.home.HomeScreen
 import com.github.mantasjasikenas.namiokai.ui.screens.settings.SettingsScreen
 import com.github.mantasjasikenas.namiokai.ui.screens.test.TestScreen
 
@@ -18,6 +19,9 @@ fun NavGraphBuilder.namiokaiNavigationGraph(
     navController: NavHostController,
     mainViewModel: MainViewModel
 ) {
+    composable(route = Screen.Home.route) {
+        HomeScreen(mainViewModel = mainViewModel)
+    }
     composable(route = Screen.Debts.route) {
         DebtsScreen(mainViewModel = mainViewModel)
     }

@@ -49,7 +49,7 @@ import com.github.mantasjasikenas.namiokai.data.repository.preferences.rememberP
 import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiDialog
 import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiTextField
 import com.github.mantasjasikenas.namiokai.ui.main.MainViewModel
-import com.github.mantasjasikenas.namiokai.ui.navigation.Screen
+import com.github.mantasjasikenas.namiokai.navigation.Screen
 import com.github.mantasjasikenas.namiokai.ui.theme.md_theme_dark_primary
 import com.github.mantasjasikenas.namiokai.utils.Constants.IMAGES_TYPE
 

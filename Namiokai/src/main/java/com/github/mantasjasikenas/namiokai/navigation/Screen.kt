@@ -1,4 +1,4 @@
-package com.github.mantasjasikenas.namiokai.ui.navigation
+package com.github.mantasjasikenas.namiokai.navigation
 
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
@@ -10,6 +10,7 @@ import androidx.compose.material.icons.outlined.Payments
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.ShoppingBag
 import androidx.compose.material.icons.outlined.Sync
+import androidx.compose.material.icons.outlined.Tab
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.github.mantasjasikenas.namiokai.R
 
@@ -18,18 +19,19 @@ sealed class Screen(
     @StringRes val titleResourceId: Int,
     val imageVector: ImageVector = Icons.Outlined.BrokenImage
 ) {
+    object Home : Screen("home", R.string.home_menu_label, Icons.Outlined.Tab)
     object Debts : Screen("debt", R.string.debts_name, Icons.Outlined.Payments)
     object Fuel : Screen("fuel", R.string.trips_name, Icons.Outlined.LocalGasStation)
     object Bill : Screen("bill", R.string.bill_name, Icons.Outlined.ShoppingBag)
     object Settings : Screen("settings", R.string.settings_name, Icons.Outlined.Settings)
     object Login : Screen("login", R.string.login_name, Icons.Outlined.Sync)
     object Test : Screen("test", R.string.test_name, Icons.Outlined.Sync)
-    object AdminPanel :
-        Screen("admin_panel", R.string.admin_panel_menu_label, Icons.Outlined.AdminPanelSettings)
-
+    object AdminPanel : Screen("admin_panel", R.string.admin_panel_menu_label, Icons.Outlined.AdminPanelSettings)
     object Flat : Screen("flat", R.string.flat_label, Icons.Outlined.Cottage)
 
     companion object {
+        val initialScreen = Debts
+
         val navBarScreens = listOf(
             Debts,
             Bill,
@@ -37,6 +39,7 @@ sealed class Screen(
             Flat
         )
         private val screens = listOf(
+            Home,
             Debts,
             Bill,
             Fuel,

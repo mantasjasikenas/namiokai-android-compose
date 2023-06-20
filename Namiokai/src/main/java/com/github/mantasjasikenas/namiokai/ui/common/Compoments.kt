@@ -1,15 +1,20 @@
 package com.github.mantasjasikenas.namiokai.ui.common
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -17,8 +22,10 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LargeFloatingActionButton
@@ -38,9 +45,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
@@ -48,6 +58,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import coil.compose.AsyncImage
 import com.github.mantasjasikenas.namiokai.R
@@ -107,6 +118,40 @@ fun CardTextColumn(modifier: Modifier = Modifier, label: String, value: String) 
 }
 
 @Composable
+fun VerticalDivider(
+    modifier: Modifier = Modifier,
+    thickness: Dp = DividerDefaults.Thickness,
+    color: Color = DividerDefaults.color,
+) {
+    val targetThickness = if (thickness == Dp.Hairline) {
+        (1f / LocalDensity.current.density).dp
+    } else {
+        thickness
+    }
+    Box(
+        modifier
+            .fillMaxHeight()
+            .width(targetThickness)
+            .background(color = color)
+    )
+}
+
+@Composable
+fun DateTimeCardColumn(modifier: Modifier = Modifier, day: String, month: String) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = day,
+            style = MaterialTheme.typography.headlineSmall.copy(fontSize = 20.sp),
+            fontWeight = FontWeight.Bold
+        )
+        Text(text = month)
+    }
+}
+
+@Composable
 fun CardTextRow(modifier: Modifier = Modifier, label: String, value: String) {
     Row(
         modifier = modifier, verticalAlignment = Alignment.CenterVertically,
@@ -154,7 +199,7 @@ fun UsersPicker(
         crossAxisAlignment = FlowCrossAxisAlignment.Center,
     ) {
         usersPickup.forEach { (uid, selected) ->
-            FlowRowItemCard(usersMap[uid]?.displayName ?: "Missing display name" , selected, onItemSelected = { status ->
+            FlowRowItemCard(usersMap[uid]?.displayName ?: "Missing display name", selected, onItemSelected = { status ->
                 if (!isMultipleSelectEnabled) {
                     usersPickup.forEach { (uid, _) -> usersPickup[uid] = false }
                 }
@@ -322,26 +367,6 @@ fun <T> NamiokaiDialog(
     }
 }
 
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun NamiokaiDialogPreview() {
-    NamiokaiTheme(useDarkTheme = true) {
-        val status = remember { mutableStateOf(true) }
-
-        if (status.value) {
-            NamiokaiDialog(
-                title = "Select username",
-                onDismiss = { status.value = false },
-                onSaveClick = { status.value = false })
-            {
-                CustomSpacer(height = 30)
-            }
-        }
-
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NamiokaiTextField(
     modifier: Modifier = Modifier,
@@ -371,5 +396,48 @@ fun NamiokaiTextField(
         singleLine = singleLine,
         modifier = modifier.padding(vertical = 10.dp, horizontal = 30.dp)
     )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun FiltersRow(sourceData: List<String> = listOf("All", "Active", "Inactive", "Blocked")) {
+    LazyRow() {
+        items(sourceData) { item ->
+
+            val selected = remember { mutableStateOf(false) }
+            FilterChip(
+                selected = selected.value,
+                modifier = Modifier.padding(horizontal = 4.dp),
+                onClick = { /*TODO*/ }, label = { Text(item) })
+        }
+    }
+}
+
+
+@Preview(showBackground = true)
+@Composable
+fun FiltersRowPreview() {
+    NamiokaiTheme(useDarkTheme = true) {
+        FiltersRow()
+    }
+}
+
+//@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun NamiokaiDialogPreview() {
+    NamiokaiTheme(useDarkTheme = true) {
+        val status = remember { mutableStateOf(true) }
+
+        if (status.value) {
+            NamiokaiDialog(
+                title = "Select username",
+                onDismiss = { status.value = false },
+                onSaveClick = { status.value = false })
+            {
+                CustomSpacer(height = 30)
+            }
+        }
+
+    }
 }
 

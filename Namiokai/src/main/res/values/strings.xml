@@ -52,4 +52,5 @@
     <string name="flat_label">Flat</string>
     <string name="payment_date">Payment date</string>
     <string name="rent_total">Rent</string>
+    <string name="home_menu_label">Home</string>
 </resources>

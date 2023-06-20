@@ -42,12 +42,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.github.mantasjasikenas.namiokai.R
-import com.github.mantasjasikenas.namiokai.ui.navigation.Screen
-import com.github.mantasjasikenas.namiokai.ui.navigation.namiokaiNavigationGraph
+import com.github.mantasjasikenas.namiokai.navigation.Screen
+import com.github.mantasjasikenas.namiokai.navigation.namiokaiNavigationGraph
 import com.github.mantasjasikenas.namiokai.utils.Constants.NAMIOKAI_ASSETS_URL
 
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NamiokaiApp(
     modifier: Modifier = Modifier,
@@ -62,7 +61,7 @@ fun NamiokaiApp(
     val topBarState = rememberSaveable { (mutableStateOf(true)) }
 
     val isLoggedIn = mainViewModel.authRepository.isUserAuthenticatedInFirebase
-    val initialRoute = if (isLoggedIn) Screen.Debts.route else Screen.Login.route
+    val initialRoute = if (isLoggedIn) Screen.initialScreen.route else Screen.Login.route
     val mainUiState by mainViewModel.mainUiState.collectAsState()
     val currentUser = mainUiState.currentUser
 

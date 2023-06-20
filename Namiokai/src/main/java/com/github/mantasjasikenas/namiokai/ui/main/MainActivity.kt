@@ -9,6 +9,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.runtime.getValue
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
+import com.github.mantasjasikenas.namiokai.data.repository.debts.DebtsManager
 import com.github.mantasjasikenas.namiokai.data.repository.preferences.PreferenceKeys
 import com.github.mantasjasikenas.namiokai.data.repository.preferences.PreferencesRepository
 import com.github.mantasjasikenas.namiokai.data.repository.preferences.rememberPreference
@@ -36,6 +37,9 @@ class MainActivity : ComponentActivity(), AnalyticsLogger by AnalyticsLoggerImpl
 
     @Inject
     lateinit var preferencesRepository: PreferencesRepository
+
+    @Inject
+    lateinit var debtsManager: DebtsManager
 
     private lateinit var appUpdateManager: AppUpdateManager
     private val updateType = AppUpdateType.FLEXIBLE

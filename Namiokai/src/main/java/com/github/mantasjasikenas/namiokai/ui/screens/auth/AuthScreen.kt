@@ -31,8 +31,8 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import com.github.mantasjasikenas.namiokai.R
 import com.github.mantasjasikenas.namiokai.model.Response
+import com.github.mantasjasikenas.namiokai.navigation.Screen
 import com.github.mantasjasikenas.namiokai.ui.main.MainViewModel
-import com.github.mantasjasikenas.namiokai.ui.navigation.Screen
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.GoogleAuthProvider
 
@@ -116,7 +116,7 @@ fun AuthScreen(
             is Response.Success -> signInWithGoogleResponse.data?.let { signedIn ->
                 LaunchedEffect(signedIn) {
                     if (signedIn) {
-                        navController.navigate(Screen.Debts.route) {
+                        navController.navigate(Screen.initialScreen.route) {
                             popUpTo(navController.graph.findStartDestination().id) {
                                 saveState = true
                             }

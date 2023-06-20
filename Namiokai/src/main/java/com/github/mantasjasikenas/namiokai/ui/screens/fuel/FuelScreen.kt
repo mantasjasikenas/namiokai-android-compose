@@ -109,7 +109,7 @@ private fun FuelCard(
 ) {
     var expandedState by remember { mutableStateOf(false) }
     val rotationState by animateFloatAsState(
-        targetValue = if (expandedState) 180f else 0f
+        targetValue = if (expandedState) 180f else 0f, label = ""
     )
     val modifyPopupState = remember {
         mutableStateOf(false)

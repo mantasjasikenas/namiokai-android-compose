@@ -1,6 +1,7 @@
 package com.github.mantasjasikenas.namiokai.utils
 
 import androidx.compose.runtime.snapshots.SnapshotStateMap
+import kotlinx.datetime.LocalDateTime
 import kotlin.math.round
 
 fun <K, V> Map<K, V>.toMutableStateMap() = SnapshotStateMap<K, V>().also { it.putAll(this) }
@@ -15,3 +16,12 @@ fun Double.format(digits:Int) = String.Companion.format(
     "%#,.${digits}f",
     this
 )
+
+fun LocalDateTime.Companion.tryParse(isoString: String) = try {
+    parse(isoString)
+} catch (e: Exception) {
+    null
+}
+
+fun String.parseLocalDateTime() = LocalDateTime.tryParse(this)
+

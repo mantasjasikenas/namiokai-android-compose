@@ -5,13 +5,13 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -45,10 +45,8 @@ import com.github.mantasjasikenas.namiokai.ui.common.EmptyView
 import com.github.mantasjasikenas.namiokai.ui.main.MainViewModel
 import com.github.mantasjasikenas.namiokai.ui.main.UsersMap
 import com.github.mantasjasikenas.namiokai.utils.format
-import com.google.accompanist.flowlayout.FlowCrossAxisAlignment
-import com.google.accompanist.flowlayout.FlowRow
-import com.google.accompanist.flowlayout.MainAxisAlignment
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun DebtsScreen(
     modifier: Modifier = Modifier,
@@ -66,10 +64,9 @@ fun DebtsScreen(
     }
 
     FlowRow(
-        mainAxisAlignment = MainAxisAlignment.Center,
-        mainAxisSpacing = 8.dp,
-        crossAxisAlignment = FlowCrossAxisAlignment.Start,
-        crossAxisSpacing = 8.dp,
+        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        maxItemsInEachRow = 2,
         modifier = Modifier
             .fillMaxSize()
             .padding(20.dp)
@@ -100,7 +97,7 @@ private fun ExpandableAvatarCard(debtorUser: User, userDebts: UserDebtsMap, user
         Column(
             modifier = Modifier
                 .padding(20.dp)
-                .width(IntrinsicSize.Max),
+                .fillMaxSize(0.4F),
             horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.Center
         ) {
@@ -115,7 +112,7 @@ private fun ExpandableAvatarCard(debtorUser: User, userDebts: UserDebtsMap, user
                     modifier = Modifier
                         .clip(RoundedCornerShape(50))
                         .clickable { expandedState = !expandedState }
-                        .size(40.dp),
+                        .size(31.dp),
                     contentScale = ContentScale.FillBounds,
                 )
                 CustomSpacer(width = 10)
@@ -128,15 +125,27 @@ private fun ExpandableAvatarCard(debtorUser: User, userDebts: UserDebtsMap, user
 
             AnimatedVisibility(visible = expandedState) {
                 Column(modifier = Modifier.fillMaxWidth()) {
-                    CustomSpacer(height = 7)
+                    CustomSpacer(height = 10)
+
+                    if(userDebts.isEmpty()) {
+                        Text(
+                            text = "No debts",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.Bold,
+                        )
+                        return@AnimatedVisibility
+                    }
+
                     Text(
-                        text = "pays to",
+                        text = "Pays to",
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.Bold,
+                        modifier = Modifier.align(Alignment.Start)
                     )
                     //CustomSpacer(height = 15)
-                    Divider(modifier = Modifier.padding(vertical = 7.dp))
+                    Divider(modifier = Modifier.padding(vertical = 10.dp))
                     //CustomSpacer(height = 10)
 
 
