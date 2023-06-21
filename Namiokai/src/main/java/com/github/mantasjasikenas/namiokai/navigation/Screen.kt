@@ -5,12 +5,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AdminPanelSettings
 import androidx.compose.material.icons.outlined.BrokenImage
 import androidx.compose.material.icons.outlined.Cottage
+import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.LocalGasStation
 import androidx.compose.material.icons.outlined.Payments
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.ShoppingBag
 import androidx.compose.material.icons.outlined.Sync
-import androidx.compose.material.icons.outlined.Tab
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.github.mantasjasikenas.namiokai.R
 
@@ -19,7 +19,7 @@ sealed class Screen(
     @StringRes val titleResourceId: Int,
     val imageVector: ImageVector = Icons.Outlined.BrokenImage
 ) {
-    object Home : Screen("home", R.string.home_menu_label, Icons.Outlined.Tab)
+    object Home : Screen("home", R.string.home_menu_label, Icons.Outlined.Home)
     object Debts : Screen("debt", R.string.debts_name, Icons.Outlined.Payments)
     object Fuel : Screen("fuel", R.string.trips_name, Icons.Outlined.LocalGasStation)
     object Bill : Screen("bill", R.string.bill_name, Icons.Outlined.ShoppingBag)
@@ -30,9 +30,10 @@ sealed class Screen(
     object Flat : Screen("flat", R.string.flat_label, Icons.Outlined.Cottage)
 
     companion object {
-        val initialScreen = Debts
+        val initialScreen = Home
 
         val navBarScreens = listOf(
+            Home,
             Debts,
             Bill,
             Fuel,

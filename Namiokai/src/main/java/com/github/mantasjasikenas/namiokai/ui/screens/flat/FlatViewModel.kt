@@ -41,7 +41,7 @@ class FlatViewModel @Inject constructor(private val firebaseRepository: Firebase
     }
 
     fun insertFlatBill(flatBill: FlatBill) {
-        val formatter = DateTimeFormatter.ofPattern(Constants.DATE_FORMAT_DISPLAY)
+        val formatter = DateTimeFormatter.ofPattern(Constants.DATE_TIME_FORMAT)
         val currentDateTime = LocalDateTime.now().format(formatter)
 
         flatBill.paymentDate = currentDateTime

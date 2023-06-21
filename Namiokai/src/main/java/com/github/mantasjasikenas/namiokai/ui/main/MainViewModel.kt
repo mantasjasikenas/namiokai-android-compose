@@ -38,6 +38,10 @@ class MainViewModel @Inject constructor(
     }
 
     private fun getUsersFromDatabase() {
+        if (Firebase.auth.currentUser == null) {
+            return
+        }
+
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 usersRepository.getUsers().collect { users ->
@@ -48,7 +52,11 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    fun getCurrentUserDetails() {
+    private fun getCurrentUserDetails() {
+        if (Firebase.auth.currentUser == null) {
+            return
+        }
+
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 Firebase.auth.currentUser?.uid?.let { uid ->
@@ -68,5 +76,10 @@ class MainViewModel @Inject constructor(
         _mainUiState.update {
             it.copy(currentUser = User())
         }
+    }
+
+    fun fetchData() {
+        getCurrentUserDetails()
+        getUsersFromDatabase()
     }
 }

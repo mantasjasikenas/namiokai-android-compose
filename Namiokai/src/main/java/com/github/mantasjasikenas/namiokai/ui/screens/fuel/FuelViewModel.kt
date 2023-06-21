@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.mantasjasikenas.namiokai.data.FirebaseRepository
 import com.github.mantasjasikenas.namiokai.model.Fuel
-import com.github.mantasjasikenas.namiokai.utils.Constants.DATE_FORMAT_DISPLAY
+import com.github.mantasjasikenas.namiokai.utils.Constants.DATE_TIME_FORMAT
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -51,7 +51,7 @@ class FuelViewModel @Inject constructor(private val firebaseRepository: Firebase
     }
 
     fun insertFuel(fuel: Fuel) {
-        val formatter = DateTimeFormatter.ofPattern(DATE_FORMAT_DISPLAY)
+        val formatter = DateTimeFormatter.ofPattern(DATE_TIME_FORMAT)
         val currentDateTime = LocalDateTime.now().format(formatter)
 
         fuel.date = currentDateTime

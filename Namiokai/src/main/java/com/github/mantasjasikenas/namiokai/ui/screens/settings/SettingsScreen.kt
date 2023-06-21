@@ -6,7 +6,6 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -46,10 +45,10 @@ import androidx.navigation.NavHostController
 import com.github.mantasjasikenas.namiokai.R
 import com.github.mantasjasikenas.namiokai.data.repository.preferences.PreferenceKeys
 import com.github.mantasjasikenas.namiokai.data.repository.preferences.rememberPreference
+import com.github.mantasjasikenas.namiokai.navigation.Screen
 import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiDialog
 import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiTextField
 import com.github.mantasjasikenas.namiokai.ui.main.MainViewModel
-import com.github.mantasjasikenas.namiokai.navigation.Screen
 import com.github.mantasjasikenas.namiokai.ui.theme.md_theme_dark_primary
 import com.github.mantasjasikenas.namiokai.utils.Constants.IMAGES_TYPE
 
@@ -60,11 +59,11 @@ fun SettingsScreen(
     settingsViewModel: SettingsViewModel = hiltViewModel(),
     navController: NavHostController
 ) {
-    var isDarkModeEnabled by rememberPreference(
-        PreferenceKeys.IS_DARK_MODE_ENABLED, isSystemInDarkTheme()
-    )
     var useSystemTheme by rememberPreference(
-        PreferenceKeys.USE_SYSTEM_DEFAULT_THEME, false
+        PreferenceKeys.USE_SYSTEM_DEFAULT_THEME, true
+    )
+    var isDarkModeEnabled by rememberPreference(
+        PreferenceKeys.IS_DARK_MODE_ENABLED, false
     )
     var isAmoledModeEnabled by rememberPreference(
         PreferenceKeys.IS_AMOLED_MODE_ENABLED, false

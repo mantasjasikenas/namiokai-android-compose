@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -22,7 +21,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material3.BottomSheetDefaults
+import androidx.compose.material.icons.outlined.EuroSymbol
+import androidx.compose.material.icons.outlined.Receipt
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DismissDirection
 import androidx.compose.material3.DismissValue
@@ -30,7 +30,6 @@ import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.SwipeToDismiss
 import androidx.compose.material3.Text
@@ -67,6 +66,7 @@ import com.github.mantasjasikenas.namiokai.ui.common.CustomSpacer
 import com.github.mantasjasikenas.namiokai.ui.common.DateTimeCardColumn
 import com.github.mantasjasikenas.namiokai.ui.common.EmptyView
 import com.github.mantasjasikenas.namiokai.ui.common.FloatingAddButton
+import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiBottomSheet
 import com.github.mantasjasikenas.namiokai.ui.common.VerticalDivider
 import com.github.mantasjasikenas.namiokai.ui.main.MainViewModel
 import com.github.mantasjasikenas.namiokai.ui.main.UsersMap
@@ -137,6 +137,7 @@ private fun BillCard(
     modifier: Modifier = Modifier,
     currentUser: User
 ) {
+    val scope = rememberCoroutineScope()
     val modifyPopupState = remember {
         mutableStateOf(false)
     }
@@ -145,11 +146,8 @@ private fun BillCard(
     )
 
     var openBottomSheet by rememberSaveable { mutableStateOf(false) }
-    val skipPartiallyExpanded by remember { mutableStateOf(false) }
-    val edgeToEdgeEnabled by remember { mutableStateOf(false) }
-    val scope = rememberCoroutineScope()
     val bottomSheetState = rememberModalBottomSheetState(
-        skipPartiallyExpanded = skipPartiallyExpanded
+        skipPartiallyExpanded = true
     )
     val currentBill by rememberUpdatedState(bill)
     val dismissState = rememberDismissState(
@@ -170,21 +168,21 @@ private fun BillCard(
                 }
             }
         },
-        /*positionalThreshold = {
-            this.density * 0.4f
-        }*/
+        positionalThreshold = {
+            200.dp.toPx()
+        }
     )
     val color by animateColorAsState(
         when (dismissState.targetValue) {
             DismissValue.Default -> Color.Transparent
-            DismissValue.DismissedToEnd -> Color.Red
-            DismissValue.DismissedToStart -> Color.Green
+            DismissValue.DismissedToEnd -> MaterialTheme.colorScheme.primary
+            DismissValue.DismissedToStart -> MaterialTheme.colorScheme.primary
         }, label = ""
     )
 
-    if (dismissState.isDismissed(DismissDirection.StartToEnd)) {
+    /*if (dismissState.isDismissed(DismissDirection.StartToEnd)) {
         viewModel.deleteBill(bill)
-    }
+    }*/
 
     SwipeToDismiss(state = dismissState,
         background = {
@@ -257,16 +255,29 @@ private fun BillCard(
                                     contentDescription = null,
                                     modifier = Modifier
                                         .clip(RoundedCornerShape(50))
-                                        .size(19.dp), // 25 old
+                                        .size(18.dp), // 25 old
                                     contentScale = ContentScale.FillBounds,
                                 )
                                 CustomSpacer(width = 6) // old 6
                                 Text(text = usersMap[bill.paymasterUid]?.displayName ?: "-")
                             }
                             CustomSpacer(height = 5)
-                            Text(
-                                text = bill.shoppingList, style = MaterialTheme.typography.labelMedium
-                            )
+                            
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = Icons.Outlined.Receipt,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(18.dp),
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                                CustomSpacer(width = 7)
+                                Text(
+                                    text = bill.shoppingList,
+                                    style = MaterialTheme.typography.labelMedium
+                                )
+                            }
+
+
                         }
                         CustomSpacer(width = 30)
 
@@ -276,22 +287,24 @@ private fun BillCard(
                             val isCurrentUserInSplitUsersAndNotPaymaster =
                                 isCurrentUserInSplitUsers && !isCurrentUserPaymaster
 
-                            val startSymbol = if (isCurrentUserInSplitUsersAndNotPaymaster) "-" else "+"
+                            val prefix = if (isCurrentUserInSplitUsersAndNotPaymaster) "-" else "+"
 
-                            Text(
-                                text = startSymbol + "${bill.splitPricePerUser().format(2)}€",
-                                color = if (isCurrentUserInSplitUsersAndNotPaymaster) Color.Red.copy(alpha = 0.5f) else Color.Green.copy(
-                                    alpha = 0.5f
-                                ),
-                                fontWeight = FontWeight.Bold,
-                                style = MaterialTheme.typography.headlineSmall.copy(
-                                    fontSize = 18.sp
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    text = prefix + bill.splitPricePerUser().format(2),
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    fontWeight = FontWeight.Bold,
+                                    style = MaterialTheme.typography.headlineSmall.copy(
+                                        fontSize = 18.sp
+                                    )
                                 )
-                            )
-
-                            CustomSpacer(height = 5)
-
-                            /*Text(text = "€${bill.total.format(2)}")*/
+                                Icon(
+                                    imageVector = Icons.Outlined.EuroSymbol,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(18.dp),
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                            }
                         }
                         CustomSpacer(width = 10)
 
@@ -304,72 +317,71 @@ private fun BillCard(
 
     // Sheet content
     if (openBottomSheet) {
-        val windowInsets = if (edgeToEdgeEnabled) WindowInsets(0) else BottomSheetDefaults.windowInsets
-
-        ModalBottomSheet(
-            onDismissRequest = { openBottomSheet = false },
-            sheetState = bottomSheetState,
-            windowInsets = windowInsets,
-            modifier = Modifier.padding(5.dp)
+        NamiokaiBottomSheet(
+            title = stringResource(id = R.string.bill_details),
+            onDismiss = { openBottomSheet = false },
+            bottomSheetState = bottomSheetState
         ) {
-
-            Column(modifier = Modifier.padding(25.dp)) {
-                CardText(label = stringResource(R.string.shopping_list), value = bill.shoppingList)
-                Row(
-                    horizontalArrangement = Arrangement.SpaceEvenly
-                ) {
-                    CardTextColumn(
-                        label = stringResource(R.string.total_price), value = "€${bill.total.format(2)}"
-                    )
-                    CustomSpacer(width = 30)
-                    CardTextColumn(
-                        label = stringResource(R.string.price_per_person),
-                        value = "€${bill.splitPricePerUser().format(2)}"
-                    )
-                }
-                CustomSpacer(height = 10)
-                Text(
-                    text = stringResource(R.string.split_bill_with), style = MaterialTheme.typography.labelMedium
+            CardText(label = "Paymaster", value = usersMap[bill.paymasterUid]?.displayName ?: "-")
+            CardText(label = "Date", value = dateTime.format())
+            CardText(label = stringResource(R.string.shopping_list), value = bill.shoppingList)
+            Row(
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                CardTextColumn(
+                    label = stringResource(R.string.total_price),
+                    value = "€${bill.total.format(2)}"
                 )
-                CustomSpacer(height = 7)
-                FlowRow(mainAxisSpacing = 7.dp, crossAxisSpacing = 7.dp) {
-                    usersMap.filter { bill.splitUsersUid.contains(it.key) }.values.forEach {
-                        OutlinedCard(shape = RoundedCornerShape(25)) {
-                            Text(
-                                text = it.displayName,
-                                modifier = Modifier.padding(7.dp),
-                                style = MaterialTheme.typography.labelMedium
-                            )
-                        }
-                    }
-                }
-                CustomSpacer(height = 10)
-                AnimatedVisibility(visible = isAllowedModification) {
-                    Row(
-                        horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()
+                CustomSpacer(width = 30)
+                CardTextColumn(
+                    label = stringResource(R.string.price_per_person),
+                    value = "€${bill.splitPricePerUser().format(2)}"
+                )
+            }
+            CustomSpacer(height = 10)
+            Text(
+                text = stringResource(R.string.split_bill_with), style = MaterialTheme.typography.labelMedium
+            )
+            CustomSpacer(height = 7)
+            FlowRow(mainAxisSpacing = 7.dp, crossAxisSpacing = 7.dp) {
+                usersMap.filter { bill.splitUsersUid.contains(it.key) }.values.forEach {
+                    OutlinedCard(
+                        shape = RoundedCornerShape(25)
                     ) {
-
-                        TextButton(onClick = {
-                            modifyPopupState.value = true
-                        }) {
-                            Text(text = "Edit")
-                        }
-                        TextButton(onClick = {
-                            scope.launch { bottomSheetState.hide() }.invokeOnCompletion {
-                                if (!bottomSheetState.isVisible) {
-                                    openBottomSheet = false
-                                }
-                            }
-                            viewModel.deleteBill(bill)
-                        }) {
-                            Text(text = "Delete")
-                        }
+                        Text(
+                            text = it.displayName,
+                            modifier = Modifier.padding(7.dp),
+                            style = MaterialTheme.typography.labelMedium
+                        )
                     }
-                    CustomSpacer(height = 30)
                 }
             }
+            CustomSpacer(height = 10)
+            AnimatedVisibility(visible = isAllowedModification) {
+                Row(
+                    horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()
+                ) {
 
+                    TextButton(onClick = {
+                        modifyPopupState.value = true
+                    }) {
+                        Text(text = "Edit")
+                    }
+                    TextButton(onClick = {
+                        scope.launch { bottomSheetState.hide() }.invokeOnCompletion {
+                            if (!bottomSheetState.isVisible) {
+                                openBottomSheet = false
+                            }
+                        }
+                        viewModel.deleteBill(bill)
+                    }) {
+                        Text(text = "Delete")
+                    }
+                }
+                CustomSpacer(height = 30)
+            }
         }
+
     }
 
     // Add new bill
@@ -383,6 +395,8 @@ private fun BillCard(
     }
 
 }
+
+
 
 
 

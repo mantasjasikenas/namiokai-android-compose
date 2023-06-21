@@ -3,7 +3,7 @@ package com.github.mantasjasikenas.namiokai.ui.screens.bill
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.mantasjasikenas.namiokai.model.Bill
-import com.github.mantasjasikenas.namiokai.utils.Constants.DATE_FORMAT_DISPLAY
+import com.github.mantasjasikenas.namiokai.utils.Constants.DATE_TIME_FORMAT
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -42,7 +42,7 @@ class BillViewModel @Inject constructor(private val firebaseRepository: com.gith
 
 
     fun insertBill(bill: Bill) {
-        val formatter = DateTimeFormatter.ofPattern(DATE_FORMAT_DISPLAY)
+        val formatter = DateTimeFormatter.ofPattern(DATE_TIME_FORMAT)
         val currentDateTime = LocalDateTime.now().format(formatter)
 
         bill.date = currentDateTime

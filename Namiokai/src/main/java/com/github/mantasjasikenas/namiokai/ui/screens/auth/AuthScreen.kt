@@ -123,7 +123,7 @@ fun AuthScreen(
                             launchSingleTop = true
                             restoreState = true
                         }
-                        mainViewModel.getCurrentUserDetails()
+                        mainViewModel.fetchData()
 
                     }
                 }

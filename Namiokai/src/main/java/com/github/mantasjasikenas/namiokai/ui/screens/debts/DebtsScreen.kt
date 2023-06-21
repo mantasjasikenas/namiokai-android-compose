@@ -55,8 +55,8 @@ fun DebtsScreen(
 ) {
     val summaryUiState by debtsViewModel.debtsUiState.collectAsState()
     val mainUiState by mainViewModel.mainUiState.collectAsState()
-    val vertScrollState = rememberScrollState()
     val usersMap = mainUiState.usersMap
+    val vertScrollState = rememberScrollState()
 
     if (summaryUiState.debts.isEmpty()) {
         EmptyView()
@@ -73,7 +73,7 @@ fun DebtsScreen(
             .verticalScroll(vertScrollState)
     ) {
         summaryUiState.debts.forEach { (user, debts) ->
-            if (debts.isEmpty()) return@forEach
+            if (debts.isEmpty() || usersMap[user] == null) return@forEach
 
             ExpandableAvatarCard(
                 debtorUser = usersMap[user]!!,
@@ -127,7 +127,7 @@ private fun ExpandableAvatarCard(debtorUser: User, userDebts: UserDebtsMap, user
                 Column(modifier = Modifier.fillMaxWidth()) {
                     CustomSpacer(height = 10)
 
-                    if(userDebts.isEmpty()) {
+                    if (userDebts.isEmpty()) {
                         Text(
                             text = "No debts",
                             style = MaterialTheme.typography.labelLarge,
@@ -144,9 +144,7 @@ private fun ExpandableAvatarCard(debtorUser: User, userDebts: UserDebtsMap, user
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.align(Alignment.Start)
                     )
-                    //CustomSpacer(height = 15)
                     Divider(modifier = Modifier.padding(vertical = 10.dp))
-                    //CustomSpacer(height = 10)
 
 
                     var total = 0.0
@@ -157,12 +155,15 @@ private fun ExpandableAvatarCard(debtorUser: User, userDebts: UserDebtsMap, user
                         )
                         total += value
                     }
-                    Divider(modifier = Modifier.padding(vertical = 7.dp))
-                    CardTextRow(
-                        label = "Total",
-                        value = "€${total.format(2)}",
-                        modifier = Modifier.align(Alignment.End)
-                    )
+
+                    if (userDebts.size > 1) {
+                        Divider(modifier = Modifier.padding(vertical = 7.dp))
+                        CardTextRow(
+                            label = "Total",
+                            value = "€${total.format(2)}",
+                            modifier = Modifier.align(Alignment.End)
+                        )
+                    }
 
 
                 }

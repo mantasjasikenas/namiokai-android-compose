@@ -53,4 +53,8 @@
     <string name="payment_date">Payment date</string>
     <string name="rent_total">Rent</string>
     <string name="home_menu_label">Home</string>
+    <string name="bill_details">Bill details\n</string>
+    <string name="trip_details">Trip details</string>
+    <string name="flat_bill_details">Flat bill details</string>
+    <string name="flat_bill_date">Flat bill date</string>
 </resources>
