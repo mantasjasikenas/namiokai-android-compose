@@ -10,10 +10,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.Clock
-import kotlinx.datetime.LocalDate
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
 import javax.inject.Inject
 
 
@@ -50,29 +46,6 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun getCurrentPeriod(): Pair<LocalDate, LocalDate> {
 
-        val startDayInclusive = 22
-
-        val periodStart: LocalDate
-        val periodEnd: LocalDate
-
-        val currentDate = Clock.System.now().toLocalDateTime(
-            TimeZone.currentSystemDefault()
-        ).date
-
-        if (currentDate.dayOfMonth < startDayInclusive) {
-            periodStart = LocalDate(currentDate.year, currentDate.monthNumber - 1, startDayInclusive)
-            periodEnd = LocalDate(currentDate.year, currentDate.monthNumber, startDayInclusive - 1)
-        } else {
-            periodStart = LocalDate(currentDate.year, currentDate.monthNumber, startDayInclusive)
-            periodEnd = LocalDate(currentDate.year, currentDate.monthNumber + 1, startDayInclusive - 1)
-        }
-
-
-
-
-        return Pair(periodStart, periodEnd)
-    }
 
 }

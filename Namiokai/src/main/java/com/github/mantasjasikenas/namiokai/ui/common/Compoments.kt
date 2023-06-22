@@ -25,6 +25,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.EuroSymbol
 import androidx.compose.material3.BottomAppBarDefaults
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DividerDefaults
@@ -160,7 +161,7 @@ fun DateTimeCardColumn(modifier: Modifier = Modifier, day: String, month: String
 }
 
 @Composable
-fun CardTextRow(modifier: Modifier = Modifier, label: String, value: String) {
+fun EuroIconTextRow(modifier: Modifier = Modifier, label: String, value: String) {
     Row(
         modifier = modifier, verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
@@ -169,6 +170,12 @@ fun CardTextRow(modifier: Modifier = Modifier, label: String, value: String) {
         CustomSpacer(width = 10)
         Spacer(modifier = Modifier.weight(1F))
         Text(text = value)
+        Icon(
+            imageVector = Icons.Outlined.EuroSymbol,
+            contentDescription = null,
+            modifier = Modifier.size(16.dp),
+            tint = MaterialTheme.colorScheme.primary
+        )
     }
 }
 

@@ -38,13 +38,16 @@ import coil.compose.AsyncImage
 import com.github.mantasjasikenas.namiokai.R
 import com.github.mantasjasikenas.namiokai.data.repository.debts.UserDebtsMap
 import com.github.mantasjasikenas.namiokai.model.User
+import com.github.mantasjasikenas.namiokai.model.isInPeriod
 import com.github.mantasjasikenas.namiokai.ui.common.CardTextColumn
-import com.github.mantasjasikenas.namiokai.ui.common.CardTextRow
 import com.github.mantasjasikenas.namiokai.ui.common.CustomSpacer
 import com.github.mantasjasikenas.namiokai.ui.common.EmptyView
+import com.github.mantasjasikenas.namiokai.ui.common.EuroIconTextRow
 import com.github.mantasjasikenas.namiokai.ui.main.MainViewModel
 import com.github.mantasjasikenas.namiokai.ui.main.UsersMap
 import com.github.mantasjasikenas.namiokai.utils.format
+import com.github.mantasjasikenas.namiokai.utils.tryParse
+import kotlinx.datetime.LocalDateTime
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -57,6 +60,16 @@ fun DebtsScreen(
     val mainUiState by mainViewModel.mainUiState.collectAsState()
     val usersMap = mainUiState.usersMap
     val vertScrollState = rememberScrollState()
+
+    val period = mainViewModel.getCurrentPeriod()
+    val currentFlatBill = summaryUiState.flatBills
+        .find { LocalDateTime.tryParse(it.paymentDate)!!.date.isInPeriod(period) }
+        .takeIf {
+            it != null &&
+                    it.paymasterUid != mainUiState.currentUser.uid &&
+                    it.splitUsersUid.contains(mainUiState.currentUser.uid)
+        }
+
 
     if (summaryUiState.debts.isEmpty()) {
         EmptyView()
@@ -149,18 +162,18 @@ private fun ExpandableAvatarCard(debtorUser: User, userDebts: UserDebtsMap, user
 
                     var total = 0.0
                     userDebts.forEach { (key, value) ->
-                        CardTextRow(
+                        EuroIconTextRow(
                             label = usersMap[key]!!.displayName,
-                            value = "€${value.format(2)}"
+                            value = value.format(2)
                         )
                         total += value
                     }
 
                     if (userDebts.size > 1) {
                         Divider(modifier = Modifier.padding(vertical = 7.dp))
-                        CardTextRow(
+                        EuroIconTextRow(
                             label = "Total",
-                            value = "€${total.format(2)}",
+                            value = total.format(2),
                             modifier = Modifier.align(Alignment.End)
                         )
                     }

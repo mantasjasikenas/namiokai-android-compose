@@ -130,7 +130,8 @@ dependencies {
     implementation("com.google.firebase:firebase-firestore-ktx:24.6.1")
     implementation("com.google.firebase:firebase-messaging-ktx:23.1.2")
     implementation ("com.google.firebase:firebase-analytics-ktx:21.3.0")
-    implementation ("com.google.firebase:firebase-storage-ktx:20.2.0")
+    implementation ("com.google.firebase:firebase-storage-ktx:20.2.1")
+    implementation ("com.google.firebase:firebase-config-ktx:21.4.0")
 
     //Dagger - Hilt
     implementation("com.google.dagger:hilt-android:2.46.1")

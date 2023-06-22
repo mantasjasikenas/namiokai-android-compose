@@ -19,9 +19,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.EuroSymbol
+import androidx.compose.material.icons.outlined.ReadMore
 import androidx.compose.material.icons.outlined.TripOrigin
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DismissDirection
@@ -151,7 +151,7 @@ private fun FuelCard(
         confirmValueChange = {
             when (it) {
                 DismissValue.DismissedToEnd -> {
-                    viewModel.deleteFuel(currentFuel)
+                    openBottomSheet = !openBottomSheet
                     false
                 }
 
@@ -165,15 +165,14 @@ private fun FuelCard(
                 }
             }
         },
-        positionalThreshold = {
+        /*positionalThreshold = {
             200.dp.toPx()
-        }
+        }*/
     )
     val color by animateColorAsState(
         when (dismissState.targetValue) {
             DismissValue.Default -> Color.Transparent
-            DismissValue.DismissedToEnd -> MaterialTheme.colorScheme.primary
-            DismissValue.DismissedToStart -> MaterialTheme.colorScheme.primary
+            DismissValue.DismissedToEnd, DismissValue.DismissedToStart -> MaterialTheme.colorScheme.secondaryContainer
         }, label = ""
     )
 
@@ -187,7 +186,8 @@ private fun FuelCard(
                     .background(color),
             ) {
                 Icon(
-                    imageVector = Icons.Outlined.Delete,
+                    imageVector = Icons.Outlined.ReadMore,
+                    tint = MaterialTheme.colorScheme.primary,
                     contentDescription = "",
                     modifier = Modifier
                         .padding(20.dp)
@@ -195,6 +195,7 @@ private fun FuelCard(
                 )
                 Icon(
                     imageVector = Icons.Outlined.Edit,
+                    tint = MaterialTheme.colorScheme.primary,
                     contentDescription = "",
                     modifier = Modifier
                         .padding(20.dp)

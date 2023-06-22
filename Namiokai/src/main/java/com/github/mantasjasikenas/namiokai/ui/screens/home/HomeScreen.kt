@@ -15,11 +15,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.github.mantasjasikenas.namiokai.model.isInPeriod
 import com.github.mantasjasikenas.namiokai.model.splitPricePerUser
-import com.github.mantasjasikenas.namiokai.ui.common.CardTextRow
 import com.github.mantasjasikenas.namiokai.ui.common.CustomSpacer
+import com.github.mantasjasikenas.namiokai.ui.common.EuroIconTextRow
 import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiElevatedCard
 import com.github.mantasjasikenas.namiokai.ui.main.MainViewModel
 import com.github.mantasjasikenas.namiokai.utils.format
@@ -35,14 +37,16 @@ fun HomeScreen(
     val verticalScrollState = rememberScrollState()
     val mainUiState by mainViewModel.mainUiState.collectAsState()
     val homeUiState by homeViewModel.homeUiState.collectAsState()
-    val (startDate, endDate) = homeViewModel.getCurrentPeriod()
-    val currentFlatBill = homeUiState.flatBills.firstOrNull().takeIf {
-        it != null &&
-                it.splitUsersUid.contains(mainUiState.currentUser.uid) &&
-                LocalDateTime.tryParse(it.paymentDate)!!.date >= startDate &&
-                LocalDateTime.tryParse(it.paymentDate)!!.date <= endDate
-    }
     val currentUserDebts = homeUiState.debts[mainUiState.currentUser.uid]
+    val period = mainViewModel.getCurrentPeriod()
+    val currentFlatBill = homeUiState.flatBills
+        .find { LocalDateTime.tryParse(it.paymentDate)!!.date.isInPeriod(period) }
+        .takeIf {
+            it != null &&
+                    it.paymasterUid != mainUiState.currentUser.uid &&
+                    it.splitUsersUid.contains(mainUiState.currentUser.uid)
+        }
+
 
     Column(
         modifier = modifier
@@ -51,27 +55,13 @@ fun HomeScreen(
             .verticalScroll(verticalScrollState)
     ) {
         CustomSpacer(height = 15)
-        /*Text(
-            text = "Welcome back,",
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold
-        )
-        Text(
-            text = mainUiState.currentUser.displayName,
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.primary
-        )
-        CustomSpacer(height = 60)*/
-
-
         Text(
             text = "Your debts",
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold
         )
         Text(
-            text = "$startDate - $endDate",
+            text = "$period",
             style = MaterialTheme.typography.labelLarge,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.primary
@@ -83,71 +73,79 @@ fun HomeScreen(
             NamiokaiElevatedCard {
                 Text(
                     text = "Bills and trips",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Start
                 )
-
+                CustomSpacer(height = 20)
                 Column(modifier = Modifier.fillMaxWidth()) {
-                    CustomSpacer(height = 10)
-
                     var total = 0.0
                     currentUserDebts.forEach { (key, value) ->
-                        CardTextRow(
+
+                        EuroIconTextRow(
                             label = mainUiState.usersMap[key]!!.displayName,
-                            value = "€${value.format(2)}"
+                            value = value.format(2)
                         )
                         total += value
                     }
 
                     if (currentUserDebts.size > 1) {
                         Divider(modifier = Modifier.padding(vertical = 7.dp))
-                        CardTextRow(
+                        EuroIconTextRow(
                             label = "Total",
-                            value = "€${total.format(2)}",
+                            value = total.format(2),
                             modifier = Modifier.align(Alignment.End)
                         )
                     }
-
 
                 }
             }
         }
 
         if (currentFlatBill != null) {
-            CustomSpacer(height = 35)
+            CustomSpacer(height = 20)
             NamiokaiElevatedCard {
                 Text(
-                    text = "Flat bill",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
+                    text = "Flat debt",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Start
                 )
-                CustomSpacer(height = 10)
-                CardTextRow(
-                    label = "Taxes",
-                    value = "€${currentFlatBill.taxesTotal}",
-                    modifier = Modifier.align(Alignment.End)
-                )
-                CustomSpacer(height = 5)
-                CardTextRow(
-                    label = "Rent",
-                    value = "€${currentFlatBill.rentTotal}",
-                    modifier = Modifier.align(Alignment.End)
-                )
-                CustomSpacer(height = 5)
-                Divider()
-                CustomSpacer(height = 5)
-                CardTextRow(
-                    label = "Total per user",
-                    value = "€${currentFlatBill.splitPricePerUser()}",
-                    modifier = Modifier.align(Alignment.End)
+                CustomSpacer(height = 20)
+                EuroIconTextRow(
+                    label = mainUiState.usersMap[currentFlatBill.paymasterUid]?.displayName ?: "-",
+                    value = "${currentFlatBill.splitPricePerUser()}",
                 )
             }
         }
 
+        CustomSpacer(height = 20)
+        NamiokaiElevatedCard {
+            Text(
+                text = "Summary",
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Start
+            )
+            CustomSpacer(height = 20)
 
+            currentUserDebts?.forEach { (key, value) ->
+                val total = value + (currentFlatBill?.splitPricePerUser() ?: 0.0)
+                EuroIconTextRow(
+                    label = mainUiState.usersMap[key]!!.displayName,
+                    value = total.format(2)
+                )
+            }
+
+
+        }
 
 
     }
-
-
 }

@@ -19,10 +19,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.EuroSymbol
 import androidx.compose.material.icons.outlined.Flood
+import androidx.compose.material.icons.outlined.ReadMore
 import androidx.compose.material.icons.outlined.WaterDrop
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DismissDirection
@@ -147,7 +147,7 @@ private fun FlatCard(
         confirmValueChange = {
             when (it) {
                 DismissValue.DismissedToEnd -> {
-                    viewModel.deleteFlatBill(currentFlatBill)
+                    openBottomSheet = !openBottomSheet
                     false
                 }
 
@@ -161,15 +161,14 @@ private fun FlatCard(
                 }
             }
         },
-        positionalThreshold = {
+        /*positionalThreshold = {
             200.dp.toPx()
-        }
+        }*/
     )
     val color by animateColorAsState(
         when (dismissState.targetValue) {
             DismissValue.Default -> Color.Transparent
-            DismissValue.DismissedToEnd -> MaterialTheme.colorScheme.primary
-            DismissValue.DismissedToStart -> MaterialTheme.colorScheme.primary
+            DismissValue.DismissedToEnd, DismissValue.DismissedToStart -> MaterialTheme.colorScheme.secondaryContainer
         }, label = ""
     )
 
@@ -183,14 +182,16 @@ private fun FlatCard(
                     .background(color),
             ) {
                 Icon(
-                    imageVector = Icons.Outlined.Delete,
+                    imageVector = Icons.Outlined.ReadMore,
                     contentDescription = "",
+                    tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier
                         .padding(20.dp)
                         .align(Alignment.CenterStart)
                 )
                 Icon(
                     imageVector = Icons.Outlined.Edit,
+                    tint = MaterialTheme.colorScheme.primary,
                     contentDescription = "",
                     modifier = Modifier
                         .padding(20.dp)

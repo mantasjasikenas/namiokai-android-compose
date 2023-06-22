@@ -2,6 +2,7 @@
 
 package com.github.mantasjasikenas.namiokai.ui.main
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -45,8 +46,11 @@ class MainActivity : ComponentActivity(), AnalyticsLogger by AnalyticsLoggerImpl
     private val updateType = AppUpdateType.FLEXIBLE
 
 
+    @SuppressLint("SourceLockedOrientationActivity")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        //requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 
         appUpdateManager = AppUpdateManagerFactory.create(applicationContext)
         if (updateType == AppUpdateType.FLEXIBLE) {

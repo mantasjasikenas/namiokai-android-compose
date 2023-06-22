@@ -19,9 +19,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.EuroSymbol
+import androidx.compose.material.icons.outlined.ReadMore
 import androidx.compose.material.icons.outlined.Receipt
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DismissDirection
@@ -154,7 +154,7 @@ private fun BillCard(
         confirmValueChange = {
             when (it) {
                 DismissValue.DismissedToEnd -> {
-                    viewModel.deleteBill(currentBill)
+                    openBottomSheet = !openBottomSheet
                     false
                 }
 
@@ -168,21 +168,16 @@ private fun BillCard(
                 }
             }
         },
-        positionalThreshold = {
+        /*positionalThreshold = {
             200.dp.toPx()
-        }
+        }*/
     )
     val color by animateColorAsState(
         when (dismissState.targetValue) {
             DismissValue.Default -> Color.Transparent
-            DismissValue.DismissedToEnd -> MaterialTheme.colorScheme.primary
-            DismissValue.DismissedToStart -> MaterialTheme.colorScheme.primary
+            DismissValue.DismissedToEnd, DismissValue.DismissedToStart -> MaterialTheme.colorScheme.secondaryContainer
         }, label = ""
     )
-
-    /*if (dismissState.isDismissed(DismissDirection.StartToEnd)) {
-        viewModel.deleteBill(bill)
-    }*/
 
     SwipeToDismiss(state = dismissState,
         background = {
@@ -194,7 +189,8 @@ private fun BillCard(
                     .background(color),
             ) {
                 Icon(
-                    imageVector = Icons.Outlined.Delete,
+                    imageVector = Icons.Outlined.ReadMore,
+                    tint = MaterialTheme.colorScheme.primary,
                     contentDescription = "",
                     modifier = Modifier
                         .padding(20.dp)
@@ -202,6 +198,7 @@ private fun BillCard(
                 )
                 Icon(
                     imageVector = Icons.Outlined.Edit,
+                    tint = MaterialTheme.colorScheme.primary,
                     contentDescription = "",
                     modifier = Modifier
                         .padding(20.dp)
@@ -262,7 +259,7 @@ private fun BillCard(
                                 Text(text = usersMap[bill.paymasterUid]?.displayName ?: "-")
                             }
                             CustomSpacer(height = 5)
-                            
+
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Icon(
                                     imageVector = Icons.Outlined.Receipt,
