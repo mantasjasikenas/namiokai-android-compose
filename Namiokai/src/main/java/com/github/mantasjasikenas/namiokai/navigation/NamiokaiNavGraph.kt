@@ -5,7 +5,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import com.github.mantasjasikenas.namiokai.ui.main.MainViewModel
 import com.github.mantasjasikenas.namiokai.ui.screens.admin.AdminPanelScreen
-import com.github.mantasjasikenas.namiokai.ui.screens.auth.AuthScreen
 import com.github.mantasjasikenas.namiokai.ui.screens.bill.BillScreen
 import com.github.mantasjasikenas.namiokai.ui.screens.debts.DebtsScreen
 import com.github.mantasjasikenas.namiokai.ui.screens.flat.FlatScreen
@@ -15,9 +14,9 @@ import com.github.mantasjasikenas.namiokai.ui.screens.settings.SettingsScreen
 import com.github.mantasjasikenas.namiokai.ui.screens.test.TestScreen
 
 
-fun NavGraphBuilder.namiokaiNavigationGraph(
+fun NavGraphBuilder.namiokaiNavGraph(
     navController: NavHostController,
-    mainViewModel: MainViewModel
+    mainViewModel: MainViewModel,
 ) {
     composable(route = Screen.Home.route) {
         HomeScreen(mainViewModel = mainViewModel)
@@ -36,9 +35,6 @@ fun NavGraphBuilder.namiokaiNavigationGraph(
     }
     composable(route = Screen.Settings.route) {
         SettingsScreen(navController = navController, mainViewModel = mainViewModel)
-    }
-    composable(route = Screen.Login.route) {
-        AuthScreen(navController = navController, mainViewModel = mainViewModel)
     }
     composable(route = Screen.Test.route) {
         TestScreen()

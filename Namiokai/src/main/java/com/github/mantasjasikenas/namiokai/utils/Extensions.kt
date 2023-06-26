@@ -1,6 +1,8 @@
 package com.github.mantasjasikenas.namiokai.utils
 
 import androidx.compose.runtime.snapshots.SnapshotStateMap
+import com.github.mantasjasikenas.namiokai.model.User
+import com.google.firebase.auth.FirebaseUser
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.toJavaLocalDateTime
 import java.time.format.DateTimeFormatter
@@ -29,5 +31,12 @@ fun String.parseLocalDateTime() = LocalDateTime.tryParse(this)
 
 fun LocalDateTime.format(format: String = Constants.DATE_TIME_DISPLAY_FORMAT): String =
     DateTimeFormatter.ofPattern(format).format(this.toJavaLocalDateTime())
+
+fun FirebaseUser.toUser(): User = User(
+    displayName = displayName ?: "",
+    email = email ?: "",
+    uid = uid,
+    photoUrl = photoUrl?.toString() ?: ""
+)
 
 

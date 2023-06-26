@@ -7,5 +7,5 @@ typealias UsersMap = Map<UserUid, User>
 
 data class MainUiState(
     val usersMap: UsersMap = emptyMap(),
-    val currentUser: User = User()
+    val currentUser: User = User(),
 )

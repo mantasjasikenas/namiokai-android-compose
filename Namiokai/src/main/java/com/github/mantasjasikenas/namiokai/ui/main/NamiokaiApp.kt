@@ -24,6 +24,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -34,34 +35,75 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.ViewModel
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.github.mantasjasikenas.namiokai.R
+import com.github.mantasjasikenas.namiokai.model.isNotLoggedIn
+import com.github.mantasjasikenas.namiokai.navigation.NavGraph
 import com.github.mantasjasikenas.namiokai.navigation.Screen
-import com.github.mantasjasikenas.namiokai.navigation.namiokaiNavigationGraph
+import com.github.mantasjasikenas.namiokai.navigation.authNavGraph
+import com.github.mantasjasikenas.namiokai.navigation.namiokaiNavGraph
 import com.github.mantasjasikenas.namiokai.utils.Constants.NAMIOKAI_ASSETS_URL
 
 
 @Composable
-fun NamiokaiApp(
+fun NamiokaiApp() {
+    val mainViewModel: MainViewModel = hiltViewModel()
+    val navController = rememberNavController()
+    val mainUiState by mainViewModel.mainUiState.collectAsState()
+
+
+
+    NavHost(
+        navController = navController,
+        route = NavGraph.Root.route,
+        startDestination = NavGraph.Home.route
+    ) {
+        authNavGraph(
+            navController = navController,
+            mainViewModel = mainViewModel
+        )
+        composable(route = NavGraph.Home.route) {
+
+            LaunchedEffect(key1 = mainUiState.currentUser) {
+                if (mainUiState.currentUser.isNotLoggedIn()) {
+                    navController.navigate(NavGraph.Auth.route) {
+                        popUpTo(NavGraph.Root.route) {
+                            inclusive = true
+                        }
+                    }
+                }
+            }
+
+            NamiokaiScreen(
+                mainViewModel = mainViewModel
+            )
+
+        }
+    }
+}
+
+
+@Composable
+fun NamiokaiScreen(
     modifier: Modifier = Modifier,
-    navController: NavHostController = rememberNavController(),
     mainViewModel: MainViewModel = hiltViewModel()
 ) {
-
+    val navController: NavHostController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
     val currentScreen = Screen.fromRoute(navBackStackEntry?.destination?.route)
     val bottomBarState = rememberSaveable { (mutableStateOf(true)) }
     val topBarState = rememberSaveable { (mutableStateOf(true)) }
 
-    val isLoggedIn = mainViewModel.authRepository.isUserAuthenticatedInFirebase
-    val initialRoute = if (isLoggedIn) Screen.initialScreen.route else Screen.Login.route
     val mainUiState by mainViewModel.mainUiState.collectAsState()
     val currentUser = mainUiState.currentUser
 
@@ -70,11 +112,6 @@ fun NamiokaiApp(
         Screen.Settings.route, Screen.AdminPanel.route -> {
             bottomBarState.value = false
             topBarState.value = true
-        }
-
-        Screen.Login.route -> {
-            bottomBarState.value = false
-            topBarState.value = false
         }
 
         else -> {
@@ -101,17 +138,21 @@ fun NamiokaiApp(
             currentDestination = currentDestination,
             bottomBarState = bottomBarState.value
         )
-    }) { innerPadding ->
+    }
+    ) { innerPadding ->
 
         NavHost(
             navController = navController,
-            startDestination = initialRoute,
+            route = NavGraph.Home.route,
+            startDestination = Screen.initialScreen.route,
             modifier = modifier.padding(innerPadding)
         ) {
-            namiokaiNavigationGraph(navController = navController, mainViewModel = mainViewModel)
+            namiokaiNavGraph(
+                navController = navController,
+                mainViewModel = mainViewModel
+            )
         }
     }
-
 }
 
 @Composable
@@ -259,4 +300,14 @@ fun TopBarDropdownMenu(
             }
         }
     }
+}
+
+@Composable
+inline fun <reified T : ViewModel> NavBackStackEntry.sharedViewModel(navController: NavHostController): T {
+    val navGraphRoute = destination.parent?.route ?: return hiltViewModel()
+    val parentEntry = remember(this) {
+        navController.getBackStackEntry(navGraphRoute)
+    }
+
+    return hiltViewModel(parentEntry)
 }

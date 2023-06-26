@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Edit
@@ -24,6 +25,7 @@ import androidx.compose.material.icons.outlined.EuroSymbol
 import androidx.compose.material.icons.outlined.ReadMore
 import androidx.compose.material.icons.outlined.TripOrigin
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DismissDirection
 import androidx.compose.material3.DismissValue
 import androidx.compose.material3.ElevatedCard
@@ -49,12 +51,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import coil.compose.AsyncImage
+import coil.compose.SubcomposeAsyncImage
+import coil.request.ImageRequest
 import com.github.mantasjasikenas.namiokai.R
 import com.github.mantasjasikenas.namiokai.model.Destination
 import com.github.mantasjasikenas.namiokai.model.Fuel
@@ -242,15 +246,21 @@ private fun FuelCard(
 
                         Column(modifier = Modifier.weight(1f)) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                AsyncImage(
-                                    model = usersMap[fuel.driverUid]?.photoUrl?.ifEmpty { R.drawable.profile },
+                                SubcomposeAsyncImage(
+                                    model = ImageRequest.Builder(LocalContext.current)
+                                        .data(usersMap[fuel.driverUid]?.photoUrl?.ifEmpty { R.drawable.profile })
+                                        .crossfade(true)
+                                        .build(),
                                     contentDescription = null,
+                                    loading = {
+                                        CircularProgressIndicator()
+                                    },
+                                    contentScale = ContentScale.Crop,
                                     modifier = Modifier
-                                        .clip(RoundedCornerShape(50))
-                                        .size(18.dp), // 25 old
-                                    contentScale = ContentScale.FillBounds,
+                                        .clip(CircleShape)
+                                        .size(18.dp)
                                 )
-                                CustomSpacer(width = 6) // old 6
+                                CustomSpacer(width = 6)
                                 Text(text = usersMap[fuel.driverUid]?.displayName ?: "-")
                             }
                             CustomSpacer(height = 5)

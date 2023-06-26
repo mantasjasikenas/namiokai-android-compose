@@ -4,8 +4,8 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.mantasjasikenas.namiokai.data.FirebaseRepository
-import com.github.mantasjasikenas.namiokai.data.UserRepository
 import com.github.mantasjasikenas.namiokai.model.Response
+import com.github.mantasjasikenas.namiokai.presentation.sign_in.GoogleAuthUiClient
 import com.github.mantasjasikenas.namiokai.ui.main.MainUiState
 import com.github.mantasjasikenas.namiokai.utils.ToastManager
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -14,14 +14,14 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
-    private val userRepository: UserRepository,
+    private val googleAuthUiClient: GoogleAuthUiClient,
     private val firebaseRepository: FirebaseRepository,
     private val toastManager: ToastManager
 ) : ViewModel() {
 
     fun logout() {
         viewModelScope.launch {
-            userRepository.signOut()
+            googleAuthUiClient.signOut()
         }
     }
 

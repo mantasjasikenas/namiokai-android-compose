@@ -45,7 +45,6 @@ import androidx.navigation.NavHostController
 import com.github.mantasjasikenas.namiokai.R
 import com.github.mantasjasikenas.namiokai.data.repository.preferences.PreferenceKeys
 import com.github.mantasjasikenas.namiokai.data.repository.preferences.rememberPreference
-import com.github.mantasjasikenas.namiokai.navigation.Screen
 import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiDialog
 import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiTextField
 import com.github.mantasjasikenas.namiokai.ui.main.MainViewModel
@@ -145,9 +144,6 @@ fun SettingsScreen(
                 onClick = {
                     settingsViewModel.logout()
                     mainViewModel.resetCurrentUser()
-                    navController.navigate(Screen.Login.route) {
-                        popUpTo(0)
-                    }
                 })
         }
 

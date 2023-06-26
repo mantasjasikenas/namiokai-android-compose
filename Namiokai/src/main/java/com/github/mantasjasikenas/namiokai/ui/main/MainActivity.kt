@@ -46,6 +46,8 @@ class MainActivity : ComponentActivity(), AnalyticsLogger by AnalyticsLoggerImpl
     private val updateType = AppUpdateType.FLEXIBLE
 
 
+
+
     @SuppressLint("SourceLockedOrientationActivity")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,9 +59,9 @@ class MainActivity : ComponentActivity(), AnalyticsLogger by AnalyticsLoggerImpl
             appUpdateManager.registerListener(installStateUpdatedListener)
         }
 
+        installSplashScreen()
         checkForAppUpdates()
         registerLifecycleOwner(this)
-        installSplashScreen()
 
         setContent {
             val useSystemTheme by rememberPreference(

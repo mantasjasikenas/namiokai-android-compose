@@ -3,7 +3,6 @@ package com.github.mantasjasikenas.namiokai.ui.main
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.github.mantasjasikenas.namiokai.data.AuthRepository
 import com.github.mantasjasikenas.namiokai.data.FirebaseRepository
 import com.github.mantasjasikenas.namiokai.data.UsersRepository
 import com.github.mantasjasikenas.namiokai.model.Period
@@ -31,13 +30,15 @@ private const val TAG = "MainViewModel"
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    val authRepository: AuthRepository,
     val firebaseRepository: FirebaseRepository,
     private val usersRepository: UsersRepository
 ) : ViewModel() {
 
     private val _mainUiState = MutableStateFlow(MainUiState())
     val mainUiState = _mainUiState.asStateFlow()
+
+    private val _periodState = MutableStateFlow(getPeriod(getStartDate()))
+    val periodState = _periodState.asStateFlow()
 
 
     init {
@@ -88,15 +89,12 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    fun fetchData() {
+    fun fetchDataAfterLogin() {
         getCurrentUserDetails()
         getUsersFromDatabase()
     }
 
-    fun getCurrentPeriod(): Period {
-
-
-        val startDayInclusive = 25
+    private fun getPeriod(startDayInclusive: Int = 15): Period {
 
         val periodStart: LocalDate
         val periodEnd: LocalDate
@@ -125,7 +123,8 @@ class MainViewModel @Inject constructor(
                 if (configUpdate.updatedKeys.contains("period_start_day")) {
                     Firebase.remoteConfig.activate().addOnCompleteListener {
                         Log.d(TAG, "Remote config updated")
-                        val value = Firebase.remoteConfig.getValue("period_start_day").asString()
+                        val value = getStartDate()
+                        _periodState.update { getPeriod(startDayInclusive = value) }
                         Log.d(TAG, "New value: $value")
 
                     }
@@ -137,5 +136,15 @@ class MainViewModel @Inject constructor(
             }
         })
 
+    }
+
+    private fun getStartDate() : Int {
+        val result = Firebase.remoteConfig.getValue("period_start_day").asLong()
+        if(result == 0L){
+            // FIXME fix this nonsense
+            return 15
+        }
+
+        return Firebase.remoteConfig.getValue("period_start_day").asLong().toInt()
     }
 }

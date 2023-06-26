@@ -51,7 +51,10 @@ sealed class Screen(
             AdminPanel
         )
 
-        fun fromRoute(route: String?): Screen =
-            screens.firstOrNull { it.route == route } ?: Debts
+        fun fromRoute(route: String?): Screen {
+            if(route == null) return initialScreen
+
+            return screens.firstOrNull { it.route == route } ?: initialScreen
+        }
     }
 }

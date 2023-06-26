@@ -18,6 +18,12 @@ fun User.toUidAndDisplayNamePair(): Pair<Uid, DisplayName> {
     return Pair(uid, displayName)
 }
 
+fun User.isNotLoggedIn(): Boolean {
+    return uid == ""
+}
+
+
+
 
 
 

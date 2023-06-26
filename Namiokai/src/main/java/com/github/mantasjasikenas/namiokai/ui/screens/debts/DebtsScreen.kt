@@ -2,7 +2,6 @@ package com.github.mantasjasikenas.namiokai.ui.screens.debts
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -13,8 +12,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -30,11 +30,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import coil.compose.AsyncImage
+import coil.compose.SubcomposeAsyncImage
+import coil.request.ImageRequest
 import com.github.mantasjasikenas.namiokai.R
 import com.github.mantasjasikenas.namiokai.data.repository.debts.UserDebtsMap
 import com.github.mantasjasikenas.namiokai.model.User
@@ -60,8 +62,8 @@ fun DebtsScreen(
     val mainUiState by mainViewModel.mainUiState.collectAsState()
     val usersMap = mainUiState.usersMap
     val vertScrollState = rememberScrollState()
+    val period by mainViewModel.periodState.collectAsState()
 
-    val period = mainViewModel.getCurrentPeriod()
     val currentFlatBill = summaryUiState.flatBills
         .find { LocalDateTime.tryParse(it.paymentDate)!!.date.isInPeriod(period) }
         .takeIf {
@@ -119,15 +121,22 @@ private fun ExpandableAvatarCard(debtorUser: User, userDebts: UserDebtsMap, user
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
             ) {
-                AsyncImage(
-                    model = debtorUser.photoUrl.ifEmpty { R.drawable.profile },
+                SubcomposeAsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(debtorUser.photoUrl.ifEmpty { R.drawable.profile })
+                        .crossfade(true)
+                        .build(),
                     contentDescription = null,
+                    loading = {
+                        CircularProgressIndicator()
+                    },
+                    contentScale = ContentScale.Crop,
                     modifier = Modifier
-                        .clip(RoundedCornerShape(50))
-                        .clickable { expandedState = !expandedState }
-                        .size(31.dp),
-                    contentScale = ContentScale.FillBounds,
+                        .clip(CircleShape)
+                        .size(31.dp)
                 )
+
+
                 CustomSpacer(width = 10)
                 CardTextColumn(
                     label = stringResource(R.string.debtor),
