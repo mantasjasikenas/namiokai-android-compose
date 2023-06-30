@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.runtime.getValue
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
@@ -45,6 +46,7 @@ class MainActivity : ComponentActivity(), AnalyticsLogger by AnalyticsLoggerImpl
     private lateinit var appUpdateManager: AppUpdateManager
     private val updateType = AppUpdateType.FLEXIBLE
 
+    val mainViewModel: MainViewModel by viewModels()
 
 
 
@@ -53,6 +55,7 @@ class MainActivity : ComponentActivity(), AnalyticsLogger by AnalyticsLoggerImpl
         super.onCreate(savedInstanceState)
 
         //requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        mainViewModel.init()
 
         appUpdateManager = AppUpdateManagerFactory.create(applicationContext)
         if (updateType == AppUpdateType.FLEXIBLE) {
@@ -84,7 +87,7 @@ class MainActivity : ComponentActivity(), AnalyticsLogger by AnalyticsLoggerImpl
                 useDynamicColorTheme = dynamicColor
             ) {
                 PermissionsHandler()
-                NamiokaiApp()
+                NamiokaiApp(mainViewModel = mainViewModel)
             }
         }
     }

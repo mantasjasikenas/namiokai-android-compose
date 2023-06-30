@@ -25,16 +25,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.github.mantasjasikenas.namiokai.R
 import com.github.mantasjasikenas.namiokai.model.Destination
-import com.github.mantasjasikenas.namiokai.model.Fuel
-import com.github.mantasjasikenas.namiokai.model.isValid
+import com.github.mantasjasikenas.namiokai.model.bills.TripBill
 import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiDialog
 import com.github.mantasjasikenas.namiokai.ui.common.UsersPicker
 import com.github.mantasjasikenas.namiokai.ui.main.UsersMap
 
 @Composable
 fun FuelPopup(
-    initialFuel: Fuel = Fuel(),
-    onSaveClick: (Fuel) -> Unit,
+    initialTripBill: TripBill = TripBill(),
+    onSaveClick: (TripBill) -> Unit,
     onDismiss: () -> Unit,
     usersMap: UsersMap,
     destinations: List<Destination>
@@ -49,17 +48,17 @@ fun FuelPopup(
     val (selectedOption, onOptionSelected) = remember { mutableStateOf(destinations[0]) }
     val context = LocalContext.current
     val fuel by remember {
-        mutableStateOf(initialFuel)
+        mutableStateOf(initialTripBill)
     }
 
     LaunchedEffect(Unit) {
         if (fuel.isValid()) {
-            fuel.passengersUid.forEach { uid ->
+            fuel.splitUsersUid.forEach { uid ->
                 splitFuelHashMap[uid] = true
             }
 
-            driverSelectHashMap[fuel.driverUid] = true
-            onOptionSelected(destinations.first { it.name == initialFuel.tripDestination })
+            driverSelectHashMap[fuel.paymasterUid] = true
+            onOptionSelected(destinations.first { it.name == initialTripBill.tripDestination })
         }
 
     }
@@ -70,13 +69,13 @@ fun FuelPopup(
         title = "Select trip details",
         selectedValue = fuel,
         onSaveClick = {
-            fuel.driverUid =
+            fuel.paymasterUid =
                 driverSelectHashMap.filter { it.value }.keys.map { it }.firstOrNull() ?: ""
-            fuel.passengersUid = splitFuelHashMap.filter { it.value }.keys.map { it }
+            fuel.splitUsersUid = splitFuelHashMap.filter { it.value }.keys.map { it }
 
 
             fuel.tripDestination = selectedOption.name
-            fuel.tripPricePerUser = when (fuel.passengersUid.count()) {
+            fuel.tripPricePerUser = when (fuel.splitUsersUid.count()) {
                 1 -> selectedOption.tripPriceAlone
                 else -> selectedOption.tripPriceWithOthers
             }

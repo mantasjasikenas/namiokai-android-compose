@@ -3,21 +3,25 @@ package com.github.mantasjasikenas.namiokai.ui.main
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.AdminPanelSettings
 import androidx.compose.material.icons.outlined.BugReport
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.Update
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
@@ -32,8 +36,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavBackStackEntry
@@ -45,6 +53,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import coil.compose.SubcomposeAsyncImage
+import coil.request.ImageRequest
 import com.github.mantasjasikenas.namiokai.R
 import com.github.mantasjasikenas.namiokai.model.isNotLoggedIn
 import com.github.mantasjasikenas.namiokai.navigation.NavGraph
@@ -55,17 +65,21 @@ import com.github.mantasjasikenas.namiokai.utils.Constants.NAMIOKAI_ASSETS_URL
 
 
 @Composable
-fun NamiokaiApp() {
-    val mainViewModel: MainViewModel = hiltViewModel()
+fun NamiokaiApp(mainViewModel: MainViewModel = hiltViewModel()) {
+
     val navController = rememberNavController()
     val mainUiState by mainViewModel.mainUiState.collectAsState()
 
-
+    val startDestination = if (mainUiState.currentUser.isNotLoggedIn()) {
+        NavGraph.Auth.route
+    } else {
+        NavGraph.Home.route
+    }
 
     NavHost(
         navController = navController,
         route = NavGraph.Root.route,
-        startDestination = NavGraph.Home.route
+        startDestination = startDestination
     ) {
         authNavGraph(
             navController = navController,
@@ -77,7 +91,7 @@ fun NamiokaiApp() {
                 if (mainUiState.currentUser.isNotLoggedIn()) {
                     navController.navigate(NavGraph.Auth.route) {
                         popUpTo(NavGraph.Root.route) {
-                            inclusive = true
+                            inclusive = false
                         }
                     }
                 }
@@ -131,6 +145,7 @@ fun NamiokaiScreen(
             ),
             navigateUp = { navController.navigateUp() },
             adminModeEnabled = currentUser.admin,
+            photoUrl = currentUser.photoUrl
         )
     }, bottomBar = {
         NamiokaiAppNavigationBar(
@@ -193,6 +208,7 @@ fun NamiokaiAppTopBar(
     adminModeEnabled: Boolean,
     currentScreen: Screen,
     canNavigateBack: Boolean,
+    photoUrl: String,
     navigateUp: () -> Unit
 ) {
     AnimatedVisibility(visible = topBarState) {
@@ -215,7 +231,8 @@ fun NamiokaiAppTopBar(
                             launchSingleTop = true
                         }
                     },
-                    adminModeEnabled = adminModeEnabled
+                    adminModeEnabled = adminModeEnabled,
+                    photoUrl = photoUrl
                 )
             })
     }
@@ -225,7 +242,8 @@ fun NamiokaiAppTopBar(
 @Composable
 fun TopBarDropdownMenu(
     navigateScreen: (Screen) -> Unit,
-    adminModeEnabled: Boolean = false
+    adminModeEnabled: Boolean = false,
+    photoUrl : String = ""
 ) {
     var expanded by remember { mutableStateOf(false) }
     val context = LocalContext.current
@@ -233,7 +251,22 @@ fun TopBarDropdownMenu(
 
 
     IconButton(onClick = { expanded = true }) {
-        Icon(Icons.Default.MoreVert, contentDescription = null)
+//        Icon(Icons.Default.MoreVert, contentDescription = null)
+        SubcomposeAsyncImage(
+            model = ImageRequest.Builder(LocalContext.current)
+                .data(photoUrl.ifEmpty { R.drawable.profile })
+                .crossfade(true)
+                .build(),
+            contentDescription = null,
+            loading = {
+                CircularProgressIndicator()
+            },
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .clip(CircleShape)
+                .size(28.dp) // 31.dp
+                .border(Dp.Hairline, MaterialTheme.colorScheme.primary, CircleShape)
+        )
     }
 
     DropdownMenu(
@@ -305,6 +338,7 @@ fun TopBarDropdownMenu(
 @Composable
 inline fun <reified T : ViewModel> NavBackStackEntry.sharedViewModel(navController: NavHostController): T {
     val navGraphRoute = destination.parent?.route ?: return hiltViewModel()
+    println("navGraphRoute: $navGraphRoute")
     val parentEntry = remember(this) {
         navController.getBackStackEntry(navGraphRoute)
     }

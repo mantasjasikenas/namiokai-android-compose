@@ -21,21 +21,12 @@ class DebtsViewModel @Inject constructor(
 
     init {
         getDebts()
-        getFlatBills()
     }
 
     private fun getDebts() {
         viewModelScope.launch {
             debtsManager.getDebts().collect { debts ->
                 _debtsUiState.update { it.copy(debts = debts) }
-            }
-        }
-    }
-
-    private fun getFlatBills() {
-        viewModelScope.launch {
-            debtsManager.getFlatBill().collect { flatBills ->
-                _debtsUiState.update { it.copy(flatBills = flatBills) }
             }
         }
     }

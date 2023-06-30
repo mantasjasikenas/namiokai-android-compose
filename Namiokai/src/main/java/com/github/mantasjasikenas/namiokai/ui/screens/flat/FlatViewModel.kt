@@ -3,7 +3,7 @@ package com.github.mantasjasikenas.namiokai.ui.screens.flat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.mantasjasikenas.namiokai.data.FirebaseRepository
-import com.github.mantasjasikenas.namiokai.model.FlatBill
+import com.github.mantasjasikenas.namiokai.model.bills.FlatBill
 import com.github.mantasjasikenas.namiokai.utils.Constants
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
@@ -44,7 +44,7 @@ class FlatViewModel @Inject constructor(private val firebaseRepository: Firebase
         val formatter = DateTimeFormatter.ofPattern(Constants.DATE_TIME_FORMAT)
         val currentDateTime = LocalDateTime.now().format(formatter)
 
-        flatBill.paymentDate = currentDateTime
+        flatBill.date = currentDateTime
         flatBill.createdByUid = Firebase.auth.uid ?: ""
 
         viewModelScope.launch {

@@ -2,12 +2,14 @@ package com.github.mantasjasikenas.namiokai.data.repository
 
 import android.net.Uri
 import com.github.mantasjasikenas.namiokai.data.FirebaseRepository
-import com.github.mantasjasikenas.namiokai.model.Bill
 import com.github.mantasjasikenas.namiokai.model.Destination
-import com.github.mantasjasikenas.namiokai.model.FlatBill
-import com.github.mantasjasikenas.namiokai.model.Fuel
+import com.github.mantasjasikenas.namiokai.model.Period
 import com.github.mantasjasikenas.namiokai.model.Response
 import com.github.mantasjasikenas.namiokai.model.User
+import com.github.mantasjasikenas.namiokai.model.bills.Bill
+import com.github.mantasjasikenas.namiokai.model.bills.FlatBill
+import com.github.mantasjasikenas.namiokai.model.bills.PurchaseBill
+import com.github.mantasjasikenas.namiokai.model.bills.TripBill
 import com.github.mantasjasikenas.namiokai.utils.JsonBuilder
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.PersistentCacheSettings
@@ -44,7 +46,7 @@ private const val USERS_PATH = "$BASE_PATH/users"
 private const val BILLS_PATH = "$BASE_PATH/bills"
 private const val FUEL_PATH = "$BASE_PATH/fuel"
 
-private const val ORDER_BY = "date"
+private const val ORDER_BY_FIELD = "date"
 
 // User profile picture path
 private const val IMAGES_STORAGE_PATH = "images"
@@ -64,7 +66,7 @@ class FirebaseRepositoryImpl : FirebaseRepository {
 
     init {
         val settings = firestoreSettings {
-            setLocalCacheSettings (
+            setLocalCacheSettings(
                 PersistentCacheSettings.newBuilder()
                     .build()
             )
@@ -73,30 +75,102 @@ class FirebaseRepositoryImpl : FirebaseRepository {
     }
 
 
-    override suspend fun getBills(): Flow<List<Bill>> =
-        db.collection(BILLS_COLLECTION).orderBy(
-            ORDER_BY, Query.Direction.DESCENDING
-        ).snapshots()
+    override suspend fun getPurchaseBills(): Flow<List<PurchaseBill>> =
+        db.collection(BILLS_COLLECTION)
+            .orderBy(
+                ORDER_BY_FIELD,
+                Query.Direction.DESCENDING
+            )
+            .snapshots()
             .map {
                 it.documents.map { document ->
-                    document.toObject<Bill>()!!
+                    document.toObject<PurchaseBill>()!!
                 }
             }
 
-    override suspend fun getFuel(): Flow<List<Fuel>> =
-        db.collection(FUEL_COLLECTION).orderBy(
-            ORDER_BY, Query.Direction.DESCENDING
-        ).snapshots()
+    override suspend fun getPurchaseBills(period: Period): Flow<List<PurchaseBill>> =
+        db.collection(BILLS_COLLECTION)
+            .orderBy(
+                ORDER_BY_FIELD,
+                Query.Direction.DESCENDING
+            )
+            .whereGreaterThanOrEqualTo(
+                ORDER_BY_FIELD,
+                period.start.toString() + "T00:00:00"
+            )
+            .whereLessThanOrEqualTo(
+                ORDER_BY_FIELD,
+                period.end.toString() + "T23:59:59"
+            )
+            .snapshots()
             .map {
                 it.documents.map { document ->
-                    document.toObject<Fuel>()!!
+                    document.toObject<PurchaseBill>()!!
+                }
+            }
+
+    override suspend fun getTripBills(): Flow<List<TripBill>> =
+        db.collection(FUEL_COLLECTION)
+            .orderBy(
+                ORDER_BY_FIELD,
+                Query.Direction.DESCENDING
+            )
+            .snapshots()
+            .map {
+                it.documents.map { document ->
+                    document.toObject<TripBill>()!!
+                }
+            }
+
+    override suspend fun getTripBills(period: Period): Flow<List<TripBill>> =
+        db.collection(FUEL_COLLECTION)
+            .orderBy(
+                ORDER_BY_FIELD,
+                Query.Direction.DESCENDING
+            )
+            .whereGreaterThanOrEqualTo(
+                ORDER_BY_FIELD,
+                period.start.toString() + "T00:00:00"
+            )
+            .whereLessThanOrEqualTo(
+                ORDER_BY_FIELD,
+                period.end.toString() + "T23:59:59"
+            )
+            .snapshots()
+            .map {
+                it.documents.map { document ->
+                    document.toObject<TripBill>()!!
                 }
             }
 
     override suspend fun getFlatBills(): Flow<List<FlatBill>> =
-        db.collection(FLAT_BILLS_COLLECTION).orderBy(
-            "paymentDate", Query.Direction.DESCENDING
-        ).snapshots()
+        db.collection(FLAT_BILLS_COLLECTION)
+            .orderBy(
+                ORDER_BY_FIELD,
+                Query.Direction.DESCENDING
+            )
+            .snapshots()
+            .map {
+                it.documents.map { document ->
+                    document.toObject<FlatBill>()!!
+                }
+            }
+
+    override suspend fun getFlatBills(period: Period): Flow<List<FlatBill>> =
+        db.collection(FLAT_BILLS_COLLECTION)
+            .orderBy(
+                ORDER_BY_FIELD,
+                Query.Direction.DESCENDING
+            )
+            .whereGreaterThanOrEqualTo(
+                ORDER_BY_FIELD,
+                period.start.toString() + "T00:00:00"
+            )
+            .whereLessThanOrEqualTo(
+                ORDER_BY_FIELD,
+                period.end.toString() + "T23:59:59"
+            )
+            .snapshots()
             .map {
                 it.documents.map { document ->
                     document.toObject<FlatBill>()!!
@@ -104,90 +178,123 @@ class FirebaseRepositoryImpl : FirebaseRepository {
             }
 
 
-    override suspend fun insertBill(bill: Bill) {
-        db.collection(BILLS_COLLECTION).add(bill)
+    override suspend fun insertBill(purchaseBill: PurchaseBill) {
+        db.collection(BILLS_COLLECTION)
+            .add(purchaseBill)
     }
 
 
-    override suspend fun insertFuel(fuel: Fuel) {
-        db.collection(FUEL_COLLECTION).add(fuel)
+    override suspend fun insertFuel(tripBill: TripBill) {
+        db.collection(FUEL_COLLECTION)
+            .add(tripBill)
     }
 
     override suspend fun insertUser(user: User) {
-        db.collection(USERS_COLLECTION).document(user.uid).set(user)
+        db.collection(USERS_COLLECTION)
+            .document(user.uid)
+            .set(user)
         // db.collection(USERS_COLLECTION).add(user)
     }
 
     override suspend fun insertFlatBill(flatBill: FlatBill) {
-        db.collection(FLAT_BILLS_COLLECTION).add(flatBill)
+        db.collection(FLAT_BILLS_COLLECTION)
+            .add(flatBill)
     }
 
-    override suspend fun updateBill(bill: Bill) {
-        if (bill.documentId.isNotEmpty()) {
-            db.collection(BILLS_COLLECTION).document(bill.documentId).set(bill)
+    override suspend fun updateBill(purchaseBill: PurchaseBill) {
+        if (purchaseBill.documentId.isNotEmpty()) {
+            db.collection(BILLS_COLLECTION)
+                .document(purchaseBill.documentId)
+                .set(purchaseBill)
         }
     }
 
-    override suspend fun updateFuel(fuel: Fuel) {
-        if (fuel.documentId.isNotEmpty()) {
-            db.collection(FUEL_COLLECTION).document(fuel.documentId).set(fuel)
+    override suspend fun updateFuel(tripBill: TripBill) {
+        if (tripBill.documentId.isNotEmpty()) {
+            db.collection(FUEL_COLLECTION)
+                .document(tripBill.documentId)
+                .set(tripBill)
         }
     }
 
     override suspend fun updateFlatBill(flatBill: FlatBill) {
         if (flatBill.documentId.isNotEmpty()) {
-            db.collection(FLAT_BILLS_COLLECTION).document(flatBill.documentId).set(flatBill)
+            db.collection(FLAT_BILLS_COLLECTION)
+                .document(flatBill.documentId)
+                .set(flatBill)
         }
     }
 
-    override suspend fun deleteBill(bill: Bill) {
-        if (bill.documentId.isNotEmpty()) {
-            db.collection(BILLS_COLLECTION).document(bill.documentId).delete()
+    override suspend fun deleteBill(purchaseBill: PurchaseBill) {
+        if (purchaseBill.documentId.isNotEmpty()) {
+            db.collection(BILLS_COLLECTION)
+                .document(purchaseBill.documentId)
+                .delete()
         }
     }
 
-    override suspend fun deleteFuel(fuel: Fuel) {
-        if (fuel.documentId.isNotEmpty()) {
-            db.collection(FUEL_COLLECTION).document(fuel.documentId).delete()
+    override suspend fun deleteFuel(tripBill: TripBill) {
+        if (tripBill.documentId.isNotEmpty()) {
+            db.collection(FUEL_COLLECTION)
+                .document(tripBill.documentId)
+                .delete()
         }
     }
 
     override suspend fun deleteFlatBill(flatBill: FlatBill) {
         if (flatBill.documentId.isNotEmpty()) {
-            db.collection(FLAT_BILLS_COLLECTION).document(flatBill.documentId).delete()
+            db.collection(FLAT_BILLS_COLLECTION)
+                .document(flatBill.documentId)
+                .delete()
         }
     }
 
     override suspend fun clearBills() {
-        db.collection(BILLS_COLLECTION).get().addOnSuccessListener { documents ->
-            for (document in documents) {
-                db.collection(BILLS_COLLECTION).document(document.id).delete()
+        db.collection(BILLS_COLLECTION)
+            .get()
+            .addOnSuccessListener { documents ->
+                for (document in documents) {
+                    db.collection(BILLS_COLLECTION)
+                        .document(document.id)
+                        .delete()
+                }
             }
-        }
     }
 
     override suspend fun clearFuel() {
-        db.collection(FUEL_COLLECTION).get().addOnSuccessListener { documents ->
-            for (document in documents) {
-                db.collection(FUEL_COLLECTION).document(document.id).delete()
+        db.collection(FUEL_COLLECTION)
+            .get()
+            .addOnSuccessListener { documents ->
+                for (document in documents) {
+                    db.collection(FUEL_COLLECTION)
+                        .document(document.id)
+                        .delete()
+                }
             }
-        }
     }
 
     override suspend fun clearFlatBills() {
-        db.collection(FLAT_BILLS_COLLECTION).get().addOnSuccessListener { documents ->
-            for (document in documents) {
-                db.collection(FLAT_BILLS_COLLECTION).document(document.id).delete()
+        db.collection(FLAT_BILLS_COLLECTION)
+            .get()
+            .addOnSuccessListener { documents ->
+                for (document in documents) {
+                    db.collection(FLAT_BILLS_COLLECTION)
+                        .document(document.id)
+                        .delete()
+                }
             }
-        }
     }
 
     override suspend fun clearUsers() {
-        db.collection(USERS_COLLECTION).get().addOnSuccessListener { documents ->
-            for (document in documents) {
-                db.collection(USERS_COLLECTION).document(document.id).delete()
+        db.collection(USERS_COLLECTION)
+            .get()
+            .addOnSuccessListener { documents ->
+                for (document in documents) {
+                    db.collection(USERS_COLLECTION)
+                        .document(document.id)
+                        .delete()
+                }
             }
-        }
     }
 
     override suspend fun clearBillsAndFuel() {
@@ -196,14 +303,17 @@ class FirebaseRepositoryImpl : FirebaseRepository {
     }
 
     override suspend fun getUsers(): Flow<List<User>> =
-        db.collection(USERS_COLLECTION).snapshots().map {
-            it.documents.map { document ->
-                document.toObject<User>()!!
+        db.collection(USERS_COLLECTION)
+            .snapshots()
+            .map {
+                it.documents.map { document ->
+                    document.toObject<User>()!!
+                }
             }
-        }
 
     override suspend fun getDestinations(): Flow<List<Destination>> =
-        db.collection(DESTINATIONS_COLLECTION).snapshots()
+        db.collection(DESTINATIONS_COLLECTION)
+            .snapshots()
             .map {
                 it.documents.map { document ->
                     document.toObject<Destination>()!!
@@ -215,22 +325,38 @@ class FirebaseRepositoryImpl : FirebaseRepository {
         userList.first { it.uid == uid }
     }
 
-    override suspend fun getCollections(): Flow<Triple<List<User>, List<Bill>, List<Fuel>>> =
+    override suspend fun getCollections(): Flow<Triple<List<User>, List<PurchaseBill>, List<TripBill>>> =
         combine(
             getUsers(),
-            getBills(),
-            getFuel()
+            getPurchaseBills(),
+            getTripBills()
         ) { users, bills, fuels ->
-            Triple(users, bills, fuels)
+            Triple(
+                users,
+                bills,
+                fuels
+            )
         }
 
-    override suspend fun getBillsAndFuel(): Flow<Pair<List<Bill>, List<Fuel>>> =
-        combine(
-            getBills(),
-            getFuel()
-        ) { bills, fuels ->
-            Pair(bills, fuels)
+    override suspend fun getBills(): Flow<List<Bill>> {
+        return combine(
+            getPurchaseBills(),
+            getTripBills(),
+            getFlatBills()
+        ) { purchaseBills, tripBills, flatBills ->
+            purchaseBills + tripBills + flatBills
         }
+    }
+
+    override suspend fun getBills(period: Period): Flow<List<Bill>> {
+        return combine(
+            getPurchaseBills(period),
+            getTripBills(period),
+            getFlatBills(period)
+        ) { purchaseBills, tripBills, flatBills ->
+            purchaseBills + tripBills + flatBills
+        }
+    }
 
     override suspend fun backupCollections() =
         coroutineScope {
@@ -242,29 +368,49 @@ class FirebaseRepositoryImpl : FirebaseRepository {
             val billsJson = deferredBills.await()
             val fuelJson = deferredFuel.await()
 
-            val currentDateTime = LocalDateTime.now().toString()
+            val currentDateTime = LocalDateTime.now()
+                .toString()
 
-            uploadJsonToStorage(usersJson, "$USERS_PATH/$currentDateTime.json")
-            uploadJsonToStorage(billsJson, "$BILLS_PATH/$currentDateTime.json")
-            uploadJsonToStorage(fuelJson, "$FUEL_PATH/$currentDateTime.json")
+            uploadJsonToStorage(
+                usersJson,
+                "$USERS_PATH/$currentDateTime.json"
+            )
+            uploadJsonToStorage(
+                billsJson,
+                "$BILLS_PATH/$currentDateTime.json"
+            )
+            uploadJsonToStorage(
+                fuelJson,
+                "$FUEL_PATH/$currentDateTime.json"
+            )
 
         }
 
     private suspend fun backupCollection(collectionPath: String): String {
-        val querySnapshot = db.collection(collectionPath).get().await()
+        val querySnapshot = db.collection(collectionPath)
+            .get()
+            .await()
         val jsonBuilder = JsonBuilder()
 
         querySnapshot.forEach { document -> jsonBuilder.append(document.data) }
 
-        return jsonBuilder.toString().replace("\\/", "/")
+        return jsonBuilder.toString()
+            .replace(
+                "\\/",
+                "/"
+            )
     }
 
-    override suspend fun uploadJsonToStorage(json: String, fileName: String) {
+    override suspend fun uploadJsonToStorage(
+        json: String,
+        fileName: String
+    ) {
         val storageRef = storage.reference
         val fileRef = storageRef.child(fileName)
 
         val stream = json.byteInputStream()
-        fileRef.putStream(stream).await()
+        fileRef.putStream(stream)
+            .await()
 
         withContext(Dispatchers.IO) {
             stream.close()
@@ -276,15 +422,15 @@ class FirebaseRepositoryImpl : FirebaseRepository {
         val fileRef = storageRef.child(fileName)
         val taskSnapshot = fileRef.stream.await()
 
-        return taskSnapshot.stream.bufferedReader().use { it.readText() }
+        return taskSnapshot.stream.bufferedReader()
+            .use { it.readText() }
     }
 
-    // TODO Finish this method (deserialize json string) and below
     override suspend fun loadBillsFromStorage(fileName: String): Response<Boolean> {
         return try {
             val billsJson = getFileFromStorage("$BILLS_PATH/$fileName")
-            val bills = Json.decodeFromString<List<Bill>>(billsJson)
-            bills.forEach { insertBill(it) }
+            val purchaseBills = Json.decodeFromString<List<PurchaseBill>>(billsJson)
+            purchaseBills.forEach { insertBill(it) }
 
             Response.Success(true)
         } catch (e: Exception) {
@@ -296,8 +442,8 @@ class FirebaseRepositoryImpl : FirebaseRepository {
     override suspend fun loadFuelFromStorage(fileName: String): Response<Boolean> {
         return try {
             val fuelJson = getFileFromStorage("$FUEL_PATH/$fileName")
-            val fuel = Json.decodeFromString<List<Fuel>>(fuelJson)
-            fuel.forEach { insertFuel(it) }
+            val tripBill = Json.decodeFromString<List<TripBill>>(fuelJson)
+            tripBill.forEach { insertFuel(it) }
 
             Response.Success(true)
         } catch (e: Exception) {
@@ -308,7 +454,7 @@ class FirebaseRepositoryImpl : FirebaseRepository {
     override suspend fun loadUsersFromStorage(fileName: String): Response<Boolean> {
         return try {
             val usersJson = getFileFromStorage("$FUEL_PATH/$fileName")
-            val users = Json.decodeFromString<List<Fuel>>(usersJson)
+            val users = Json.decodeFromString<List<TripBill>>(usersJson)
             users.forEach { insertFuel(it) }
 
             Response.Success(true)
@@ -323,8 +469,10 @@ class FirebaseRepositoryImpl : FirebaseRepository {
                 val profileImageName = "$uid.jpg"
 
                 val downloadUrl =
-                    storage.reference.child(IMAGES_STORAGE_PATH).child(profileImageName)
-                        .putFile(imageUri).await()
+                    storage.reference.child(IMAGES_STORAGE_PATH)
+                        .child(profileImageName)
+                        .putFile(imageUri)
+                        .await()
                         .storage.downloadUrl.await()
 
                 return Response.Success(downloadUrl)
@@ -340,8 +488,13 @@ class FirebaseRepositoryImpl : FirebaseRepository {
     override suspend fun changeCurrentUserImageUrlInFirestore(downloadUrl: Uri): Response<Boolean> {
         return try {
             auth.uid?.let { uid ->
-                db.collection(USERS_COLLECTION).document(uid)
-                    .update(PHOTO_URL_FIELD, downloadUrl.toString()).await()
+                db.collection(USERS_COLLECTION)
+                    .document(uid)
+                    .update(
+                        PHOTO_URL_FIELD,
+                        downloadUrl.toString()
+                    )
+                    .await()
                 return Response.Success(true)
             }
             Response.Failure(Exception("User is not logged in"))
@@ -353,8 +506,13 @@ class FirebaseRepositoryImpl : FirebaseRepository {
     override suspend fun changeCurrentUserNameInFirestore(newUserName: String): Response<Boolean> {
         return try {
             auth.uid?.let { uid ->
-                db.collection(USERS_COLLECTION).document(uid)
-                    .update(USERNAME_FIELD, newUserName).await()
+                db.collection(USERS_COLLECTION)
+                    .document(uid)
+                    .update(
+                        USERNAME_FIELD,
+                        newUserName
+                    )
+                    .await()
                 return Response.Success(true)
             }
             Response.Failure(Exception("User is not logged in"))

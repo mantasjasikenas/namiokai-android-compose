@@ -2,7 +2,7 @@ package com.github.mantasjasikenas.namiokai.ui.screens.bill
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.github.mantasjasikenas.namiokai.model.Bill
+import com.github.mantasjasikenas.namiokai.model.bills.PurchaseBill
 import com.github.mantasjasikenas.namiokai.utils.Constants.DATE_TIME_FORMAT
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
@@ -33,40 +33,40 @@ class BillViewModel @Inject constructor(private val firebaseRepository: com.gith
     private fun getBills() {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                firebaseRepository.getBills().collect { bills ->
-                    _billUiState.update { it.copy(bills = bills) }
+                firebaseRepository.getPurchaseBills().collect { bills ->
+                    _billUiState.update { it.copy(purchaseBills = bills) }
                 }
             }
         }
     }
 
 
-    fun insertBill(bill: Bill) {
+    fun insertBill(purchaseBill: PurchaseBill) {
         val formatter = DateTimeFormatter.ofPattern(DATE_TIME_FORMAT)
         val currentDateTime = LocalDateTime.now().format(formatter)
 
-        bill.date = currentDateTime
-        bill.createdByUid = Firebase.auth.uid ?: ""
+        purchaseBill.date = currentDateTime
+        purchaseBill.createdByUid = Firebase.auth.uid ?: ""
 
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                firebaseRepository.insertBill(bill)
+                firebaseRepository.insertBill(purchaseBill)
             }
         }
     }
 
-    fun updateBill(bill: Bill) {
+    fun updateBill(purchaseBill: PurchaseBill) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                firebaseRepository.updateBill(bill)
+                firebaseRepository.updateBill(purchaseBill)
             }
         }
     }
 
-    fun deleteBill(bill: Bill) {
+    fun deleteBill(purchaseBill: PurchaseBill) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                firebaseRepository.deleteBill(bill)
+                firebaseRepository.deleteBill(purchaseBill)
             }
         }
     }

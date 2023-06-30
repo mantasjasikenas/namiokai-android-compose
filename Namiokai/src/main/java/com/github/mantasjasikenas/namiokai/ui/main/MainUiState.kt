@@ -8,4 +8,5 @@ typealias UsersMap = Map<UserUid, User>
 data class MainUiState(
     val usersMap: UsersMap = emptyMap(),
     val currentUser: User = User(),
+    val isLoading : Boolean = false,
 )

@@ -3,7 +3,7 @@ package com.github.mantasjasikenas.namiokai.ui.screens.fuel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.mantasjasikenas.namiokai.data.FirebaseRepository
-import com.github.mantasjasikenas.namiokai.model.Fuel
+import com.github.mantasjasikenas.namiokai.model.bills.TripBill
 import com.github.mantasjasikenas.namiokai.utils.Constants.DATE_TIME_FORMAT
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
@@ -33,8 +33,8 @@ class FuelViewModel @Inject constructor(private val firebaseRepository: Firebase
     private fun getFuel() {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                firebaseRepository.getFuel().collect { fuels ->
-                    _fuelUiState.update { it.copy(fuels = fuels) }
+                firebaseRepository.getTripBills().collect { fuels ->
+                    _fuelUiState.update { it.copy(tripBills = fuels) }
                 }
             }
         }
@@ -50,32 +50,32 @@ class FuelViewModel @Inject constructor(private val firebaseRepository: Firebase
         }
     }
 
-    fun insertFuel(fuel: Fuel) {
+    fun insertFuel(tripBill: TripBill) {
         val formatter = DateTimeFormatter.ofPattern(DATE_TIME_FORMAT)
         val currentDateTime = LocalDateTime.now().format(formatter)
 
-        fuel.date = currentDateTime
-        fuel.createdByUid = Firebase.auth.uid ?: ""
+        tripBill.date = currentDateTime
+        tripBill.createdByUid = Firebase.auth.uid ?: ""
 
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                firebaseRepository.insertFuel(fuel)
+                firebaseRepository.insertFuel(tripBill)
             }
         }
     }
 
-    fun updateFuel(fuel: Fuel) {
+    fun updateFuel(tripBill: TripBill) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                firebaseRepository.updateFuel(fuel)
+                firebaseRepository.updateFuel(tripBill)
             }
         }
     }
 
-    fun deleteFuel(fuel: Fuel) {
+    fun deleteFuel(tripBill: TripBill) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                firebaseRepository.deleteFuel(fuel)
+                firebaseRepository.deleteFuel(tripBill)
             }
         }
 

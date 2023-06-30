@@ -1,15 +1,13 @@
 package com.github.mantasjasikenas.namiokai.ui.screens.home
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.github.mantasjasikenas.namiokai.data.repository.debts.DebtsManager
+import com.github.mantasjasikenas.namiokai.data.repository.debts.DebtsMap
+import com.github.mantasjasikenas.namiokai.model.Period
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 
@@ -21,31 +19,7 @@ class HomeViewModel @Inject constructor(
     private val _homeUiState = MutableStateFlow(HomeUiState())
     val homeUiState = _homeUiState.asStateFlow()
 
-    init {
-        getUserDebts()
-        getFlatBills()
+    fun getDebts(period: Period): Flow<DebtsMap> {
+        return debtsManager.getDebts(period)
     }
-
-    private fun getUserDebts() {
-        viewModelScope.launch {
-            withContext(Dispatchers.IO) {
-                debtsManager.getDebts().collect { debts ->
-                    _homeUiState.update { it.copy(debts = debts) }
-                }
-            }
-        }
-    }
-
-    private fun getFlatBills() {
-        viewModelScope.launch {
-            withContext(Dispatchers.IO) {
-                debtsManager.getFlatBill().collect { flatBills ->
-                    _homeUiState.update { it.copy(flatBills = flatBills) }
-                }
-            }
-        }
-    }
-
-
-
 }

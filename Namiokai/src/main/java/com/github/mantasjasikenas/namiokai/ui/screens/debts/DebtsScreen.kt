@@ -2,18 +2,19 @@ package com.github.mantasjasikenas.namiokai.ui.screens.debts
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.gestures.ScrollableDefaults
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ElevatedCard
@@ -40,7 +41,6 @@ import coil.request.ImageRequest
 import com.github.mantasjasikenas.namiokai.R
 import com.github.mantasjasikenas.namiokai.data.repository.debts.UserDebtsMap
 import com.github.mantasjasikenas.namiokai.model.User
-import com.github.mantasjasikenas.namiokai.model.isInPeriod
 import com.github.mantasjasikenas.namiokai.ui.common.CardTextColumn
 import com.github.mantasjasikenas.namiokai.ui.common.CustomSpacer
 import com.github.mantasjasikenas.namiokai.ui.common.EmptyView
@@ -48,8 +48,6 @@ import com.github.mantasjasikenas.namiokai.ui.common.EuroIconTextRow
 import com.github.mantasjasikenas.namiokai.ui.main.MainViewModel
 import com.github.mantasjasikenas.namiokai.ui.main.UsersMap
 import com.github.mantasjasikenas.namiokai.utils.format
-import com.github.mantasjasikenas.namiokai.utils.tryParse
-import kotlinx.datetime.LocalDateTime
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -61,16 +59,7 @@ fun DebtsScreen(
     val summaryUiState by debtsViewModel.debtsUiState.collectAsState()
     val mainUiState by mainViewModel.mainUiState.collectAsState()
     val usersMap = mainUiState.usersMap
-    val vertScrollState = rememberScrollState()
     val period by mainViewModel.periodState.collectAsState()
-
-    val currentFlatBill = summaryUiState.flatBills
-        .find { LocalDateTime.tryParse(it.paymentDate)!!.date.isInPeriod(period) }
-        .takeIf {
-            it != null &&
-                    it.paymasterUid != mainUiState.currentUser.uid &&
-                    it.splitUsersUid.contains(mainUiState.currentUser.uid)
-        }
 
 
     if (summaryUiState.debts.isEmpty()) {
@@ -78,7 +67,33 @@ fun DebtsScreen(
         return
     }
 
-    FlowRow(
+    LazyVerticalStaggeredGrid(
+        columns = StaggeredGridCells.Fixed(2),
+        flingBehavior = ScrollableDefaults.flingBehavior()  ,
+        verticalItemSpacing = 8.dp,
+        horizontalArrangement = Arrangement.spacedBy(
+            8.dp,
+            Alignment.CenterHorizontally
+        ),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(20.dp)
+    ) {
+
+        items(summaryUiState.debts.toList()) { (user, debts) ->
+            if (debts.isEmpty() || usersMap[user] == null) return@items
+
+
+            ExpandableAvatarCard(
+                debtorUser = usersMap[user]!!,
+                userDebts = debts,
+                usersMap = usersMap
+            )
+
+        }
+    }
+
+    /*FlowRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
         verticalArrangement = Arrangement.spacedBy(8.dp),
         maxItemsInEachRow = 2,
@@ -96,12 +111,16 @@ fun DebtsScreen(
                 usersMap = usersMap
             )
         }
-    }
+    }*/
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ExpandableAvatarCard(debtorUser: User, userDebts: UserDebtsMap, usersMap: UsersMap) {
+private fun ExpandableAvatarCard(
+    debtorUser: User,
+    userDebts: UserDebtsMap,
+    usersMap: UsersMap
+) {
 
     var expandedState by remember { mutableStateOf(false) }
 
@@ -111,8 +130,7 @@ private fun ExpandableAvatarCard(debtorUser: User, userDebts: UserDebtsMap, user
 
         Column(
             modifier = Modifier
-                .padding(20.dp)
-                .fillMaxSize(0.4F),
+                .padding(20.dp),
             horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.Center
         ) {

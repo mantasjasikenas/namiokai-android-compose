@@ -1,9 +1,9 @@
 package com.github.mantasjasikenas.namiokai.ui.screens.fuel
 
 import com.github.mantasjasikenas.namiokai.model.Destination
-import com.github.mantasjasikenas.namiokai.model.Fuel
+import com.github.mantasjasikenas.namiokai.model.bills.TripBill
 
 data class FuelUiState(
-    val fuels: List<Fuel> = emptyList(),
+    val tripBills: List<TripBill> = emptyList(),
     val destinations: List<Destination> = emptyList()
 )

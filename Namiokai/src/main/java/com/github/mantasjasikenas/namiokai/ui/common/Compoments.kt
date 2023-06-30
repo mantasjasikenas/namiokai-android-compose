@@ -45,6 +45,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisallowComposableCalls
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -80,7 +81,10 @@ import com.google.accompanist.flowlayout.FlowRow
 import com.google.accompanist.flowlayout.MainAxisAlignment
 
 @Composable
-fun FloatingAddButton(modifier: Modifier = Modifier, onClick: () -> Unit) {
+fun FloatingAddButton(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
     Column(
         modifier = modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Bottom,
@@ -102,7 +106,10 @@ fun FloatingAddButton(modifier: Modifier = Modifier, onClick: () -> Unit) {
 }
 
 @Composable
-fun CustomSpacer(height: Int = 0, width: Int = 0) {
+fun CustomSpacer(
+    height: Int = 0,
+    width: Int = 0
+) {
     Spacer(
         modifier = Modifier
             .height(height.dp)
@@ -112,16 +119,29 @@ fun CustomSpacer(height: Int = 0, width: Int = 0) {
 
 
 @Composable
-fun CardText(label: String, value: String) {
-    Text(text = label, style = MaterialTheme.typography.labelMedium)
+fun CardText(
+    label: String,
+    value: String
+) {
+    Text(
+        text = label,
+        style = MaterialTheme.typography.labelMedium
+    )
     Text(text = value)
     CustomSpacer(height = 10)
 }
 
 @Composable
-fun CardTextColumn(modifier: Modifier = Modifier, label: String, value: String) {
+fun CardTextColumn(
+    modifier: Modifier = Modifier,
+    label: String,
+    value: String
+) {
     Column(modifier = modifier) {
-        Text(text = label, style = MaterialTheme.typography.labelMedium)
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelMedium
+        )
         Text(text = value)
     }
 }
@@ -134,7 +154,8 @@ fun VerticalDivider(
 ) {
     val targetThickness = if (thickness == Dp.Hairline) {
         (1f / LocalDensity.current.density).dp
-    } else {
+    }
+    else {
         thickness
     }
     Box(
@@ -146,7 +167,11 @@ fun VerticalDivider(
 }
 
 @Composable
-fun DateTimeCardColumn(modifier: Modifier = Modifier, day: String, month: String) {
+fun DateTimeCardColumn(
+    modifier: Modifier = Modifier,
+    day: String,
+    month: String
+) {
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally
@@ -161,21 +186,34 @@ fun DateTimeCardColumn(modifier: Modifier = Modifier, day: String, month: String
 }
 
 @Composable
-fun EuroIconTextRow(modifier: Modifier = Modifier, label: String, value: String) {
+fun EuroIconTextRow(
+    modifier: Modifier = Modifier,
+    label: String,
+    value: String
+) {
     Row(
-        modifier = modifier, verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Text(text = label, style = MaterialTheme.typography.labelLarge)
-        CustomSpacer(width = 10)
-        Spacer(modifier = Modifier.weight(1F))
-        Text(text = value)
-        Icon(
-            imageVector = Icons.Outlined.EuroSymbol,
-            contentDescription = null,
-            modifier = Modifier.size(16.dp),
-            tint = MaterialTheme.colorScheme.primary
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelLarge,
+            modifier = Modifier.weight(1f),
         )
+        Row(
+            modifier = Modifier.weight(1f),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.End
+        ) {
+            Text(text = value)
+            Icon(
+                imageVector = Icons.Outlined.EuroSymbol,
+                contentDescription = null,
+                modifier = Modifier.size(16.dp).fillMaxWidth(),
+                tint = MaterialTheme.colorScheme.primary
+            )
+        }
     }
 }
 
@@ -214,12 +252,15 @@ fun UsersPicker(
         crossAxisAlignment = FlowCrossAxisAlignment.Center,
     ) {
         usersPickup.forEach { (uid, selected) ->
-            FlowRowItemCard(usersMap[uid]?.displayName ?: "Missing display name", selected, onItemSelected = { status ->
-                if (!isMultipleSelectEnabled) {
-                    usersPickup.forEach { (uid, _) -> usersPickup[uid] = false }
-                }
-                usersPickup[uid] = status.not()
-            })
+            FlowRowItemCard(
+                usersMap[uid]?.displayName ?: "Missing display name",
+                selected,
+                onItemSelected = { status ->
+                    if (!isMultipleSelectEnabled) {
+                        usersPickup.forEach { (uid, _) -> usersPickup[uid] = false }
+                    }
+                    usersPickup[uid] = status.not()
+                })
         }
     }
 }
@@ -231,10 +272,8 @@ private fun FlowRowItemCard(
     selectedStatus: Boolean,
     onItemSelected: (status: Boolean) -> Unit,
 ) {
-    OutlinedCard(
-        colors = CardDefaults.outlinedCardColors(containerColor = if (selectedStatus) MaterialTheme.colorScheme.surfaceTint else MaterialTheme.colorScheme.surface),
-        onClick = { onItemSelected(selectedStatus) }
-    ) {
+    OutlinedCard(colors = CardDefaults.outlinedCardColors(containerColor = if (selectedStatus) MaterialTheme.colorScheme.surfaceTint else MaterialTheme.colorScheme.surface),
+        onClick = { onItemSelected(selectedStatus) }) {
         Text(
             text = text,
             modifier = Modifier.padding(8.dp),
@@ -258,7 +297,10 @@ fun SizedIcon(
 }
 
 @Composable
-fun UserCard(user: User, modifier: Modifier = Modifier) {
+fun UserCard(
+    user: User,
+    modifier: Modifier = Modifier
+) {
     ElevatedCard(
         modifier = modifier
             .padding(20.dp)
@@ -273,8 +315,14 @@ fun UserCard(user: User, modifier: Modifier = Modifier) {
             verticalArrangement = Arrangement.Center
         ) {
 
-            CardText(label = stringResource(R.string.display_name), value = user.displayName)
-            CardText(label = stringResource(R.string.email), value = user.email)
+            CardText(
+                label = stringResource(R.string.display_name),
+                value = user.displayName
+            )
+            CardText(
+                label = stringResource(R.string.email),
+                value = user.email
+            )
             Text(
                 text = stringResource(R.string.photo),
                 style = MaterialTheme.typography.labelMedium
@@ -285,7 +333,10 @@ fun UserCard(user: User, modifier: Modifier = Modifier) {
                 modifier = Modifier.clip(RoundedCornerShape(4.dp))
             )
             CustomSpacer(height = 10)
-            CardText(label = stringResource(R.string.uid), value = user.uid)
+            CardText(
+                label = stringResource(R.string.uid),
+                value = user.uid
+            )
 
 
         }
@@ -341,14 +392,16 @@ fun <T> NamiokaiDialog(
             color = MaterialTheme.colorScheme.background,
             shape = MaterialTheme.shapes.medium,
             shadowElevation = 8.dp,
-            modifier = Modifier
-                .fillMaxWidth()
+            modifier = Modifier.fillMaxWidth()
         ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
-                modifier = Modifier
-                    .padding(top = 16.dp, start = 16.dp, end = 16.dp)
+                modifier = Modifier.padding(
+                    top = 16.dp,
+                    start = 16.dp,
+                    end = 16.dp
+                )
             ) {
                 Text(
                     text = title,
@@ -397,7 +450,10 @@ fun NamiokaiTextField(
     OutlinedTextField(
         value = text,
         label = { Text(text = label) },
-        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next, keyboardType = keyboardType),
+        keyboardOptions = KeyboardOptions(
+            imeAction = ImeAction.Next,
+            keyboardType = keyboardType
+        ),
         keyboardActions = KeyboardActions(onNext = {
             val isMoved = focusManager.moveFocus(FocusDirection.Down)
             if (!isMoved) {
@@ -409,21 +465,31 @@ fun NamiokaiTextField(
             onValueChange(it.text)
         },
         singleLine = singleLine,
-        modifier = modifier.padding(vertical = 10.dp, horizontal = 30.dp)
+        modifier = modifier.padding(
+            vertical = 10.dp,
+            horizontal = 30.dp
+        )
     )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FiltersRow(sourceData: List<String> = listOf("All", "Active", "Inactive", "Blocked")) {
-    LazyRow() {
+fun FiltersRow(
+    sourceData: List<String> = listOf(
+        "All",
+        "Active",
+        "Inactive",
+        "Blocked"
+    )
+) {
+    LazyRow {
         items(sourceData) { item ->
 
             val selected = remember { mutableStateOf(false) }
-            FilterChip(
-                selected = selected.value,
+            FilterChip(selected = selected.value,
                 modifier = Modifier.padding(horizontal = 4.dp),
-                onClick = { /*TODO*/ }, label = { Text(item) })
+                onClick = {  },
+                label = { Text(item) })
         }
     }
 }
@@ -444,11 +510,9 @@ fun NamiokaiDialogPreview() {
         val status = remember { mutableStateOf(true) }
 
         if (status.value) {
-            NamiokaiDialog(
-                title = "Select username",
+            NamiokaiDialog(title = "Select username",
                 onDismiss = { status.value = false },
-                onSaveClick = { status.value = false })
-            {
+                onSaveClick = { status.value = false }) {
                 CustomSpacer(height = 30)
             }
         }
@@ -472,7 +536,14 @@ fun NamiokaiBottomSheet(
         modifier = Modifier.padding(10.dp)
     ) {
 
-        Column(modifier = Modifier.padding(25.dp, 0.dp, 25.dp, 25.dp)) {
+        Column(
+            modifier = Modifier.padding(
+                25.dp,
+                0.dp,
+                25.dp,
+                25.dp
+            )
+        ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -509,7 +580,8 @@ fun NamiokaiElevatedCard(
             .fillMaxSize()
             .animateContentSize(
                 animationSpec = tween(
-                    durationMillis = 300, easing = LinearOutSlowInEasing
+                    durationMillis = 300,
+                    easing = LinearOutSlowInEasing
                 )
             ),
         onClick = onClick,
@@ -527,3 +599,11 @@ fun NamiokaiElevatedCard(
     }
 }
 
+@Composable
+inline fun <T> rememberState(crossinline producer: @DisallowComposableCalls () -> T) = remember { mutableStateOf(producer()) }
+
+@Composable
+inline fun <T> rememberState(
+    key: Any?,
+    crossinline producer: @DisallowComposableCalls () -> T
+) = remember(key) { mutableStateOf(producer()) }

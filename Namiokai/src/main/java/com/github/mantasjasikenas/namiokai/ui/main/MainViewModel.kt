@@ -5,8 +5,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.mantasjasikenas.namiokai.data.FirebaseRepository
 import com.github.mantasjasikenas.namiokai.data.UsersRepository
+import com.github.mantasjasikenas.namiokai.data.repository.preferences.PreferencesRepository
 import com.github.mantasjasikenas.namiokai.model.Period
 import com.github.mantasjasikenas.namiokai.model.User
+import com.github.mantasjasikenas.namiokai.model.getMonthlyPeriod
+import com.github.mantasjasikenas.namiokai.utils.toUser
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.remoteconfig.ConfigUpdate
@@ -20,10 +23,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.Clock
-import kotlinx.datetime.LocalDate
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
 import javax.inject.Inject
 
 private const val TAG = "MainViewModel"
@@ -31,22 +30,50 @@ private const val TAG = "MainViewModel"
 @HiltViewModel
 class MainViewModel @Inject constructor(
     val firebaseRepository: FirebaseRepository,
-    private val usersRepository: UsersRepository
+    private val usersRepository: UsersRepository,
+    private val preferencesRepository: PreferencesRepository
 ) : ViewModel() {
 
-    private val _mainUiState = MutableStateFlow(MainUiState())
+    private val _mainUiState = MutableStateFlow(MainUiState(currentUser = getUserFromAuth()))
     val mainUiState = _mainUiState.asStateFlow()
 
-    private val _periodState = MutableStateFlow(getPeriod(getStartDate()))
+    private val _periodState = MutableStateFlow(Period.getMonthlyPeriod(getStartDate()))
     val periodState = _periodState.asStateFlow()
 
 
     init {
-        Log.d(TAG, "MainViewModel init")
+        setLoadingStatus(true)
+        Log.d(
+            TAG,
+            "MainViewModel init"
+        )
+
         getUsersFromDatabase()
         getCurrentUserDetails()
         addConfigUpdateListener()
+
+        setLoadingStatus(false)
     }
+
+    fun init() {
+        Log.d(
+            TAG,
+            "init called"
+        )
+    }
+
+    fun updatePeriodState(period: Period) {
+        _periodState.update { period }
+    }
+
+    private fun setLoadingStatus(isLoading: Boolean) {
+        if (_mainUiState.value.isLoading == isLoading) {
+            return
+        }
+        _mainUiState.update { it.copy(isLoading = isLoading) }
+    }
+
+    private fun getUserFromAuth() = Firebase.auth.currentUser?.toUser() ?: User()
 
     private fun getUsersFromDatabase() {
         if (Firebase.auth.currentUser == null) {
@@ -55,10 +82,11 @@ class MainViewModel @Inject constructor(
 
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                usersRepository.getUsers().collect { users ->
-                    val usersMap = users.associateBy { it.uid }
-                    _mainUiState.update { it.copy(usersMap = usersMap) }
-                }
+                usersRepository.getUsers()
+                    .collect { users ->
+                        val usersMap = users.associateBy { it.uid }
+                        _mainUiState.update { it.copy(usersMap = usersMap) }
+                    }
             }
         }
     }
@@ -71,17 +99,40 @@ class MainViewModel @Inject constructor(
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 Firebase.auth.currentUser?.uid?.let { uid ->
-                    firebaseRepository.getUser(uid).collect { user ->
-                        println(uid)
-                        println(user)
-                        _mainUiState.update { it.copy(currentUser = user) }
-                        Log.d(TAG, "Is admin? ${user.admin}")
-                    }
+                    firebaseRepository.getUser(uid)
+                        .collect { user ->
+                            println(uid)
+                            println(user)
+                            _mainUiState.update { it.copy(currentUser = user) }
+                            Log.d(
+                                TAG,
+                                "Is admin? ${user.admin}"
+                            )
+                        }
                 }
             }
 
         }
     }
+
+    private fun fetchStartDateFromConfig() {
+        Firebase.remoteConfig.fetchAndActivate()
+            .addOnCompleteListener {
+                Log.d(
+                    TAG,
+                    "Remote config updated"
+                )
+                val value = Firebase.remoteConfig.getLong("period_start_day")
+                    .toInt()
+                _periodState.update { Period.getMonthlyPeriod(startDayInclusive = value) }
+                Log.d(
+                    TAG,
+                    "New value: $value"
+                )
+
+            }
+    }
+
 
     fun resetCurrentUser() {
         _mainUiState.update {
@@ -94,57 +145,64 @@ class MainViewModel @Inject constructor(
         getUsersFromDatabase()
     }
 
-    private fun getPeriod(startDayInclusive: Int = 15): Period {
-
-        val periodStart: LocalDate
-        val periodEnd: LocalDate
-
-        val currentDate = Clock.System.now().toLocalDateTime(
-            TimeZone.currentSystemDefault()
-        ).date
-
-        if (currentDate.dayOfMonth < startDayInclusive) {
-            periodStart = LocalDate(currentDate.year, currentDate.monthNumber - 1, startDayInclusive)
-            periodEnd = LocalDate(currentDate.year, currentDate.monthNumber, startDayInclusive - 1)
-        } else {
-            periodStart = LocalDate(currentDate.year, currentDate.monthNumber, startDayInclusive)
-            periodEnd = LocalDate(currentDate.year, currentDate.monthNumber + 1, startDayInclusive - 1)
-        }
-
-        return Period(periodStart, periodEnd)
-    }
 
     private fun addConfigUpdateListener() {
 
         Firebase.remoteConfig.addOnConfigUpdateListener(object : ConfigUpdateListener {
             override fun onUpdate(configUpdate: ConfigUpdate) {
-                Log.d(TAG, "Updated keys: " + configUpdate.updatedKeys)
+                Log.d(
+                    TAG,
+                    "Updated keys: " + configUpdate.updatedKeys
+                )
 
                 if (configUpdate.updatedKeys.contains("period_start_day")) {
-                    Firebase.remoteConfig.activate().addOnCompleteListener {
-                        Log.d(TAG, "Remote config updated")
-                        val value = getStartDate()
-                        _periodState.update { getPeriod(startDayInclusive = value) }
-                        Log.d(TAG, "New value: $value")
+                    Firebase.remoteConfig.activate()
+                        .addOnCompleteListener {
+                            Log.d(
+                                TAG,
+                                "Remote config updated"
+                            )
+                            val value = getStartDate()
+                            _periodState.update { Period.getMonthlyPeriod(startDayInclusive = value) }
+                            Log.d(
+                                TAG,
+                                "New value: $value"
+                            )
 
-                    }
+                        }
                 }
             }
 
             override fun onError(error: FirebaseRemoteConfigException) {
-                Log.w(TAG, "Config update error with code: " + error.code, error)
+                Log.w(
+                    TAG,
+                    "Config update error with code: " + error.code,
+                    error
+                )
             }
         })
 
     }
 
-    private fun getStartDate() : Int {
-        val result = Firebase.remoteConfig.getValue("period_start_day").asLong()
-        if(result == 0L){
-            // FIXME fix this nonsense
-            return 15
+    private fun getStartDate(): Int {
+        val value = Firebase.remoteConfig.getLong("period_start_day")
+            .toInt()
+
+        if (value in 1..31) {
+            return value
+        }
+        else {
+            Log.e(
+                TAG,
+                "Invalid value for period_start_day: $value"
+            )
+            fetchStartDateFromConfig()
         }
 
-        return Firebase.remoteConfig.getValue("period_start_day").asLong().toInt()
+        return 15
+    }
+
+    fun resetPeriodState() {
+        _periodState.update { Period.getMonthlyPeriod(getStartDate()) }
     }
 }

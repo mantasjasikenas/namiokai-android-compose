@@ -43,7 +43,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -61,8 +61,9 @@ import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
 import com.github.mantasjasikenas.namiokai.R
 import com.github.mantasjasikenas.namiokai.model.Destination
-import com.github.mantasjasikenas.namiokai.model.Fuel
 import com.github.mantasjasikenas.namiokai.model.User
+import com.github.mantasjasikenas.namiokai.model.bills.TripBill
+import com.github.mantasjasikenas.namiokai.model.bills.resolveBillCost
 import com.github.mantasjasikenas.namiokai.ui.common.CardText
 import com.github.mantasjasikenas.namiokai.ui.common.CustomSpacer
 import com.github.mantasjasikenas.namiokai.ui.common.DateTimeCardColumn
@@ -75,6 +76,7 @@ import com.github.mantasjasikenas.namiokai.ui.main.UsersMap
 import com.github.mantasjasikenas.namiokai.utils.format
 import com.github.mantasjasikenas.namiokai.utils.tryParse
 import com.google.accompanist.flowlayout.FlowRow
+import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
@@ -95,14 +97,15 @@ fun FuelScreen(
     }
     val currentUser = mainUiState.currentUser
 
-    if (fuelUiState.fuels.isEmpty()) {
+    if (fuelUiState.tripBills.isEmpty()) {
         EmptyView()
-    } else {
+    }
+    else {
         LazyColumn(modifier = modifier.fillMaxSize()) {
             item { CustomSpacer(height = 15) }
-            items(fuelUiState.fuels) { fuel ->
+            items(fuelUiState.tripBills) { fuel ->
                 FuelCard(
-                    fuel = fuel,
+                    tripBill = fuel,
                     isAllowedModification = (currentUser.admin || fuel.createdByUid == currentUser.uid),
                     destinations = fuelUiState.destinations,
                     usersMap = mainUiState.usersMap,
@@ -131,7 +134,7 @@ fun FuelScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun FuelCard(
-    fuel: Fuel,
+    tripBill: TripBill,
     isAllowedModification: Boolean,
     destinations: List<Destination>,
     usersMap: UsersMap,
@@ -139,9 +142,11 @@ private fun FuelCard(
     currentUser: User,
     modifier: Modifier = Modifier
 ) {
-    val dateTime = LocalDateTime.tryParse(fuel.date) ?: Clock.System.now().toLocalDateTime(
-        TimeZone.currentSystemDefault()
-    )
+    val scope = rememberCoroutineScope()
+    val dateTime = LocalDateTime.tryParse(tripBill.date) ?: Clock.System.now()
+        .toLocalDateTime(
+            TimeZone.currentSystemDefault()
+        )
     val modifyPopupState = remember {
         mutableStateOf(false)
     }
@@ -150,7 +155,6 @@ private fun FuelCard(
     val bottomSheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = true
     )
-    val currentFuel by rememberUpdatedState(fuel)
     val dismissState = rememberDismissState(
         confirmValueChange = {
             when (it) {
@@ -177,7 +181,8 @@ private fun FuelCard(
         when (dismissState.targetValue) {
             DismissValue.Default -> Color.Transparent
             DismissValue.DismissedToEnd, DismissValue.DismissedToStart -> MaterialTheme.colorScheme.secondaryContainer
-        }, label = ""
+        },
+        label = ""
     )
 
     SwipeToDismiss(state = dismissState,
@@ -207,11 +212,18 @@ private fun FuelCard(
                 )
             }
         },
-        directions = if (isAllowedModification) setOf(DismissDirection.StartToEnd, DismissDirection.EndToStart) else setOf(),
+        directions = if (isAllowedModification) setOf(
+            DismissDirection.StartToEnd,
+            DismissDirection.EndToStart
+        )
+        else setOf(),
         dismissContent = {
             ElevatedCard(
                 modifier = modifier
-                    .padding(horizontal = 20.dp, vertical = 5.dp)
+                    .padding(
+                        horizontal = 20.dp,
+                        vertical = 5.dp
+                    )
                     .fillMaxSize()
                     .animateContentSize(
                         animationSpec = tween(
@@ -237,7 +249,10 @@ private fun FuelCard(
                         CustomSpacer(width = 10)
                         DateTimeCardColumn(
                             day = dateTime.date.dayOfMonth.toString(),
-                            month = dateTime.month.getDisplayName(TextStyle.SHORT, Locale.getDefault())
+                            month = dateTime.month.getDisplayName(
+                                TextStyle.SHORT,
+                                Locale.getDefault()
+                            )
                         )
 
                         CustomSpacer(width = 20)
@@ -248,7 +263,7 @@ private fun FuelCard(
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 SubcomposeAsyncImage(
                                     model = ImageRequest.Builder(LocalContext.current)
-                                        .data(usersMap[fuel.driverUid]?.photoUrl?.ifEmpty { R.drawable.profile })
+                                        .data(usersMap[tripBill.paymasterUid]?.photoUrl?.ifEmpty { R.drawable.profile })
                                         .crossfade(true)
                                         .build(),
                                     contentDescription = null,
@@ -261,11 +276,11 @@ private fun FuelCard(
                                         .size(18.dp)
                                 )
                                 CustomSpacer(width = 6)
-                                Text(text = usersMap[fuel.driverUid]?.displayName ?: "-")
+                                Text(text = usersMap[tripBill.paymasterUid]?.displayName ?: "-")
                             }
                             CustomSpacer(height = 5)
 
-                            Row(verticalAlignment = Alignment.CenterVertically){
+                            Row(verticalAlignment = Alignment.CenterVertically) {
                                 Icon(
                                     imageVector = Icons.Outlined.TripOrigin,
                                     contentDescription = null,
@@ -274,23 +289,17 @@ private fun FuelCard(
                                 )
                                 CustomSpacer(width = 7)
                                 Text(
-                                    text = fuel.tripDestination, style = MaterialTheme.typography.labelMedium
+                                    text = tripBill.tripDestination,
+                                    style = MaterialTheme.typography.labelMedium
                                 )
                             }
                         }
                         CustomSpacer(width = 30)
 
                         Column(horizontalAlignment = Alignment.End) {
-                            val isCurrentUserPaymaster = fuel.driverUid == currentUser.uid
-                            val isCurrentUserInSplitUsers = fuel.passengersUid.any { it == currentUser.uid }
-                            val isCurrentUserInSplitUsersAndNotPaymaster =
-                                isCurrentUserInSplitUsers && !isCurrentUserPaymaster
-
-                            val prefix = if (isCurrentUserInSplitUsersAndNotPaymaster) "-" else "+"
-
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text(
-                                    text = prefix + fuel.tripPricePerUser.format(2),
+                                    text = tripBill.resolveBillCost(currentUser),
                                     color = MaterialTheme.colorScheme.onSurface,
                                     fontWeight = FontWeight.Bold,
                                     style = MaterialTheme.typography.headlineSmall.copy(
@@ -323,11 +332,11 @@ private fun FuelCard(
 
             CardText(
                 label = stringResource(R.string.driver),
-                value = usersMap[fuel.driverUid]?.displayName ?: "-"
+                value = usersMap[tripBill.paymasterUid]?.displayName ?: "-"
             )
             CardText(
                 label = stringResource(R.string.destination),
-                value = fuel.tripDestination
+                value = tripBill.tripDestination
             )
             CardText(
                 label = stringResource(R.string.trip_date),
@@ -338,8 +347,11 @@ private fun FuelCard(
                 style = MaterialTheme.typography.labelMedium
             )
             CustomSpacer(height = 7)
-            FlowRow(mainAxisSpacing = 7.dp, crossAxisSpacing = 7.dp) {
-                usersMap.filter { fuel.passengersUid.contains(it.key) }.values.forEach {
+            FlowRow(
+                mainAxisSpacing = 7.dp,
+                crossAxisSpacing = 7.dp
+            ) {
+                usersMap.filter { tripBill.splitUsersUid.contains(it.key) }.values.forEach {
                     OutlinedCard(shape = RoundedCornerShape(25)) {
                         Text(
                             text = it.displayName,
@@ -349,7 +361,7 @@ private fun FuelCard(
                     }
                 }
             }
-            CustomSpacer(height = 10)
+            CustomSpacer(height = 30)
             AnimatedVisibility(visible = isAllowedModification) {
                 Row(
                     horizontalArrangement = Arrangement.End,
@@ -361,7 +373,15 @@ private fun FuelCard(
                         Text(text = "Edit")
                     }
                     TextButton(
-                        onClick = { viewModel.deleteFuel(fuel) }) {
+                        onClick = {
+                            scope.launch { bottomSheetState.hide() }
+                                .invokeOnCompletion {
+                                    if (!bottomSheetState.isVisible) {
+                                        openBottomSheet = false
+                                    }
+                                }
+                            viewModel.deleteFuel(tripBill)
+                        }) {
                         Text(text = "Delete")
                     }
                 }
@@ -374,7 +394,7 @@ private fun FuelCard(
 
     if (modifyPopupState.value) {
         FuelPopup(
-            initialFuel = fuel.copy(),
+            initialTripBill = tripBill.copy(),
             onSaveClick = { viewModel.updateFuel(it) },
             onDismiss = { modifyPopupState.value = false },
             destinations = destinations,

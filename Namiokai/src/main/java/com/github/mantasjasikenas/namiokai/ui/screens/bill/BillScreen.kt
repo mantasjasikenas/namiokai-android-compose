@@ -44,7 +44,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -61,9 +60,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
 import com.github.mantasjasikenas.namiokai.R
-import com.github.mantasjasikenas.namiokai.model.Bill
 import com.github.mantasjasikenas.namiokai.model.User
-import com.github.mantasjasikenas.namiokai.model.splitPricePerUser
+import com.github.mantasjasikenas.namiokai.model.bills.PurchaseBill
+import com.github.mantasjasikenas.namiokai.model.bills.resolveBillCost
 import com.github.mantasjasikenas.namiokai.ui.common.CardText
 import com.github.mantasjasikenas.namiokai.ui.common.CardTextColumn
 import com.github.mantasjasikenas.namiokai.ui.common.CustomSpacer
@@ -88,7 +87,9 @@ import java.util.Locale
 
 @Composable
 fun BillScreen(
-    modifier: Modifier = Modifier, viewModel: BillViewModel = hiltViewModel(), mainViewModel: MainViewModel = hiltViewModel()
+    modifier: Modifier = Modifier,
+    viewModel: BillViewModel = hiltViewModel(),
+    mainViewModel: MainViewModel = hiltViewModel()
 ) {
     val billUiState by viewModel.uiState.collectAsState()
     val mainUiState by mainViewModel.mainUiState.collectAsState()
@@ -97,14 +98,15 @@ fun BillScreen(
     }
     val currentUser = mainUiState.currentUser
 
-    if (billUiState.bills.isEmpty()) {
+    if (billUiState.purchaseBills.isEmpty()) {
         EmptyView()
-    } else {
+    }
+    else {
         LazyColumn(modifier = modifier.fillMaxSize()) {
             item { CustomSpacer(height = 15) }
-            items(billUiState.bills) { bill ->
+            items(billUiState.purchaseBills) { bill ->
                 BillCard(
-                    bill = bill,
+                    purchaseBill = bill,
                     isAllowedModification = (currentUser.admin || bill.createdByUid == currentUser.uid),
                     usersMap = mainUiState.usersMap,
                     viewModel = viewModel,
@@ -134,7 +136,7 @@ fun BillScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun BillCard(
-    bill: Bill,
+    purchaseBill: PurchaseBill,
     isAllowedModification: Boolean,
     usersMap: UsersMap,
     viewModel: BillViewModel,
@@ -145,15 +147,15 @@ private fun BillCard(
     val modifyPopupState = remember {
         mutableStateOf(false)
     }
-    val dateTime = LocalDateTime.tryParse(bill.date) ?: Clock.System.now().toLocalDateTime(
-        TimeZone.currentSystemDefault()
-    )
+    val dateTime = LocalDateTime.tryParse(purchaseBill.date) ?: Clock.System.now()
+        .toLocalDateTime(
+            TimeZone.currentSystemDefault()
+        )
 
     var openBottomSheet by rememberSaveable { mutableStateOf(false) }
     val bottomSheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = true
     )
-    val currentBill by rememberUpdatedState(bill)
     val dismissState = rememberDismissState(
         confirmValueChange = {
             when (it) {
@@ -180,7 +182,8 @@ private fun BillCard(
         when (dismissState.targetValue) {
             DismissValue.Default -> Color.Transparent
             DismissValue.DismissedToEnd, DismissValue.DismissedToStart -> MaterialTheme.colorScheme.secondaryContainer
-        }, label = ""
+        },
+        label = ""
     )
 
     SwipeToDismiss(state = dismissState,
@@ -210,15 +213,23 @@ private fun BillCard(
                 )
             }
         },
-        directions = if (isAllowedModification) setOf(DismissDirection.StartToEnd, DismissDirection.EndToStart) else setOf(),
+        directions = if (isAllowedModification) setOf(
+            DismissDirection.StartToEnd,
+            DismissDirection.EndToStart
+        )
+        else setOf(),
         dismissContent = {
             ElevatedCard(
                 modifier = modifier
-                    .padding(horizontal = 20.dp, vertical = 5.dp)
+                    .padding(
+                        horizontal = 20.dp,
+                        vertical = 5.dp
+                    )
                     .fillMaxSize()
                     .animateContentSize(
                         animationSpec = tween(
-                            durationMillis = 300, easing = LinearOutSlowInEasing
+                            durationMillis = 300,
+                            easing = LinearOutSlowInEasing
                         )
                     ),
                 onClick = {
@@ -242,7 +253,10 @@ private fun BillCard(
                         CustomSpacer(width = 10)
                         DateTimeCardColumn(
                             day = dateTime.date.dayOfMonth.toString(),
-                            month = dateTime.month.getDisplayName(TextStyle.SHORT, Locale.getDefault())
+                            month = dateTime.month.getDisplayName(
+                                TextStyle.SHORT,
+                                Locale.getDefault()
+                            )
                         )
 
                         CustomSpacer(width = 20)
@@ -253,7 +267,7 @@ private fun BillCard(
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 SubcomposeAsyncImage(
                                     model = ImageRequest.Builder(LocalContext.current)
-                                        .data(usersMap[bill.paymasterUid]?.photoUrl?.ifEmpty { R.drawable.profile })
+                                        .data(usersMap[purchaseBill.paymasterUid]?.photoUrl?.ifEmpty { R.drawable.profile })
                                         .crossfade(true)
                                         .build(),
                                     contentDescription = null,
@@ -268,7 +282,7 @@ private fun BillCard(
 
 
                                 CustomSpacer(width = 6) // old 6
-                                Text(text = usersMap[bill.paymasterUid]?.displayName ?: "-")
+                                Text(text = usersMap[purchaseBill.paymasterUid]?.displayName ?: "-")
                             }
                             CustomSpacer(height = 5)
 
@@ -281,7 +295,7 @@ private fun BillCard(
                                 )
                                 CustomSpacer(width = 7)
                                 Text(
-                                    text = bill.shoppingList,
+                                    text = purchaseBill.shoppingList,
                                     style = MaterialTheme.typography.labelMedium
                                 )
                             }
@@ -291,16 +305,9 @@ private fun BillCard(
                         CustomSpacer(width = 30)
 
                         Column(horizontalAlignment = Alignment.End) {
-                            val isCurrentUserPaymaster = bill.paymasterUid == currentUser.uid
-                            val isCurrentUserInSplitUsers = bill.splitUsersUid.any { it == currentUser.uid }
-                            val isCurrentUserInSplitUsersAndNotPaymaster =
-                                isCurrentUserInSplitUsers && !isCurrentUserPaymaster
-
-                            val prefix = if (isCurrentUserInSplitUsersAndNotPaymaster) "-" else "+"
-
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text(
-                                    text = prefix + bill.splitPricePerUser().format(2),
+                                    text = purchaseBill.resolveBillCost(currentUser),
                                     color = MaterialTheme.colorScheme.onSurface,
                                     fontWeight = FontWeight.Bold,
                                     style = MaterialTheme.typography.headlineSmall.copy(
@@ -331,29 +338,45 @@ private fun BillCard(
             onDismiss = { openBottomSheet = false },
             bottomSheetState = bottomSheetState
         ) {
-            CardText(label = "Paymaster", value = usersMap[bill.paymasterUid]?.displayName ?: "-")
-            CardText(label = "Date", value = dateTime.format())
-            CardText(label = stringResource(R.string.shopping_list), value = bill.shoppingList)
+            CardText(
+                label = "Paymaster",
+                value = usersMap[purchaseBill.paymasterUid]?.displayName ?: "-"
+            )
+            CardText(
+                label = "Date",
+                value = dateTime.format()
+            )
+            CardText(
+                label = stringResource(R.string.shopping_list),
+                value = purchaseBill.shoppingList
+            )
             Row(
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 CardTextColumn(
                     label = stringResource(R.string.total_price),
-                    value = "€${bill.total.format(2)}"
+                    value = "€${purchaseBill.total.format(2)}"
                 )
                 CustomSpacer(width = 30)
                 CardTextColumn(
                     label = stringResource(R.string.price_per_person),
-                    value = "€${bill.splitPricePerUser().format(2)}"
+                    value = "€${
+                        purchaseBill.splitPricePerUser()
+                            .format(2)
+                    }"
                 )
             }
             CustomSpacer(height = 10)
             Text(
-                text = stringResource(R.string.split_bill_with), style = MaterialTheme.typography.labelMedium
+                text = stringResource(R.string.split_bill_with),
+                style = MaterialTheme.typography.labelMedium
             )
             CustomSpacer(height = 7)
-            FlowRow(mainAxisSpacing = 7.dp, crossAxisSpacing = 7.dp) {
-                usersMap.filter { bill.splitUsersUid.contains(it.key) }.values.forEach {
+            FlowRow(
+                mainAxisSpacing = 7.dp,
+                crossAxisSpacing = 7.dp
+            ) {
+                usersMap.filter { purchaseBill.splitUsersUid.contains(it.key) }.values.forEach {
                     OutlinedCard(
                         shape = RoundedCornerShape(25)
                     ) {
@@ -365,10 +388,11 @@ private fun BillCard(
                     }
                 }
             }
-            CustomSpacer(height = 10)
+            CustomSpacer(height = 30)
             AnimatedVisibility(visible = isAllowedModification) {
                 Row(
-                    horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()
+                    horizontalArrangement = Arrangement.End,
+                    modifier = Modifier.fillMaxWidth()
                 ) {
 
                     TextButton(onClick = {
@@ -377,12 +401,13 @@ private fun BillCard(
                         Text(text = "Edit")
                     }
                     TextButton(onClick = {
-                        scope.launch { bottomSheetState.hide() }.invokeOnCompletion {
-                            if (!bottomSheetState.isVisible) {
-                                openBottomSheet = false
+                        scope.launch { bottomSheetState.hide() }
+                            .invokeOnCompletion {
+                                if (!bottomSheetState.isVisible) {
+                                    openBottomSheet = false
+                                }
                             }
-                        }
-                        viewModel.deleteBill(bill)
+                        viewModel.deleteBill(purchaseBill)
                     }) {
                         Text(text = "Delete")
                     }
@@ -396,7 +421,7 @@ private fun BillCard(
     // Add new bill
     if (modifyPopupState.value) {
         BillPopup(
-            initialBill = bill.copy(),
+            initialPurchaseBill = purchaseBill.copy(),
             onSaveClick = { viewModel.updateBill(it) },
             onDismiss = { modifyPopupState.value = false },
             usersMap = usersMap
