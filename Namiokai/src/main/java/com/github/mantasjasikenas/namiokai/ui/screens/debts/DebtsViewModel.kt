@@ -1,13 +1,13 @@
 package com.github.mantasjasikenas.namiokai.ui.screens.debts
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.github.mantasjasikenas.namiokai.data.repository.debts.DebtsManager
+import com.github.mantasjasikenas.namiokai.data.repository.debts.DebtsMap
+import com.github.mantasjasikenas.namiokai.model.Period
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 
@@ -19,8 +19,12 @@ class DebtsViewModel @Inject constructor(
     private val _debtsUiState = MutableStateFlow(DebtsUiState())
     val debtsUiState = _debtsUiState.asStateFlow()
 
-    init {
-        getDebts()
+    fun getDebts(period: Period): Flow<DebtsMap> {
+        return debtsManager.getDebts(period)
+    }
+
+    /*init {
+        //getDebts()
     }
 
     private fun getDebts() {
@@ -29,6 +33,6 @@ class DebtsViewModel @Inject constructor(
                 _debtsUiState.update { it.copy(debts = debts) }
             }
         }
-    }
+    }*/
 
 }

@@ -2,7 +2,7 @@ package com.github.mantasjasikenas.namiokai.ui.screens.flat
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.github.mantasjasikenas.namiokai.data.FirebaseRepository
+import com.github.mantasjasikenas.namiokai.data.FlatBillsRepository
 import com.github.mantasjasikenas.namiokai.model.bills.FlatBill
 import com.github.mantasjasikenas.namiokai.utils.Constants
 import com.google.firebase.auth.ktx.auth
@@ -19,7 +19,7 @@ import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 @HiltViewModel
-class FlatViewModel @Inject constructor(private val firebaseRepository: FirebaseRepository) :
+class FlatViewModel @Inject constructor(private val flatBillsRepository: FlatBillsRepository) :
     ViewModel() {
 
     private val _flatUiState = MutableStateFlow(FlatUiState())
@@ -33,7 +33,7 @@ class FlatViewModel @Inject constructor(private val firebaseRepository: Firebase
     private fun getFlatBills() {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                firebaseRepository.getFlatBills().collect { flatBills ->
+                flatBillsRepository.getFlatBills().collect { flatBills ->
                     _flatUiState.update { it.copy(flatBills = flatBills) }
                 }
             }
@@ -49,7 +49,7 @@ class FlatViewModel @Inject constructor(private val firebaseRepository: Firebase
 
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                firebaseRepository.insertFlatBill(flatBill)
+                flatBillsRepository.insertFlatBill(flatBill)
             }
         }
     }
@@ -57,7 +57,7 @@ class FlatViewModel @Inject constructor(private val firebaseRepository: Firebase
     fun updateFlatBill(flatBill: FlatBill) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                firebaseRepository.updateFlatBill(flatBill)
+                flatBillsRepository.updateFlatBill(flatBill)
             }
         }
     }
@@ -65,7 +65,7 @@ class FlatViewModel @Inject constructor(private val firebaseRepository: Firebase
     fun deleteFlatBill(flatBill: FlatBill) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                firebaseRepository.deleteFlatBill(flatBill)
+                flatBillsRepository.deleteFlatBill(flatBill)
             }
         }
     }

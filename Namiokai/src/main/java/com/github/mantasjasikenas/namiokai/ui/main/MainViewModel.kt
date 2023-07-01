@@ -3,9 +3,8 @@ package com.github.mantasjasikenas.namiokai.ui.main
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.github.mantasjasikenas.namiokai.data.FirebaseRepository
+import com.github.mantasjasikenas.namiokai.data.BaseFirebaseRepository
 import com.github.mantasjasikenas.namiokai.data.UsersRepository
-import com.github.mantasjasikenas.namiokai.data.repository.preferences.PreferencesRepository
 import com.github.mantasjasikenas.namiokai.model.Period
 import com.github.mantasjasikenas.namiokai.model.User
 import com.github.mantasjasikenas.namiokai.model.getMonthlyPeriod
@@ -29,9 +28,8 @@ private const val TAG = "MainViewModel"
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    val firebaseRepository: FirebaseRepository,
-    private val usersRepository: UsersRepository,
-    private val preferencesRepository: PreferencesRepository
+    val baseFirebaseRepository: BaseFirebaseRepository,
+    private val usersRepository: UsersRepository
 ) : ViewModel() {
 
     private val _mainUiState = MutableStateFlow(MainUiState(currentUser = getUserFromAuth()))
@@ -99,7 +97,7 @@ class MainViewModel @Inject constructor(
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 Firebase.auth.currentUser?.uid?.let { uid ->
-                    firebaseRepository.getUser(uid)
+                    usersRepository.getUser(uid)
                         .collect { user ->
                             println(uid)
                             println(user)

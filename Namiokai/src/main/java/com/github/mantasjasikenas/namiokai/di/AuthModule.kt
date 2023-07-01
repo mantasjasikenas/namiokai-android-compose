@@ -1,12 +1,10 @@
 package com.github.mantasjasikenas.namiokai.di
 
 import android.content.Context
-import com.github.mantasjasikenas.namiokai.data.FirebaseRepository
+import com.github.mantasjasikenas.namiokai.data.UsersRepository
 import com.github.mantasjasikenas.namiokai.presentation.sign_in.GoogleAuthUiClient
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.auth.api.identity.SignInClient
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -19,19 +17,16 @@ import javax.inject.Singleton
 object AuthModule {
 
     @Provides
-    fun provideFirebaseAuth() = Firebase.auth
-
-    @Provides
     @Singleton
     fun provideGoogleAuthUiClient(
         @ApplicationContext
         context: Context,
         oneTapClient: SignInClient,
-        firebaseRepository: FirebaseRepository
+        usersRepository: UsersRepository
     ) = GoogleAuthUiClient(
         context = context,
         oneTapClient = oneTapClient,
-        firebaseRepository = firebaseRepository
+        usersRepository = usersRepository
     )
 
     @Provides

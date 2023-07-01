@@ -3,7 +3,7 @@ package com.github.mantasjasikenas.namiokai.ui.screens.settings
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.github.mantasjasikenas.namiokai.data.FirebaseRepository
+import com.github.mantasjasikenas.namiokai.data.UsersRepository
 import com.github.mantasjasikenas.namiokai.model.Response
 import com.github.mantasjasikenas.namiokai.presentation.sign_in.GoogleAuthUiClient
 import com.github.mantasjasikenas.namiokai.ui.main.MainUiState
@@ -15,7 +15,7 @@ import javax.inject.Inject
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val googleAuthUiClient: GoogleAuthUiClient,
-    private val firebaseRepository: FirebaseRepository,
+    private val usersRepository: UsersRepository,
     private val toastManager: ToastManager
 ) : ViewModel() {
 
@@ -27,10 +27,10 @@ class SettingsViewModel @Inject constructor(
 
     fun addImageToStorage(imageUri: Uri) = viewModelScope.launch {
         when (val addImageToStorageResponse =
-            firebaseRepository.addImageToFirebaseStorage(imageUri)) {
+            usersRepository.addImageToFirebaseStorage(imageUri)) {
             is Response.Success -> {
                 addImageToStorageResponse.data?.let { uri ->
-                    firebaseRepository.changeCurrentUserImageUrlInFirestore(uri)
+                    usersRepository.changeCurrentUserImageUrlInFirestore(uri)
                 }
                 toastManager.show("Image uploaded successfully")
             }
@@ -45,15 +45,19 @@ class SettingsViewModel @Inject constructor(
     }
 
     fun updateDisplayName(newName: String) = viewModelScope.launch {
-        val response = firebaseRepository.changeCurrentUserNameInFirestore(newName)
+        val response = usersRepository.changeCurrentUserNameInFirestore(newName)
         if (response is Response.Success) {
             toastManager.show("Name changed successfully")
-        } else {
+        }
+        else {
             toastManager.show("Name change failed")
         }
     }
 
-    fun validateDisplayName(mainUiState: MainUiState, name: String): Boolean {
+    fun validateDisplayName(
+        mainUiState: MainUiState,
+        name: String
+    ): Boolean {
         if (name.isBlank()) {
             toastManager.show("Name cannot be blank")
             return false

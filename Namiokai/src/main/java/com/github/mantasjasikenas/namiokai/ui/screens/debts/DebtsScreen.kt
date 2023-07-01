@@ -2,7 +2,6 @@ package com.github.mantasjasikenas.namiokai.ui.screens.debts
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.gestures.ScrollableDefaults
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -56,20 +55,20 @@ fun DebtsScreen(
     debtsViewModel: DebtsViewModel = hiltViewModel(),
     mainViewModel: MainViewModel = hiltViewModel(),
 ) {
-    val summaryUiState by debtsViewModel.debtsUiState.collectAsState()
+    val debtsUiState by debtsViewModel.debtsUiState.collectAsState()
     val mainUiState by mainViewModel.mainUiState.collectAsState()
     val usersMap = mainUiState.usersMap
     val period by mainViewModel.periodState.collectAsState()
+    val usersDebts by debtsViewModel.getDebts(period)
+        .collectAsState(initial = emptyMap())
 
-
-    if (summaryUiState.debts.isEmpty()) {
+    if (usersDebts.isEmpty()) {
         EmptyView()
         return
     }
 
     LazyVerticalStaggeredGrid(
         columns = StaggeredGridCells.Fixed(2),
-        flingBehavior = ScrollableDefaults.flingBehavior()  ,
         verticalItemSpacing = 8.dp,
         horizontalArrangement = Arrangement.spacedBy(
             8.dp,
@@ -80,7 +79,7 @@ fun DebtsScreen(
             .padding(20.dp)
     ) {
 
-        items(summaryUiState.debts.toList()) { (user, debts) ->
+        items(usersDebts.toList()) { (user, debts) ->
             if (debts.isEmpty() || usersMap[user] == null) return@items
 
 

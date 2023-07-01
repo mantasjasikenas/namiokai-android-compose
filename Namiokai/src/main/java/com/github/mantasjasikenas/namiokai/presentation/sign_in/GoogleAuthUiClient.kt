@@ -4,7 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentSender
 import com.github.mantasjasikenas.namiokai.R
-import com.github.mantasjasikenas.namiokai.data.FirebaseRepository
+import com.github.mantasjasikenas.namiokai.data.UsersRepository
 import com.github.mantasjasikenas.namiokai.model.User
 import com.github.mantasjasikenas.namiokai.utils.toUser
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
@@ -19,7 +19,7 @@ import kotlinx.coroutines.tasks.await
 class GoogleAuthUiClient(
     private val context: Context,
     private val oneTapClient: SignInClient,
-    private val firebaseRepository: FirebaseRepository
+    private val usersRepository: UsersRepository
 ) {
     private val auth = Firebase.auth
 
@@ -46,7 +46,7 @@ class GoogleAuthUiClient(
             val isNewUser = authResult.additionalUserInfo?.isNewUser ?: false
 
             if (isNewUser && authResult.user != null) {
-                firebaseRepository.insertUser(authResult.user!!.toUser())
+                usersRepository.insertUser(authResult.user!!.toUser())
             }
 
             SignInResult(

@@ -2,7 +2,7 @@ package com.github.mantasjasikenas.namiokai.ui.screens.fuel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.github.mantasjasikenas.namiokai.data.FirebaseRepository
+import com.github.mantasjasikenas.namiokai.data.TripBillsRepository
 import com.github.mantasjasikenas.namiokai.model.bills.TripBill
 import com.github.mantasjasikenas.namiokai.utils.Constants.DATE_TIME_FORMAT
 import com.google.firebase.auth.ktx.auth
@@ -19,7 +19,7 @@ import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 @HiltViewModel
-class FuelViewModel @Inject constructor(private val firebaseRepository: FirebaseRepository) :
+class FuelViewModel @Inject constructor(private val tripBillsRepository: TripBillsRepository) :
     ViewModel() {
 
     private val _fuelUiState = MutableStateFlow(FuelUiState())
@@ -33,7 +33,7 @@ class FuelViewModel @Inject constructor(private val firebaseRepository: Firebase
     private fun getFuel() {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                firebaseRepository.getTripBills().collect { fuels ->
+                tripBillsRepository.getTripBills().collect { fuels ->
                     _fuelUiState.update { it.copy(tripBills = fuels) }
                 }
             }
@@ -43,7 +43,7 @@ class FuelViewModel @Inject constructor(private val firebaseRepository: Firebase
     private fun getDestinations() {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                firebaseRepository.getDestinations().collect { destinations ->
+                tripBillsRepository.getDestinations().collect { destinations ->
                     _fuelUiState.update { it.copy(destinations = destinations) }
                 }
             }
@@ -59,7 +59,7 @@ class FuelViewModel @Inject constructor(private val firebaseRepository: Firebase
 
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                firebaseRepository.insertFuel(tripBill)
+                tripBillsRepository.insertFuel(tripBill)
             }
         }
     }
@@ -67,7 +67,7 @@ class FuelViewModel @Inject constructor(private val firebaseRepository: Firebase
     fun updateFuel(tripBill: TripBill) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                firebaseRepository.updateFuel(tripBill)
+                tripBillsRepository.updateFuel(tripBill)
             }
         }
     }
@@ -75,7 +75,7 @@ class FuelViewModel @Inject constructor(private val firebaseRepository: Firebase
     fun deleteFuel(tripBill: TripBill) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                firebaseRepository.deleteFuel(tripBill)
+                tripBillsRepository.deleteFuel(tripBill)
             }
         }
 

@@ -1,7 +1,7 @@
 package com.github.mantasjasikenas.namiokai.data.repository.debts
 
 import android.util.Log
-import com.github.mantasjasikenas.namiokai.data.FirebaseRepository
+import com.github.mantasjasikenas.namiokai.data.BillsRepository
 import com.github.mantasjasikenas.namiokai.di.annotations.ApplicationScope
 import com.github.mantasjasikenas.namiokai.model.Period
 import kotlinx.coroutines.CoroutineScope
@@ -13,7 +13,7 @@ import javax.inject.Inject
 private const val TAG = "DebtsManager"
 
 class DebtsManager @Inject constructor(
-    private val firebaseRepository: FirebaseRepository,
+    private val billsRepository: BillsRepository,
     @ApplicationScope private val coroutineScope: CoroutineScope
 ) {
     private val debtsRepository = DebtsRepository()
@@ -27,7 +27,7 @@ class DebtsManager @Inject constructor(
     }
 
     fun getDebts(): Flow<DebtsMap> = channelFlow {
-        firebaseRepository.getBills()
+        billsRepository.getBills()
             .collect { bills ->
                 val debts = debtsRepository.calculateDebts(bills)
                 send(debts)
@@ -42,7 +42,7 @@ class DebtsManager @Inject constructor(
     }
 
     fun getDebts(period: Period): Flow<DebtsMap> = channelFlow {
-        firebaseRepository.getBills(period)
+        billsRepository.getBills(period)
             .collect { bills ->
                 val debts = debtsRepository.calculateDebts(bills)
                 send(debts)

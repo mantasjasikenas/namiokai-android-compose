@@ -2,6 +2,7 @@ package com.github.mantasjasikenas.namiokai.ui.screens.bill
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.github.mantasjasikenas.namiokai.data.PurchaseBillsRepository
 import com.github.mantasjasikenas.namiokai.model.bills.PurchaseBill
 import com.github.mantasjasikenas.namiokai.utils.Constants.DATE_TIME_FORMAT
 import com.google.firebase.auth.ktx.auth
@@ -20,7 +21,7 @@ import javax.inject.Inject
 private const val TAG = "BillViewModel"
 
 @HiltViewModel
-class BillViewModel @Inject constructor(private val firebaseRepository: com.github.mantasjasikenas.namiokai.data.FirebaseRepository) :
+class BillViewModel @Inject constructor(private val purchaseBillsRepository: PurchaseBillsRepository) :
     ViewModel() {
 
     private val _billUiState = MutableStateFlow(BillUiState())
@@ -33,7 +34,7 @@ class BillViewModel @Inject constructor(private val firebaseRepository: com.gith
     private fun getBills() {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                firebaseRepository.getPurchaseBills().collect { bills ->
+                purchaseBillsRepository.getPurchaseBills().collect { bills ->
                     _billUiState.update { it.copy(purchaseBills = bills) }
                 }
             }
@@ -50,7 +51,7 @@ class BillViewModel @Inject constructor(private val firebaseRepository: com.gith
 
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                firebaseRepository.insertBill(purchaseBill)
+                purchaseBillsRepository.insertBill(purchaseBill)
             }
         }
     }
@@ -58,7 +59,7 @@ class BillViewModel @Inject constructor(private val firebaseRepository: com.gith
     fun updateBill(purchaseBill: PurchaseBill) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                firebaseRepository.updateBill(purchaseBill)
+                purchaseBillsRepository.updateBill(purchaseBill)
             }
         }
     }
@@ -66,7 +67,7 @@ class BillViewModel @Inject constructor(private val firebaseRepository: com.gith
     fun deleteBill(purchaseBill: PurchaseBill) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                firebaseRepository.deleteBill(purchaseBill)
+                purchaseBillsRepository.deleteBill(purchaseBill)
             }
         }
     }
