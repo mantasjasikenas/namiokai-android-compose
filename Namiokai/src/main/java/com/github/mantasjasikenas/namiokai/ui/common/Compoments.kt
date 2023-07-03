@@ -3,6 +3,7 @@ package com.github.mantasjasikenas.namiokai.ui.common
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -125,7 +126,8 @@ fun CardText(
 ) {
     Text(
         text = label,
-        style = MaterialTheme.typography.labelMedium
+        style = MaterialTheme.typography.labelMedium,
+        color = MaterialTheme.colorScheme.primary,
     )
     Text(text = value)
     CustomSpacer(height = 10)
@@ -140,7 +142,9 @@ fun CardTextColumn(
     Column(modifier = modifier) {
         Text(
             text = label,
-            style = MaterialTheme.typography.labelMedium
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.primary,
         )
         Text(text = value)
     }
@@ -199,10 +203,8 @@ fun EuroIconTextRow(
         Text(
             text = label,
             style = MaterialTheme.typography.labelLarge,
-            modifier = Modifier.weight(1f),
         )
         Row(
-            modifier = Modifier.weight(1f),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.End
         ) {
@@ -363,23 +365,26 @@ fun EmptyView() {
 @Composable
 fun NamiokaiDialog(
     title: String,
+    buttonsVisible: Boolean = true,
     onSaveClick: () -> Unit,
     onDismiss: () -> Unit,
     content: @Composable () -> Unit
 ) {
     NamiokaiDialog(
         title = title,
+        buttonsVisible = buttonsVisible,
         selectedValue = null,
         onSaveClick = { onSaveClick() },
         onDismiss = onDismiss,
     ) {
-
+        content()
     }
 }
 
 @Composable
 fun <T> NamiokaiDialog(
     title: String,
+    buttonsVisible : Boolean = true,
     selectedValue: T,
     onSaveClick: (T) -> Unit,
     onDismiss: () -> Unit,
@@ -415,19 +420,21 @@ fun <T> NamiokaiDialog(
                 content()
                 Spacer(modifier = Modifier.height(30.dp))
 
-                Row(
-                    horizontalArrangement = Arrangement.End,
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    TextButton(
-                        onClick = onDismiss
+                if (buttonsVisible){
+                    Row(
+                        horizontalArrangement = Arrangement.End,
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text(text = "Cancel")
-                    }
-                    Spacer(modifier = Modifier.width(10.dp))
-                    TextButton(onClick = { onSaveClick(selectedValue) }) {
-                        Text(text = "OK")
+                        TextButton(
+                            onClick = onDismiss
+                        ) {
+                            Text(text = "Cancel")
+                        }
+                        Spacer(modifier = Modifier.width(10.dp))
+                        TextButton(onClick = { onSaveClick(selectedValue) }) {
+                            Text(text = "OK")
+                        }
                     }
                 }
             }
@@ -584,6 +591,31 @@ fun NamiokaiElevatedCard(
                     easing = LinearOutSlowInEasing
                 )
             ),
+        onClick = onClick,
+    ) {
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(15.dp),
+            horizontalAlignment = Alignment.Start,
+            verticalArrangement = Arrangement.Center
+        ) {
+            content()
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun NamiokaiOutlinedCard(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = {},
+    content: @Composable () -> Unit
+) {
+    OutlinedCard(
+        modifier = modifier
+            .fillMaxSize(),
         onClick = onClick,
     ) {
 

@@ -344,7 +344,8 @@ private fun FuelCard(
             )
             Text(
                 text = stringResource(R.string.passengers),
-                style = MaterialTheme.typography.labelMedium
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.primary
             )
             CustomSpacer(height = 7)
             FlowRow(

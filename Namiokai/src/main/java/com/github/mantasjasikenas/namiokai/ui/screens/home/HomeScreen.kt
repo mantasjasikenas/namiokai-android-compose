@@ -12,7 +12,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.OtherHouses
-import androidx.compose.material.icons.outlined.Payment
+import androidx.compose.material.icons.outlined.ShortText
 import androidx.compose.material.icons.outlined.Store
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DateRangePicker
@@ -40,6 +40,7 @@ import com.github.mantasjasikenas.namiokai.model.bills.FlatBill
 import com.github.mantasjasikenas.namiokai.ui.common.CustomSpacer
 import com.github.mantasjasikenas.namiokai.ui.common.EuroIconTextRow
 import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiElevatedCard
+import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiOutlinedCard
 import com.github.mantasjasikenas.namiokai.ui.common.rememberState
 import com.github.mantasjasikenas.namiokai.ui.main.MainUiState
 import com.github.mantasjasikenas.namiokai.ui.main.MainViewModel
@@ -74,17 +75,13 @@ fun HomeScreen(
             .padding(20.dp)
             .verticalScroll(verticalScrollState)
     ) {
-        CustomSpacer(height = 20)
         HomeScreenTopBar(
             mainUiState = mainUiState,
             period = period,
             onPeriodClick = {
                 openDatePicker = true
             })
-        CustomSpacer(height = 20)
-
-
-        CustomSpacer(height = 20)
+        CustomSpacer(height = 8)
         SummaryCard(
             currentUserDebts = currentUserDebts,
             mainUiState = mainUiState
@@ -173,16 +170,18 @@ private fun HomeScreenTopBar(
     onPeriodClick: () -> Unit,
     period: Period
 ) {
-    Text(
-        text = "Your debts, ${mainUiState.currentUser.displayName}",
-        style = MaterialTheme.typography.titleLarge,
-        fontWeight = FontWeight.Bold
-    )
-    Text(text = "$period",
-        style = MaterialTheme.typography.labelLarge,
-        fontWeight = FontWeight.Bold,
-        color = MaterialTheme.colorScheme.primary,
-        modifier = Modifier.clickable { onPeriodClick() })
+    NamiokaiOutlinedCard {
+        Text(
+            text = "Your debts, ${mainUiState.currentUser.displayName}",
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold
+        )
+        Text(text = "$period",
+            style = MaterialTheme.typography.labelLarge,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.clickable { onPeriodClick() })
+    }
 }
 
 @Composable
@@ -191,45 +190,28 @@ private fun SummaryCard(
     mainUiState: MainUiState
 ) {
     if (currentUserDebts.isNullOrEmpty()) {
-        Row(
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = Icons.Outlined.Payment,
-                contentDescription = null,
-                modifier = Modifier.size(18.dp),
-                tint = MaterialTheme.colorScheme.primary
-            )
-            CustomSpacer(width = 7)
-            Text(
-                text = "No debts found",
-                fontWeight = FontWeight.Bold,
-            )
+        NamiokaiElevatedCard {
+            Row(
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.ShortText,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+                CustomSpacer(width = 10)
+                Text(
+                    text = "No debts found",
+                    fontWeight = FontWeight.Bold,
+                )
+            }
         }
         return
     }
 
     NamiokaiElevatedCard {
-        Row {
-            Icon(
-                imageVector = Icons.Outlined.Payment,
-                contentDescription = null,
-                modifier = Modifier.size(18.dp),
-                tint = MaterialTheme.colorScheme.primary
-            )
-            CustomSpacer(width = 7)
-            Text(
-                text = "Debts summary",
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.primary,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Start
-            )
-        }
-        CustomSpacer(height = 20)
-
         var total = 0.0
         currentUserDebts.forEach { (key, value) ->
 

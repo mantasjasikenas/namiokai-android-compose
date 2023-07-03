@@ -349,7 +349,9 @@ private fun FlatCard(
             CustomSpacer(height = 10)
             Text(
                 text = stringResource(R.string.split_bill_with),
-                style = MaterialTheme.typography.labelMedium
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.Bold
             )
             CustomSpacer(height = 7)
             FlowRow(mainAxisSpacing = 7.dp, crossAxisSpacing = 7.dp) {

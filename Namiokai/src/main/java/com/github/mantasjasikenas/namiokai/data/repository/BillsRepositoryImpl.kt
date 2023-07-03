@@ -28,9 +28,9 @@ class BillsRepositoryImpl @Inject constructor(
 
     override suspend fun getBills(period: Period): Flow<List<Bill>> {
         return combine(
-            purchaseBillsRepository.getPurchaseBills(),
-            tripBillsRepository.getTripBills(),
-            flatBillsRepository.getFlatBills()
+            purchaseBillsRepository.getPurchaseBills(period),
+            tripBillsRepository.getTripBills(period),
+            flatBillsRepository.getFlatBills(period)
         ) { purchaseBills, tripBills, flatBills ->
             purchaseBills + tripBills + flatBills
         }

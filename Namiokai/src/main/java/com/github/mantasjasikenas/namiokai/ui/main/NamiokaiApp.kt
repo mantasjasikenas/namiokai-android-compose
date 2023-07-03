@@ -25,6 +25,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -72,7 +73,8 @@ fun NamiokaiApp(mainViewModel: MainViewModel = hiltViewModel()) {
 
     val startDestination = if (mainUiState.currentUser.isNotLoggedIn()) {
         NavGraph.Auth.route
-    } else {
+    }
+    else {
         NavGraph.Home.route
     }
 
@@ -135,25 +137,27 @@ fun NamiokaiScreen(
     }
 
 
-    Scaffold(topBar = {
-        NamiokaiAppTopBar(
-            navController = navController,
-            topBarState = topBarState.value,
-            currentScreen = currentScreen,
-            canNavigateBack = navController.previousBackStackEntry != null && !Screen.navBarScreens.contains(
-                currentScreen
-            ),
-            navigateUp = { navController.navigateUp() },
-            adminModeEnabled = currentUser.admin,
-            photoUrl = currentUser.photoUrl
-        )
-    }, bottomBar = {
-        NamiokaiAppNavigationBar(
-            navController = navController,
-            currentDestination = currentDestination,
-            bottomBarState = bottomBarState.value
-        )
-    }
+    Scaffold(
+        topBar = {
+            NamiokaiAppTopBar(
+                navController = navController,
+                topBarState = topBarState.value,
+                currentScreen = currentScreen,
+                canNavigateBack = navController.previousBackStackEntry != null && !Screen.navBarScreens.contains(
+                    currentScreen
+                ),
+                navigateUp = { navController.navigateUp() },
+                adminModeEnabled = currentUser.admin,
+                photoUrl = currentUser.photoUrl
+            )
+        },
+        bottomBar = {
+            NamiokaiAppNavigationBar(
+                navController = navController,
+                currentDestination = currentDestination,
+                bottomBarState = bottomBarState.value
+            )
+        }
     ) { innerPadding ->
 
         NavHost(
@@ -179,7 +183,12 @@ fun NamiokaiAppNavigationBar(
     AnimatedVisibility(visible = bottomBarState) {
         NavigationBar {
             Screen.navBarScreens.forEach { screen ->
-                NavigationBarItem(icon = { Icon(screen.imageVector, contentDescription = null) },
+                NavigationBarItem(icon = {
+                    Icon(
+                        screen.imageVector,
+                        contentDescription = null
+                    )
+                },
                     label = { Text(stringResource(screen.titleResourceId)) },
                     selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true,
                     onClick = {
@@ -211,30 +220,38 @@ fun NamiokaiAppTopBar(
     photoUrl: String,
     navigateUp: () -> Unit
 ) {
-    AnimatedVisibility(visible = topBarState) {
-        TopAppBar(title = { Text(stringResource(currentScreen.titleResourceId)) },
-            modifier = modifier,
-            navigationIcon = {
-                if (canNavigateBack) {
-                    IconButton(onClick = navigateUp) {
-                        Icon(
-                            imageVector = Icons.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.back_button)
-                        )
-                    }
-                }
-            },
-            actions = {
-                TopBarDropdownMenu(
-                    navigateScreen = { screen ->
-                        navController.navigate(screen.route) {
-                            launchSingleTop = true
-                        }
-                    },
-                    adminModeEnabled = adminModeEnabled,
-                    photoUrl = photoUrl
+    Surface {
+        AnimatedVisibility(visible = topBarState) {
+            TopAppBar(title = {
+                Text(
+                    text = stringResource(id = currentScreen.titleResourceId),
+                    style = MaterialTheme.typography.titleLarge,
                 )
-            })
+            },
+                modifier = modifier,
+                navigationIcon = {
+                    if (canNavigateBack) {
+                        IconButton(onClick = navigateUp) {
+                            Icon(
+                                imageVector = Icons.Filled.ArrowBack,
+                                contentDescription = stringResource(R.string.back_button)
+                            )
+                        }
+                    }
+                },
+                actions = {
+                    TopBarDropdownMenu(
+                        navigateScreen = { screen ->
+                            navController.navigate(screen.route) {
+                                launchSingleTop = true
+                            }
+                        },
+                        adminModeEnabled = adminModeEnabled,
+                        photoUrl = photoUrl
+                    )
+                }
+            )
+        }
     }
 }
 
@@ -243,11 +260,16 @@ fun NamiokaiAppTopBar(
 fun TopBarDropdownMenu(
     navigateScreen: (Screen) -> Unit,
     adminModeEnabled: Boolean = false,
-    photoUrl : String = ""
+    photoUrl: String = ""
 ) {
     var expanded by remember { mutableStateOf(false) }
     val context = LocalContext.current
-    val urlIntent = remember { Intent(Intent.ACTION_VIEW, Uri.parse(NAMIOKAI_ASSETS_URL)) }
+    val urlIntent = remember {
+        Intent(
+            Intent.ACTION_VIEW,
+            Uri.parse(NAMIOKAI_ASSETS_URL)
+        )
+    }
 
 
     IconButton(onClick = { expanded = true }) {
@@ -265,7 +287,11 @@ fun TopBarDropdownMenu(
             modifier = Modifier
                 .clip(CircleShape)
                 .size(28.dp) // 31.dp
-                .border(Dp.Hairline, MaterialTheme.colorScheme.primary, CircleShape)
+                .border(
+                    Dp.Hairline,
+                    MaterialTheme.colorScheme.primary,
+                    CircleShape
+                )
         )
     }
 
