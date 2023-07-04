@@ -70,6 +70,7 @@ import com.github.mantasjasikenas.namiokai.ui.common.DateTimeCardColumn
 import com.github.mantasjasikenas.namiokai.ui.common.EmptyView
 import com.github.mantasjasikenas.namiokai.ui.common.FloatingAddButton
 import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiBottomSheet
+import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiConfirmDialog
 import com.github.mantasjasikenas.namiokai.ui.common.VerticalDivider
 import com.github.mantasjasikenas.namiokai.ui.main.MainViewModel
 import com.github.mantasjasikenas.namiokai.ui.main.UsersMap
@@ -152,6 +153,7 @@ private fun FuelCard(
     }
 
     var openBottomSheet by rememberSaveable { mutableStateOf(false) }
+    var confirmDialog by remember { mutableStateOf(false) }
     val bottomSheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = true
     )
@@ -375,17 +377,27 @@ private fun FuelCard(
                     }
                     TextButton(
                         onClick = {
-                            scope.launch { bottomSheetState.hide() }
-                                .invokeOnCompletion {
-                                    if (!bottomSheetState.isVisible) {
-                                        openBottomSheet = false
-                                    }
-                                }
-                            viewModel.deleteFuel(tripBill)
+                            confirmDialog = true
                         }) {
                         Text(text = "Delete")
                     }
                 }
+            }
+
+            if (confirmDialog) {
+                NamiokaiConfirmDialog(
+                    onConfirm = {
+                        scope.launch { bottomSheetState.hide() }
+                            .invokeOnCompletion {
+                                if (!bottomSheetState.isVisible) {
+                                    openBottomSheet = false
+                                }
+                            }
+                        viewModel.deleteFuel(tripBill)
+                        confirmDialog = false
+                    },
+                    onDismiss = { confirmDialog = false }
+                )
             }
 
         }

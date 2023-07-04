@@ -119,5 +119,9 @@ class TripBillsRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun backupCollection(fileName: String) {
+        baseFirebaseRepository.backupCollection(FUEL_COLLECTION, BACKUP_FUEL_PATH, fileName)
+    }
+
 
 }

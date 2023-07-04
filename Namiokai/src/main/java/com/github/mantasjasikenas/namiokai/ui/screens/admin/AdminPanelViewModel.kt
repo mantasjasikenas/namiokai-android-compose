@@ -3,7 +3,6 @@ package com.github.mantasjasikenas.namiokai.ui.screens.admin
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.github.mantasjasikenas.namiokai.data.BaseFirebaseRepository
 import com.github.mantasjasikenas.namiokai.data.FlatBillsRepository
 import com.github.mantasjasikenas.namiokai.data.PurchaseBillsRepository
 import com.github.mantasjasikenas.namiokai.data.TripBillsRepository
@@ -15,13 +14,13 @@ import com.github.mantasjasikenas.namiokai.model.User
 import com.github.mantasjasikenas.namiokai.utils.ToastManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import java.time.LocalDateTime
 import java.util.UUID
 import javax.inject.Inject
 
 @HiltViewModel
 class AdminPanelViewModel @Inject constructor(
     private val toastManager: ToastManager,
-    private val baseFirebaseRepository: BaseFirebaseRepository,
     private val purchaseBillsRepository: PurchaseBillsRepository,
     private val tripBillsRepository: TripBillsRepository,
     private val flatBillsRepository: FlatBillsRepository,
@@ -32,8 +31,12 @@ class AdminPanelViewModel @Inject constructor(
         toastManager.show("Backup started")
 
         viewModelScope.launch {
-            TODO()
-            //baseFirebaseRepository.backupCollection()
+            val currentDateTime = LocalDateTime.now().toString()
+
+            purchaseBillsRepository.backupCollection(currentDateTime)
+            tripBillsRepository.backupCollection(currentDateTime)
+            flatBillsRepository.backupCollection(currentDateTime)
+            usersRepository.backupCollection(currentDateTime)
         }
             .invokeOnCompletion { throwable ->
                 if (throwable != null)
@@ -44,16 +47,31 @@ class AdminPanelViewModel @Inject constructor(
     }
 
     fun clearBills() {
-        toastManager.show("Bills clear started")
+        toastManager.show("Records clear started")
+        viewModelScope.launch {
+            purchaseBillsRepository.clearBills()
+            tripBillsRepository.clearFuel()
+            flatBillsRepository.clearFlatBills()
+        }
+            .invokeOnCompletion { throwable ->
+                if (throwable != null)
+                    toastManager.show("Records clear failed")
+                else
+                    toastManager.show("Records cleared")
+            }
+    }
+
+    fun clearPurchaseBills() {
+        toastManager.show("Purchase bills clear started")
 
         viewModelScope.launch {
             purchaseBillsRepository.clearBills()
         }
             .invokeOnCompletion { throwable ->
                 if (throwable != null)
-                    toastManager.show("Bills clear failed")
+                    toastManager.show("Purchase bills clear failed")
                 else
-                    toastManager.show("Bills cleared")
+                    toastManager.show("Purchase bills cleared")
             }
     }
 
@@ -96,20 +114,6 @@ class AdminPanelViewModel @Inject constructor(
                     toastManager.show("Users clear failed")
                 else
                     toastManager.show("Users cleared")
-            }
-    }
-
-    fun clearBillsAndFuel() {
-        toastManager.show("Records clear started")
-        viewModelScope.launch {
-            purchaseBillsRepository.clearBills()
-            tripBillsRepository.clearFuel()
-        }
-            .invokeOnCompletion { throwable ->
-                if (throwable != null)
-                    toastManager.show("Records clear failed")
-                else
-                    toastManager.show("Records cleared")
             }
     }
 

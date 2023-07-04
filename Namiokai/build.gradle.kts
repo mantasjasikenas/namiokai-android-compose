@@ -12,14 +12,14 @@ plugins {
 
 android {
     namespace = "com.github.mantasjasikenas.namiokai"
-    compileSdk = 33
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "com.namiokai"
         minSdk = 26
-        targetSdk = 33
-        versionCode = 10
-        versionName = "0.1.0"
+        targetSdk = 34
+        versionCode = 12
+        versionName = "0.1.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -89,14 +89,14 @@ dependencies {
 
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
     implementation("org.jetbrains.kotlinx:kotlinx-datetime-jvm:0.4.0")
-    implementation("androidx.core:core-ktx:1.11.0-beta02")
+    implementation("androidx.core:core-ktx:1.12.0-alpha05")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")
     implementation("androidx.activity:activity-compose:1.7.2")
     implementation(platform("androidx.compose:compose-bom:2023.06.00"))
-    implementation("androidx.compose.ui:ui:1.5.0-beta02")
-    implementation("androidx.compose.ui:ui-graphics:1.5.0-beta02")
-    implementation("androidx.compose.ui:ui-tooling-preview:1.5.0-beta02")
-    implementation("androidx.compose.material3:material3:1.2.0-alpha02")
+    implementation("androidx.compose.ui:ui:1.6.0-alpha01")
+    implementation("androidx.compose.ui:ui-graphics:1.6.0-alpha01")
+    implementation("androidx.compose.ui:ui-tooling-preview:1.6.0-alpha01")
+    implementation("androidx.compose.material3:material3:1.2.0-alpha03")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.1")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1")
@@ -122,15 +122,15 @@ dependencies {
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
     androidTestImplementation(platform("androidx.compose:compose-bom:2023.06.00"))
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.5.0-beta02")
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.6.0-alpha01")
 
-    debugImplementation("androidx.compose.ui:ui-tooling:1.5.0-beta02")
-    debugImplementation("androidx.compose.ui:ui-test-manifest:1.5.0-beta02")
+    debugImplementation("androidx.compose.ui:ui-tooling:1.6.0-alpha01")
+    debugImplementation("androidx.compose.ui:ui-test-manifest:1.6.0-alpha01")
 
     debugImplementation ("androidx.customview:customview:1.2.0-alpha02")
     debugImplementation ("androidx.customview:customview-poolingcontainer:1.0.0")
 
-    implementation("com.google.android.gms:play-services-auth:20.5.0")
+    implementation("com.google.android.gms:play-services-auth:20.6.0")
 
 
 

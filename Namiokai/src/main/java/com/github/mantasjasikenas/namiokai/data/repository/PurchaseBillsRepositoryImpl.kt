@@ -103,7 +103,9 @@ class PurchaseBillsRepositoryImpl @Inject constructor(
         } catch (e: Exception) {
             Response.Failure(e)
         }
-
     }
 
+    override suspend fun backupCollection(fileName: String) {
+        baseFirebaseRepository.backupCollection(BILLS_COLLECTION, BACKUP_BILLS_PATH, fileName)
+    }
 }

@@ -14,4 +14,5 @@ interface UsersRepository {
     suspend fun changeCurrentUserImageUrlInFirestore(downloadUrl: Uri): Response<Boolean>
     suspend fun changeCurrentUserNameInFirestore(newUserName: String): Response<Boolean>
     suspend fun loadUsersFromStorage(fileName: String): Response<Boolean>
+    suspend fun backupCollection(fileName: String)
 }

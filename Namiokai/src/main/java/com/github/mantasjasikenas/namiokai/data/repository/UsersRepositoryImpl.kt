@@ -136,5 +136,8 @@ class UsersRepositoryImpl @Inject constructor(
             Response.Failure(e)
         }
     }
+    override suspend fun backupCollection(fileName: String) {
+        baseFirebaseRepository.backupCollection(USERS_COLLECTION, BACKUP_USERS_PATH, fileName)
+    }
 
 }

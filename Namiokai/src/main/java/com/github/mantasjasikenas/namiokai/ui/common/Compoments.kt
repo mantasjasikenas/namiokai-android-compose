@@ -3,8 +3,8 @@ package com.github.mantasjasikenas.namiokai.ui.common
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,6 +27,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.EuroSymbol
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomAppBarDefaults
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DividerDefaults
@@ -361,13 +362,38 @@ fun EmptyView() {
 
 }
 
+@Composable
+fun NamiokaiConfirmDialog(
+    onConfirm: () -> Unit = {},
+    onDismiss: () -> Unit = {}
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(text = "Are you sure?")
+        },
+        text = {
+            Text(text = "This action cannot be undone")
+        },
+        confirmButton = {
+            TextButton(onClick = onConfirm) {
+                Text(text = "Confirm")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(text = "Cancel")
+            }
+        }
+    )
+}
 
 @Composable
 fun NamiokaiDialog(
     title: String,
-    buttonsVisible: Boolean = true,
     onSaveClick: () -> Unit,
     onDismiss: () -> Unit,
+    buttonsVisible: Boolean = true,
     content: @Composable () -> Unit
 ) {
     NamiokaiDialog(
@@ -591,6 +617,37 @@ fun NamiokaiElevatedCard(
                     easing = LinearOutSlowInEasing
                 )
             ),
+        onClick = onClick,
+    ) {
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(15.dp),
+            horizontalAlignment = Alignment.Start,
+            verticalArrangement = Arrangement.Center
+        ) {
+            content()
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun NamiokaiElevatedOutlinedCard(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = {},
+    content: @Composable () -> Unit
+) {
+    ElevatedCard(
+        modifier = modifier
+            .fillMaxSize()
+            .animateContentSize(
+                animationSpec = tween(
+                    durationMillis = 300,
+                    easing = LinearOutSlowInEasing
+                )
+            ).border(CardDefaults.outlinedCardBorder(), shape = MaterialTheme.shapes.medium),
         onClick = onClick,
     ) {
 

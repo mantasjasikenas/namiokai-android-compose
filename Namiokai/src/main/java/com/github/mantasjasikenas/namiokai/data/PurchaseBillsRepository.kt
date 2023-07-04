@@ -13,4 +13,6 @@ interface PurchaseBillsRepository {
     suspend fun deleteBill(purchaseBill: PurchaseBill)
     suspend fun clearBills()
     suspend fun loadBillsFromStorage(fileName: String): Response<Boolean>
+    suspend fun backupCollection(fileName: String)
+
 }

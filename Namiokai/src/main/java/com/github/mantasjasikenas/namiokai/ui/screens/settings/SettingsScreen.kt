@@ -45,6 +45,7 @@ import androidx.navigation.NavHostController
 import com.github.mantasjasikenas.namiokai.R
 import com.github.mantasjasikenas.namiokai.data.repository.preferences.PreferenceKeys
 import com.github.mantasjasikenas.namiokai.data.repository.preferences.rememberPreference
+import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiConfirmDialog
 import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiDialog
 import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiTextField
 import com.github.mantasjasikenas.namiokai.ui.main.MainViewModel
@@ -59,16 +60,20 @@ fun SettingsScreen(
     navController: NavHostController
 ) {
     var useSystemTheme by rememberPreference(
-        PreferenceKeys.USE_SYSTEM_DEFAULT_THEME, true
+        PreferenceKeys.USE_SYSTEM_DEFAULT_THEME,
+        true
     )
     var isDarkModeEnabled by rememberPreference(
-        PreferenceKeys.IS_DARK_MODE_ENABLED, false
+        PreferenceKeys.IS_DARK_MODE_ENABLED,
+        false
     )
     var isAmoledModeEnabled by rememberPreference(
-        PreferenceKeys.IS_AMOLED_MODE_ENABLED, false
+        PreferenceKeys.IS_AMOLED_MODE_ENABLED,
+        false
     )
     var isDynamicColorEnabled by rememberPreference(
-        PreferenceKeys.IS_DYNAMIC_COLOR_ENABLED, false
+        PreferenceKeys.IS_DYNAMIC_COLOR_ENABLED,
+        false
     )
     val mainUiState by mainViewModel.mainUiState.collectAsState()
     val currentUser = mainUiState.currentUser
@@ -130,9 +135,12 @@ fun SettingsScreen(
             onClick = {
                 galleryLauncher.launch(IMAGES_TYPE)
             })
-        SettingsEntry(title = "Change display name", text = "Update display name", onClick = {
-            setUpdateNameDialogState(true)
-        })
+        SettingsEntry(
+            title = "Change display name",
+            text = "Update display name",
+            onClick = {
+                setUpdateNameDialogState(true)
+            })
         SettingsGroupSpacer()
         SettingsEntryGroupText(title = "Account")
         SettingsEntry(title = "Email",
@@ -151,7 +159,10 @@ fun SettingsScreen(
             ChangeDisplayNameDialog(
                 onSaveClick = {
                     val name = it.trim()
-                    val isValid = settingsViewModel.validateDisplayName(mainUiState, name)
+                    val isValid = settingsViewModel.validateDisplayName(
+                        mainUiState,
+                        name
+                    )
                     if (!isValid) {
                         return@ChangeDisplayNameDialog
                     }
@@ -215,16 +226,32 @@ fun SettingsEntry(
     text: String,
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
+    confirmClick: Boolean = false,
     isEnabled: Boolean = true,
     trailingContent: (@Composable () -> Unit)? = null
 ) {
+    var showDialog by remember { mutableStateOf(false) }
+
     Row(
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
-            .clickable(enabled = isEnabled, onClick = onClick)
+            .clickable(
+                enabled = isEnabled,
+                onClick = {
+                    if (confirmClick) {
+                        showDialog = true
+                    }
+                    else {
+                        onClick()
+                    }
+                }
+            )
             .alpha(if (isEnabled) 1f else 0.5f)
-            .padding(start = 16.dp, end = 16.dp)
+            .padding(
+                start = 16.dp,
+                end = 16.dp
+            )
             .padding(all = 16.dp)
             .fillMaxWidth()
     ) {
@@ -235,13 +262,23 @@ fun SettingsEntry(
                 text = title,
                 style = typography.titleMedium,
             )
-
             Text(
                 text = text,
                 style = typography.labelMedium,
             )
         }
         trailingContent?.invoke()
+    }
+
+    if (showDialog) {
+        NamiokaiConfirmDialog(
+            onConfirm = {
+                showDialog = false
+                onClick()
+            },
+            onDismiss = { showDialog = false }
+        )
+
     }
 }
 
@@ -255,7 +292,10 @@ fun SettingsDescription(
         style = typography.bodyMedium,
         modifier = modifier
             .padding(start = 16.dp)
-            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .padding(
+                horizontal = 16.dp,
+                vertical = 8.dp
+            )
     )
 }
 
@@ -293,7 +333,10 @@ fun ImportantSettingsDescription(
         style = typography.bodyMedium,
         modifier = modifier
             .padding(start = 16.dp)
-            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .padding(
+                horizontal = 16.dp,
+                vertical = 8.dp
+            )
     )
 }
 
@@ -378,7 +421,11 @@ inline fun <T> ValueSelectorDialog(
         ) {
             Column(modifier = Modifier.padding(10.dp)) {
                 Text(
-                    text = title, modifier = Modifier.padding(vertical = 8.dp, horizontal = 24.dp)
+                    text = title,
+                    modifier = Modifier.padding(
+                        vertical = 8.dp,
+                        horizontal = 24.dp
+                    )
                 )
                 Column(
                     modifier = Modifier.verticalScroll(rememberScrollState())
@@ -392,7 +439,10 @@ inline fun <T> ValueSelectorDialog(
                                     onDismiss()
                                     onValueSelected(value)
                                 })
-                                .padding(vertical = 12.dp, horizontal = 24.dp)
+                                .padding(
+                                    vertical = 12.dp,
+                                    horizontal = 24.dp
+                                )
                                 .fillMaxWidth()
                         ) {
                             if (selectedValue == value) {
@@ -412,7 +462,8 @@ inline fun <T> ValueSelectorDialog(
                                         center = size.center,
                                     )
                                 }
-                            } else {
+                            }
+                            else {
                                 Spacer(
                                     modifier = Modifier
                                         .size(18.dp)
@@ -425,7 +476,8 @@ inline fun <T> ValueSelectorDialog(
                             }
 
                             Text(
-                                text = valueText(value), style = typography.labelLarge
+                                text = valueText(value),
+                                style = typography.labelLarge
                             )
                         }
                     }
@@ -435,7 +487,8 @@ inline fun <T> ValueSelectorDialog(
                     modifier = Modifier.align(Alignment.CenterHorizontally)
                 ) {
                     OutlinedButton(
-                        onClick = onDismiss, modifier = Modifier.padding(top = 16.dp)
+                        onClick = onDismiss,
+                        modifier = Modifier.padding(top = 16.dp)
                     ) {
                         Text(text = "Cancel")
                     }

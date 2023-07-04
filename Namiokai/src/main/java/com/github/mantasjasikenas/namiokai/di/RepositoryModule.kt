@@ -84,9 +84,13 @@ object RepositoryModule {
     @Provides
     @Singleton
     fun provideFlatBillsRepository(
-        db: FirebaseFirestore
+        db: FirebaseFirestore,
+        baseFirebaseRepository: BaseFirebaseRepository
     ): FlatBillsRepository =
-        FlatBillsRepositoryImpl(db = db)
+        FlatBillsRepositoryImpl(
+            db = db,
+            baseFirebaseRepository = baseFirebaseRepository
+        )
 
     @Provides
     @Singleton

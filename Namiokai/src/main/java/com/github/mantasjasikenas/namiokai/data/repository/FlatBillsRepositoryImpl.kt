@@ -1,5 +1,6 @@
 package com.github.mantasjasikenas.namiokai.data.repository
 
+import com.github.mantasjasikenas.namiokai.data.BaseFirebaseRepository
 import com.github.mantasjasikenas.namiokai.data.FlatBillsRepository
 import com.github.mantasjasikenas.namiokai.model.Period
 import com.github.mantasjasikenas.namiokai.model.bills.FlatBill
@@ -12,10 +13,12 @@ import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 private const val FLAT_BILLS_COLLECTION = "flatBills"
+private const val BACKUP_FLAT_BILLS_PATH = "backup/flatBills"
 private const val ORDER_BY_FIELD = "date"
 
 class FlatBillsRepositoryImpl @Inject constructor(
     private val db: FirebaseFirestore,
+    private val baseFirebaseRepository: BaseFirebaseRepository
 ) :
     FlatBillsRepository {
 
@@ -88,5 +91,7 @@ class FlatBillsRepositoryImpl @Inject constructor(
             }
     }
 
-
+    override suspend fun backupCollection(fileName: String) {
+        baseFirebaseRepository.backupCollection(FLAT_BILLS_COLLECTION, BACKUP_FLAT_BILLS_PATH, fileName)
+    }
 }

@@ -70,6 +70,7 @@ import com.github.mantasjasikenas.namiokai.ui.common.DateTimeCardColumn
 import com.github.mantasjasikenas.namiokai.ui.common.EmptyView
 import com.github.mantasjasikenas.namiokai.ui.common.FloatingAddButton
 import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiBottomSheet
+import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiConfirmDialog
 import com.github.mantasjasikenas.namiokai.ui.common.VerticalDivider
 import com.github.mantasjasikenas.namiokai.ui.main.MainViewModel
 import com.github.mantasjasikenas.namiokai.ui.main.UsersMap
@@ -153,6 +154,7 @@ private fun BillCard(
         )
 
     var openBottomSheet by rememberSaveable { mutableStateOf(false) }
+    var confirmDialog by remember { mutableStateOf(false) }
     val bottomSheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = true
     )
@@ -403,18 +405,28 @@ private fun BillCard(
                         Text(text = "Edit")
                     }
                     TextButton(onClick = {
-                        scope.launch { bottomSheetState.hide() }
-                            .invokeOnCompletion {
-                                if (!bottomSheetState.isVisible) {
-                                    openBottomSheet = false
-                                }
-                            }
-                        viewModel.deleteBill(purchaseBill)
+                        confirmDialog = true
                     }) {
                         Text(text = "Delete")
                     }
                 }
                 CustomSpacer(height = 30)
+
+                if (confirmDialog) {
+                    NamiokaiConfirmDialog(
+                        onConfirm = {
+                            scope.launch { bottomSheetState.hide() }
+                            .invokeOnCompletion {
+                                if (!bottomSheetState.isVisible) {
+                                    openBottomSheet = false
+                                }
+                            }
+                            viewModel.deleteBill(purchaseBill)
+                            confirmDialog = false
+                        },
+                        onDismiss = { confirmDialog = false }
+                    )
+                }
             }
         }
 
@@ -431,6 +443,8 @@ private fun BillCard(
     }
 
 }
+
+
 
 
 

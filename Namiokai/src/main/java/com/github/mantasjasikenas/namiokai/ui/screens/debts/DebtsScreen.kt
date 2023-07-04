@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
@@ -32,6 +32,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.SubcomposeAsyncImage
@@ -46,7 +47,7 @@ import com.github.mantasjasikenas.namiokai.ui.common.EmptyView
 import com.github.mantasjasikenas.namiokai.ui.common.EuroIconTextRow
 import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiDialog
 import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiElevatedCard
-import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiOutlinedCard
+import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiElevatedOutlinedCard
 import com.github.mantasjasikenas.namiokai.ui.common.rememberState
 import com.github.mantasjasikenas.namiokai.ui.main.MainViewModel
 import com.github.mantasjasikenas.namiokai.ui.main.UsersMap
@@ -63,7 +64,6 @@ fun DebtsScreen(
     debtsViewModel: DebtsViewModel = hiltViewModel(),
     mainViewModel: MainViewModel = hiltViewModel(),
 ) {
-    val debtsUiState by debtsViewModel.debtsUiState.collectAsState()
     val mainUiState by mainViewModel.mainUiState.collectAsState()
     val usersMap = mainUiState.usersMap
     val period by mainViewModel.periodState.collectAsState()
@@ -83,7 +83,7 @@ fun DebtsScreen(
             .fillMaxSize()
             .padding(
                 20.dp,
-                10.dp,
+                12.dp,
                 20.dp,
                 5.dp
             )
@@ -95,13 +95,13 @@ fun DebtsScreen(
             verticalItemSpacing = 8.dp,
             horizontalArrangement = Arrangement.spacedBy(
                 8.dp,
-                Alignment.CenterHorizontally
+                Alignment.Start
             ),
             modifier = Modifier
                 .fillMaxSize()
         ) {
             item(span = StaggeredGridItemSpan.FullLine) {
-                NamiokaiOutlinedCard(modifier = Modifier.height(80.dp)) {
+                NamiokaiElevatedOutlinedCard {
                     Text(
                         text = "Period",
                         style = MaterialTheme.typography.titleLarge,
@@ -115,6 +115,9 @@ fun DebtsScreen(
                         modifier = Modifier.clickable(onClick = { openDatePicker = true })
                     )
                 }
+            }
+            item(span = StaggeredGridItemSpan.FullLine) {
+                CustomSpacer(height = 8)
             }
             items(usersDebts.toList()) { (user, debts) ->
                 if (debts.isEmpty() || usersMap[user] == null) return@items
@@ -155,7 +158,6 @@ private fun DebtorCard(
     userDebts: UserDebtsMap,
     usersMap: UsersMap
 ) {
-
     var expandedState by remember { mutableStateOf(false) }
 
     NamiokaiElevatedCard(modifier = Modifier
@@ -164,7 +166,7 @@ private fun DebtorCard(
 
         Column(
             modifier = Modifier
-                .padding(5.dp),
+                .padding(0.dp),
             horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.Center
         ) {
@@ -209,7 +211,7 @@ private fun DebtorCard(
             onDismiss = { expandedState = false })
         {
             Column {
-                CustomSpacer(height = 10)
+                CustomSpacer(height = 8)
                 if (userDebts.isEmpty()) {
                     Text(
                         text = "No debts",
@@ -224,40 +226,42 @@ private fun DebtorCard(
                     label = "Debtor",
                     value = debtorUser.displayName,
                 )
-                //CustomSpacer(height = 10)
+                CustomSpacer(height = 16)
                 Text(
-                    text = "Pays to",
+                    text = "Debts",
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary,
-                )
-                /*Text(
-                    text = "Pays to",
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.Bold,
-                    //modifier = Modifier.align(Alignment.Start)
-                )*/
-                //Divider(modifier = Modifier.padding(vertical = 10.dp))
 
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center,
+                )
 
                 var total = 0.0
                 userDebts.forEach { (key, value) ->
+                    total += value
                     EuroIconTextRow(
                         label = usersMap[key]!!.displayName,
                         value = value.format(2)
                     )
-                    total += value
+
+                    if (userDebts.size > 1) {
+                        val thickness = if (userDebts.keys.last() != key) 1.dp else 2.dp
+                        Divider(
+                            modifier = Modifier.padding(vertical = 3.dp),
+                            thickness = thickness,
+                        )
+                    }
                 }
 
                 if (userDebts.size > 1) {
-                    Divider(modifier = Modifier.padding(vertical = 7.dp))
+                    //Divider(modifier = Modifier.padding(vertical = 7.dp))
                     EuroIconTextRow(
-                        label = "",
+                        label = "Total",
                         value = total.format(2),
-                        //modifier = Modifier.align(Alignment.End)
                     )
                 }
+                CustomSpacer(height = 8)
             }
         }
     }

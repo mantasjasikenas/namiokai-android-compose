@@ -54,7 +54,7 @@ sealed class Screen(
         fun fromRoute(route: String?): Screen {
             if(route == null) return initialScreen
 
-            return screens.firstOrNull { it.route == route } ?: initialScreen
+            return screens.firstOrNull { it != null && it.route == route } ?: initialScreen
         }
     }
 }

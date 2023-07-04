@@ -11,8 +11,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.DoneOutline
 import androidx.compose.material.icons.outlined.OtherHouses
-import androidx.compose.material.icons.outlined.ShortText
 import androidx.compose.material.icons.outlined.Store
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DateRangePicker
@@ -40,7 +40,7 @@ import com.github.mantasjasikenas.namiokai.model.bills.FlatBill
 import com.github.mantasjasikenas.namiokai.ui.common.CustomSpacer
 import com.github.mantasjasikenas.namiokai.ui.common.EuroIconTextRow
 import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiElevatedCard
-import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiOutlinedCard
+import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiElevatedOutlinedCard
 import com.github.mantasjasikenas.namiokai.ui.common.rememberState
 import com.github.mantasjasikenas.namiokai.ui.main.MainUiState
 import com.github.mantasjasikenas.namiokai.ui.main.MainViewModel
@@ -59,7 +59,6 @@ fun HomeScreen(
 ) {
     val verticalScrollState = rememberScrollState()
     val mainUiState by mainViewModel.mainUiState.collectAsState()
-    val homeUiState by homeViewModel.homeUiState.collectAsState()
     val period by mainViewModel.periodState.collectAsState()
     val usersDebts by homeViewModel.getDebts(period)
         .collectAsState(initial = emptyMap())
@@ -81,7 +80,7 @@ fun HomeScreen(
             onPeriodClick = {
                 openDatePicker = true
             })
-        CustomSpacer(height = 8)
+        CustomSpacer(height = 24)
         SummaryCard(
             currentUserDebts = currentUserDebts,
             mainUiState = mainUiState
@@ -170,7 +169,7 @@ private fun HomeScreenTopBar(
     onPeriodClick: () -> Unit,
     period: Period
 ) {
-    NamiokaiOutlinedCard {
+    NamiokaiElevatedOutlinedCard {
         Text(
             text = "Your debts, ${mainUiState.currentUser.displayName}",
             style = MaterialTheme.typography.titleLarge,
@@ -196,14 +195,16 @@ private fun SummaryCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
-                    imageVector = Icons.Outlined.ShortText,
+                    imageVector = Icons.Outlined.DoneOutline,
                     contentDescription = null,
-                    modifier = Modifier.size(18.dp),
+                    modifier = Modifier.size(16.dp),
                     tint = MaterialTheme.colorScheme.primary
                 )
-                CustomSpacer(width = 10)
+                CustomSpacer(width = 8)
                 Text(
                     text = "No debts found",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.Bold,
                 )
             }
@@ -214,15 +215,23 @@ private fun SummaryCard(
     NamiokaiElevatedCard {
         var total = 0.0
         currentUserDebts.forEach { (key, value) ->
-
             total += value
             EuroIconTextRow(
                 label = mainUiState.usersMap[key]!!.displayName,
                 value = value.format(2)
             )
+
+            if (currentUserDebts.size > 1) {
+                val thickness = if (currentUserDebts.keys.last() != key) 1.dp else 2.dp
+                Divider(
+                    modifier = Modifier.padding(vertical = 3.dp),
+                    thickness = thickness,
+                )
+            }
         }
+
         if ((currentUserDebts.size) > 1) {
-            Divider(modifier = Modifier.padding(vertical = 7.dp))
+            //Divider(modifier = Modifier.padding(vertical = 7.dp))
             EuroIconTextRow(
                 label = "Total",
                 value = total.format(2),

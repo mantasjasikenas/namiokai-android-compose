@@ -64,6 +64,7 @@ import com.github.mantasjasikenas.namiokai.ui.common.DateTimeCardColumn
 import com.github.mantasjasikenas.namiokai.ui.common.EmptyView
 import com.github.mantasjasikenas.namiokai.ui.common.FloatingAddButton
 import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiBottomSheet
+import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiConfirmDialog
 import com.github.mantasjasikenas.namiokai.ui.common.VerticalDivider
 import com.github.mantasjasikenas.namiokai.ui.main.MainViewModel
 import com.github.mantasjasikenas.namiokai.ui.main.UsersMap
@@ -141,6 +142,7 @@ private fun FlatCard(
         mutableStateOf(false)
     }
     var openBottomSheet by rememberSaveable { mutableStateOf(false) }
+    var confirmDialog by remember { mutableStateOf(false) }
     val bottomSheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = true
     )
@@ -204,7 +206,10 @@ private fun FlatCard(
         dismissContent = {
             ElevatedCard(
                 modifier = modifier
-                    .padding(horizontal = 20.dp, vertical = 5.dp)
+                    .padding(
+                        horizontal = 20.dp,
+                        vertical = 5.dp
+                    )
                     .fillMaxSize()
                     .animateContentSize(
                         animationSpec = tween(
@@ -378,17 +383,27 @@ private fun FlatCard(
                     }
                     TextButton(
                         onClick = {
-                            scope.launch { bottomSheetState.hide() }
-                                .invokeOnCompletion {
-                                    if (!bottomSheetState.isVisible) {
-                                        openBottomSheet = false
-                                    }
-                                }
-                            viewModel.deleteFlatBill(flatBill)
+                            confirmDialog = true
                         }) {
                         Text(text = "Delete")
                     }
                 }
+            }
+
+            if (confirmDialog) {
+                NamiokaiConfirmDialog(
+                    onConfirm = {
+                        scope.launch { bottomSheetState.hide() }
+                            .invokeOnCompletion {
+                                if (!bottomSheetState.isVisible) {
+                                    openBottomSheet = false
+                                }
+                            }
+                        viewModel.deleteFlatBill(flatBill)
+                        confirmDialog = false
+                    },
+                    onDismiss = { confirmDialog = false }
+                )
             }
         }
     }

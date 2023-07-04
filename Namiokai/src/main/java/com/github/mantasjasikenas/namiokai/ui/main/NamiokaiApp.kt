@@ -273,7 +273,6 @@ fun TopBarDropdownMenu(
 
 
     IconButton(onClick = { expanded = true }) {
-//        Icon(Icons.Default.MoreVert, contentDescription = null)
         SubcomposeAsyncImage(
             model = ImageRequest.Builder(LocalContext.current)
                 .data(photoUrl.ifEmpty { R.drawable.profile })
