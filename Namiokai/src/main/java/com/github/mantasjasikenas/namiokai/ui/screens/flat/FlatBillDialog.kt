@@ -77,12 +77,20 @@ fun FlatBillPopup(
             usersMap = usersMap, usersPickup = paymasterHashMap, isMultipleSelectEnabled = false
         )
         NamiokaiTextField(
+            modifier = Modifier.padding(
+                vertical = 10.dp,
+                horizontal = 30.dp
+            ),
             label = "Rent",
             initialTextFieldValue = (if (flatBill.rentTotal == 0.0) "" else flatBill.rentTotal.toString()),
             onValueChange = { flatBill.rentTotal = it.replace(',', '.').toDoubleOrNull() ?: 0.0 },
             keyboardType = KeyboardType.Number
         )
         NamiokaiTextField(
+            modifier = Modifier.padding(
+                vertical = 10.dp,
+                horizontal = 30.dp
+            ),
             label = "Taxes",
             initialTextFieldValue = (if (flatBill.taxesTotal == 0.0) "" else flatBill.taxesTotal.toString()),
             onValueChange = { flatBill.taxesTotal = it.replace(',', '.').toDoubleOrNull() ?: 0.0 },

@@ -1,8 +1,11 @@
 package com.github.mantasjasikenas.namiokai.model
 
 import kotlinx.datetime.Clock
+import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.minus
+import kotlinx.datetime.plus
 import kotlinx.datetime.toLocalDateTime
 
 data class Period(
@@ -16,33 +19,102 @@ data class Period(
     }
 }
 
-fun LocalDate.isBetween(start: LocalDate, end: LocalDate): Boolean {
+fun LocalDate.isBetween(
+    start: LocalDate,
+    end: LocalDate
+): Boolean {
     return this in start..end
 }
 
 fun LocalDate.isInPeriod(period: Period): Boolean {
-    return this.isBetween(period.start, period.end)
+    return this.isBetween(
+        period.start,
+        period.end
+    )
+}
+
+fun Period.previousMonthly(
+    minusMonths: Int = 1
+): Period {
+    val periodStart = start.minus(
+        minusMonths,
+        DateTimeUnit.MONTH
+    )
+    val periodEnd = end.minus(
+        minusMonths,
+        DateTimeUnit.MONTH
+    )
+
+    return Period(
+        periodStart,
+        periodEnd
+    )
+}
+
+fun Period.nextMonthly(
+    plusMonths: Int = 1
+): Period {
+    val periodStart = start.plus(
+        plusMonths,
+        DateTimeUnit.MONTH
+    )
+    val periodEnd = end.plus(
+        plusMonths,
+        DateTimeUnit.MONTH
+    )
+
+    return Period(
+        periodStart,
+        periodEnd
+    )
 }
 
 fun Period.Companion.getMonthlyPeriod(startDayInclusive: Int): Period {
-    return getPeriod(startDayInclusive, startDayInclusive)
+    return getPeriod(
+        startDayInclusive,
+        startDayInclusive
+    )
 }
 
-fun Period.Companion.getPeriod(startDayInclusive: Int, endDateExclusive: Int): Period {
+fun Period.Companion.getPeriod(
+    startDayInclusive: Int,
+    endDateExclusive: Int
+): Period {
     val periodStart: LocalDate
     val periodEnd: LocalDate
 
-    val currentDate = Clock.System.now().toLocalDateTime(
-        TimeZone.currentSystemDefault()
-    ).date
+    val currentDate = Clock.System.now()
+        .toLocalDateTime(
+            TimeZone.currentSystemDefault()
+        ).date
 
     if (currentDate.dayOfMonth < startDayInclusive) {
-        periodStart = LocalDate(currentDate.year, currentDate.monthNumber - 1, startDayInclusive)
-        periodEnd = LocalDate(currentDate.year, currentDate.monthNumber, endDateExclusive - 1)
-    } else {
-        periodStart = LocalDate(currentDate.year, currentDate.monthNumber, startDayInclusive)
-        periodEnd = LocalDate(currentDate.year, currentDate.monthNumber + 1, endDateExclusive - 1)
+        periodStart = LocalDate(
+            currentDate.year,
+            currentDate.monthNumber - 1,
+            startDayInclusive
+        )
+        periodEnd = LocalDate(
+            currentDate.year,
+            currentDate.monthNumber,
+            endDateExclusive - 1
+        )
+    }
+    else {
+        periodStart = LocalDate(
+            currentDate.year,
+            currentDate.monthNumber,
+            startDayInclusive
+        )
+        periodEnd = LocalDate(
+            currentDate.year,
+            currentDate.monthNumber + 1,
+            endDateExclusive - 1
+        )
     }
 
-    return Period(periodStart, periodEnd)
+    return Period(
+        periodStart,
+        periodEnd
+    )
 }

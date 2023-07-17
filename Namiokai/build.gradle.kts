@@ -18,8 +18,8 @@ android {
         applicationId = "com.namiokai"
         minSdk = 26
         targetSdk = 34
-        versionCode = 12
-        versionName = "0.1.2"
+        versionCode = 13
+        versionName = "0.1.3"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -136,12 +136,12 @@ dependencies {
 
     // Firebase
     implementation(platform("com.google.firebase:firebase-bom:32.1.1"))
-    implementation("com.google.firebase:firebase-auth-ktx:22.0.0")
-    implementation("com.google.firebase:firebase-firestore-ktx:24.6.1")
-    implementation("com.google.firebase:firebase-messaging-ktx:23.1.2")
+    implementation("com.google.firebase:firebase-auth-ktx:22.1.0")
+    implementation("com.google.firebase:firebase-firestore-ktx:24.7.0")
+    implementation("com.google.firebase:firebase-messaging-ktx:23.2.0")
     implementation ("com.google.firebase:firebase-analytics-ktx:21.3.0")
     implementation ("com.google.firebase:firebase-storage-ktx:20.2.1")
-    implementation ("com.google.firebase:firebase-config-ktx:21.4.0")
+    implementation ("com.google.firebase:firebase-config-ktx:21.4.1")
 
     //Dagger - Hilt
     implementation("com.google.dagger:hilt-android:2.46.1")

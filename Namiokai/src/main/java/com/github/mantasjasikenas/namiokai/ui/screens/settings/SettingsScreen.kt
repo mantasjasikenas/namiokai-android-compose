@@ -191,6 +191,10 @@ private fun ChangeDisplayNameDialog(
         onDismiss = onDismiss
     ) {
         NamiokaiTextField(
+            modifier = Modifier.padding(
+                vertical = 10.dp,
+                horizontal = 30.dp
+            ),
             label = stringResource(R.string.display_name),
             onValueChange = { newDisplayName.value = it }
         )

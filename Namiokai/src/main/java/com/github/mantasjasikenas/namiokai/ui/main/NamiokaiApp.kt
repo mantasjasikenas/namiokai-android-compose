@@ -62,6 +62,8 @@ import com.github.mantasjasikenas.namiokai.navigation.NavGraph
 import com.github.mantasjasikenas.namiokai.navigation.Screen
 import com.github.mantasjasikenas.namiokai.navigation.authNavGraph
 import com.github.mantasjasikenas.namiokai.navigation.namiokaiNavGraph
+import com.github.mantasjasikenas.namiokai.ui.common.rememberState
+import com.github.mantasjasikenas.namiokai.ui.screens.ReportBugDialog
 import com.github.mantasjasikenas.namiokai.utils.Constants.NAMIOKAI_ASSETS_URL
 
 
@@ -137,28 +139,26 @@ fun NamiokaiScreen(
     }
 
 
-    Scaffold(
-        topBar = {
-            NamiokaiAppTopBar(
-                navController = navController,
-                topBarState = topBarState.value,
-                currentScreen = currentScreen,
-                canNavigateBack = navController.previousBackStackEntry != null && !Screen.navBarScreens.contains(
-                    currentScreen
-                ),
-                navigateUp = { navController.navigateUp() },
-                adminModeEnabled = currentUser.admin,
-                photoUrl = currentUser.photoUrl
-            )
-        },
+    Scaffold(topBar = {
+        NamiokaiAppTopBar(
+            navController = navController,
+            topBarState = topBarState.value,
+            currentScreen = currentScreen,
+            canNavigateBack = navController.previousBackStackEntry != null && !Screen.navBarScreens.contains(
+                currentScreen
+            ),
+            navigateUp = { navController.navigateUp() },
+            adminModeEnabled = currentUser.admin,
+            photoUrl = currentUser.photoUrl
+        )
+    },
         bottomBar = {
             NamiokaiAppNavigationBar(
                 navController = navController,
                 currentDestination = currentDestination,
                 bottomBarState = bottomBarState.value
             )
-        }
-    ) { innerPadding ->
+        }) { innerPadding ->
 
         NavHost(
             navController = navController,
@@ -249,8 +249,7 @@ fun NamiokaiAppTopBar(
                         adminModeEnabled = adminModeEnabled,
                         photoUrl = photoUrl
                     )
-                }
-            )
+                })
         }
     }
 }
@@ -263,6 +262,7 @@ fun TopBarDropdownMenu(
     photoUrl: String = ""
 ) {
     var expanded by remember { mutableStateOf(false) }
+    var reportBugDialog by rememberState { false }
     val context = LocalContext.current
     val urlIntent = remember {
         Intent(
@@ -294,13 +294,10 @@ fun TopBarDropdownMenu(
         )
     }
 
-    DropdownMenu(
-        expanded = expanded,
-        onDismissRequest = { expanded = false }
-    ) {
+    DropdownMenu(expanded = expanded,
+        onDismissRequest = { expanded = false }) {
 
-        DropdownMenuItem(
-            text = { Text(stringResource(R.string.settings_menu_label)) },
+        DropdownMenuItem(text = { Text(stringResource(R.string.settings_menu_label)) },
             onClick = {
                 navigateScreen(Screen.Settings)
                 expanded = false
@@ -311,13 +308,25 @@ fun TopBarDropdownMenu(
                     contentDescription = null
                 )
             })
+        DropdownMenuItem(text = { Text(text = "New issue") },
+            onClick = {
+                reportBugDialog = true
+                expanded = false
+            },
+            leadingIcon = {
+                Icon(
+                    Icons.Outlined.BugReport,
+                    contentDescription = null
+                )
+            })
+
+
 
 
         AnimatedVisibility(visible = adminModeEnabled) {
             Column {
                 Divider()
-                DropdownMenuItem(
-                    text = { Text(stringResource(R.string.admin_panel_menu_label)) },
+                DropdownMenuItem(text = { Text(stringResource(R.string.admin_panel_menu_label)) },
                     onClick = {
                         navigateScreen(Screen.AdminPanel)
                         expanded = false
@@ -327,10 +336,8 @@ fun TopBarDropdownMenu(
                             Icons.Outlined.AdminPanelSettings,
                             contentDescription = null
                         )
-                    }
-                )
-                DropdownMenuItem(
-                    text = { Text(stringResource(R.string.github)) },
+                    })
+                DropdownMenuItem(text = { Text(stringResource(R.string.github)) },
                     onClick = {
                         expanded = false
                         context.startActivity(urlIntent)
@@ -342,8 +349,7 @@ fun TopBarDropdownMenu(
                             contentDescription = null
                         )
                     })
-                DropdownMenuItem(
-                    text = { Text(stringResource(R.string.debug_menu_label)) },
+                DropdownMenuItem(text = { Text(stringResource(R.string.debug_menu_label)) },
                     onClick = {
                         navigateScreen(Screen.Test)
                         expanded = false
@@ -353,11 +359,16 @@ fun TopBarDropdownMenu(
                             Icons.Outlined.BugReport,
                             contentDescription = null
                         )
-                    }
-                )
+                    })
             }
         }
     }
+
+    ReportBugDialog(
+        dialogState = reportBugDialog,
+        onDismiss = { reportBugDialog = false })
+
+
 }
 
 @Composable

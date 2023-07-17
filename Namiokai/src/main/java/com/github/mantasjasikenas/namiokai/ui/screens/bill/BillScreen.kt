@@ -5,10 +5,14 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,10 +20,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.ArrowDropDown
+import androidx.compose.material.icons.outlined.Clear
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.EuroSymbol
 import androidx.compose.material.icons.outlined.ReadMore
@@ -28,8 +35,10 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DismissDirection
 import androidx.compose.material3.DismissValue
+import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
@@ -50,6 +59,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -60,18 +70,22 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
 import com.github.mantasjasikenas.namiokai.R
+import com.github.mantasjasikenas.namiokai.model.Period
 import com.github.mantasjasikenas.namiokai.model.User
 import com.github.mantasjasikenas.namiokai.model.bills.PurchaseBill
 import com.github.mantasjasikenas.namiokai.model.bills.resolveBillCost
+import com.github.mantasjasikenas.namiokai.model.isInPeriod
 import com.github.mantasjasikenas.namiokai.ui.common.CardText
 import com.github.mantasjasikenas.namiokai.ui.common.CardTextColumn
-import com.github.mantasjasikenas.namiokai.ui.common.CustomSpacer
 import com.github.mantasjasikenas.namiokai.ui.common.DateTimeCardColumn
 import com.github.mantasjasikenas.namiokai.ui.common.EmptyView
 import com.github.mantasjasikenas.namiokai.ui.common.FloatingAddButton
 import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiBottomSheet
 import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiConfirmDialog
+import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiDateRangePicker
+import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiSpacer
 import com.github.mantasjasikenas.namiokai.ui.common.VerticalDivider
+import com.github.mantasjasikenas.namiokai.ui.common.rememberState
 import com.github.mantasjasikenas.namiokai.ui.main.MainViewModel
 import com.github.mantasjasikenas.namiokai.ui.main.UsersMap
 import com.github.mantasjasikenas.namiokai.utils.format
@@ -81,11 +95,15 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.toLocalDateTime
 import java.time.format.TextStyle
 import java.util.Locale
+import kotlin.time.Duration.Companion.days
 
+private const val TAG = "BillScreen"
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun BillScreen(
     modifier: Modifier = Modifier,
@@ -94,18 +112,25 @@ fun BillScreen(
 ) {
     val billUiState by viewModel.uiState.collectAsState()
     val mainUiState by mainViewModel.mainUiState.collectAsState()
+    val currentUser = mainUiState.currentUser
     val popupState = remember {
         mutableStateOf(false)
     }
-    val currentUser = mainUiState.currentUser
+
 
     if (billUiState.purchaseBills.isEmpty()) {
         EmptyView()
     }
     else {
         LazyColumn(modifier = modifier.fillMaxSize()) {
-            item { CustomSpacer(height = 15) }
-            items(billUiState.purchaseBills) { bill ->
+            item { NamiokaiSpacer(height = 15) }
+            item {
+                PurchaseBillFiltersRow(
+                    mainViewModel = mainViewModel,
+                    billViewModel = viewModel,
+                )
+            }
+            items(billUiState.filteredPurchaseBills) { bill ->
                 BillCard(
                     purchaseBill = bill,
                     isAllowedModification = (currentUser.admin || bill.createdByUid == currentUser.uid),
@@ -114,7 +139,7 @@ fun BillScreen(
                     currentUser = currentUser
                 )
             }
-            item { CustomSpacer(height = 120) }
+            item { NamiokaiSpacer(height = 120) }
         }
     }
 
@@ -130,6 +155,312 @@ fun BillScreen(
         )
     }
 
+
+}
+
+@Composable
+private fun PurchaseBillFiltersRow(
+    mainViewModel: MainViewModel,
+    billViewModel: BillViewModel,
+) {
+    val mainUiState by mainViewModel.mainUiState.collectAsState()
+    val users = mainUiState.usersMap.map { (_, user) ->
+        user.displayName
+    }
+
+    val paymasterFilterValue = rememberState {
+        "All"
+    }
+    val splitterFilterValue = rememberState {
+        "All"
+    }
+    val periodFilterValue = remember {
+        mutableStateOf<Period?>(null)
+    }
+    val onFiltersReset = {
+        billViewModel.resetFilters()
+        paymasterFilterValue.value = "All"
+        splitterFilterValue.value = "All"
+        periodFilterValue.value = null
+    }
+
+
+    LazyRow(
+        contentPadding = PaddingValues(
+            start = 20.dp,
+            end = 20.dp,
+            top = 0.dp,
+            bottom = 5.dp
+        ),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        item {
+            ResetFilterChip(
+                label = "Reset",
+                onReset = onFiltersReset
+            )
+        }
+        item {
+            NamiokaiFilterChip(
+                label = "Paymaster",
+                currentValue = paymasterFilterValue.value,
+                values = users,
+                onValueSelected = {
+                    if (it == null) {
+                        billViewModel.removeFilter("paymaster")
+                    }
+                    else {
+                        paymasterFilterValue.value = it
+                        billViewModel.addFilter("paymaster") { bill ->
+                            bill.paymasterUid == mainUiState.usersMap.values.firstOrNull { user ->
+                                user.displayName == it
+                            }?.uid
+                        }
+                    }
+                }
+            )
+        }
+
+        item {
+            NamiokaiFilterChip(
+                label = "Splitter",
+                currentValue = splitterFilterValue.value,
+                values = users,
+                onValueSelected = {
+                    if (it == null) {
+                        billViewModel.removeFilter("splitter")
+                    }
+                    else {
+                        splitterFilterValue.value = it
+                        billViewModel.addFilter("splitter") { bill ->
+                            val userUid = mainUiState.usersMap.values.firstOrNull { user ->
+                                user.displayName == it
+                            }?.uid
+
+                            userUid?.let { uid ->
+                                bill.splitUsersUid.contains(uid)
+                            } ?: true
+                        }
+                    }
+                }
+            )
+        }
+
+        item {
+            PeriodFilterChip(
+                label = "Period",
+                currentValue = periodFilterValue.value,
+                defaultValue = null,
+                onValueSelected = { period ->
+                    if (period == null) {
+                        periodFilterValue.value = null
+                        billViewModel.removeFilter("period")
+                    }
+                    else {
+                        periodFilterValue.value = period
+                        billViewModel.addFilter("period") { bill ->
+                            val dateTime = LocalDateTime.tryParse(bill.date)?.date
+                            dateTime?.isInPeriod(period) ?: true
+                        }
+                    }
+                }
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ResetFilterChip(
+    modifier: Modifier = Modifier,
+    label: String,
+    onReset: () -> Unit
+) {
+    FilterChip(
+        onClick = onReset,
+        selected = false,
+        label = {
+            Icon(
+                imageVector = Icons.Outlined.Clear,
+                contentDescription = null,
+                modifier = Modifier.size(18.dp)
+            )
+        },
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun NamiokaiFilterChip(
+    modifier: Modifier = Modifier,
+    label: String,
+    values: List<String>,
+    noFilterValue: String = "All",
+    currentValue: String,
+    onValueSelected: (String?) -> Unit,
+    leadingIcon: ImageVector? = null,
+    trailingIcon: ImageVector? = Icons.Outlined.ArrowDropDown,
+) {
+    val availableValues = values.toMutableList()
+    val expandedSheet = remember { mutableStateOf(false) }
+
+    val onClickRequest = { expandedSheet.value = true }
+    val onDismissRequest = { expandedSheet.value = false }
+    val bottomSheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true
+    )
+
+    val onFilterSelected = { filter: String? ->
+        onDismissRequest()
+        onValueSelected(filter)
+    }
+
+    FilterChip(modifier = modifier,
+        selected = currentValue != noFilterValue,
+        onClick = onClickRequest,
+        label = { if (currentValue == noFilterValue) Text(label) else Text(currentValue) },
+        leadingIcon = {
+            leadingIcon?.let {
+                Icon(
+                    imageVector = it,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
+        },
+        trailingIcon = {
+            trailingIcon?.let {
+                Icon(
+                    imageVector = it,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
+        })
+
+    if (expandedSheet.value) {
+        NamiokaiBottomSheet(
+            onDismiss = onDismissRequest,
+            title = label,
+            bottomSheetState = bottomSheetState
+        ) {
+            // No filter applied
+            FilterCard(
+                onValueSelected = {
+                    onFilterSelected(null)
+                },
+                value = noFilterValue,
+                selectedValue = currentValue
+            )
+            availableValues.forEach { value ->
+                FilterCard(
+                    onValueSelected = onFilterSelected,
+                    value = value,
+                    selectedValue = currentValue
+                )
+            }
+            NamiokaiSpacer(height = 20)
+        }
+    }
+
+}
+
+@Composable
+private fun FilterCard(
+    onValueSelected: (String) -> Unit,
+    value: String,
+    selectedValue: String
+) {
+    Box(modifier = Modifier
+        .padding(vertical = 2.dp) // 4
+        .fillMaxWidth()
+        .clickable {
+            onValueSelected(value)
+        }
+        .border(
+            width = 1.dp,
+            color = DividerDefaults.color,
+            shape = MaterialTheme.shapes.small
+        )
+        .background(
+            if (selectedValue == value) MaterialTheme.colorScheme.primary else Color.Transparent,
+            shape = MaterialTheme.shapes.small
+        )
+        .padding(10.dp)) {
+        Text(
+            text = value,
+            color = if (selectedValue == value) DividerDefaults.color else MaterialTheme.colorScheme.onSurface,
+            fontWeight = if (selectedValue == value) FontWeight.SemiBold else FontWeight.Normal,
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp)
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun PeriodFilterChip(
+    modifier: Modifier = Modifier,
+    label: String,
+    currentValue: Period?,
+    defaultValue: Period?,
+    onValueSelected: (Period?) -> Unit,
+    leadingIcon: ImageVector? = null,
+    trailingIcon: ImageVector? = Icons.Outlined.ArrowDropDown,
+) {
+    val datePickerState = remember { mutableStateOf(false) }
+
+    val onClickRequest = { datePickerState.value = true }
+    val onDismissRequest = { datePickerState.value = false }
+
+    val onSaveRequest = { sort: Period ->
+        onDismissRequest()
+        onValueSelected(sort)
+    }
+    val onResetRequest = {
+        onDismissRequest()
+        onValueSelected(null)
+    }
+
+
+    FilterChip(modifier = modifier,
+        selected = currentValue != defaultValue,
+        onClick = onClickRequest,
+        label = { if (currentValue == defaultValue) Text(label) else Text(currentValue.toString()) },
+        leadingIcon = {
+            leadingIcon?.let {
+                Icon(
+                    imageVector = it,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
+        },
+        trailingIcon = {
+            trailingIcon?.let {
+                Icon(
+                    imageVector = it,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
+        })
+
+    if (datePickerState.value) {
+        NamiokaiDateRangePicker(
+            onDismissRequest = onDismissRequest,
+            onSaveRequest = onSaveRequest,
+            onResetRequest = onResetRequest,
+            initialSelectedStartDateMillis = currentValue?.start?.atStartOfDayIn(TimeZone.currentSystemDefault())
+                ?.plus(1.days)
+                ?.toEpochMilliseconds(),
+            initialSelectedEndDateMillis = currentValue?.end?.atStartOfDayIn(TimeZone.currentSystemDefault())
+                ?.plus(1.days)
+                ?.toEpochMilliseconds()
+        )
+    }
 
 }
 
@@ -189,6 +520,7 @@ private fun BillCard(
     )
 
     SwipeToDismiss(state = dismissState,
+        modifier = modifier,
         background = {
             Box(
                 modifier = Modifier
@@ -222,7 +554,7 @@ private fun BillCard(
         else setOf(),
         dismissContent = {
             ElevatedCard(
-                modifier = modifier
+                modifier = Modifier
                     .padding(
                         horizontal = 20.dp,
                         vertical = 5.dp
@@ -252,7 +584,7 @@ private fun BillCard(
                         horizontalArrangement = Arrangement.Start,
                         modifier = Modifier.fillMaxSize()
                     ) {
-                        CustomSpacer(width = 10)
+                        NamiokaiSpacer(width = 10)
                         DateTimeCardColumn(
                             day = dateTime.date.dayOfMonth.toString(),
                             month = dateTime.month.getDisplayName(
@@ -261,9 +593,9 @@ private fun BillCard(
                             )
                         )
 
-                        CustomSpacer(width = 20)
+                        NamiokaiSpacer(width = 20)
                         VerticalDivider(modifier = Modifier.height(60.dp))
-                        CustomSpacer(width = 20)
+                        NamiokaiSpacer(width = 20)
 
                         Column(modifier = Modifier.weight(1f)) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -283,10 +615,10 @@ private fun BillCard(
                                 )
 
 
-                                CustomSpacer(width = 6) // old 6
+                                NamiokaiSpacer(width = 6) // old 6
                                 Text(text = usersMap[purchaseBill.paymasterUid]?.displayName ?: "-")
                             }
-                            CustomSpacer(height = 5)
+                            NamiokaiSpacer(height = 5)
 
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Icon(
@@ -295,7 +627,7 @@ private fun BillCard(
                                     modifier = Modifier.size(18.dp),
                                     tint = MaterialTheme.colorScheme.primary
                                 )
-                                CustomSpacer(width = 7)
+                                NamiokaiSpacer(width = 7)
                                 Text(
                                     text = purchaseBill.shoppingList,
                                     style = MaterialTheme.typography.labelMedium
@@ -304,7 +636,7 @@ private fun BillCard(
 
 
                         }
-                        CustomSpacer(width = 30)
+                        NamiokaiSpacer(width = 30)
 
                         Column(horizontalAlignment = Alignment.End) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -324,7 +656,7 @@ private fun BillCard(
                                 )
                             }
                         }
-                        CustomSpacer(width = 10)
+                        NamiokaiSpacer(width = 10)
 
                     }
 
@@ -359,7 +691,7 @@ private fun BillCard(
                     label = stringResource(R.string.total_price),
                     value = "€${purchaseBill.total.format(2)}"
                 )
-                CustomSpacer(width = 30)
+                NamiokaiSpacer(width = 30)
                 CardTextColumn(
                     label = stringResource(R.string.price_per_person),
                     value = "€${
@@ -368,14 +700,14 @@ private fun BillCard(
                     }"
                 )
             }
-            CustomSpacer(height = 10)
+            NamiokaiSpacer(height = 10)
             Text(
                 text = stringResource(R.string.split_bill_with),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Bold
             )
-            CustomSpacer(height = 7)
+            NamiokaiSpacer(height = 7)
             FlowRow(
                 mainAxisSpacing = 7.dp,
                 crossAxisSpacing = 7.dp
@@ -392,7 +724,7 @@ private fun BillCard(
                     }
                 }
             }
-            CustomSpacer(height = 30)
+            NamiokaiSpacer(height = 30)
             AnimatedVisibility(visible = isAllowedModification) {
                 Row(
                     horizontalArrangement = Arrangement.End,
@@ -410,22 +742,20 @@ private fun BillCard(
                         Text(text = "Delete")
                     }
                 }
-                CustomSpacer(height = 30)
+                NamiokaiSpacer(height = 30)
 
                 if (confirmDialog) {
-                    NamiokaiConfirmDialog(
-                        onConfirm = {
-                            scope.launch { bottomSheetState.hide() }
+                    NamiokaiConfirmDialog(onConfirm = {
+                        scope.launch { bottomSheetState.hide() }
                             .invokeOnCompletion {
                                 if (!bottomSheetState.isVisible) {
                                     openBottomSheet = false
                                 }
                             }
-                            viewModel.deleteBill(purchaseBill)
-                            confirmDialog = false
-                        },
-                        onDismiss = { confirmDialog = false }
-                    )
+                        viewModel.deleteBill(purchaseBill)
+                        confirmDialog = false
+                    },
+                        onDismiss = { confirmDialog = false })
                 }
             }
         }

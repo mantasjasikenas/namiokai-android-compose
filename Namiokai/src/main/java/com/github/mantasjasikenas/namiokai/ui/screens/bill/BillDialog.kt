@@ -93,10 +93,18 @@ fun BillPopup(
             isMultipleSelectEnabled = false
         )
         NamiokaiTextField(
+            modifier = Modifier.padding(
+                vertical = 10.dp,
+                horizontal = 30.dp
+            ),
             label = stringResource(R.string.shopping_list),
             initialTextFieldValue = bill.shoppingList,
             onValueChange = { bill.shoppingList = it })
         NamiokaiTextField(
+            modifier = Modifier.padding(
+                vertical = 10.dp,
+                horizontal = 30.dp
+            ),
             label = stringResource(R.string.total_price),
             initialTextFieldValue = (if (bill.total == 0.0) "" else bill.total.toString()),
             onValueChange = { bill.total = it.replace(',', '.').toDoubleOrNull() ?: 0.0 },

@@ -4,7 +4,6 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -42,22 +41,21 @@ import com.github.mantasjasikenas.namiokai.data.repository.debts.UserDebtsMap
 import com.github.mantasjasikenas.namiokai.model.User
 import com.github.mantasjasikenas.namiokai.ui.common.CardText
 import com.github.mantasjasikenas.namiokai.ui.common.CardTextColumn
-import com.github.mantasjasikenas.namiokai.ui.common.CustomSpacer
 import com.github.mantasjasikenas.namiokai.ui.common.EmptyView
 import com.github.mantasjasikenas.namiokai.ui.common.EuroIconTextRow
+import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiDateRangePicker
 import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiDialog
 import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiElevatedCard
 import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiElevatedOutlinedCard
+import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiSpacer
 import com.github.mantasjasikenas.namiokai.ui.common.rememberState
 import com.github.mantasjasikenas.namiokai.ui.main.MainViewModel
 import com.github.mantasjasikenas.namiokai.ui.main.UsersMap
-import com.github.mantasjasikenas.namiokai.ui.screens.home.NamiokaiDateRangePicker
 import com.github.mantasjasikenas.namiokai.utils.format
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
 import kotlin.time.Duration.Companion.days
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun DebtsScreen(
     modifier: Modifier = Modifier,
@@ -66,11 +64,11 @@ fun DebtsScreen(
 ) {
     val mainUiState by mainViewModel.mainUiState.collectAsState()
     val usersMap = mainUiState.usersMap
-    val period by mainViewModel.periodState.collectAsState()
+    val periodUiState by mainViewModel.periodState.collectAsState()
     var openDatePicker by rememberState {
         false
     }
-    val usersDebts by debtsViewModel.getDebts(period)
+    val usersDebts by debtsViewModel.getDebts(periodUiState.userSelectedPeriod)
         .collectAsState(initial = emptyMap())
 
     if (usersDebts.isEmpty()) {
@@ -89,7 +87,7 @@ fun DebtsScreen(
             )
     ) {
 
-        CustomSpacer(height = 8)
+        NamiokaiSpacer(height = 8)
         LazyVerticalStaggeredGrid(
             columns = StaggeredGridCells.Fixed(2),
             verticalItemSpacing = 8.dp,
@@ -108,7 +106,7 @@ fun DebtsScreen(
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = "$period",
+                        text = "${periodUiState.userSelectedPeriod}",
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary,
@@ -117,7 +115,7 @@ fun DebtsScreen(
                 }
             }
             item(span = StaggeredGridItemSpan.FullLine) {
-                CustomSpacer(height = 8)
+                NamiokaiSpacer(height = 8)
             }
             items(usersDebts.toList()) { (user, debts) ->
                 if (debts.isEmpty() || usersMap[user] == null) return@items
@@ -135,17 +133,17 @@ fun DebtsScreen(
         NamiokaiDateRangePicker(
             onDismissRequest = { openDatePicker = false },
             onSaveRequest = {
-                mainViewModel.updatePeriodState(it)
+                mainViewModel.updateUserSelectedPeriodState(it)
                 openDatePicker = false
             },
             onResetRequest = {
                 mainViewModel.resetPeriodState()
                 openDatePicker = false
             },
-            initialSelectedStartDateMillis = period.start.atStartOfDayIn(TimeZone.currentSystemDefault())
+            initialSelectedStartDateMillis = periodUiState.userSelectedPeriod.start.atStartOfDayIn(TimeZone.currentSystemDefault())
                 .plus(1.days)
                 .toEpochMilliseconds(),
-            initialSelectedEndDateMillis = period.end.atStartOfDayIn(TimeZone.currentSystemDefault())
+            initialSelectedEndDateMillis = periodUiState.userSelectedPeriod.end.atStartOfDayIn(TimeZone.currentSystemDefault())
                 .plus(1.days)
                 .toEpochMilliseconds()
         )
@@ -191,7 +189,7 @@ private fun DebtorCard(
                 )
 
 
-                CustomSpacer(width = 10)
+                NamiokaiSpacer(width = 10)
                 CardTextColumn(
                     label = stringResource(R.string.debtor),
                     value = debtorUser.displayName,
@@ -211,7 +209,6 @@ private fun DebtorCard(
             onDismiss = { expandedState = false })
         {
             Column {
-                CustomSpacer(height = 8)
                 if (userDebts.isEmpty()) {
                     Text(
                         text = "No debts",
@@ -222,19 +219,29 @@ private fun DebtorCard(
                     return@NamiokaiDialog
                 }
 
-                CardText(
-                    label = "Debtor",
-                    value = debtorUser.displayName,
-                )
-                CustomSpacer(height = 16)
+
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    CardText(
+                        label = "Debtor",
+                        value = debtorUser.displayName
+                    )
+                   /* CardText(
+                        label = "Period",
+                        value = "$debtsPeriod"
+                    )*/
+                }
+
+                //CustomSpacer(height = 8) // 16
                 Text(
                     text = "Debts",
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.Bold,
-
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Center,
+                    textAlign = TextAlign.Start,
                 )
 
                 var total = 0.0
@@ -244,24 +251,19 @@ private fun DebtorCard(
                         label = usersMap[key]!!.displayName,
                         value = value.format(2)
                     )
-
-                    if (userDebts.size > 1) {
-                        val thickness = if (userDebts.keys.last() != key) 1.dp else 2.dp
-                        Divider(
-                            modifier = Modifier.padding(vertical = 3.dp),
-                            thickness = thickness,
-                        )
-                    }
                 }
 
                 if (userDebts.size > 1) {
-                    //Divider(modifier = Modifier.padding(vertical = 7.dp))
+                    Divider(
+                        modifier = Modifier.padding(vertical = 3.dp),
+                        thickness = 2.dp,
+                    )
                     EuroIconTextRow(
                         label = "Total",
                         value = total.format(2),
                     )
                 }
-                CustomSpacer(height = 8)
+                NamiokaiSpacer(height = 8)
             }
         }
     }

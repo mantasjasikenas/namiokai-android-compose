@@ -8,6 +8,7 @@ import com.github.mantasjasikenas.namiokai.data.UsersRepository
 import com.github.mantasjasikenas.namiokai.model.Period
 import com.github.mantasjasikenas.namiokai.model.User
 import com.github.mantasjasikenas.namiokai.model.getMonthlyPeriod
+import com.github.mantasjasikenas.namiokai.model.previousMonthly
 import com.github.mantasjasikenas.namiokai.utils.toUser
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
@@ -35,7 +36,12 @@ class MainViewModel @Inject constructor(
     private val _mainUiState = MutableStateFlow(MainUiState(currentUser = getUserFromAuth()))
     val mainUiState = _mainUiState.asStateFlow()
 
-    private val _periodState = MutableStateFlow(Period.getMonthlyPeriod(getStartDate()))
+    private val _periodState = MutableStateFlow(
+        PeriodUiState(
+            currentPeriod = Period.getMonthlyPeriod(getStartDate()),
+            userSelectedPeriod = Period.getMonthlyPeriod(getStartDate())
+        )
+    )
     val periodState = _periodState.asStateFlow()
 
 
@@ -60,8 +66,8 @@ class MainViewModel @Inject constructor(
         )
     }
 
-    fun updatePeriodState(period: Period) {
-        _periodState.update { period }
+    fun updateUserSelectedPeriodState(period: Period) {
+        _periodState.update { it.copy(userSelectedPeriod = period) }
     }
 
     private fun setLoadingStatus(isLoading: Boolean) {
@@ -122,7 +128,11 @@ class MainViewModel @Inject constructor(
                 )
                 val value = Firebase.remoteConfig.getLong("period_start_day")
                     .toInt()
-                _periodState.update { Period.getMonthlyPeriod(startDayInclusive = value) }
+                _periodState.update {
+                    it.copy(
+                        currentPeriod = Period.getMonthlyPeriod(startDayInclusive = value)
+                    )
+                }
                 Log.d(
                     TAG,
                     "New value: $value"
@@ -161,7 +171,11 @@ class MainViewModel @Inject constructor(
                                 "Remote config updated"
                             )
                             val value = getStartDate()
-                            _periodState.update { Period.getMonthlyPeriod(startDayInclusive = value) }
+                            _periodState.update {
+                                it.copy(
+                                    currentPeriod = Period.getMonthlyPeriod(startDayInclusive = value)
+                                )
+                            }
                             Log.d(
                                 TAG,
                                 "New value: $value"
@@ -201,6 +215,22 @@ class MainViewModel @Inject constructor(
     }
 
     fun resetPeriodState() {
-        _periodState.update { Period.getMonthlyPeriod(getStartDate()) }
+        _periodState.update {
+            it.copy(userSelectedPeriod = it.currentPeriod)
+        }
+    }
+
+    fun getPeriods(): List<Period> {
+        val currentPeriod = periodState.value.currentPeriod
+
+        val nextPeriodsCount = 1
+        val previousPeriodsCount = 6
+        val totalPeriodsCount = nextPeriodsCount + previousPeriodsCount + 1
+
+        val periods = (0 until totalPeriodsCount).map {
+            currentPeriod.previousMonthly(previousPeriodsCount - it)
+        }
+
+        return periods
     }
 }

@@ -59,7 +59,7 @@ import com.github.mantasjasikenas.namiokai.model.User
 import com.github.mantasjasikenas.namiokai.model.bills.FlatBill
 import com.github.mantasjasikenas.namiokai.model.bills.resolveBillCost
 import com.github.mantasjasikenas.namiokai.ui.common.CardTextColumn
-import com.github.mantasjasikenas.namiokai.ui.common.CustomSpacer
+import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiSpacer
 import com.github.mantasjasikenas.namiokai.ui.common.DateTimeCardColumn
 import com.github.mantasjasikenas.namiokai.ui.common.EmptyView
 import com.github.mantasjasikenas.namiokai.ui.common.FloatingAddButton
@@ -98,7 +98,7 @@ fun FlatScreen(
         EmptyView()
     } else {
         LazyColumn(modifier = modifier.fillMaxSize()) {
-            item { CustomSpacer(height = 15) }
+            item { NamiokaiSpacer(height = 15) }
             items(flatUiState.flatBills) { flatBill ->
                 FlatCard(
                     flatBill = flatBill,
@@ -108,7 +108,7 @@ fun FlatScreen(
                     currentUser = currentUser
                 )
             }
-            item { CustomSpacer(height = 120) }
+            item { NamiokaiSpacer(height = 120) }
         }
     }
 
@@ -233,15 +233,15 @@ private fun FlatCard(
                         horizontalArrangement = Arrangement.Start,
                         modifier = Modifier.fillMaxSize()
                     ) {
-                        CustomSpacer(width = 10)
+                        NamiokaiSpacer(width = 10)
                         DateTimeCardColumn(
                             day = dateTime.date.dayOfMonth.toString(),
                             month = dateTime.month.getDisplayName(TextStyle.SHORT, Locale.getDefault())
                         )
 
-                        CustomSpacer(width = 20)
+                        NamiokaiSpacer(width = 20)
                         VerticalDivider(modifier = Modifier.height(60.dp))
-                        CustomSpacer(width = 20)
+                        NamiokaiSpacer(width = 20)
 
                         Column(modifier = Modifier.weight(1f)) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -251,14 +251,14 @@ private fun FlatCard(
                                     modifier = Modifier.size(18.dp),
                                     tint = MaterialTheme.colorScheme.primary
                                 )
-                                CustomSpacer(width = 7)
+                                NamiokaiSpacer(width = 7)
                                 Text(
                                     text = "€${flatBill.taxesTotal.format(2)}",
                                     style = MaterialTheme.typography.bodyMedium,
                                     fontWeight = FontWeight.Bold
                                 )
                             }
-                            CustomSpacer(height = 10)
+                            NamiokaiSpacer(height = 10)
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Icon(
                                     imageVector = Icons.Outlined.Flood,
@@ -266,7 +266,7 @@ private fun FlatCard(
                                     modifier = Modifier.size(18.dp),
                                     tint = MaterialTheme.colorScheme.primary
                                 )
-                                CustomSpacer(width = 7)
+                                NamiokaiSpacer(width = 7)
                                 Text(
                                     text = "€${flatBill.rentTotal.format(2)}",
                                     style = MaterialTheme.typography.bodyMedium,
@@ -275,7 +275,7 @@ private fun FlatCard(
                             }
                         }
 
-                        CustomSpacer(width = 30)
+                        NamiokaiSpacer(width = 30)
                         Column(horizontalAlignment = Alignment.End) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text(
@@ -294,7 +294,7 @@ private fun FlatCard(
                                 )
                             }
                         }
-                        CustomSpacer(width = 10)
+                        NamiokaiSpacer(width = 10)
 
                     }
 
@@ -310,12 +310,12 @@ private fun FlatCard(
             onDismiss = { openBottomSheet = false },
             bottomSheetState = bottomSheetState
         ) {
-            CustomSpacer(height = 10)
+            NamiokaiSpacer(height = 10)
             CardTextColumn(
                 label = stringResource(R.string.paid_by),
                 value = usersMap[flatBill.paymasterUid]?.displayName ?: "-"
             )
-            CustomSpacer(height = 10)
+            NamiokaiSpacer(height = 10)
             Row(
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
@@ -323,13 +323,13 @@ private fun FlatCard(
                     label = stringResource(R.string.rent_total),
                     value = "€${flatBill.rentTotal.format(2)}"
                 )
-                CustomSpacer(width = 30)
+                NamiokaiSpacer(width = 30)
                 CardTextColumn(
                     label = "Taxes",
                     value = "€${flatBill.taxesTotal.format(2)}"
                 )
             }
-            CustomSpacer(height = 10)
+            NamiokaiSpacer(height = 10)
 
             Row(
                 horizontalArrangement = Arrangement.SpaceEvenly
@@ -338,27 +338,27 @@ private fun FlatCard(
                     label = "Total",
                     value = "€${flatBill.total.format(2)}"
                 )
-                CustomSpacer(width = 30)
+                NamiokaiSpacer(width = 30)
                 CardTextColumn(
                     label = stringResource(R.string.price_per_person),
                     value = "€${flatBill.splitPricePerUser().format(2)}"
                 )
             }
 
-            CustomSpacer(height = 10)
+            NamiokaiSpacer(height = 10)
             CardTextColumn(
                 label = stringResource(R.string.flat_bill_date),
                 value = dateTime.format()
             )
 
-            CustomSpacer(height = 10)
+            NamiokaiSpacer(height = 10)
             Text(
                 text = stringResource(R.string.split_bill_with),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Bold
             )
-            CustomSpacer(height = 7)
+            NamiokaiSpacer(height = 7)
             FlowRow(mainAxisSpacing = 7.dp, crossAxisSpacing = 7.dp) {
                 usersMap.filter { flatBill.splitUsersUid.contains(it.key) }.values.forEach {
                     OutlinedCard(shape = RoundedCornerShape(25)) {
@@ -370,7 +370,7 @@ private fun FlatCard(
                     }
                 }
             }
-            CustomSpacer(height = 30)
+            NamiokaiSpacer(height = 30)
             AnimatedVisibility(visible = isAllowedModification) {
                 Row(
                     horizontalArrangement = Arrangement.End,

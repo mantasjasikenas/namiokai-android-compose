@@ -39,4 +39,23 @@ fun FirebaseUser.toUser(): User = User(
     photoUrl = photoUrl?.toString() ?: ""
 )
 
+fun <T> Iterable<T>.filterAll(vararg predicates: (T) -> Boolean): List<T> {
+    return filter { candidate ->
+        predicates.all { it(candidate) }
+    }
+}
+
+fun <T> Iterable<T>.filterAll(predicates: List<(T) -> Boolean>): List<T> {
+    return filter { candidate ->
+        predicates.all { it(candidate) }
+    }
+}
+
+fun <T> Collection<T>.filterAll(predicates: MutableCollection<(T) -> Boolean>): List<T> {
+    return filter { candidate ->
+        predicates.all { it(candidate) }
+    }
+
+}
+
 

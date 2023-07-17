@@ -3,8 +3,10 @@ package com.github.mantasjasikenas.namiokai.ui.common
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,6 +32,8 @@ import androidx.compose.material.icons.outlined.EuroSymbol
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomAppBarDefaults
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.DateRangePicker
 import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -46,6 +50,7 @@ import androidx.compose.material3.SheetState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberDateRangePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisallowComposableCalls
 import androidx.compose.runtime.getValue
@@ -59,8 +64,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -72,8 +79,10 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import coil.compose.AsyncImage
 import com.github.mantasjasikenas.namiokai.R
+import com.github.mantasjasikenas.namiokai.model.Period
 import com.github.mantasjasikenas.namiokai.model.Uid
 import com.github.mantasjasikenas.namiokai.model.User
 import com.github.mantasjasikenas.namiokai.ui.main.UsersMap
@@ -81,6 +90,9 @@ import com.github.mantasjasikenas.namiokai.ui.theme.NamiokaiTheme
 import com.google.accompanist.flowlayout.FlowCrossAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
 import com.google.accompanist.flowlayout.MainAxisAlignment
+import kotlinx.datetime.Instant
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 
 @Composable
 fun FloatingAddButton(
@@ -108,7 +120,7 @@ fun FloatingAddButton(
 }
 
 @Composable
-fun CustomSpacer(
+fun NamiokaiSpacer(
     height: Int = 0,
     width: Int = 0
 ) {
@@ -131,7 +143,7 @@ fun CardText(
         color = MaterialTheme.colorScheme.primary,
     )
     Text(text = value)
-    CustomSpacer(height = 10)
+    NamiokaiSpacer(height = 10)
 }
 
 @Composable
@@ -190,14 +202,29 @@ fun DateTimeCardColumn(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun EuroIconTextRow(
     modifier: Modifier = Modifier,
     label: String,
-    value: String
+    value: String,
+    onLongClick: (() -> Unit)? = null
 ) {
+    val haptics = LocalHapticFeedback.current
+
     Row(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .conditional(onLongClick != null) {
+                //this.noRippleClickable { onClick?.invoke() }
+                this.combinedClickable(
+                    onClick = { },
+                    onLongClick = {
+                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                        onLongClick?.invoke()
+                    }
+                )
+            },
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
@@ -213,7 +240,9 @@ fun EuroIconTextRow(
             Icon(
                 imageVector = Icons.Outlined.EuroSymbol,
                 contentDescription = null,
-                modifier = Modifier.size(16.dp).fillMaxWidth(),
+                modifier = Modifier
+                    .size(16.dp)
+                    .fillMaxWidth(),
                 tint = MaterialTheme.colorScheme.primary
             )
         }
@@ -255,8 +284,7 @@ fun UsersPicker(
         crossAxisAlignment = FlowCrossAxisAlignment.Center,
     ) {
         usersPickup.forEach { (uid, selected) ->
-            FlowRowItemCard(
-                usersMap[uid]?.displayName ?: "Missing display name",
+            FlowRowItemCard(usersMap[uid]?.displayName ?: "Missing display name",
                 selected,
                 onItemSelected = { status ->
                     if (!isMultipleSelectEnabled) {
@@ -335,7 +363,7 @@ fun UserCard(
                 contentDescription = null,
                 modifier = Modifier.clip(RoundedCornerShape(4.dp))
             )
-            CustomSpacer(height = 10)
+            NamiokaiSpacer(height = 10)
             CardText(
                 label = stringResource(R.string.uid),
                 value = user.uid
@@ -367,8 +395,7 @@ fun NamiokaiConfirmDialog(
     onConfirm: () -> Unit = {},
     onDismiss: () -> Unit = {}
 ) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
+    AlertDialog(onDismissRequest = onDismiss,
         title = {
             Text(text = "Are you sure?")
         },
@@ -384,8 +411,7 @@ fun NamiokaiConfirmDialog(
             TextButton(onClick = onDismiss) {
                 Text(text = "Cancel")
             }
-        }
-    )
+        })
 }
 
 @Composable
@@ -410,7 +436,7 @@ fun NamiokaiDialog(
 @Composable
 fun <T> NamiokaiDialog(
     title: String,
-    buttonsVisible : Boolean = true,
+    buttonsVisible: Boolean = true,
     selectedValue: T,
     onSaveClick: (T) -> Unit,
     onDismiss: () -> Unit,
@@ -446,7 +472,7 @@ fun <T> NamiokaiDialog(
                 content()
                 Spacer(modifier = Modifier.height(30.dp))
 
-                if (buttonsVisible){
+                if (buttonsVisible) {
                     Row(
                         horizontalArrangement = Arrangement.End,
                         verticalAlignment = Alignment.CenterVertically,
@@ -498,10 +524,39 @@ fun NamiokaiTextField(
             onValueChange(it.text)
         },
         singleLine = singleLine,
-        modifier = modifier.padding(
-            vertical = 10.dp,
-            horizontal = 30.dp
-        )
+        modifier = modifier
+    )
+}
+
+@Composable
+fun NamiokaiTextArea(
+    modifier: Modifier = Modifier,
+    label: String,
+    initialTextFieldValue: String = "",
+    onValueChange: (String) -> Unit,
+    keyboardType: KeyboardType = KeyboardType.Text,
+) {
+    var text by remember { mutableStateOf(TextFieldValue(initialTextFieldValue)) }
+    val focusManager = LocalFocusManager.current
+
+    OutlinedTextField(
+        modifier = modifier.height(100.dp),
+        value = text,
+        label = { Text(text = label) },
+        keyboardOptions = KeyboardOptions(
+            imeAction = ImeAction.Next,
+            keyboardType = keyboardType
+        ),
+        keyboardActions = KeyboardActions(onNext = {
+            val isMoved = focusManager.moveFocus(FocusDirection.Down)
+            if (!isMoved) {
+                focusManager.clearFocus()
+            }
+        }),
+        onValueChange = {
+            text = it
+            onValueChange(it.text)
+        },
     )
 }
 
@@ -521,7 +576,7 @@ fun FiltersRow(
             val selected = remember { mutableStateOf(false) }
             FilterChip(selected = selected.value,
                 modifier = Modifier.padding(horizontal = 4.dp),
-                onClick = {  },
+                onClick = { },
                 label = { Text(item) })
         }
     }
@@ -546,7 +601,7 @@ fun NamiokaiDialogPreview() {
             NamiokaiDialog(title = "Select username",
                 onDismiss = { status.value = false },
                 onSaveClick = { status.value = false }) {
-                CustomSpacer(height = 30)
+                NamiokaiSpacer(height = 30)
             }
         }
 
@@ -566,32 +621,44 @@ fun NamiokaiBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = bottomSheetState,
         windowInsets = BottomAppBarDefaults.windowInsets,
-        modifier = Modifier.padding(10.dp)
+        modifier = Modifier.padding(
+            start = 10.dp,
+            top = 0.dp,
+            end = 10.dp,
+            bottom = 10.dp
+        )
     ) {
 
         Column(
             modifier = Modifier.padding(
-                25.dp,
-                0.dp,
-                25.dp,
-                25.dp
+                start = 25.dp,
+                top = 0.dp,
+                end = 25.dp,
+                bottom = 25.dp
             )
         ) {
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 15.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
                     text = title,
-                    style = MaterialTheme.typography.headlineSmall,
+                    maxLines = 1,
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.titleLarge, // previous: headlineSmall
                     fontWeight = FontWeight.Bold,
                 )
-                IconButton(onClick = onDismiss) {
+                IconButton(
+                    onClick = onDismiss,
+                ) {
                     Icon(
                         imageVector = Icons.Outlined.Close,
                         contentDescription = null,
-                        modifier = Modifier.size(24.dp)
+                        modifier = Modifier
+                            .size(24.dp)
                     )
                 }
             }
@@ -605,6 +672,7 @@ fun NamiokaiBottomSheet(
 @Composable
 fun NamiokaiElevatedCard(
     modifier: Modifier = Modifier,
+    padding: Dp = 15.dp,
     onClick: () -> Unit = {},
     content: @Composable () -> Unit
 ) {
@@ -623,7 +691,7 @@ fun NamiokaiElevatedCard(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(15.dp),
+                .padding(padding),
             horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.Center
         ) {
@@ -647,7 +715,11 @@ fun NamiokaiElevatedOutlinedCard(
                     durationMillis = 300,
                     easing = LinearOutSlowInEasing
                 )
-            ).border(CardDefaults.outlinedCardBorder(), shape = MaterialTheme.shapes.medium),
+            )
+            .border(
+                CardDefaults.outlinedCardBorder(),
+                shape = MaterialTheme.shapes.medium
+            ),
         onClick = onClick,
     ) {
 
@@ -671,8 +743,7 @@ fun NamiokaiOutlinedCard(
     content: @Composable () -> Unit
 ) {
     OutlinedCard(
-        modifier = modifier
-            .fillMaxSize(),
+        modifier = modifier.fillMaxSize(),
         onClick = onClick,
     ) {
 
@@ -688,6 +759,60 @@ fun NamiokaiOutlinedCard(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun NamiokaiDateRangePicker(
+    initialSelectedStartDateMillis: Long? = null,
+    initialSelectedEndDateMillis: Long? = null,
+    onDismissRequest: () -> Unit = {},
+    onSaveRequest: (Period) -> Unit = { _ -> },
+    onResetRequest: () -> Unit = {}
+) {
+
+    val state = rememberDateRangePickerState(
+        initialSelectedStartDateMillis = initialSelectedStartDateMillis,
+        initialSelectedEndDateMillis = initialSelectedEndDateMillis
+    )
+
+    DatePickerDialog(modifier = Modifier.fillMaxSize(),
+        onDismissRequest = onDismissRequest,
+        properties = DialogProperties(dismissOnClickOutside = true),
+        dismissButton = {
+            TextButton(onClick = onResetRequest) {
+                Text(text = "Reset")
+            }
+            TextButton(onClick = onDismissRequest) {
+                Text(text = "Cancel")
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    onDismissRequest()
+                    onSaveRequest(
+                        Period(
+                            Instant.fromEpochMilliseconds(state.selectedStartDateMillis ?: 0)
+                                .toLocalDateTime(TimeZone.currentSystemDefault()).date,
+
+                            Instant.fromEpochMilliseconds(state.selectedEndDateMillis ?: 0)
+                                .toLocalDateTime(TimeZone.currentSystemDefault()).date
+                        )
+                    )
+                },
+                enabled = state.selectedEndDateMillis != null
+            ) {
+                Text(text = "Save")
+            }
+        }) {
+
+        NamiokaiSpacer(height = 25)
+        DateRangePicker(
+            state = state,
+            modifier = Modifier.weight(1f),
+        )
+    }
+}
+
 @Composable
 inline fun <T> rememberState(crossinline producer: @DisallowComposableCalls () -> T) = remember { mutableStateOf(producer()) }
 
@@ -696,3 +821,4 @@ inline fun <T> rememberState(
     key: Any?,
     crossinline producer: @DisallowComposableCalls () -> T
 ) = remember(key) { mutableStateOf(producer()) }
+

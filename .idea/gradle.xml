@@ -12,6 +12,7 @@
             <option value="$PROJECT_DIR$/Namiokai" />
           </set>
         </option>
+        <option name="resolveExternalAnnotations" value="false" />
       </GradleProjectSettings>
     </option>
   </component>

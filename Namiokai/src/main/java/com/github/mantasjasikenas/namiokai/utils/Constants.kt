@@ -15,4 +15,6 @@ object Constants {
 
     const val DOWNLOAD_CHANNEL_ID = "download_channel"
     const val IMAGES_TYPE = "image/*"
+
+    const val EMAIL_ADDRESS = "mantasjasikenas@gmail.com"
 }

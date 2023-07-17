@@ -65,7 +65,7 @@ import com.github.mantasjasikenas.namiokai.model.User
 import com.github.mantasjasikenas.namiokai.model.bills.TripBill
 import com.github.mantasjasikenas.namiokai.model.bills.resolveBillCost
 import com.github.mantasjasikenas.namiokai.ui.common.CardText
-import com.github.mantasjasikenas.namiokai.ui.common.CustomSpacer
+import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiSpacer
 import com.github.mantasjasikenas.namiokai.ui.common.DateTimeCardColumn
 import com.github.mantasjasikenas.namiokai.ui.common.EmptyView
 import com.github.mantasjasikenas.namiokai.ui.common.FloatingAddButton
@@ -103,7 +103,7 @@ fun FuelScreen(
     }
     else {
         LazyColumn(modifier = modifier.fillMaxSize()) {
-            item { CustomSpacer(height = 15) }
+            item { NamiokaiSpacer(height = 15) }
             items(fuelUiState.tripBills) { fuel ->
                 FuelCard(
                     tripBill = fuel,
@@ -114,7 +114,7 @@ fun FuelScreen(
                     currentUser = currentUser
                 )
             }
-            item { CustomSpacer(height = 120) }
+            item { NamiokaiSpacer(height = 120) }
         }
     }
 
@@ -248,7 +248,7 @@ private fun FuelCard(
                         horizontalArrangement = Arrangement.Start,
                         modifier = Modifier.fillMaxSize()
                     ) {
-                        CustomSpacer(width = 10)
+                        NamiokaiSpacer(width = 10)
                         DateTimeCardColumn(
                             day = dateTime.date.dayOfMonth.toString(),
                             month = dateTime.month.getDisplayName(
@@ -257,9 +257,9 @@ private fun FuelCard(
                             )
                         )
 
-                        CustomSpacer(width = 20)
+                        NamiokaiSpacer(width = 20)
                         VerticalDivider(modifier = Modifier.height(60.dp))
-                        CustomSpacer(width = 20)
+                        NamiokaiSpacer(width = 20)
 
                         Column(modifier = Modifier.weight(1f)) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -277,10 +277,10 @@ private fun FuelCard(
                                         .clip(CircleShape)
                                         .size(18.dp)
                                 )
-                                CustomSpacer(width = 6)
+                                NamiokaiSpacer(width = 6)
                                 Text(text = usersMap[tripBill.paymasterUid]?.displayName ?: "-")
                             }
-                            CustomSpacer(height = 5)
+                            NamiokaiSpacer(height = 5)
 
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Icon(
@@ -289,14 +289,14 @@ private fun FuelCard(
                                     modifier = Modifier.size(18.dp),
                                     tint = MaterialTheme.colorScheme.primary
                                 )
-                                CustomSpacer(width = 7)
+                                NamiokaiSpacer(width = 7)
                                 Text(
                                     text = tripBill.tripDestination,
                                     style = MaterialTheme.typography.labelMedium
                                 )
                             }
                         }
-                        CustomSpacer(width = 30)
+                        NamiokaiSpacer(width = 30)
 
                         Column(horizontalAlignment = Alignment.End) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -316,7 +316,7 @@ private fun FuelCard(
                                 )
                             }
                         }
-                        CustomSpacer(width = 10)
+                        NamiokaiSpacer(width = 10)
                     }
 
                 }
@@ -349,7 +349,7 @@ private fun FuelCard(
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.primary
             )
-            CustomSpacer(height = 7)
+            NamiokaiSpacer(height = 7)
             FlowRow(
                 mainAxisSpacing = 7.dp,
                 crossAxisSpacing = 7.dp
@@ -364,7 +364,7 @@ private fun FuelCard(
                     }
                 }
             }
-            CustomSpacer(height = 30)
+            NamiokaiSpacer(height = 30)
             AnimatedVisibility(visible = isAllowedModification) {
                 Row(
                     horizontalArrangement = Arrangement.End,
