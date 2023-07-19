@@ -1,30 +1,31 @@
 package com.github.mantasjasikenas.namiokai.ui.screens.home
 
 import android.content.Intent
+import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.CreditScore
 import androidx.compose.material3.Divider
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -39,161 +40,374 @@ import androidx.core.content.ContextCompat.startActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.github.mantasjasikenas.namiokai.data.repository.debts.UserUid
 import com.github.mantasjasikenas.namiokai.model.Period
+import com.github.mantasjasikenas.namiokai.model.User
+import com.github.mantasjasikenas.namiokai.ui.common.CircleIndicatorsRow
 import com.github.mantasjasikenas.namiokai.ui.common.EuroIconTextRow
 import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiDateRangePicker
 import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiElevatedOutlinedCard
 import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiOutlinedCard
 import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiSpacer
+import com.github.mantasjasikenas.namiokai.ui.common.NoResultsFound
 import com.github.mantasjasikenas.namiokai.ui.common.rememberState
 import com.github.mantasjasikenas.namiokai.ui.main.MainUiState
 import com.github.mantasjasikenas.namiokai.ui.main.MainViewModel
+import com.github.mantasjasikenas.namiokai.ui.main.PeriodUiState
 import com.github.mantasjasikenas.namiokai.utils.format
+import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
+import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Duration.Companion.days
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
     mainViewModel: MainViewModel = hiltViewModel(),
     homeViewModel: HomeViewModel = hiltViewModel()
 ) {
-    val verticalScrollState = rememberScrollState()
     val mainUiState by mainViewModel.mainUiState.collectAsState()
     val periodUiState by mainViewModel.periodState.collectAsState()
     val usersDebts by homeViewModel.getDebts(periodUiState.userSelectedPeriod)
         .collectAsState(initial = emptyMap())
     val currentUserDebts = usersDebts[mainUiState.currentUser.uid]
-    var openDatePicker by rememberState {
-        false
+
+    val pageCount = 2
+    val pagerState = rememberPagerState(
+        initialPage = 0,
+        pageCount = {
+            pageCount
+        }
+    )
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        HorizontalPager(
+            state = pagerState
+        ) { pageIndex ->
+            when (pageIndex) {
+                0 -> {
+                    WelcomePage(
+                        mainUiState = mainUiState,
+                        usersDebts = usersDebts,
+                        mainViewModel = mainViewModel
+                    )
+                }
+
+                1 -> {
+                    DebtsPage(
+                        mainUiState = mainUiState,
+                        mainViewModel = mainViewModel,
+                        periodUiState = periodUiState,
+                        currentUserDebts = currentUserDebts
+                    )
+                }
+            }
+        }
+
+        Row(
+            Modifier
+                .height(33.dp)
+                .fillMaxWidth()
+                .align(Alignment.BottomCenter),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            CircleIndicatorsRow(
+                count = pageCount,
+                current = pagerState.currentPage,
+            )
+        }
+
+
     }
+}
+
+@Composable
+private fun WelcomePage(
+    mainUiState: MainUiState,
+    usersDebts: Map<UserUid, MutableMap<UserUid, Double>>,
+    mainViewModel: MainViewModel
+) {
+    val currentUser = mainUiState.currentUser
 
     Column(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxSize()
-            .padding(20.dp)
-            .verticalScroll(verticalScrollState)
+            .padding(20.dp),
     ) {
-        HomeScreenHeader(
+        WelcomeCard(displayName = currentUser.displayName)
+        NamiokaiSpacer(height = 40)
+
+        StatisticsCard(
+            usersDebts = usersDebts,
+            currentUser = currentUser
+        )
+        NamiokaiSpacer(height = 20)
+    }
+}
+
+@Composable
+private fun StatisticsCard(
+    usersDebts: Map<UserUid, MutableMap<UserUid, Double>>,
+    currentUser: User
+) {
+    NamiokaiOutlinedCard {
+        Text(
+            text = "Statistics",
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.primary
+        )
+        NamiokaiSpacer(height = 12)
+
+        TextLine(
+            leadingText = "Debts",
+            trailingText = "${usersDebts[currentUser.uid]?.size ?: 0}",
+        )
+        NamiokaiSpacer(height = 3)
+        TextLine(
+            leadingText = "You owe",
+            trailingText = "${
+                usersDebts[currentUser.uid]?.values?.sum()
+                    ?.format(2) ?: 0.0.format(2)
+            }€",
+        )
+        NamiokaiSpacer(height = 3)
+        TextLine(
+            leadingText = "You are owed",
+            trailingText = "${
+                usersDebts.values.sumOf {
+                    it[currentUser.uid] ?: 0.0
+                }
+                    .format(2)
+
+            }€",
+        )
+
+        /*Text(
+            text = "You have ${usersDebts[currentUser.uid]?.size ?: 0} debts",
+            style = MaterialTheme.typography.bodyLarge,
+        )
+        NamiokaiSpacer(height = 6)
+        Text(
+            text = "You owe ${
+                usersDebts[currentUser.uid]?.values?.sum()
+                    ?.format(2) ?: 0.0.format(2)
+            }€",
+            style = MaterialTheme.typography.bodyLarge,
+        )
+        NamiokaiSpacer(height = 6)
+        Text(
+            text = "You are owed ${
+                usersDebts.values.sumOf {
+                    it[currentUser.uid] ?: 0.0
+                }
+                    .format(2)
+
+            }€",
+            style = MaterialTheme.typography.bodyLarge,
+        )*/
+    }
+}
+
+@Composable
+private fun TextLine(
+    leadingText: String,
+    trailingText: String,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(
+            text = leadingText,
+            style = MaterialTheme.typography.bodyLarge,
+        )
+        Text(
+            text = trailingText,
+            style = MaterialTheme.typography.bodyLarge,
+        )
+    }
+}
+
+
+@Composable
+private fun WelcomeCard(
+    displayName: String
+) {
+    val currentHour = Clock.System.now()
+        .toLocalDateTime(TimeZone.currentSystemDefault()).hour
+
+    val greeting = when (currentHour) {
+        in 0..11 -> "Good morning"
+        in 12..17 -> "Good afternoon"
+        in 18..23 -> "Good evening"
+        else -> "Hello"
+    }
+
+    NamiokaiElevatedOutlinedCard {
+        Text(
+            text = greeting,
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold
+        )
+        Text(
+            text = displayName,
+            textAlign = TextAlign.End,
+        )
+    }
+
+}
+
+@Composable
+private fun DebtsPage(
+    mainUiState: MainUiState,
+    mainViewModel: MainViewModel,
+    periodUiState: PeriodUiState,
+    currentUserDebts: MutableMap<UserUid, Double>?
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(20.dp),
+    ) {
+        HomeTitleCard(
             mainUiState = mainUiState,
             periods = mainViewModel.getPeriods(),
             currentPeriod = periodUiState.currentPeriod,
             userSelectedPeriod = periodUiState.userSelectedPeriod,
-            onPeriodClick = {
-                openDatePicker = true
+            onPeriodReset = {
+                mainViewModel.resetPeriodState()
             },
             onPeriodUpdate = {
                 mainViewModel.updateUserSelectedPeriodState(it)
             }
         )
-        NamiokaiSpacer(height = 24)
-        DebtsCard(
-            currentUserDebts = currentUserDebts,
-            mainUiState = mainUiState
-        )
 
-        if (openDatePicker) {
-            NamiokaiDateRangePicker(
-                onDismissRequest = { openDatePicker = false },
-                onSaveRequest = {
-                    mainViewModel.updateUserSelectedPeriodState(it)
-                    openDatePicker = false
-                },
-                onResetRequest = {
-                    mainViewModel.resetPeriodState()
-                    openDatePicker = false
-                },
-                initialSelectedStartDateMillis = periodUiState.userSelectedPeriod.start.atStartOfDayIn(TimeZone.currentSystemDefault())
-                    .plus(1.days)
-                    .toEpochMilliseconds(),
-                initialSelectedEndDateMillis = periodUiState.userSelectedPeriod.end.atStartOfDayIn(TimeZone.currentSystemDefault())
-                    .plus(1.days)
-                    .toEpochMilliseconds()
+        if (currentUserDebts.isNullOrEmpty()) {
+            NoDebtsFound()
+        }
+        else {
+            DebtsCard(
+                currentUserDebts = currentUserDebts,
+                mainUiState = mainUiState
             )
         }
     }
 }
 
+
 @OptIn(
-    ExperimentalMaterial3Api::class,
     ExperimentalFoundationApi::class
 )
 @Composable
-private fun HomeScreenHeader(
+private fun HomeTitleCard(
     mainUiState: MainUiState,
     periods: List<Period>,
     userSelectedPeriod: Period,
     currentPeriod: Period,
-    onPeriodClick: () -> Unit,
+    onPeriodReset: () -> Unit,
     onPeriodUpdate: (Period) -> Unit,
 ) {
-    val currentPeriodIndex = periods.indexOf(currentPeriod)
-    val userScrollEnabled by rememberState {
-        periods.contains(userSelectedPeriod)
-    }
+    val coroutineScope = rememberCoroutineScope()
+    val currentPeriodIndex = periods.indexOf(userSelectedPeriod)
     val pagerState = rememberPagerState(
         initialPage = currentPeriodIndex,
         pageCount = {
             periods.size
         })
+    var openDatePicker by rememberState {
+        false
+    }
+    val onPeriodClick = {
+        openDatePicker = true
+    }
 
+
+    NamiokaiElevatedOutlinedCard {
+        Text(
+            text = "Your debts", // , ${mainUiState.currentUser.displayName}
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold
+        )
+        if (!periods.contains(userSelectedPeriod)) {
+            Text(text = "$userSelectedPeriod",
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.clickable {
+                    onPeriodClick()
+                }
+            )
+        }
+        else {
+            PeriodsHorizontalPager(
+                periods = periods,
+                pagerState = pagerState,
+                onPeriodClick = onPeriodClick,
+                onPeriodUpdate = onPeriodUpdate
+            )
+        }
+    }
+
+    if (openDatePicker) {
+        NamiokaiDateRangePicker(
+            onDismissRequest = { openDatePicker = false },
+            onSaveRequest = {
+                onPeriodUpdate(it)
+                openDatePicker = false
+            },
+            onResetRequest = {
+                onPeriodReset()
+                coroutineScope.launch {
+                    val index = periods.indexOf(currentPeriod)
+                    Log.d(
+                        "HomeScreen",
+                        "index: $index"
+                    )
+                    pagerState.animateScrollToPage(index)
+                }
+                openDatePicker = false
+            },
+            initialSelectedStartDateMillis = userSelectedPeriod.start.atStartOfDayIn(TimeZone.currentSystemDefault())
+                .plus(1.days)
+                .toEpochMilliseconds(),
+            initialSelectedEndDateMillis = userSelectedPeriod.end.atStartOfDayIn(TimeZone.currentSystemDefault())
+                .plus(1.days)
+                .toEpochMilliseconds()
+        )
+    }
+
+}
+
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun PeriodsHorizontalPager(
+    periods: List<Period>,
+    pagerState: PagerState,
+    onPeriodClick: () -> Unit,
+    onPeriodUpdate: (Period) -> Unit
+) {
     LaunchedEffect(pagerState) {
         snapshotFlow { pagerState.currentPage }.collect { page ->
             onPeriodUpdate(periods[page])
         }
     }
 
-    LaunchedEffect(
-        userSelectedPeriod,
-    ) {
-        val index = periods.indexOf(userSelectedPeriod)
-        if (index != -1) {
-            pagerState.animateScrollToPage(index)
-        }
-    }
-
-    NamiokaiElevatedOutlinedCard {
+    HorizontalPager(
+        modifier = Modifier.width(180.dp),
+        state = pagerState,
+        pageSpacing = 8.dp,
+    ) { page ->
         Text(
-            text = "Your debts, ${mainUiState.currentUser.displayName}",
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold
+            text = "${periods[page]}",
+            style = MaterialTheme.typography.labelLarge,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.clickable { onPeriodClick() }
         )
-
-        if (periods.contains(userSelectedPeriod)) {
-            HorizontalPager(
-                modifier = Modifier.width(180.dp),
-                state = pagerState,
-                pageSpacing = 8.dp,
-                userScrollEnabled = userScrollEnabled
-            ) { page ->
-                Text(
-                    text = "${periods[page]}",
-                    style = MaterialTheme.typography.labelLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.clickable { onPeriodClick() }
-                )
-            }
-        }
-        else {
-            Text(text = "$userSelectedPeriod",
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.clickable { onPeriodClick() }
-            )
-        }
     }
-}
-
-@Composable
-private fun PeriodsHorizontalPager(
-    period: Period,
-    onPeriodClick: () -> Unit,
-    onPeriodUpdate: (Period) -> Unit
-) {
-
-
 }
 
 @Composable
@@ -201,6 +415,10 @@ private fun DebtsCard(
     currentUserDebts: MutableMap<UserUid, Double>?,
     mainUiState: MainUiState
 ) {
+    if (currentUserDebts == null) {
+        return
+    }
+
     val clipboardManager = LocalClipboardManager.current
     val context = LocalContext.current
     val launchSwedbank = {
@@ -214,12 +432,10 @@ private fun DebtsCard(
         }
     }
 
-    if (currentUserDebts.isNullOrEmpty()) {
-        NoDebtsFoundCard()
-        return
-    }
-
-    NamiokaiOutlinedCard {
+    NamiokaiSpacer(height = 20)
+    NamiokaiOutlinedCard(
+        modifier = Modifier.verticalScroll(rememberScrollState())
+    ) {
         var total = 0.0
         currentUserDebts.forEach { (key, value) ->
             total += value
@@ -251,62 +467,41 @@ private fun DebtsCard(
 }
 
 @Composable
-private fun NoDebtsFoundCard() {
-    NamiokaiOutlinedCard{
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Icon(
-                imageVector = Icons.Outlined.CreditScore,
-                contentDescription = null,
-                modifier = Modifier.size(72.dp),
-                tint = MaterialTheme.colorScheme.primary
-            )
-            NamiokaiSpacer(height = 16)
-            Text(
-                text = "Whoops!",
-                style = MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.primary,
-                fontWeight = FontWeight.Bold,
-            )
-            NamiokaiSpacer(height = 8)
-            Text(
-                text = "No debts was found.\nYou are all good!",
-                textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Bold,
-            )
-            NamiokaiSpacer(height = 8)
-        }
+fun NoDebtsFound(
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        NoResultsFound(
+            label = "No debts was found.\nYou are all good!",
+            modifier = modifier
+        )
     }
 }
 
 
-
-
-    /*Row(
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            imageVector = Icons.Outlined.DoneOutline,
-            contentDescription = null,
-            modifier = Modifier.size(16.dp),
-            tint = MaterialTheme.colorScheme.primary
-        )
-        NamiokaiSpacer(width = 8)
-        Text(
-            text = "No debts found",
-            style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.primary,
-            fontWeight = FontWeight.Bold,
-        )
-    }*/
-    //}
+/*Row(
+    horizontalArrangement = Arrangement.Center,
+    verticalAlignment = Alignment.CenterVertically
+) {
+    Icon(
+        imageVector = Icons.Outlined.DoneOutline,
+        contentDescription = null,
+        modifier = Modifier.size(16.dp),
+        tint = MaterialTheme.colorScheme.primary
+    )
+    NamiokaiSpacer(width = 8)
+    Text(
+        text = "No debts found",
+        style = MaterialTheme.typography.labelLarge,
+        color = MaterialTheme.colorScheme.primary,
+        fontWeight = FontWeight.Bold,
+    )
+}*/
+//}
 
 /*@Composable
 private fun FlatCard(

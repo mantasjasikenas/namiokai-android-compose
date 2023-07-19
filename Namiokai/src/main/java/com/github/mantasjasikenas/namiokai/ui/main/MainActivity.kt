@@ -4,6 +4,7 @@ package com.github.mantasjasikenas.namiokai.ui.main
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -26,6 +27,8 @@ import com.google.android.play.core.install.model.InstallStatus
 import com.google.android.play.core.install.model.UpdateAvailability
 import com.google.android.play.core.ktx.isFlexibleUpdateAllowed
 import com.google.android.play.core.ktx.isImmediateUpdateAllowed
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.messaging.ktx.messaging
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -63,6 +66,7 @@ class MainActivity : ComponentActivity(), AnalyticsLogger by AnalyticsLoggerImpl
         }
 
         installSplashScreen()
+        subscribeToTopics()
         checkForAppUpdates()
         registerLifecycleOwner(this)
 
@@ -141,5 +145,16 @@ class MainActivity : ComponentActivity(), AnalyticsLogger by AnalyticsLoggerImpl
                 )
             }
         }
+    }
+
+    private fun subscribeToTopics(){
+        Firebase.messaging.subscribeToTopic("namiokai")
+            .addOnCompleteListener { task ->
+                var msg = "Subscribed"
+                if (!task.isSuccessful) {
+                    msg = "Subscribe failed"
+                }
+                Log.d(TAG, msg)
+            }
     }
 }

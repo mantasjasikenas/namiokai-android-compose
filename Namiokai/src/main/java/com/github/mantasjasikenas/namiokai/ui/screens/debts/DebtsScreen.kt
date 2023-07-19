@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
-import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.CircularProgressIndicator
@@ -41,7 +40,6 @@ import com.github.mantasjasikenas.namiokai.data.repository.debts.UserDebtsMap
 import com.github.mantasjasikenas.namiokai.model.User
 import com.github.mantasjasikenas.namiokai.ui.common.CardText
 import com.github.mantasjasikenas.namiokai.ui.common.CardTextColumn
-import com.github.mantasjasikenas.namiokai.ui.common.EmptyView
 import com.github.mantasjasikenas.namiokai.ui.common.EuroIconTextRow
 import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiDateRangePicker
 import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiDialog
@@ -51,6 +49,7 @@ import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiSpacer
 import com.github.mantasjasikenas.namiokai.ui.common.rememberState
 import com.github.mantasjasikenas.namiokai.ui.main.MainViewModel
 import com.github.mantasjasikenas.namiokai.ui.main.UsersMap
+import com.github.mantasjasikenas.namiokai.ui.screens.home.NoDebtsFound
 import com.github.mantasjasikenas.namiokai.utils.format
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
@@ -71,60 +70,59 @@ fun DebtsScreen(
     val usersDebts by debtsViewModel.getDebts(periodUiState.userSelectedPeriod)
         .collectAsState(initial = emptyMap())
 
-    if (usersDebts.isEmpty()) {
-        EmptyView()
-        return
-    }
-
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(
-                20.dp,
-                12.dp,
-                20.dp,
-                5.dp
+                20.dp
             )
     ) {
+        NamiokaiElevatedOutlinedCard {
+            Text(
+                text = "Period",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = "${periodUiState.userSelectedPeriod}",
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.clickable(onClick = { openDatePicker = true })
+            )
+        }
 
-        NamiokaiSpacer(height = 8)
-        LazyVerticalStaggeredGrid(
-            columns = StaggeredGridCells.Fixed(2),
-            verticalItemSpacing = 8.dp,
-            horizontalArrangement = Arrangement.spacedBy(
-                8.dp,
-                Alignment.Start
-            ),
-            modifier = Modifier
-                .fillMaxSize()
-        ) {
-            item(span = StaggeredGridItemSpan.FullLine) {
-                NamiokaiElevatedOutlinedCard {
-                    Text(
-                        text = "Period",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = "${periodUiState.userSelectedPeriod}",
-                        style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.clickable(onClick = { openDatePicker = true })
+
+        if (usersDebts.isEmpty()) {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Center
+            ) {
+                NoDebtsFound()
+            }
+            return@Column
+        }
+        else {
+            NamiokaiSpacer(height = 20) // looks good with 8?
+            LazyVerticalStaggeredGrid(
+                columns = StaggeredGridCells.Fixed(2),
+                verticalItemSpacing = 8.dp,
+                horizontalArrangement = Arrangement.spacedBy(
+                    8.dp,
+                    Alignment.Start
+                ),
+                modifier = Modifier
+                    .fillMaxSize()
+            ) {
+                items(usersDebts.toList()) { (user, debts) ->
+                    if (debts.isEmpty() || usersMap[user] == null) return@items
+
+                    DebtorCard(
+                        debtorUser = usersMap[user]!!,
+                        userDebts = debts,
+                        usersMap = usersMap
                     )
                 }
-            }
-            item(span = StaggeredGridItemSpan.FullLine) {
-                NamiokaiSpacer(height = 8)
-            }
-            items(usersDebts.toList()) { (user, debts) ->
-                if (debts.isEmpty() || usersMap[user] == null) return@items
-
-                DebtorCard(
-                    debtorUser = usersMap[user]!!,
-                    userDebts = debts,
-                    usersMap = usersMap
-                )
             }
         }
     }
@@ -228,10 +226,10 @@ private fun DebtorCard(
                         label = "Debtor",
                         value = debtorUser.displayName
                     )
-                   /* CardText(
-                        label = "Period",
-                        value = "$debtsPeriod"
-                    )*/
+                    /* CardText(
+                         label = "Period",
+                         value = "$debtsPeriod"
+                     )*/
                 }
 
                 //CustomSpacer(height = 8) // 16

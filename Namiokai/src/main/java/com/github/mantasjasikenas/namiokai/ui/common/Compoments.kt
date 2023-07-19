@@ -29,6 +29,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.EuroSymbol
+import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomAppBarDefaults
 import androidx.compose.material3.CardDefaults
@@ -391,6 +392,66 @@ fun EmptyView() {
 }
 
 @Composable
+fun NoResultsFound(
+    modifier: Modifier = Modifier,
+    label: String
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Icon(
+            imageVector = Icons.Outlined.Search,
+            contentDescription = null,
+            modifier = Modifier.size((144).dp),
+            tint = MaterialTheme.colorScheme.primary
+        )
+        NamiokaiSpacer(height = 16)
+        Text(
+            text = "Whoops!",
+            style = MaterialTheme.typography.headlineMedium,
+            color = MaterialTheme.colorScheme.primary,
+            fontWeight = FontWeight.Bold,
+        )
+        NamiokaiSpacer(height = 8)
+        Text(
+            text = label,
+            textAlign = TextAlign.Center,
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.SemiBold,
+        )
+        NamiokaiSpacer(height = 8)
+    }
+}
+
+@Composable
+fun CircleIndicatorsRow(
+    count: Int,
+    current: Int
+) {
+    Row(
+        Modifier
+            .fillMaxSize(),
+        horizontalArrangement = Arrangement.Center
+    ) {
+        repeat(count) { iteration ->
+            val color = if (current == iteration) Color.LightGray else Color.DarkGray
+            Box(
+                modifier = Modifier
+                    .padding(4.dp)
+                    .clip(CircleShape)
+                    .background(color)
+                    .size(7.dp)
+
+            )
+        }
+    }
+}
+
+@Composable
 fun NamiokaiConfirmDialog(
     onConfirm: () -> Unit = {},
     onDismiss: () -> Unit = {}
@@ -709,7 +770,7 @@ fun NamiokaiElevatedOutlinedCard(
 ) {
     ElevatedCard(
         modifier = modifier
-            .fillMaxSize()
+            .fillMaxWidth()
             .animateContentSize(
                 animationSpec = tween(
                     durationMillis = 300,
@@ -725,8 +786,7 @@ fun NamiokaiElevatedOutlinedCard(
 
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(15.dp),
+                .padding(16.dp),
             horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.Center
         ) {
@@ -743,14 +803,12 @@ fun NamiokaiOutlinedCard(
     content: @Composable () -> Unit
 ) {
     OutlinedCard(
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier.fillMaxWidth(),
         onClick = onClick,
     ) {
-
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(15.dp),
+                .padding(16.dp),
             horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.Center
         ) {

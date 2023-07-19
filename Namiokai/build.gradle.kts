@@ -18,8 +18,8 @@ android {
         applicationId = "com.namiokai"
         minSdk = 26
         targetSdk = 34
-        versionCode = 13
-        versionName = "0.1.3"
+        versionCode = 15
+        versionName = "0.1.5"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

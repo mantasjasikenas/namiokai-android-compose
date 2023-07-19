@@ -207,6 +207,7 @@ private fun PurchaseBillFiltersRow(
                 values = users,
                 onValueSelected = {
                     if (it == null) {
+                        paymasterFilterValue.value = "All"
                         billViewModel.removeFilter("paymaster")
                     }
                     else {
@@ -228,6 +229,7 @@ private fun PurchaseBillFiltersRow(
                 values = users,
                 onValueSelected = {
                     if (it == null) {
+                        splitterFilterValue.value = "All"
                         billViewModel.removeFilter("splitter")
                     }
                     else {

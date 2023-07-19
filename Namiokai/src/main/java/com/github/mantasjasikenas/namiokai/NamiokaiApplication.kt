@@ -1,11 +1,20 @@
 package com.github.mantasjasikenas.namiokai
 
 import android.app.Application
+import coil.ImageLoader
+import coil.ImageLoaderFactory
 import dagger.hilt.android.HiltAndroidApp
 
 
 @HiltAndroidApp
-class NamiokaiApplication : Application() {
+class NamiokaiApplication : Application(), ImageLoaderFactory {
+    override fun newImageLoader(): ImageLoader {
+        return ImageLoader.Builder(this)
+            .respectCacheHeaders(false)
+            .crossfade(true)
+            .build()
+    }
+
     /*override fun onCreate() {
         super.onCreate()
 
