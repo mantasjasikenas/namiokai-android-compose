@@ -18,8 +18,8 @@ android {
         applicationId = "com.namiokai"
         minSdk = 26
         targetSdk = 34
-        versionCode = 15
-        versionName = "0.1.5"
+        versionCode = 17
+        versionName = "0.1.7"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -86,13 +86,12 @@ android {
 }
 
 dependencies {
-
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
     implementation("org.jetbrains.kotlinx:kotlinx-datetime-jvm:0.4.0")
     implementation("androidx.core:core-ktx:1.12.0-alpha05")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")
     implementation("androidx.activity:activity-compose:1.7.2")
-    implementation(platform("androidx.compose:compose-bom:2023.06.00"))
+    implementation(platform("androidx.compose:compose-bom:2023.06.01"))
     implementation("androidx.compose.ui:ui:1.6.0-alpha01")
     implementation("androidx.compose.ui:ui-graphics:1.6.0-alpha01")
     implementation("androidx.compose.ui:ui-tooling-preview:1.6.0-alpha01")
@@ -103,7 +102,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-savedstate:2.6.1")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.1")
     implementation("androidx.navigation:navigation-compose:2.6.0")
-    implementation("org.jetbrains.kotlin:kotlin-reflect:1.8.22")
+    implementation("org.jetbrains.kotlin:kotlin-reflect:1.9.0")
     implementation("androidx.compose.material:material-icons-extended:1.4.3")
     implementation("com.google.accompanist:accompanist-permissions:0.30.1")
     implementation("androidx.work:work-runtime-ktx:2.8.1")
@@ -121,7 +120,7 @@ dependencies {
 
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
-    androidTestImplementation(platform("androidx.compose:compose-bom:2023.06.00"))
+    androidTestImplementation(platform("androidx.compose:compose-bom:2023.06.01"))
     androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.6.0-alpha01")
 
     debugImplementation("androidx.compose.ui:ui-tooling:1.6.0-alpha01")
@@ -135,7 +134,7 @@ dependencies {
 
 
     // Firebase
-    implementation(platform("com.google.firebase:firebase-bom:32.1.1"))
+    implementation(platform("com.google.firebase:firebase-bom:32.2.0"))
     implementation("com.google.firebase:firebase-auth-ktx:22.1.0")
     implementation("com.google.firebase:firebase-firestore-ktx:24.7.0")
     implementation("com.google.firebase:firebase-messaging-ktx:23.2.0")
@@ -144,22 +143,24 @@ dependencies {
     implementation ("com.google.firebase:firebase-config-ktx:21.4.1")
 
     //Dagger - Hilt
-    implementation("com.google.dagger:hilt-android:2.46.1")
-    kapt("com.google.dagger:hilt-compiler:2.46.1")
+    implementation("com.google.dagger:hilt-android:2.47")
+    kapt("com.google.dagger:hilt-compiler:2.47")
     implementation("androidx.hilt:hilt-navigation-compose:1.1.0-alpha01")
 
     // For instrumentation tests
-    androidTestImplementation("com.google.dagger:hilt-android-testing:2.46.1")
-    kaptAndroidTest("com.google.dagger:hilt-compiler:2.46.1")
+    androidTestImplementation("com.google.dagger:hilt-android-testing:2.47")
+    kaptAndroidTest("com.google.dagger:hilt-compiler:2.47")
 
     // For local unit tests
-    testImplementation("com.google.dagger:hilt-android-testing:2.46.1")
-    kaptTest("com.google.dagger:hilt-compiler:2.46.1")
+    testImplementation("com.google.dagger:hilt-android-testing:2.47")
+    kaptTest("com.google.dagger:hilt-compiler:2.47")
 
     implementation("androidx.core:core-splashscreen:1.0.1")
 
     implementation("com.google.android.play:app-update:2.1.0")
     implementation("com.google.android.play:app-update-ktx:2.1.0")
+
+    implementation("com.github.skydoves:colorpicker-compose:1.0.4")
 }
 
 

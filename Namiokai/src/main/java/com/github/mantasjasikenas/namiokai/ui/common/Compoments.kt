@@ -75,7 +75,6 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -87,7 +86,6 @@ import com.github.mantasjasikenas.namiokai.model.Period
 import com.github.mantasjasikenas.namiokai.model.Uid
 import com.github.mantasjasikenas.namiokai.model.User
 import com.github.mantasjasikenas.namiokai.ui.main.UsersMap
-import com.github.mantasjasikenas.namiokai.ui.theme.NamiokaiTheme
 import com.google.accompanist.flowlayout.FlowCrossAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
 import com.google.accompanist.flowlayout.MainAxisAlignment
@@ -643,31 +641,6 @@ fun FiltersRow(
     }
 }
 
-
-@Preview(showBackground = true)
-@Composable
-fun FiltersRowPreview() {
-    NamiokaiTheme(useDarkTheme = true) {
-        FiltersRow()
-    }
-}
-
-//@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun NamiokaiDialogPreview() {
-    NamiokaiTheme(useDarkTheme = true) {
-        val status = remember { mutableStateOf(true) }
-
-        if (status.value) {
-            NamiokaiDialog(title = "Select username",
-                onDismiss = { status.value = false },
-                onSaveClick = { status.value = false }) {
-                NamiokaiSpacer(height = 30)
-            }
-        }
-
-    }
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

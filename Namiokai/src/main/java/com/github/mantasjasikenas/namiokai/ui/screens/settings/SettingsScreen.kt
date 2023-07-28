@@ -3,12 +3,16 @@ package com.github.mantasjasikenas.namiokai.ui.screens.settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,8 +20,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
@@ -25,6 +32,10 @@ import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabPosition
+import androidx.compose.material3.TabRow
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -37,20 +48,41 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.center
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.github.mantasjasikenas.namiokai.R
 import com.github.mantasjasikenas.namiokai.data.repository.preferences.PreferenceKeys
+import com.github.mantasjasikenas.namiokai.model.theme.ThemePreferences
 import com.github.mantasjasikenas.namiokai.data.repository.preferences.rememberPreference
+import com.github.mantasjasikenas.namiokai.data.repository.preferences.rememberThemePreferences
 import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiConfirmDialog
 import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiDialog
+import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiElevatedCard
+import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiSpacer
 import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiTextField
+import com.github.mantasjasikenas.namiokai.ui.common.noRippleClickable
+import com.github.mantasjasikenas.namiokai.ui.common.rememberState
+import com.github.mantasjasikenas.namiokai.ui.main.MainUiState
 import com.github.mantasjasikenas.namiokai.ui.main.MainViewModel
+import com.github.mantasjasikenas.namiokai.model.theme.Theme
+import com.github.mantasjasikenas.namiokai.model.theme.ThemeType
+import com.github.mantasjasikenas.namiokai.ui.theme.getColorScheme
 import com.github.mantasjasikenas.namiokai.ui.theme.md_theme_dark_primary
 import com.github.mantasjasikenas.namiokai.utils.Constants.IMAGES_TYPE
+import com.github.mantasjasikenas.namiokai.utils.toHex
+import com.github.skydoves.colorpicker.compose.AlphaTile
+import com.github.skydoves.colorpicker.compose.BrightnessSlider
+import com.github.skydoves.colorpicker.compose.HsvColorPicker
+import com.github.skydoves.colorpicker.compose.drawColorIndicator
+import com.github.skydoves.colorpicker.compose.rememberColorPickerController
 
 @Composable
 fun SettingsScreen(
@@ -59,31 +91,7 @@ fun SettingsScreen(
     settingsViewModel: SettingsViewModel = hiltViewModel(),
     navController: NavHostController
 ) {
-    var useSystemTheme by rememberPreference(
-        PreferenceKeys.USE_SYSTEM_DEFAULT_THEME,
-        true
-    )
-    var isDarkModeEnabled by rememberPreference(
-        PreferenceKeys.IS_DARK_MODE_ENABLED,
-        false
-    )
-    var isAmoledModeEnabled by rememberPreference(
-        PreferenceKeys.IS_AMOLED_MODE_ENABLED,
-        false
-    )
-    var isDynamicColorEnabled by rememberPreference(
-        PreferenceKeys.IS_DYNAMIC_COLOR_ENABLED,
-        false
-    )
     val mainUiState by mainViewModel.mainUiState.collectAsState()
-    val currentUser = mainUiState.currentUser
-    val (updateDisplayNameDialogState, setUpdateNameDialogState) = remember { mutableStateOf(false) }
-    val galleryLauncher =
-        rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { imageUri ->
-            imageUri?.let {
-                settingsViewModel.addImageToStorage(imageUri)
-            }
-        }
 
     Column(
         modifier = Modifier
@@ -92,85 +100,330 @@ fun SettingsScreen(
             .padding()
     ) {
         SettingsGroupSpacer()
-        SettingsEntryGroupText(title = "General")
-        SwitchSettingEntry(title = "Use system theme",
-            text = "Toggles system default theme",
-            isChecked = useSystemTheme,
-            onCheckedChange = { useSystemTheme = !useSystemTheme })
-        AnimatedVisibility(visible = !useSystemTheme) {
-            Column {
-                SwitchSettingEntry(
-                    title = "Dark mode",
-                    text = "Toggles theme",
-                    isChecked = isDarkModeEnabled,
-                    onCheckedChange = { isDarkModeEnabled = !isDarkModeEnabled },
-                    isEnabled = !useSystemTheme
-                )
-                SwitchSettingEntry(
-                    title = "Amoled mode",
-                    text = "Toggles amoled mode",
-                    isChecked = isAmoledModeEnabled,
-                    onCheckedChange = {
-                        isAmoledModeEnabled = !isAmoledModeEnabled
-                        isDynamicColorEnabled = false
-                    },
-                    isEnabled = isDarkModeEnabled
-                )
-                SwitchSettingEntry(
-                    title = "Dynamic color",
-                    text = "Toggles dynamic color",
-                    isChecked = isDynamicColorEnabled,
-                    onCheckedChange = {
-                        isDynamicColorEnabled = !isDynamicColorEnabled
-                        isAmoledModeEnabled = false
-                    },
-                    isEnabled = true
-                )
+        AppearanceSettingsGroup()
+        ProfileSettingsGroup(
+            settingsViewModel = settingsViewModel,
+            mainViewModel = mainViewModel,
+            mainUiState = mainUiState
+        )
+    }
+}
+
+@Composable
+private fun ColumnScope.ProfileSettingsGroup(
+    settingsViewModel: SettingsViewModel,
+    mainViewModel: MainViewModel,
+    mainUiState: MainUiState
+) {
+    val currentUser = mainUiState.currentUser
+    val (updateDisplayNameDialogState, setUpdateNameDialogState) = remember { mutableStateOf(false) }
+    val galleryLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { imageUri ->
+        imageUri?.let {
+            settingsViewModel.addImageToStorage(imageUri)
+        }
+    }
+
+
+    SettingsEntryGroupText(title = "Profile")
+    SettingsEntry(title = "Change profile picture",
+        text = "Update your profile picture",
+        onClick = {
+            galleryLauncher.launch(IMAGES_TYPE)
+        })
+    SettingsEntry(title = "Change display name",
+        text = "Update display name",
+        onClick = {
+            setUpdateNameDialogState(true)
+        })
+    SettingsGroupSpacer()
+    SettingsEntryGroupText(title = "Account")
+    SettingsEntry(title = "Email",
+        text = currentUser.email.ifEmpty { "Not logged in" },
+        onClick = { })
+    AnimatedVisibility(visible = currentUser.uid.isNotEmpty()) {
+        SettingsEntry(title = "Log out",
+            text = "You are logged in as ${currentUser.displayName.ifEmpty { "-" }}",
+            onClick = {
+                settingsViewModel.logout()
+                mainViewModel.resetCurrentUser()
+            })
+    }
+
+    if (updateDisplayNameDialogState) {
+        ChangeDisplayNameDialog(onSaveClick = {
+            val name = it.trim()
+            val isValid = settingsViewModel.validateDisplayName(
+                mainUiState,
+                name
+            )
+            if (!isValid) {
+                return@ChangeDisplayNameDialog
+            }
+
+            settingsViewModel.updateDisplayName(name)
+            setUpdateNameDialogState(false)
+        },
+            onDismiss = { setUpdateNameDialogState(false) })
+    }
+}
+
+@Composable
+fun FancyIndicator(
+    color: Color,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier
+            .padding(5.dp)
+            .fillMaxSize()
+            .border(
+                BorderStroke(
+                    2.dp,
+                    color
+                ),
+                MaterialTheme.shapes.small
+            )
+    )
+}
+
+@Composable
+fun FancyIndicatorTabs(
+    values: List<String>,
+    selectedIndex: Int,
+    onValueChange: (Int) -> Unit,
+) {
+
+
+    val indicator = @Composable { tabPositions: List<TabPosition> ->
+        FancyIndicator(
+            color = colorScheme.primary,
+            modifier = Modifier.tabIndicatorOffset(tabPositions[selectedIndex])
+        )
+    }
+
+    Column {
+        NamiokaiElevatedCard(padding = 0.dp) {
+            TabRow(
+                modifier = Modifier.clip(MaterialTheme.shapes.small),
+                selectedTabIndex = selectedIndex,
+                indicator = indicator,
+                divider = {},
+            ) {
+                values.forEachIndexed { index, title ->
+                    Tab(
+                        selected = selectedIndex == index,
+                        onClick = {
+                            onValueChange(index)
+                        },
+                        text = { Text(title) },
+                    )
+                }
             }
         }
-        SettingsGroupSpacer()
-        SettingsEntryGroupText(title = "Profile")
-        SettingsEntry(title = "Change profile picture",
-            text = "Update your profile picture",
-            onClick = {
-                galleryLauncher.launch(IMAGES_TYPE)
-            })
-        SettingsEntry(
-            title = "Change display name",
-            text = "Update display name",
-            onClick = {
-                setUpdateNameDialogState(true)
-            })
-        SettingsGroupSpacer()
-        SettingsEntryGroupText(title = "Account")
-        SettingsEntry(title = "Email",
-            text = currentUser.email.ifEmpty { "Not logged in" },
-            onClick = { })
-        AnimatedVisibility(visible = currentUser.uid.isNotEmpty()) {
-            SettingsEntry(title = "Log out",
-                text = "You are logged in as ${currentUser.displayName.ifEmpty { "-" }}",
-                onClick = {
-                    settingsViewModel.logout()
-                    mainViewModel.resetCurrentUser()
-                })
-        }
+    }
+}
 
-        if (updateDisplayNameDialogState) {
-            ChangeDisplayNameDialog(
-                onSaveClick = {
-                    val name = it.trim()
-                    val isValid = settingsViewModel.validateDisplayName(
-                        mainUiState,
-                        name
+@Composable
+private fun ColumnScope.AppearanceSettingsGroup() {
+    val (themePreferences, setThemePreferences) = rememberThemePreferences()
+    var colorDialogState by rememberState { false }
+
+    val onColorsDialogDismiss = {
+        colorDialogState = false
+    }
+
+    val onColorsDialogOpen = {
+        colorDialogState = true
+    }
+    val onColorsSaveClick = { color: Color ->
+        setThemePreferences(
+            themePreferences.copy(
+                customColor = color
+            )
+        )
+        onColorsDialogDismiss()
+    }
+
+
+
+
+    SettingsEntryGroupText(title = "Appearance")
+    Column(
+        modifier = Modifier.padding(
+            horizontal = 32.dp,
+            vertical = 16.dp
+        )
+    ) {
+        Text(
+            modifier = Modifier.padding(bottom = 8.dp),
+            text = "Colors",
+            style = typography.titleMedium,
+        )
+        val values = ThemeType.values()
+            .map { it.title }
+
+        FancyIndicatorTabs(
+            values = values,
+            selectedIndex = values.indexOf(themePreferences.themeType.title),
+            onValueChange = {
+                val themeType = ThemeType.values()[it]
+
+                setThemePreferences(
+                    themePreferences.copy(
+                        themeType = themeType
                     )
-                    if (!isValid) {
-                        return@ChangeDisplayNameDialog
-                    }
+                )
+            }
+        )
+    }
 
-                    settingsViewModel.updateDisplayName(name)
-                    setUpdateNameDialogState(false)
-                },
-                onDismiss = { setUpdateNameDialogState(false) }
+
+    AnimatedVisibility(visible = themePreferences.themeType != ThemeType.AUTOMATIC) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 32.dp),
+        ) {
+            Text(
+                text = "Theme",
+                style = typography.titleMedium,
+            )
+            LazyRow(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                contentPadding = PaddingValues(
+                    //top = 8.dp,
+                    bottom = 8.dp
+                ),
+                horizontalArrangement = Arrangement.Start,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                val themes = when (themePreferences.themeType) {
+                    ThemeType.DARK -> Theme.darkColorThemes
+                    ThemeType.LIGHT -> Theme.lightColorThemes
+                    else -> emptyList()
+                }
+
+                items(
+                    themes
+                ) { theme ->
+                    val colorScheme = getColorScheme(
+                        ThemePreferences(
+                            themeType = themePreferences.themeType,
+                            theme = theme,
+                            customColor = themePreferences.customColor
+                        )
+                    )
+
+                    Column(verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier
+                            .padding(8.dp)
+                            .noRippleClickable {
+                                setThemePreferences(
+                                    themePreferences.copy(
+                                        theme = theme
+                                    )
+                                )
+                            }) {
+                        Box(
+                            modifier = Modifier
+                                .size(50.dp)
+                                .clip(CircleShape)
+                                .background(color = colorScheme.primaryContainer)
+                                .border(
+                                    width = 2.dp,
+                                    color = if (themePreferences.theme == theme) colorScheme.primary else Color.Transparent,
+                                    shape = CircleShape
+                                )
+                        )
+                        NamiokaiSpacer(height = 8)
+                        Text(
+                            text = theme.title,
+                            style = typography.labelMedium,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+
+    AnimatedVisibility(visible = (themePreferences.themeType != ThemeType.AUTOMATIC && themePreferences.theme == Theme.CUSTOM)) {
+        SettingsEntry(
+            title = "Change accent color",
+            text = "Update custom theme accent color.",
+            onClick = onColorsDialogOpen
+        )
+
+    }
+    SettingsGroupSpacer()
+
+    if (colorDialogState) {
+        ColorPickerDialog(
+            onSaveClick = onColorsSaveClick,
+            onDismiss = onColorsDialogDismiss
+        )
+    }
+
+}
+
+
+@Composable
+private fun ColorPickerDialog(
+    onSaveClick: (Color) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val controller = rememberColorPickerController()
+    val colorArgb by rememberPreference(
+        key = PreferenceKeys.CUSTOM_COLOR,
+        defaultValue = colorScheme.primary.toArgb()
+    )
+    val clipboardManager = LocalClipboardManager.current
+
+    NamiokaiDialog(
+        title = "Pick a color",
+        selectedValue = controller.selectedColor.value,
+        onSaveClick = onSaveClick,
+        onDismiss = onDismiss
+    ) {
+        HsvColorPicker(
+            modifier = Modifier
+                .padding(10.dp)
+                .height(300.dp),
+            controller = controller,
+            drawOnPosSelected = {
+                drawColorIndicator(
+                    controller.selectedPoint.value,
+                    controller.selectedColor.value
+                )
+            },
+            initialColor = Color(colorArgb)
+        )
+        BrightnessSlider(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(10.dp)
+                .height(35.dp),
+            controller = controller,
+        )
+        Column(
+            modifier = Modifier.noRippleClickable {
+                clipboardManager.setText(AnnotatedString(controller.selectedColor.value.toHex()))
+            }
+        ) {
+            Text(
+                modifier = Modifier.padding(top = 10.dp),
+                text = controller.selectedColor.value.toHex(),
+                style = typography.bodyMedium,
+            )
+            AlphaTile(
+                modifier = Modifier
+                    .padding()
+                    .size(60.dp)
+                    .clip(RoundedCornerShape(6.dp)),
+                controller = controller
             )
         }
     }
@@ -190,14 +443,12 @@ private fun ChangeDisplayNameDialog(
         onSaveClick = onSaveClick,
         onDismiss = onDismiss
     ) {
-        NamiokaiTextField(
-            modifier = Modifier.padding(
-                vertical = 10.dp,
-                horizontal = 30.dp
-            ),
+        NamiokaiTextField(modifier = Modifier.padding(
+            vertical = 10.dp,
+            horizontal = 30.dp
+        ),
             label = stringResource(R.string.display_name),
-            onValueChange = { newDisplayName.value = it }
-        )
+            onValueChange = { newDisplayName.value = it })
     }
 }
 
@@ -240,8 +491,7 @@ fun SettingsEntry(
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
-            .clickable(
-                enabled = isEnabled,
+            .clickable(enabled = isEnabled,
                 onClick = {
                     if (confirmClick) {
                         showDialog = true
@@ -249,8 +499,7 @@ fun SettingsEntry(
                     else {
                         onClick()
                     }
-                }
-            )
+                })
             .alpha(if (isEnabled) 1f else 0.5f)
             .padding(
                 start = 16.dp,
@@ -275,13 +524,11 @@ fun SettingsEntry(
     }
 
     if (showDialog) {
-        NamiokaiConfirmDialog(
-            onConfirm = {
-                showDialog = false
-                onClick()
-            },
-            onDismiss = { showDialog = false }
-        )
+        NamiokaiConfirmDialog(onConfirm = {
+            showDialog = false
+            onClick()
+        },
+            onDismiss = { showDialog = false })
 
     }
 }

@@ -1,6 +1,8 @@
 package com.github.mantasjasikenas.namiokai.utils
 
 import androidx.compose.runtime.snapshots.SnapshotStateMap
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import com.github.mantasjasikenas.namiokai.model.User
 import com.google.firebase.auth.FirebaseUser
 import kotlinx.datetime.LocalDateTime
@@ -55,7 +57,10 @@ fun <T> Collection<T>.filterAll(predicates: MutableCollection<(T) -> Boolean>): 
     return filter { candidate ->
         predicates.all { it(candidate) }
     }
+}
 
+fun Color.toHex(): String {
+    return String.format("#%06X", 0xFFFFFF and this.toArgb())
 }
 
 

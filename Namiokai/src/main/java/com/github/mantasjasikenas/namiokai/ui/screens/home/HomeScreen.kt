@@ -5,20 +5,31 @@ import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.EuroSymbol
 import androidx.compose.material3.Divider
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -36,14 +47,15 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.startActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.github.mantasjasikenas.namiokai.data.repository.debts.UserUid
 import com.github.mantasjasikenas.namiokai.model.Period
 import com.github.mantasjasikenas.namiokai.model.User
-import com.github.mantasjasikenas.namiokai.ui.common.CircleIndicatorsRow
 import com.github.mantasjasikenas.namiokai.ui.common.EuroIconTextRow
 import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiDateRangePicker
+import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiElevatedCard
 import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiElevatedOutlinedCard
 import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiOutlinedCard
 import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiSpacer
@@ -67,12 +79,17 @@ fun HomeScreen(
     mainViewModel: MainViewModel = hiltViewModel(),
     homeViewModel: HomeViewModel = hiltViewModel()
 ) {
+    val coroutineScope = rememberCoroutineScope()
     val mainUiState by mainViewModel.mainUiState.collectAsState()
     val periodUiState by mainViewModel.periodState.collectAsState()
     val usersDebts by homeViewModel.getDebts(periodUiState.userSelectedPeriod)
         .collectAsState(initial = emptyMap())
     val currentUserDebts = usersDebts[mainUiState.currentUser.uid]
 
+    val pages = listOf(
+        "Widgets",
+        "Debts"
+    )
     val pageCount = 2
     val pagerState = rememberPagerState(
         initialPage = 0,
@@ -81,16 +98,33 @@ fun HomeScreen(
         }
     )
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Column(modifier = Modifier.fillMaxSize()) {
+        Row(
+            Modifier
+                .padding(horizontal = 20.dp)
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            PagesFlowRow(
+                pages = pages,
+                currentPage = pagerState.currentPage,
+                onPageClick = {
+                    coroutineScope.launch {
+                        pagerState.animateScrollToPage(it)
+                    }
+                }
+            )
+        }
+
         HorizontalPager(
             state = pagerState
         ) { pageIndex ->
             when (pageIndex) {
                 0 -> {
-                    WelcomePage(
-                        mainUiState = mainUiState,
+                    WidgetsPage(
+                        currentUser = mainUiState.currentUser,
                         usersDebts = usersDebts,
-                        mainViewModel = mainViewModel
+                        period = periodUiState.userSelectedPeriod
                     )
                 }
 
@@ -104,109 +138,187 @@ fun HomeScreen(
                 }
             }
         }
+    }
+}
 
-        Row(
-            Modifier
-                .height(33.dp)
-                .fillMaxWidth()
-                .align(Alignment.BottomCenter),
-            horizontalArrangement = Arrangement.Center
-        ) {
-            CircleIndicatorsRow(
-                count = pageCount,
-                current = pagerState.currentPage,
-            )
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun PagesFlowRow(
+    pages: List<String>,
+    currentPage: Int,
+    onPageClick: (Int) -> Unit = {}
+) {
+    LazyRow(
+        horizontalArrangement = Arrangement.spacedBy(
+            0.dp,
+            Alignment.Start
+        ),
+        modifier = Modifier
+            .fillMaxWidth()
+    ) {
+        items(pages) {
+            FilterChip(
+                selected = it == pages[currentPage],
+                border = null,
+                shape = CircleShape,
+                onClick = { onPageClick(pages.indexOf(it)) },
+                colors = FilterChipDefaults.filterChipColors(
+                    selectedContainerColor = MaterialTheme.colorScheme.primaryContainer
+
+                ),
+                label = { Text(text = it) })
         }
-
-
     }
 }
 
 @Composable
-private fun WelcomePage(
-    mainUiState: MainUiState,
+private fun WidgetsPage(
+    currentUser: User,
     usersDebts: Map<UserUid, MutableMap<UserUid, Double>>,
-    mainViewModel: MainViewModel
+    period: Period
 ) {
-    val currentUser = mainUiState.currentUser
-
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(20.dp),
     ) {
-        WelcomeCard(displayName = currentUser.displayName)
-        NamiokaiSpacer(height = 40)
-
-        StatisticsCard(
+        Widgets(
             usersDebts = usersDebts,
-            currentUser = currentUser
+            currentUser = currentUser,
+            period = period
         )
-        NamiokaiSpacer(height = 20)
     }
 }
 
 @Composable
-private fun StatisticsCard(
+private fun Widgets(
     usersDebts: Map<UserUid, MutableMap<UserUid, Double>>,
-    currentUser: User
+    currentUser: User,
+    period: Period
 ) {
-    NamiokaiOutlinedCard {
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(2),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        /*item(span = {
+            GridItemSpan(maxLineSpan)
+        }) {
+            Text(
+                text = "Widgets",
+                style = MaterialTheme.typography.titleLarge,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }*/
+        item(span = {
+            GridItemSpan(maxLineSpan)
+        }) {
+            WidgetCard(
+                label = "Period",
+            ) {
+                Text(
+                    text = period.toString(),
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.headlineSmall
+                )
+            }
+        }
+        item {
+            WidgetCard(
+                label = "Owed to you",
+            ) {
+                val owedToYou = usersDebts.values.sumOf {
+                    it[currentUser.uid] ?: 0.0
+                }
+
+                EuroIconText(
+                    value = owedToYou.format(2),
+                    size = 24
+                )
+            }
+        }
+        item {
+            WidgetCard(
+                label = "You owe",
+            ) {
+                val value = usersDebts[currentUser.uid]?.values?.sum()
+                    ?.format(2) ?: 0.0.format(2)
+
+                EuroIconText(
+                    value = value,
+                    size = 24
+                )
+            }
+        }
+        item {
+            WidgetCard(
+                label = "Total debts",
+            ) {
+                val value = (usersDebts[currentUser.uid]?.size ?: 0).toString()
+
+                Text(
+                    text = value,
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.headlineSmall
+                )
+
+            }
+        }
+    }
+}
+
+@Composable
+private fun EuroIconText(
+    value: String,
+    size: Int = 18
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center
+    ) {
+        Icon(
+            imageVector = Icons.Outlined.EuroSymbol,
+            contentDescription = null,
+            modifier = Modifier.size((size - 1).dp),
+            tint = MaterialTheme.colorScheme.primary
+        )
         Text(
-            text = "Statistics",
-            style = MaterialTheme.typography.labelMedium,
+            text = value,
+            color = MaterialTheme.colorScheme.onSurface,
             fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.primary
+            style = MaterialTheme.typography.headlineSmall.copy(
+                fontSize = size.sp
+            )
         )
-        NamiokaiSpacer(height = 12)
+    }
+}
 
-        TextLine(
-            leadingText = "Debts",
-            trailingText = "${usersDebts[currentUser.uid]?.size ?: 0}",
-        )
-        NamiokaiSpacer(height = 3)
-        TextLine(
-            leadingText = "You owe",
-            trailingText = "${
-                usersDebts[currentUser.uid]?.values?.sum()
-                    ?.format(2) ?: 0.0.format(2)
-            }€",
-        )
-        NamiokaiSpacer(height = 3)
-        TextLine(
-            leadingText = "You are owed",
-            trailingText = "${
-                usersDebts.values.sumOf {
-                    it[currentUser.uid] ?: 0.0
-                }
-                    .format(2)
 
-            }€",
-        )
-
-        /*Text(
-            text = "You have ${usersDebts[currentUser.uid]?.size ?: 0} debts",
-            style = MaterialTheme.typography.bodyLarge,
-        )
-        NamiokaiSpacer(height = 6)
-        Text(
-            text = "You owe ${
-                usersDebts[currentUser.uid]?.values?.sum()
-                    ?.format(2) ?: 0.0.format(2)
-            }€",
-            style = MaterialTheme.typography.bodyLarge,
-        )
-        NamiokaiSpacer(height = 6)
-        Text(
-            text = "You are owed ${
-                usersDebts.values.sumOf {
-                    it[currentUser.uid] ?: 0.0
-                }
-                    .format(2)
-
-            }€",
-            style = MaterialTheme.typography.bodyLarge,
-        )*/
+@Composable
+private fun WidgetCard(
+    modifier: Modifier = Modifier,
+    label: String,
+    onLongClick: () -> Unit = {},
+    content: @Composable () -> Unit
+) {
+    NamiokaiElevatedCard(
+        modifier = modifier
+        //.aspectRatio(1f)
+    ) {
+        Column(
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.Start,
+        ) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.primary
+            )
+            NamiokaiSpacer(height = 3)
+            content()
+        }
     }
 }
 

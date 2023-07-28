@@ -6,11 +6,16 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.preferencesDataStore
+import com.github.mantasjasikenas.namiokai.model.theme.Theme
+import com.github.mantasjasikenas.namiokai.model.theme.ThemePreferences
+import com.github.mantasjasikenas.namiokai.model.theme.ThemeType
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -28,13 +33,19 @@ class PreferencesRepository @Inject constructor(@ApplicationContext private val 
 
     private val dataStore = context.dataStore
 
-    suspend fun <T> putPreference(key: Preferences.Key<T>, value: T) {
+    suspend fun <T> putPreference(
+        key: Preferences.Key<T>,
+        value: T
+    ) {
         dataStore.edit { preferences ->
             preferences[key] = value
         }
     }
 
-    fun <T> getPreference(key: Preferences.Key<T>, default: T): Flow<T> {
+    fun <T> getPreference(
+        key: Preferences.Key<T>,
+        default: T
+    ): Flow<T> {
         return dataStore.data.map { preferences ->
             preferences[key] ?: default
         }
@@ -72,6 +83,43 @@ fun <T> rememberPreference(
             override fun component2(): (T) -> Unit = { value = it }
         }
     }
+}
+
+@Composable
+fun rememberThemePreferences(): MutableState<ThemePreferences> {
+    val themeType = rememberPreference(
+        PreferenceKeys.THEME_TYPE,
+        ThemeType.AUTOMATIC.name
+    )
+    val theme = rememberPreference(
+        PreferenceKeys.THEME,
+        Theme.DEFAULT.name
+    )
+    val customColor = rememberPreference(
+        PreferenceKeys.CUSTOM_COLOR,
+        Color.Unspecified.toArgb()
+    )
+
+    return remember {
+        object : MutableState<ThemePreferences> {
+            override var value: ThemePreferences
+                get() = ThemePreferences(
+                    themeType = ThemeType.valueOfOrDefault(themeType.value),
+                    theme = Theme.valueOfOrDefault(theme.value),
+                    customColor = Color(customColor.value)
+                )
+                set(value) {
+                    themeType.value = value.themeType.name
+                    theme.value = value.theme.name
+                    customColor.value = value.customColor.toArgb()
+                }
+
+            override fun component1() = value
+            override fun component2(): (ThemePreferences) -> Unit = { value = it }
+
+        }
+    }
+
 }
 
 

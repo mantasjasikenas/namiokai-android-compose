@@ -9,13 +9,13 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import com.github.mantasjasikenas.namiokai.data.repository.debts.DebtsManager
-import com.github.mantasjasikenas.namiokai.data.repository.preferences.PreferenceKeys
 import com.github.mantasjasikenas.namiokai.data.repository.preferences.PreferencesRepository
-import com.github.mantasjasikenas.namiokai.data.repository.preferences.rememberPreference
+import com.github.mantasjasikenas.namiokai.data.repository.preferences.rememberThemePreferences
 import com.github.mantasjasikenas.namiokai.ui.common.PermissionsHandler
 import com.github.mantasjasikenas.namiokai.ui.theme.NamiokaiTheme
 import com.google.android.play.core.appupdate.AppUpdateManager
@@ -52,7 +52,6 @@ class MainActivity : ComponentActivity(), AnalyticsLogger by AnalyticsLoggerImpl
     val mainViewModel: MainViewModel by viewModels()
 
 
-
     @SuppressLint("SourceLockedOrientationActivity")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -71,24 +70,20 @@ class MainActivity : ComponentActivity(), AnalyticsLogger by AnalyticsLoggerImpl
         registerLifecycleOwner(this)
 
         setContent {
-            val useSystemTheme by rememberPreference(
-                key = PreferenceKeys.USE_SYSTEM_DEFAULT_THEME, defaultValue = true
-            )
-            val darkTheme by rememberPreference(
-                key = PreferenceKeys.IS_DARK_MODE_ENABLED, defaultValue = false
-            )
-            val amoledTheme by rememberPreference(
-                key = PreferenceKeys.IS_AMOLED_MODE_ENABLED, defaultValue = false
-            )
-            val dynamicColor by rememberPreference(
-                key = PreferenceKeys.IS_DYNAMIC_COLOR_ENABLED, defaultValue = false
-            )
+            val themePreferences by rememberThemePreferences()
+
+            LaunchedEffect(
+                key1 = themePreferences
+            ) {
+                Log.d(
+                    TAG,
+                    "Theme changed to $themePreferences"
+                )
+            }
+
 
             NamiokaiTheme(
-                useSystemTheme = useSystemTheme,
-                useDarkTheme = darkTheme,
-                useAmoledTheme = amoledTheme,
-                useDynamicColorTheme = dynamicColor
+                themePreferences = themePreferences,
             ) {
                 PermissionsHandler()
                 NamiokaiApp(mainViewModel = mainViewModel)
@@ -103,7 +98,10 @@ class MainActivity : ComponentActivity(), AnalyticsLogger by AnalyticsLoggerImpl
             appUpdateManager.appUpdateInfo.addOnSuccessListener { info ->
                 if (info.updateAvailability() == UpdateAvailability.DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS) {
                     appUpdateManager.startUpdateFlowForResult(
-                        info, this, AppUpdateOptions.defaultOptions(updateType), 123
+                        info,
+                        this,
+                        AppUpdateOptions.defaultOptions(updateType),
+                        123
                     )
                 }
             }
@@ -120,8 +118,11 @@ class MainActivity : ComponentActivity(), AnalyticsLogger by AnalyticsLoggerImpl
     private val installStateUpdatedListener = InstallStateUpdatedListener { state ->
         if (state.installStatus() == InstallStatus.DOWNLOADED) {
             Toast.makeText(
-                applicationContext, "Download successful. Restarting app in 5 seconds.", Toast.LENGTH_LONG
-            ).show()
+                applicationContext,
+                "Download successful. Restarting app in 5 seconds.",
+                Toast.LENGTH_LONG
+            )
+                .show()
 
             lifecycleScope.launch {
                 delay(5.seconds)
@@ -141,20 +142,26 @@ class MainActivity : ComponentActivity(), AnalyticsLogger by AnalyticsLoggerImpl
 
             if (isUpdateAvailable && isUpdateAllowed) {
                 appUpdateManager.startUpdateFlowForResult(
-                    info, this, AppUpdateOptions.defaultOptions(updateType), 123
+                    info,
+                    this,
+                    AppUpdateOptions.defaultOptions(updateType),
+                    123
                 )
             }
         }
     }
 
-    private fun subscribeToTopics(){
+    private fun subscribeToTopics() {
         Firebase.messaging.subscribeToTopic("namiokai")
             .addOnCompleteListener { task ->
                 var msg = "Subscribed"
                 if (!task.isSuccessful) {
                     msg = "Subscribe failed"
                 }
-                Log.d(TAG, msg)
+                Log.d(
+                    TAG,
+                    msg
+                )
             }
     }
 }
