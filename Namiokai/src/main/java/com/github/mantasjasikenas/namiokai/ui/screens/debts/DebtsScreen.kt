@@ -1,7 +1,6 @@
 package com.github.mantasjasikenas.namiokai.ui.screens.debts
 
 import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -41,32 +40,24 @@ import com.github.mantasjasikenas.namiokai.model.User
 import com.github.mantasjasikenas.namiokai.ui.common.CardText
 import com.github.mantasjasikenas.namiokai.ui.common.CardTextColumn
 import com.github.mantasjasikenas.namiokai.ui.common.EuroIconTextRow
-import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiDateRangePicker
-import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiDialog
-import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiElevatedCard
-import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiElevatedOutlinedCard
 import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiSpacer
-import com.github.mantasjasikenas.namiokai.ui.common.rememberState
+import com.github.mantasjasikenas.namiokai.ui.components.NamiokaiDialog
+import com.github.mantasjasikenas.namiokai.ui.components.NamiokaiElevatedCard
+import com.github.mantasjasikenas.namiokai.ui.components.NamiokaiElevatedOutlinedCard
+import com.github.mantasjasikenas.namiokai.ui.components.SwipePeriod
 import com.github.mantasjasikenas.namiokai.ui.main.MainViewModel
 import com.github.mantasjasikenas.namiokai.ui.main.UsersMap
 import com.github.mantasjasikenas.namiokai.ui.screens.home.NoDebtsFound
 import com.github.mantasjasikenas.namiokai.utils.format
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.atStartOfDayIn
-import kotlin.time.Duration.Companion.days
 
 @Composable
 fun DebtsScreen(
-    modifier: Modifier = Modifier,
     debtsViewModel: DebtsViewModel = hiltViewModel(),
     mainViewModel: MainViewModel = hiltViewModel(),
 ) {
     val mainUiState by mainViewModel.mainUiState.collectAsState()
     val usersMap = mainUiState.usersMap
     val periodUiState by mainViewModel.periodState.collectAsState()
-    var openDatePicker by rememberState {
-        false
-    }
     val usersDebts by debtsViewModel.getDebts(periodUiState.userSelectedPeriod)
         .collectAsState(initial = emptyMap())
 
@@ -83,15 +74,18 @@ fun DebtsScreen(
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold
             )
-            Text(
-                text = "${periodUiState.userSelectedPeriod}",
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.clickable(onClick = { openDatePicker = true })
+            SwipePeriod(
+                periods = mainViewModel.getPeriods(),
+                userSelectedPeriod = periodUiState.userSelectedPeriod,
+                currentPeriod = periodUiState.currentPeriod,
+                onPeriodReset = {
+                    mainViewModel.resetPeriodState()
+                },
+                onPeriodUpdate = {
+                    mainViewModel.updateUserSelectedPeriodState(it)
+                },
             )
         }
-
 
         if (usersDebts.isEmpty()) {
             Column(
@@ -125,26 +119,6 @@ fun DebtsScreen(
                 }
             }
         }
-    }
-
-    if (openDatePicker) {
-        NamiokaiDateRangePicker(
-            onDismissRequest = { openDatePicker = false },
-            onSaveRequest = {
-                mainViewModel.updateUserSelectedPeriodState(it)
-                openDatePicker = false
-            },
-            onResetRequest = {
-                mainViewModel.resetPeriodState()
-                openDatePicker = false
-            },
-            initialSelectedStartDateMillis = periodUiState.userSelectedPeriod.start.atStartOfDayIn(TimeZone.currentSystemDefault())
-                .plus(1.days)
-                .toEpochMilliseconds(),
-            initialSelectedEndDateMillis = periodUiState.userSelectedPeriod.end.atStartOfDayIn(TimeZone.currentSystemDefault())
-                .plus(1.days)
-                .toEpochMilliseconds()
-        )
     }
 }
 

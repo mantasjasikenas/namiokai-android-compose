@@ -18,13 +18,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiDialog
 import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiSpacer
-import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiTextArea
-import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiTextField
 import com.github.mantasjasikenas.namiokai.ui.common.rememberState
+import com.github.mantasjasikenas.namiokai.ui.components.NamiokaiDialog
+import com.github.mantasjasikenas.namiokai.ui.components.NamiokaiTextArea
+import com.github.mantasjasikenas.namiokai.ui.components.NamiokaiTextField
 import com.github.mantasjasikenas.namiokai.utils.Constants.EMAIL_ADDRESS
 
 @Composable

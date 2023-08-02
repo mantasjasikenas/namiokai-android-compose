@@ -11,8 +11,6 @@ import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-private const val TAG = "FirebaseRepository"
-
 
 class BaseFirebaseRepositoryImpl @Inject constructor(
     private val db: FirebaseFirestore,

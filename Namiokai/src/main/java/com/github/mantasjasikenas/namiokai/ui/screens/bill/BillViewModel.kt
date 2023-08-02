@@ -3,10 +3,10 @@ package com.github.mantasjasikenas.namiokai.ui.screens.bill
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.mantasjasikenas.namiokai.data.PurchaseBillsRepository
+import com.github.mantasjasikenas.namiokai.model.Filter
 import com.github.mantasjasikenas.namiokai.model.bills.PurchaseBill
+import com.github.mantasjasikenas.namiokai.model.filter
 import com.github.mantasjasikenas.namiokai.utils.Constants.DATE_TIME_FORMAT
-import com.github.mantasjasikenas.namiokai.utils.Filter
-import com.github.mantasjasikenas.namiokai.utils.filterAll
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -20,8 +20,6 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
-private const val TAG = "BillViewModel"
-
 @HiltViewModel
 class BillViewModel @Inject constructor(private val purchaseBillsRepository: PurchaseBillsRepository) : ViewModel() {
 
@@ -30,7 +28,15 @@ class BillViewModel @Inject constructor(private val purchaseBillsRepository: Pur
 
     init {
         getBills()
-        //applyFilters()
+    }
+
+    fun onFiltersChanged(filters: List<Filter<PurchaseBill, Any>>) {
+        _billUiState.update {
+            it.copy(
+                filters = filters,
+                filteredPurchaseBills = it.purchaseBills.filter(filters)
+            )
+        }
     }
 
     private fun getBills() {
@@ -39,18 +45,17 @@ class BillViewModel @Inject constructor(private val purchaseBillsRepository: Pur
                 purchaseBillsRepository.getPurchaseBills()
                     .collect { bills ->
                         _billUiState.update {
-                            val filters = it.appliedFilters.values.toList()
+                            val filters = it.filters
 
                             it.copy(
                                 purchaseBills = bills,
-                                filteredPurchaseBills = bills.filterAll(filters)
+                                filteredPurchaseBills = bills.filter(filters)
                             )
                         }
                     }
             }
         }
     }
-
 
     fun insertBill(purchaseBill: PurchaseBill) {
         val formatter = DateTimeFormatter.ofPattern(DATE_TIME_FORMAT)
@@ -82,62 +87,6 @@ class BillViewModel @Inject constructor(private val purchaseBillsRepository: Pur
             }
         }
     }
-
-    fun addFilter(
-        fieldName: String,
-        filter: Filter<PurchaseBill>
-    ) {
-        _billUiState.update {
-            val map = it.appliedFilters.toMutableMap()
-                .apply {
-                    put(
-                        fieldName,
-                        filter
-                    )
-                }
-
-
-            it.copy(
-                appliedFilters = map,
-                filteredPurchaseBills = it.purchaseBills.filterAll(map.values)
-            )
-        }
-    }
-
-    fun removeFilter(fieldName: String) {
-        _billUiState.update {
-            val map = it.appliedFilters.toMutableMap()
-                .apply { remove(fieldName) }
-
-            it.copy(
-                appliedFilters = map,
-                filteredPurchaseBills = it.purchaseBills.filterAll(map.values)
-            )
-        }
-    }
-
-
-    fun resetFilters() {
-        _billUiState.update {
-            it.copy(
-                appliedFilters = emptyMap(),
-                filteredPurchaseBills = it.purchaseBills
-            )
-        }
-    }
-
-
-    /*fun applyFilters(
-        filters: Filters<PurchaseBill> = emptyList()
-    ) {
-        if (filters.isEmpty()) {
-            _billUiState.update { it.copy(filteredPurchaseBills = _billUiState.value.purchaseBills) }
-            return
-        }
-
-        val filteredBills = _billUiState.value.purchaseBills.filterAll(filters)
-        _billUiState.update { it.copy(filteredPurchaseBills = filteredBills) }
-    }*/
 
 
 }

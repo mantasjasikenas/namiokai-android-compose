@@ -26,8 +26,8 @@ import androidx.compose.ui.unit.dp
 import com.github.mantasjasikenas.namiokai.R
 import com.github.mantasjasikenas.namiokai.model.Destination
 import com.github.mantasjasikenas.namiokai.model.bills.TripBill
-import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiDialog
 import com.github.mantasjasikenas.namiokai.ui.common.UsersPicker
+import com.github.mantasjasikenas.namiokai.ui.components.NamiokaiDialog
 import com.github.mantasjasikenas.namiokai.ui.main.UsersMap
 
 @Composable

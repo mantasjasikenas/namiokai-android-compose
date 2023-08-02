@@ -3,7 +3,9 @@ package com.github.mantasjasikenas.namiokai.ui.screens.fuel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.mantasjasikenas.namiokai.data.TripBillsRepository
+import com.github.mantasjasikenas.namiokai.model.Filter
 import com.github.mantasjasikenas.namiokai.model.bills.TripBill
+import com.github.mantasjasikenas.namiokai.model.filter
 import com.github.mantasjasikenas.namiokai.utils.Constants.DATE_TIME_FORMAT
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
@@ -30,12 +32,29 @@ class FuelViewModel @Inject constructor(private val tripBillsRepository: TripBil
         getDestinations()
     }
 
+    fun onFiltersChanged(filters: List<Filter<TripBill, Any>>) {
+        _fuelUiState.update {
+            it.copy(
+                filters = filters,
+                filteredTripBills = it.tripBills.filter(filters)
+            )
+        }
+
+    }
+
     private fun getFuel() {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                tripBillsRepository.getTripBills().collect { fuels ->
-                    _fuelUiState.update { it.copy(tripBills = fuels) }
-                }
+                tripBillsRepository.getTripBills()
+                    .collect { fuels ->
+                        _fuelUiState.update {
+                            val filters = it.filters
+                            it.copy(
+                                tripBills = fuels,
+                                filteredTripBills = fuels.filter(filters)
+                            )
+                        }
+                    }
             }
         }
     }
@@ -43,16 +62,18 @@ class FuelViewModel @Inject constructor(private val tripBillsRepository: TripBil
     private fun getDestinations() {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                tripBillsRepository.getDestinations().collect { destinations ->
-                    _fuelUiState.update { it.copy(destinations = destinations) }
-                }
+                tripBillsRepository.getDestinations()
+                    .collect { destinations ->
+                        _fuelUiState.update { it.copy(destinations = destinations) }
+                    }
             }
         }
     }
 
     fun insertFuel(tripBill: TripBill) {
         val formatter = DateTimeFormatter.ofPattern(DATE_TIME_FORMAT)
-        val currentDateTime = LocalDateTime.now().format(formatter)
+        val currentDateTime = LocalDateTime.now()
+            .format(formatter)
 
         tripBill.date = currentDateTime
         tripBill.createdByUid = Firebase.auth.uid ?: ""

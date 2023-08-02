@@ -40,11 +40,13 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -59,13 +61,17 @@ import com.github.mantasjasikenas.namiokai.model.User
 import com.github.mantasjasikenas.namiokai.model.bills.FlatBill
 import com.github.mantasjasikenas.namiokai.model.bills.resolveBillCost
 import com.github.mantasjasikenas.namiokai.ui.common.CardTextColumn
-import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiSpacer
 import com.github.mantasjasikenas.namiokai.ui.common.DateTimeCardColumn
-import com.github.mantasjasikenas.namiokai.ui.common.EmptyView
 import com.github.mantasjasikenas.namiokai.ui.common.FloatingAddButton
 import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiBottomSheet
-import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiConfirmDialog
+import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiSpacer
 import com.github.mantasjasikenas.namiokai.ui.common.VerticalDivider
+import com.github.mantasjasikenas.namiokai.ui.common.rememberState
+import com.github.mantasjasikenas.namiokai.ui.components.EmptyView
+import com.github.mantasjasikenas.namiokai.model.Filter
+import com.github.mantasjasikenas.namiokai.ui.components.FiltersRow
+import com.github.mantasjasikenas.namiokai.ui.components.NamiokaiConfirmDialog
+import com.github.mantasjasikenas.namiokai.ui.main.MainUiState
 import com.github.mantasjasikenas.namiokai.ui.main.MainViewModel
 import com.github.mantasjasikenas.namiokai.ui.main.UsersMap
 import com.github.mantasjasikenas.namiokai.utils.format
@@ -96,10 +102,20 @@ fun FlatScreen(
 
     if (flatUiState.flatBills.isEmpty()) {
         EmptyView()
-    } else {
+    }
+    else {
         LazyColumn(modifier = modifier.fillMaxSize()) {
             item { NamiokaiSpacer(height = 15) }
-            items(flatUiState.flatBills) { flatBill ->
+            item {
+                FlatBillFiltersRow(
+                    mainUiState = mainUiState,
+                    flatUiState = flatUiState,
+                    onFiltersChanged = {
+                        flatViewModel.onFiltersChanged(it)
+                    }
+                )
+            }
+            items(flatUiState.filteredFlatBills) { flatBill ->
                 FlatCard(
                     flatBill = flatBill,
                     isAllowedModification = (currentUser.admin || flatBill.createdByUid == currentUser.uid),
@@ -123,6 +139,49 @@ fun FlatScreen(
 
 }
 
+@Composable
+private fun FlatBillFiltersRow(
+    mainUiState: MainUiState,
+    flatUiState: FlatUiState,
+    onFiltersChanged: (List<Filter<FlatBill, Any>>) -> Unit
+) {
+    val users = mainUiState.usersMap.map { (_, user) ->
+        user.displayName
+    }
+    val getUserUid = { displayName: String ->
+        mainUiState.usersMap.values.firstOrNull { user ->
+            user.displayName == displayName
+        }?.uid
+    }
+
+    var filters by rememberState {
+        flatUiState.filters.ifEmpty {
+            mutableStateListOf<Filter<FlatBill, Any>>(
+                Filter(
+                    displayLabel = "Paymaster",
+                    filterName = "paymaster",
+                    values = users,
+                    predicate = { bill, value -> bill.paymasterUid == getUserUid(value as String) }
+                ),
+                Filter(
+                    displayLabel = "Splitter",
+                    filterName = "splitter",
+                    values = users,
+                    predicate = { bill, value -> bill.splitUsersUid.contains(getUserUid(value as String)) }
+                ),
+            )
+        }
+    }
+
+    FiltersRow(
+        filters = filters,
+        onFilterChanged = {
+            filters = it.toMutableStateList()
+            onFiltersChanged(filters)
+        },
+    )
+}
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -135,9 +194,10 @@ private fun FlatCard(
     modifier: Modifier = Modifier
 ) {
     val scope = rememberCoroutineScope()
-    val dateTime = LocalDateTime.tryParse(flatBill.date) ?: Clock.System.now().toLocalDateTime(
-        TimeZone.currentSystemDefault()
-    )
+    val dateTime = LocalDateTime.tryParse(flatBill.date) ?: Clock.System.now()
+        .toLocalDateTime(
+            TimeZone.currentSystemDefault()
+        )
     val modifyPopupState = remember {
         mutableStateOf(false)
     }
@@ -172,7 +232,8 @@ private fun FlatCard(
         when (dismissState.targetValue) {
             DismissValue.Default -> Color.Transparent
             DismissValue.DismissedToEnd, DismissValue.DismissedToStart -> MaterialTheme.colorScheme.secondaryContainer
-        }, label = ""
+        },
+        label = ""
     )
 
     SwipeToDismiss(state = dismissState,
@@ -202,7 +263,11 @@ private fun FlatCard(
                 )
             }
         },
-        directions = if (isAllowedModification) setOf(DismissDirection.StartToEnd, DismissDirection.EndToStart) else setOf(),
+        directions = if (isAllowedModification) setOf(
+            DismissDirection.StartToEnd,
+            DismissDirection.EndToStart
+        )
+        else setOf(),
         dismissContent = {
             ElevatedCard(
                 modifier = modifier
@@ -236,7 +301,10 @@ private fun FlatCard(
                         NamiokaiSpacer(width = 10)
                         DateTimeCardColumn(
                             day = dateTime.date.dayOfMonth.toString(),
-                            month = dateTime.month.getDisplayName(TextStyle.SHORT, Locale.getDefault())
+                            month = dateTime.month.getDisplayName(
+                                TextStyle.SHORT,
+                                Locale.getDefault()
+                            )
                         )
 
                         NamiokaiSpacer(width = 20)
@@ -341,7 +409,10 @@ private fun FlatCard(
                 NamiokaiSpacer(width = 30)
                 CardTextColumn(
                     label = stringResource(R.string.price_per_person),
-                    value = "€${flatBill.splitPricePerUser().format(2)}"
+                    value = "€${
+                        flatBill.splitPricePerUser()
+                            .format(2)
+                    }"
                 )
             }
 
@@ -359,7 +430,10 @@ private fun FlatCard(
                 fontWeight = FontWeight.Bold
             )
             NamiokaiSpacer(height = 7)
-            FlowRow(mainAxisSpacing = 7.dp, crossAxisSpacing = 7.dp) {
+            FlowRow(
+                mainAxisSpacing = 7.dp,
+                crossAxisSpacing = 7.dp
+            ) {
                 usersMap.filter { flatBill.splitUsersUid.contains(it.key) }.values.forEach {
                     OutlinedCard(shape = RoundedCornerShape(25)) {
                         Text(

@@ -2,20 +2,16 @@
 
 package com.github.mantasjasikenas.namiokai.ui.main
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
-import com.github.mantasjasikenas.namiokai.data.repository.debts.DebtsManager
-import com.github.mantasjasikenas.namiokai.data.repository.preferences.PreferencesRepository
-import com.github.mantasjasikenas.namiokai.data.repository.preferences.rememberThemePreferences
 import com.github.mantasjasikenas.namiokai.ui.common.PermissionsHandler
 import com.github.mantasjasikenas.namiokai.ui.theme.NamiokaiTheme
 import com.google.android.play.core.appupdate.AppUpdateManager
@@ -32,7 +28,6 @@ import com.google.firebase.messaging.ktx.messaging
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
 
 private const val TAG = "MainActivity"
@@ -40,50 +35,32 @@ private const val TAG = "MainActivity"
 @AndroidEntryPoint
 class MainActivity : ComponentActivity(), AnalyticsLogger by AnalyticsLoggerImpl() {
 
-    @Inject
-    lateinit var preferencesRepository: PreferencesRepository
-
-    @Inject
-    lateinit var debtsManager: DebtsManager
-
     private lateinit var appUpdateManager: AppUpdateManager
     private val updateType = AppUpdateType.FLEXIBLE
+    private val mainViewModel: MainViewModel by viewModels()
 
-    val mainViewModel: MainViewModel by viewModels()
 
-
-    @SuppressLint("SourceLockedOrientationActivity")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        //requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-        mainViewModel.init()
 
         appUpdateManager = AppUpdateManagerFactory.create(applicationContext)
         if (updateType == AppUpdateType.FLEXIBLE) {
             appUpdateManager.registerListener(installStateUpdatedListener)
         }
 
-        installSplashScreen()
+        installSplashScreen().setKeepOnScreenCondition {
+            mainViewModel.mainUiState.value.isLoading
+        }
         subscribeToTopics()
         checkForAppUpdates()
         registerLifecycleOwner(this)
 
         setContent {
-            val themePreferences by rememberThemePreferences()
-
-            LaunchedEffect(
-                key1 = themePreferences
-            ) {
-                Log.d(
-                    TAG,
-                    "Theme changed to $themePreferences"
-                )
-            }
-
+            //val themePreferences by rememberThemePreferences()
+            val mainUiState by mainViewModel.mainUiState.collectAsState()
 
             NamiokaiTheme(
-                themePreferences = themePreferences,
+                themePreferences = mainUiState.themePreferences,
             ) {
                 PermissionsHandler()
                 NamiokaiApp(mainViewModel = mainViewModel)
@@ -154,14 +131,12 @@ class MainActivity : ComponentActivity(), AnalyticsLogger by AnalyticsLoggerImpl
     private fun subscribeToTopics() {
         Firebase.messaging.subscribeToTopic("namiokai")
             .addOnCompleteListener { task ->
-                var msg = "Subscribed"
                 if (!task.isSuccessful) {
-                    msg = "Subscribe failed"
+                    Log.d(
+                        TAG,
+                        "Failed to subscribe to topic: ${task.exception}"
+                    )
                 }
-                Log.d(
-                    TAG,
-                    msg
-                )
             }
     }
 }

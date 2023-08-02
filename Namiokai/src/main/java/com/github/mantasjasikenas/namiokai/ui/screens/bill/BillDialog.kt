@@ -20,9 +20,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.github.mantasjasikenas.namiokai.R
 import com.github.mantasjasikenas.namiokai.model.bills.PurchaseBill
-import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiDialog
-import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiTextField
 import com.github.mantasjasikenas.namiokai.ui.common.UsersPicker
+import com.github.mantasjasikenas.namiokai.ui.components.NamiokaiDialog
+import com.github.mantasjasikenas.namiokai.ui.components.NamiokaiTextField
 import com.github.mantasjasikenas.namiokai.ui.main.UsersMap
 
 
@@ -34,10 +34,12 @@ fun BillPopup(
     usersMap: UsersMap
 ) {
     val splitBillHashMap = remember {
-        usersMap.map { it.value.uid to false }.toMutableStateMap()
+        usersMap.map { it.value.uid to false }
+            .toMutableStateMap()
     }
     val paymasterHashMap = remember {
-        usersMap.map { it.value.uid to false }.toMutableStateMap()
+        usersMap.map { it.value.uid to false }
+            .toMutableStateMap()
     }
     val context = LocalContext.current
     val bill by remember {
@@ -64,19 +66,26 @@ fun BillPopup(
         selectedValue = bill,
         onSaveClick = {
             bill.splitUsersUid = splitBillHashMap.filter { it.value }.keys.map { it }
-            bill.paymasterUid = paymasterHashMap.filter { it.value }.keys.map { it }.firstOrNull() ?: ""
+            bill.paymasterUid = paymasterHashMap.filter { it.value }.keys.map { it }
+                .firstOrNull() ?: ""
 
             if (!bill.isValid()) {
                 Toast.makeText(
                     context,
                     R.string.please_fill_all_fields,
                     Toast.LENGTH_SHORT
-                ).show()
+                )
+                    .show()
                 return@NamiokaiDialog
             }
             onDismiss()
             onSaveClick(bill)
-            Toast.makeText(context, R.string.bill_saved, Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                context,
+                R.string.bill_saved,
+                Toast.LENGTH_SHORT
+            )
+                .show()
         },
         onDismiss = onDismiss
     ) {
@@ -107,7 +116,13 @@ fun BillPopup(
             ),
             label = stringResource(R.string.total_price),
             initialTextFieldValue = (if (bill.total == 0.0) "" else bill.total.toString()),
-            onValueChange = { bill.total = it.replace(',', '.').toDoubleOrNull() ?: 0.0 },
+            onValueChange = {
+                bill.total = it.replace(
+                    ',',
+                    '.'
+                )
+                    .toDoubleOrNull() ?: 0.0
+            },
             keyboardType = KeyboardType.Number
         )
         Spacer(modifier = Modifier.height(20.dp))

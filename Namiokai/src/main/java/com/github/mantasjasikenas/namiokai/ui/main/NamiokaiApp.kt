@@ -3,6 +3,8 @@ package com.github.mantasjasikenas.namiokai.ui.main
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -12,6 +14,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.outlined.AdminPanelSettings
 import androidx.compose.material.icons.outlined.BugReport
+import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.Update
 import androidx.compose.material3.CircularProgressIndicator
@@ -127,7 +130,7 @@ fun NamiokaiScreen(
 
 
     when (navBackStackEntry?.destination?.route) {
-        Screen.Settings.route, Screen.AdminPanel.route -> {
+        Screen.Settings.route, Screen.AdminPanel.route, Screen.Notifications.route -> {
             bottomBarState.value = false
             topBarState.value = true
         }
@@ -180,7 +183,10 @@ fun NamiokaiAppNavigationBar(
     currentDestination: NavDestination?,
     bottomBarState: Boolean
 ) {
-    AnimatedVisibility(visible = bottomBarState) {
+    AnimatedVisibility(visible = bottomBarState,
+        enter = fadeIn(),
+        exit = ExitTransition.None,
+        ) {
         NavigationBar {
             Screen.navBarScreens.forEach { screen ->
                 NavigationBarItem(icon = {
@@ -221,7 +227,10 @@ fun NamiokaiAppTopBar(
     navigateUp: () -> Unit
 ) {
     Surface {
-        AnimatedVisibility(visible = topBarState) {
+        AnimatedVisibility(visible = topBarState,
+            enter = fadeIn(),
+            exit = ExitTransition.None
+        ) {
             TopAppBar(title = {
                 Text(
                     text = stringResource(id = currentScreen.titleResourceId),
@@ -305,6 +314,17 @@ fun TopBarDropdownMenu(
             leadingIcon = {
                 Icon(
                     Icons.Outlined.Settings,
+                    contentDescription = null
+                )
+            })
+        DropdownMenuItem(text = { Text(stringResource(R.string.notifications_menu_label)) },
+            onClick = {
+                navigateScreen(Screen.Notifications)
+                expanded = false
+            },
+            leadingIcon = {
+                Icon(
+                    Icons.Outlined.Notifications,
                     contentDescription = null
                 )
             })

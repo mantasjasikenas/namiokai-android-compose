@@ -5,6 +5,7 @@ plugins {
     id("com.google.gms.google-services")
     id("kotlin-kapt")
     id("com.google.dagger.hilt.android")
+    id("com.google.devtools.ksp") version "1.8.21-1.0.11"
     kotlin("plugin.serialization") version "1.8.21"
 }
 
@@ -18,8 +19,8 @@ android {
         applicationId = "com.namiokai"
         minSdk = 26
         targetSdk = 34
-        versionCode = 17
-        versionName = "0.1.7"
+        versionCode = 18
+        versionName = "0.1.8"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -52,8 +53,8 @@ android {
 
         getByName("release") {
             manifestPlaceholders += mapOf()
-            isMinifyEnabled = false
-            isShrinkResources = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             isDebuggable = false
             manifestPlaceholders["appName"] = "Namiokai"
             proguardFiles(
@@ -114,7 +115,6 @@ dependencies {
     // Datastore
     implementation("androidx.datastore:datastore-preferences:1.0.0")
     implementation("com.google.android.material:material:1.9.0")
-    //implementation ("androidx.datastore:datastore-core:1.0.0")
 
     testImplementation("junit:junit:4.13.2")
 
@@ -161,6 +161,12 @@ dependencies {
     implementation("com.google.android.play:app-update-ktx:2.1.0")
 
     implementation("com.github.skydoves:colorpicker-compose:1.0.4")
+
+    //Room
+    implementation("androidx.room:room-runtime:2.5.2")
+    implementation("androidx.core:core-ktx:1.10.1")
+    ksp("androidx.room:room-compiler:2.5.2")
+    implementation("androidx.room:room-ktx:2.5.2")
 }
 
 

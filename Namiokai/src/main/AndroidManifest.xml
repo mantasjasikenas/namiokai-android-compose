@@ -15,7 +15,7 @@
         android:label="${appName}"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.App.AppSplash"
+        android:theme="@style/Theme.Namiokai"
         tools:targetApi="31">
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"

@@ -3,7 +3,6 @@ package com.github.mantasjasikenas.namiokai.ui.screens.settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -18,6 +17,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
@@ -32,10 +32,6 @@ import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
-import androidx.compose.material3.Tab
-import androidx.compose.material3.TabPosition
-import androidx.compose.material3.TabRow
-import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -60,20 +56,19 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.github.mantasjasikenas.namiokai.R
 import com.github.mantasjasikenas.namiokai.data.repository.preferences.PreferenceKeys
-import com.github.mantasjasikenas.namiokai.model.theme.ThemePreferences
 import com.github.mantasjasikenas.namiokai.data.repository.preferences.rememberPreference
-import com.github.mantasjasikenas.namiokai.data.repository.preferences.rememberThemePreferences
-import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiConfirmDialog
-import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiDialog
-import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiElevatedCard
+import com.github.mantasjasikenas.namiokai.model.theme.Theme
+import com.github.mantasjasikenas.namiokai.model.theme.ThemePreferences
+import com.github.mantasjasikenas.namiokai.model.theme.ThemeType
 import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiSpacer
-import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiTextField
 import com.github.mantasjasikenas.namiokai.ui.common.noRippleClickable
 import com.github.mantasjasikenas.namiokai.ui.common.rememberState
+import com.github.mantasjasikenas.namiokai.ui.components.FancyIndicatorTabs
+import com.github.mantasjasikenas.namiokai.ui.components.NamiokaiConfirmDialog
+import com.github.mantasjasikenas.namiokai.ui.components.NamiokaiDialog
+import com.github.mantasjasikenas.namiokai.ui.components.NamiokaiTextField
 import com.github.mantasjasikenas.namiokai.ui.main.MainUiState
 import com.github.mantasjasikenas.namiokai.ui.main.MainViewModel
-import com.github.mantasjasikenas.namiokai.model.theme.Theme
-import com.github.mantasjasikenas.namiokai.model.theme.ThemeType
 import com.github.mantasjasikenas.namiokai.ui.theme.getColorScheme
 import com.github.mantasjasikenas.namiokai.ui.theme.md_theme_dark_primary
 import com.github.mantasjasikenas.namiokai.utils.Constants.IMAGES_TYPE
@@ -86,12 +81,13 @@ import com.github.skydoves.colorpicker.compose.rememberColorPickerController
 
 @Composable
 fun SettingsScreen(
-    modifier: Modifier = Modifier,
     mainViewModel: MainViewModel = hiltViewModel(),
     settingsViewModel: SettingsViewModel = hiltViewModel(),
     navController: NavHostController
 ) {
     val mainUiState by mainViewModel.mainUiState.collectAsState()
+    val themePreferences = mainUiState.themePreferences
+
 
     Column(
         modifier = Modifier
@@ -100,7 +96,10 @@ fun SettingsScreen(
             .padding()
     ) {
         SettingsGroupSpacer()
-        AppearanceSettingsGroup()
+        AppearanceSettingsGroup(
+            themePreferences = themePreferences,
+            updateThemePreferences = mainViewModel::updateThemePreferences
+        )
         ProfileSettingsGroup(
             settingsViewModel = settingsViewModel,
             mainViewModel = mainViewModel,
@@ -110,7 +109,7 @@ fun SettingsScreen(
 }
 
 @Composable
-private fun ColumnScope.ProfileSettingsGroup(
+private fun ProfileSettingsGroup(
     settingsViewModel: SettingsViewModel,
     mainViewModel: MainViewModel,
     mainUiState: MainUiState
@@ -135,18 +134,20 @@ private fun ColumnScope.ProfileSettingsGroup(
         onClick = {
             setUpdateNameDialogState(true)
         })
-    SettingsGroupSpacer()
-    SettingsEntryGroupText(title = "Account")
-    SettingsEntry(title = "Email",
-        text = currentUser.email.ifEmpty { "Not logged in" },
-        onClick = { })
     AnimatedVisibility(visible = currentUser.uid.isNotEmpty()) {
-        SettingsEntry(title = "Log out",
-            text = "You are logged in as ${currentUser.displayName.ifEmpty { "-" }}",
-            onClick = {
-                settingsViewModel.logout()
-                mainViewModel.resetCurrentUser()
-            })
+        Column {
+            SettingsGroupSpacer()
+            SettingsEntryGroupText(title = "Account")
+            SettingsEntry(title = "Email",
+                text = currentUser.email.ifEmpty { "Not logged in" },
+                onClick = { })
+            SettingsEntry(title = "Log out",
+                text = "You are logged in as ${currentUser.displayName}",
+                onClick = {
+                    settingsViewModel.logout()
+                    mainViewModel.resetCurrentUser()
+                })
+        }
     }
 
     if (updateDisplayNameDialogState) {
@@ -167,65 +168,13 @@ private fun ColumnScope.ProfileSettingsGroup(
     }
 }
 
+
 @Composable
-fun FancyIndicator(
-    color: Color,
-    modifier: Modifier = Modifier
+private fun ColumnScope.AppearanceSettingsGroup(
+    themePreferences: ThemePreferences,
+    updateThemePreferences: (ThemePreferences) -> Unit
 ) {
-    Box(
-        modifier
-            .padding(5.dp)
-            .fillMaxSize()
-            .border(
-                BorderStroke(
-                    2.dp,
-                    color
-                ),
-                MaterialTheme.shapes.small
-            )
-    )
-}
-
-@Composable
-fun FancyIndicatorTabs(
-    values: List<String>,
-    selectedIndex: Int,
-    onValueChange: (Int) -> Unit,
-) {
-
-
-    val indicator = @Composable { tabPositions: List<TabPosition> ->
-        FancyIndicator(
-            color = colorScheme.primary,
-            modifier = Modifier.tabIndicatorOffset(tabPositions[selectedIndex])
-        )
-    }
-
-    Column {
-        NamiokaiElevatedCard(padding = 0.dp) {
-            TabRow(
-                modifier = Modifier.clip(MaterialTheme.shapes.small),
-                selectedTabIndex = selectedIndex,
-                indicator = indicator,
-                divider = {},
-            ) {
-                values.forEachIndexed { index, title ->
-                    Tab(
-                        selected = selectedIndex == index,
-                        onClick = {
-                            onValueChange(index)
-                        },
-                        text = { Text(title) },
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun ColumnScope.AppearanceSettingsGroup() {
-    val (themePreferences, setThemePreferences) = rememberThemePreferences()
+    //val (themePreferences, setThemePreferences) = rememberThemePreferences()
     var colorDialogState by rememberState { false }
 
     val onColorsDialogDismiss = {
@@ -236,7 +185,7 @@ private fun ColumnScope.AppearanceSettingsGroup() {
         colorDialogState = true
     }
     val onColorsSaveClick = { color: Color ->
-        setThemePreferences(
+        updateThemePreferences(
             themePreferences.copy(
                 customColor = color
             )
@@ -268,7 +217,7 @@ private fun ColumnScope.AppearanceSettingsGroup() {
             onValueChange = {
                 val themeType = ThemeType.values()[it]
 
-                setThemePreferences(
+                updateThemePreferences(
                     themePreferences.copy(
                         themeType = themeType
                     )
@@ -278,7 +227,9 @@ private fun ColumnScope.AppearanceSettingsGroup() {
     }
 
 
-    AnimatedVisibility(visible = themePreferences.themeType != ThemeType.AUTOMATIC) {
+    AnimatedVisibility(
+        visible = themePreferences.themeType != ThemeType.AUTOMATIC,
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -320,7 +271,7 @@ private fun ColumnScope.AppearanceSettingsGroup() {
                         modifier = Modifier
                             .padding(8.dp)
                             .noRippleClickable {
-                                setThemePreferences(
+                                updateThemePreferences(
                                     themePreferences.copy(
                                         theme = theme
                                     )
@@ -346,18 +297,21 @@ private fun ColumnScope.AppearanceSettingsGroup() {
                     }
                 }
             }
+            AnimatedVisibility(visible = (themePreferences.theme == Theme.CUSTOM),
+            ) {
+                SettingsEntry(
+                    modifier = Modifier.offset(x = (-32).dp),
+                    title = "Change accent color",
+                    text = "Update custom theme accent color.",
+                    onClick = onColorsDialogOpen
+                )
+
+            }
         }
     }
 
 
-    AnimatedVisibility(visible = (themePreferences.themeType != ThemeType.AUTOMATIC && themePreferences.theme == Theme.CUSTOM)) {
-        SettingsEntry(
-            title = "Change accent color",
-            text = "Update custom theme accent color.",
-            onClick = onColorsDialogOpen
-        )
 
-    }
     SettingsGroupSpacer()
 
     if (colorDialogState) {
@@ -661,12 +615,14 @@ inline fun <T> ValueSelectorDialog(
     crossinline valueText: (T) -> String = { it.toString() }
 ) {
 
-    Dialog(onDismissRequest = onDismiss) {
+    Dialog(
+        onDismissRequest = onDismiss,
+    ) {
         Surface(
             color = colorScheme.background,
             shape = MaterialTheme.shapes.medium,
             shadowElevation = 8.dp,
-            modifier = Modifier
+            modifier = modifier
                 .padding(20.dp)
                 .fillMaxWidth()
         ) {

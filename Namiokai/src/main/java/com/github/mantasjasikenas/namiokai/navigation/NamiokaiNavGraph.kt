@@ -10,6 +10,7 @@ import com.github.mantasjasikenas.namiokai.ui.screens.debts.DebtsScreen
 import com.github.mantasjasikenas.namiokai.ui.screens.flat.FlatScreen
 import com.github.mantasjasikenas.namiokai.ui.screens.fuel.FuelScreen
 import com.github.mantasjasikenas.namiokai.ui.screens.home.HomeScreen
+import com.github.mantasjasikenas.namiokai.ui.screens.notifications.NotificationsScreen
 import com.github.mantasjasikenas.namiokai.ui.screens.settings.SettingsScreen
 import com.github.mantasjasikenas.namiokai.ui.screens.test.TestScreen
 
@@ -35,6 +36,9 @@ fun NavGraphBuilder.namiokaiNavGraph(
     }
     composable(route = Screen.Settings.route) {
         SettingsScreen(navController = navController, mainViewModel = mainViewModel)
+    }
+    composable(route = Screen.Notifications.route) {
+        NotificationsScreen(navController = navController, mainViewModel = mainViewModel)
     }
     composable(route = Screen.Test.route) {
         TestScreen()

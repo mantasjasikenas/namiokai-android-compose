@@ -1,4 +1,4 @@
-package com.github.mantasjasikenas.namiokai.di;
+package com.github.mantasjasikenas.namiokai.di
 
 import android.content.Context
 import com.github.mantasjasikenas.namiokai.utils.ToastManager

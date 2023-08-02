@@ -51,6 +51,26 @@ class PreferencesRepository @Inject constructor(@ApplicationContext private val 
         }
     }
 
+    suspend fun updateThemePreferences(themePreferences: ThemePreferences) {
+        dataStore.edit { preferences ->
+            preferences[PreferenceKeys.THEME_TYPE] = themePreferences.themeType.name
+            preferences[PreferenceKeys.THEME] = themePreferences.theme.name
+            preferences[PreferenceKeys.CUSTOM_COLOR] = themePreferences.customColor.toArgb()
+        }
+    }
+
+    val themePreferences: Flow<ThemePreferences> = dataStore.data.map { preferences ->
+        ThemePreferences(
+            themeType = ThemeType.valueOf(
+                preferences[PreferenceKeys.THEME_TYPE] ?: ThemeType.AUTOMATIC.name
+            ),
+            theme = Theme.valueOf(
+                preferences[PreferenceKeys.THEME] ?: Theme.DEFAULT.name
+            ),
+            customColor = Color(preferences[PreferenceKeys.CUSTOM_COLOR] ?: Color.Unspecified.toArgb())
+        )
+    }
+
 }
 
 @Composable
@@ -87,7 +107,44 @@ fun <T> rememberPreference(
 
 @Composable
 fun rememberThemePreferences(): MutableState<ThemePreferences> {
-    val themeType = rememberPreference(
+    val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val state = remember {
+        context.dataStore.data
+            .map { preferences ->
+                ThemePreferences(
+                    themeType = ThemeType.valueOf(
+                        preferences[PreferenceKeys.THEME_TYPE] ?: ThemeType.AUTOMATIC.name
+                    ),
+                    theme = Theme.valueOf(
+                        preferences[PreferenceKeys.THEME] ?: Theme.DEFAULT.name
+                    ),
+                    customColor = Color(preferences[PreferenceKeys.CUSTOM_COLOR] ?: Color.Unspecified.toArgb())
+                )
+            }
+    }.collectAsState(initial = ThemePreferences())
+
+    return remember {
+        object : MutableState<ThemePreferences> {
+            override var value: ThemePreferences
+                get() = state.value
+                set(value) {
+                    coroutineScope.launch {
+                        context.dataStore.edit {
+                            it[PreferenceKeys.THEME_TYPE] = value.themeType.name
+                            it[PreferenceKeys.THEME] = value.theme.name
+                            it[PreferenceKeys.CUSTOM_COLOR] = value.customColor.toArgb()
+                        }
+                    }
+                }
+
+            override fun component1() = value
+            override fun component2(): (ThemePreferences) -> Unit = { value = it }
+        }
+    }
+}
+
+/*    val themeType = rememberPreference(
         PreferenceKeys.THEME_TYPE,
         ThemeType.AUTOMATIC.name
     )
@@ -118,9 +175,9 @@ fun rememberThemePreferences(): MutableState<ThemePreferences> {
             override fun component2(): (ThemePreferences) -> Unit = { value = it }
 
         }
-    }
+    }*/
 
-}
+
 
 
 

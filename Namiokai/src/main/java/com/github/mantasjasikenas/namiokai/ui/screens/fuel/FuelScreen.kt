@@ -41,11 +41,13 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -65,13 +67,17 @@ import com.github.mantasjasikenas.namiokai.model.User
 import com.github.mantasjasikenas.namiokai.model.bills.TripBill
 import com.github.mantasjasikenas.namiokai.model.bills.resolveBillCost
 import com.github.mantasjasikenas.namiokai.ui.common.CardText
-import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiSpacer
 import com.github.mantasjasikenas.namiokai.ui.common.DateTimeCardColumn
-import com.github.mantasjasikenas.namiokai.ui.common.EmptyView
 import com.github.mantasjasikenas.namiokai.ui.common.FloatingAddButton
 import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiBottomSheet
-import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiConfirmDialog
+import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiSpacer
 import com.github.mantasjasikenas.namiokai.ui.common.VerticalDivider
+import com.github.mantasjasikenas.namiokai.ui.common.rememberState
+import com.github.mantasjasikenas.namiokai.ui.components.EmptyView
+import com.github.mantasjasikenas.namiokai.model.Filter
+import com.github.mantasjasikenas.namiokai.ui.components.FiltersRow
+import com.github.mantasjasikenas.namiokai.ui.components.NamiokaiConfirmDialog
+import com.github.mantasjasikenas.namiokai.ui.main.MainUiState
 import com.github.mantasjasikenas.namiokai.ui.main.MainViewModel
 import com.github.mantasjasikenas.namiokai.ui.main.UsersMap
 import com.github.mantasjasikenas.namiokai.utils.format
@@ -104,7 +110,16 @@ fun FuelScreen(
     else {
         LazyColumn(modifier = modifier.fillMaxSize()) {
             item { NamiokaiSpacer(height = 15) }
-            items(fuelUiState.tripBills) { fuel ->
+            item {
+                TripBillFiltersRow(
+                    mainUiState = mainUiState,
+                    fuelUiState = fuelUiState,
+                    onFiltersChanged = {
+                        viewModel.onFiltersChanged(it)
+                    }
+                )
+            }
+            items(fuelUiState.filteredTripBills) { fuel ->
                 FuelCard(
                     tripBill = fuel,
                     isAllowedModification = (currentUser.admin || fuel.createdByUid == currentUser.uid),
@@ -129,6 +144,55 @@ fun FuelScreen(
         )
     }
 
+}
+
+@Composable
+private fun TripBillFiltersRow(
+    mainUiState: MainUiState,
+    fuelUiState: FuelUiState,
+    onFiltersChanged: (List<Filter<TripBill, Any>>) -> Unit
+) {
+    val users = mainUiState.usersMap.map { (_, user) ->
+        user.displayName
+    }
+    val getUserUid = { displayName: String ->
+        mainUiState.usersMap.values.firstOrNull { user ->
+            user.displayName == displayName
+        }?.uid
+    }
+
+    var filters by rememberState {
+        fuelUiState.filters.ifEmpty {
+            mutableStateListOf<Filter<TripBill, Any>>(
+                Filter(
+                    displayLabel = "Driver",
+                    filterName = "driver",
+                    values = users,
+                    predicate = { bill, value -> bill.paymasterUid == getUserUid(value as String) }
+                ),
+                Filter(
+                    displayLabel = "Passengers",
+                    filterName = "passengers",
+                    values = users,
+                    predicate = { bill, value -> bill.splitUsersUid.contains(getUserUid(value as String)) }
+                ),
+                Filter(
+                    displayLabel = "Destination",
+                    filterName = "destination",
+                    values = fuelUiState.destinations.map { it.name },
+                    predicate = { bill, value -> bill.tripDestination == value }
+                ),
+            )
+        }
+    }
+
+    FiltersRow(
+        filters = filters,
+        onFilterChanged = {
+            filters = it.toMutableStateList()
+            onFiltersChanged(filters)
+        },
+    )
 }
 
 

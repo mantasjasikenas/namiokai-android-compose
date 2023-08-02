@@ -7,12 +7,9 @@ import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -20,13 +17,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.ArrowDropDown
-import androidx.compose.material.icons.outlined.Clear
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.EuroSymbol
 import androidx.compose.material.icons.outlined.ReadMore
@@ -35,10 +29,8 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DismissDirection
 import androidx.compose.material3.DismissValue
-import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
@@ -50,16 +42,17 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -70,22 +63,22 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
 import com.github.mantasjasikenas.namiokai.R
-import com.github.mantasjasikenas.namiokai.model.Period
+import com.github.mantasjasikenas.namiokai.model.Filter
 import com.github.mantasjasikenas.namiokai.model.User
 import com.github.mantasjasikenas.namiokai.model.bills.PurchaseBill
 import com.github.mantasjasikenas.namiokai.model.bills.resolveBillCost
-import com.github.mantasjasikenas.namiokai.model.isInPeriod
 import com.github.mantasjasikenas.namiokai.ui.common.CardText
 import com.github.mantasjasikenas.namiokai.ui.common.CardTextColumn
 import com.github.mantasjasikenas.namiokai.ui.common.DateTimeCardColumn
-import com.github.mantasjasikenas.namiokai.ui.common.EmptyView
 import com.github.mantasjasikenas.namiokai.ui.common.FloatingAddButton
 import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiBottomSheet
-import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiConfirmDialog
-import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiDateRangePicker
 import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiSpacer
 import com.github.mantasjasikenas.namiokai.ui.common.VerticalDivider
 import com.github.mantasjasikenas.namiokai.ui.common.rememberState
+import com.github.mantasjasikenas.namiokai.ui.components.EmptyView
+import com.github.mantasjasikenas.namiokai.ui.components.FiltersRow
+import com.github.mantasjasikenas.namiokai.ui.components.NamiokaiConfirmDialog
+import com.github.mantasjasikenas.namiokai.ui.main.MainUiState
 import com.github.mantasjasikenas.namiokai.ui.main.MainViewModel
 import com.github.mantasjasikenas.namiokai.ui.main.UsersMap
 import com.github.mantasjasikenas.namiokai.utils.format
@@ -95,15 +88,11 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
-import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.toLocalDateTime
 import java.time.format.TextStyle
 import java.util.Locale
-import kotlin.time.Duration.Companion.days
 
-private const val TAG = "BillScreen"
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun BillScreen(
     modifier: Modifier = Modifier,
@@ -117,7 +106,6 @@ fun BillScreen(
         mutableStateOf(false)
     }
 
-
     if (billUiState.purchaseBills.isEmpty()) {
         EmptyView()
     }
@@ -126,8 +114,11 @@ fun BillScreen(
             item { NamiokaiSpacer(height = 15) }
             item {
                 PurchaseBillFiltersRow(
-                    mainViewModel = mainViewModel,
-                    billViewModel = viewModel,
+                    mainUiState = mainUiState,
+                    billUiState = billUiState,
+                    onFiltersChanged = {
+                        viewModel.onFiltersChanged(it)
+                    }
                 )
             }
             items(billUiState.filteredPurchaseBills) { bill ->
@@ -154,320 +145,11 @@ fun BillScreen(
             usersMap = mainUiState.usersMap
         )
     }
-
-
 }
 
-@Composable
-private fun PurchaseBillFiltersRow(
-    mainViewModel: MainViewModel,
-    billViewModel: BillViewModel,
-) {
-    val mainUiState by mainViewModel.mainUiState.collectAsState()
-    val users = mainUiState.usersMap.map { (_, user) ->
-        user.displayName
-    }
-
-    val paymasterFilterValue = rememberState {
-        "All"
-    }
-    val splitterFilterValue = rememberState {
-        "All"
-    }
-    val periodFilterValue = remember {
-        mutableStateOf<Period?>(null)
-    }
-    val onFiltersReset = {
-        billViewModel.resetFilters()
-        paymasterFilterValue.value = "All"
-        splitterFilterValue.value = "All"
-        periodFilterValue.value = null
-    }
-
-
-    LazyRow(
-        contentPadding = PaddingValues(
-            start = 20.dp,
-            end = 20.dp,
-            top = 0.dp,
-            bottom = 5.dp
-        ),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        item {
-            ResetFilterChip(
-                label = "Reset",
-                onReset = onFiltersReset
-            )
-        }
-        item {
-            NamiokaiFilterChip(
-                label = "Paymaster",
-                currentValue = paymasterFilterValue.value,
-                values = users,
-                onValueSelected = {
-                    if (it == null) {
-                        paymasterFilterValue.value = "All"
-                        billViewModel.removeFilter("paymaster")
-                    }
-                    else {
-                        paymasterFilterValue.value = it
-                        billViewModel.addFilter("paymaster") { bill ->
-                            bill.paymasterUid == mainUiState.usersMap.values.firstOrNull { user ->
-                                user.displayName == it
-                            }?.uid
-                        }
-                    }
-                }
-            )
-        }
-
-        item {
-            NamiokaiFilterChip(
-                label = "Splitter",
-                currentValue = splitterFilterValue.value,
-                values = users,
-                onValueSelected = {
-                    if (it == null) {
-                        splitterFilterValue.value = "All"
-                        billViewModel.removeFilter("splitter")
-                    }
-                    else {
-                        splitterFilterValue.value = it
-                        billViewModel.addFilter("splitter") { bill ->
-                            val userUid = mainUiState.usersMap.values.firstOrNull { user ->
-                                user.displayName == it
-                            }?.uid
-
-                            userUid?.let { uid ->
-                                bill.splitUsersUid.contains(uid)
-                            } ?: true
-                        }
-                    }
-                }
-            )
-        }
-
-        item {
-            PeriodFilterChip(
-                label = "Period",
-                currentValue = periodFilterValue.value,
-                defaultValue = null,
-                onValueSelected = { period ->
-                    if (period == null) {
-                        periodFilterValue.value = null
-                        billViewModel.removeFilter("period")
-                    }
-                    else {
-                        periodFilterValue.value = period
-                        billViewModel.addFilter("period") { bill ->
-                            val dateTime = LocalDateTime.tryParse(bill.date)?.date
-                            dateTime?.isInPeriod(period) ?: true
-                        }
-                    }
-                }
-            )
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun ResetFilterChip(
-    modifier: Modifier = Modifier,
-    label: String,
-    onReset: () -> Unit
-) {
-    FilterChip(
-        onClick = onReset,
-        selected = false,
-        label = {
-            Icon(
-                imageVector = Icons.Outlined.Clear,
-                contentDescription = null,
-                modifier = Modifier.size(18.dp)
-            )
-        },
-    )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun NamiokaiFilterChip(
-    modifier: Modifier = Modifier,
-    label: String,
-    values: List<String>,
-    noFilterValue: String = "All",
-    currentValue: String,
-    onValueSelected: (String?) -> Unit,
-    leadingIcon: ImageVector? = null,
-    trailingIcon: ImageVector? = Icons.Outlined.ArrowDropDown,
-) {
-    val availableValues = values.toMutableList()
-    val expandedSheet = remember { mutableStateOf(false) }
-
-    val onClickRequest = { expandedSheet.value = true }
-    val onDismissRequest = { expandedSheet.value = false }
-    val bottomSheetState = rememberModalBottomSheetState(
-        skipPartiallyExpanded = true
-    )
-
-    val onFilterSelected = { filter: String? ->
-        onDismissRequest()
-        onValueSelected(filter)
-    }
-
-    FilterChip(modifier = modifier,
-        selected = currentValue != noFilterValue,
-        onClick = onClickRequest,
-        label = { if (currentValue == noFilterValue) Text(label) else Text(currentValue) },
-        leadingIcon = {
-            leadingIcon?.let {
-                Icon(
-                    imageVector = it,
-                    contentDescription = null,
-                    modifier = Modifier.size(18.dp)
-                )
-            }
-        },
-        trailingIcon = {
-            trailingIcon?.let {
-                Icon(
-                    imageVector = it,
-                    contentDescription = null,
-                    modifier = Modifier.size(18.dp)
-                )
-            }
-        })
-
-    if (expandedSheet.value) {
-        NamiokaiBottomSheet(
-            onDismiss = onDismissRequest,
-            title = label,
-            bottomSheetState = bottomSheetState
-        ) {
-            // No filter applied
-            FilterCard(
-                onValueSelected = {
-                    onFilterSelected(null)
-                },
-                value = noFilterValue,
-                selectedValue = currentValue
-            )
-            availableValues.forEach { value ->
-                FilterCard(
-                    onValueSelected = onFilterSelected,
-                    value = value,
-                    selectedValue = currentValue
-                )
-            }
-            NamiokaiSpacer(height = 20)
-        }
-    }
-
-}
-
-@Composable
-private fun FilterCard(
-    onValueSelected: (String) -> Unit,
-    value: String,
-    selectedValue: String
-) {
-    Box(modifier = Modifier
-        .padding(vertical = 2.dp) // 4
-        .fillMaxWidth()
-        .clickable {
-            onValueSelected(value)
-        }
-        .border(
-            width = 1.dp,
-            color = DividerDefaults.color,
-            shape = MaterialTheme.shapes.small
-        )
-        .background(
-            if (selectedValue == value) MaterialTheme.colorScheme.primary else Color.Transparent,
-            shape = MaterialTheme.shapes.small
-        )
-        .padding(10.dp)) {
-        Text(
-            text = value,
-            color = if (selectedValue == value) DividerDefaults.color else MaterialTheme.colorScheme.onSurface,
-            fontWeight = if (selectedValue == value) FontWeight.SemiBold else FontWeight.Normal,
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp)
-        )
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun PeriodFilterChip(
-    modifier: Modifier = Modifier,
-    label: String,
-    currentValue: Period?,
-    defaultValue: Period?,
-    onValueSelected: (Period?) -> Unit,
-    leadingIcon: ImageVector? = null,
-    trailingIcon: ImageVector? = Icons.Outlined.ArrowDropDown,
-) {
-    val datePickerState = remember { mutableStateOf(false) }
-
-    val onClickRequest = { datePickerState.value = true }
-    val onDismissRequest = { datePickerState.value = false }
-
-    val onSaveRequest = { sort: Period ->
-        onDismissRequest()
-        onValueSelected(sort)
-    }
-    val onResetRequest = {
-        onDismissRequest()
-        onValueSelected(null)
-    }
-
-
-    FilterChip(modifier = modifier,
-        selected = currentValue != defaultValue,
-        onClick = onClickRequest,
-        label = { if (currentValue == defaultValue) Text(label) else Text(currentValue.toString()) },
-        leadingIcon = {
-            leadingIcon?.let {
-                Icon(
-                    imageVector = it,
-                    contentDescription = null,
-                    modifier = Modifier.size(18.dp)
-                )
-            }
-        },
-        trailingIcon = {
-            trailingIcon?.let {
-                Icon(
-                    imageVector = it,
-                    contentDescription = null,
-                    modifier = Modifier.size(18.dp)
-                )
-            }
-        })
-
-    if (datePickerState.value) {
-        NamiokaiDateRangePicker(
-            onDismissRequest = onDismissRequest,
-            onSaveRequest = onSaveRequest,
-            onResetRequest = onResetRequest,
-            initialSelectedStartDateMillis = currentValue?.start?.atStartOfDayIn(TimeZone.currentSystemDefault())
-                ?.plus(1.days)
-                ?.toEpochMilliseconds(),
-            initialSelectedEndDateMillis = currentValue?.end?.atStartOfDayIn(TimeZone.currentSystemDefault())
-                ?.plus(1.days)
-                ?.toEpochMilliseconds()
-        )
-    }
-
-}
-
-
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class,
+    ExperimentalFoundationApi::class
+)
 @Composable
 private fun BillCard(
     purchaseBill: PurchaseBill,
@@ -776,9 +458,46 @@ private fun BillCard(
 
 }
 
+@Composable
+private fun PurchaseBillFiltersRow(
+    mainUiState: MainUiState,
+    billUiState: BillUiState,
+    onFiltersChanged: (List<Filter<PurchaseBill, Any>>) -> Unit
+) {
+    val users = mainUiState.usersMap.map { (_, user) ->
+        user.displayName
+    }
+    val getUserUid = { displayName: String ->
+        mainUiState.usersMap.values.firstOrNull { user ->
+            user.displayName == displayName
+        }?.uid
+    }
 
+    var filters by rememberState {
+        billUiState.filters.ifEmpty {
+            mutableStateListOf<Filter<PurchaseBill, Any>>(
+                Filter(
+                    displayLabel = "Paymaster",
+                    filterName = "paymaster",
+                    values = users,
+                    predicate = { bill, value -> bill.paymasterUid == getUserUid(value as String) }
+                ),
+                Filter(
+                    displayLabel = "Splitter",
+                    filterName = "splitter",
+                    values = users,
+                    predicate = { bill, value -> bill.splitUsersUid.contains(getUserUid(value as String)) }
+                ),
+            )
+        }
+    }
 
-
-
-
+    FiltersRow(
+        filters = filters,
+        onFilterChanged = {
+            filters = it.toMutableStateList()
+            onFiltersChanged(filters)
+        },
+    )
+}
 

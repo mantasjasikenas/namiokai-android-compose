@@ -9,7 +9,7 @@ import com.github.mantasjasikenas.namiokai.R
 import com.github.mantasjasikenas.namiokai.utils.Constants.DOWNLOAD_CHANNEL_ID
 import java.util.Random
 
-class NotificationWorker(private val context: Context, private val workerParams: WorkerParameters) :
+class NotificationWorker(private val context: Context, workerParams: WorkerParameters) :
     CoroutineWorker(context, workerParams) {
     override suspend fun doWork(): Result {
         startForegroundService()

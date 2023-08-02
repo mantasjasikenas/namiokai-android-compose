@@ -24,11 +24,17 @@
 # For Google Play Services
 #-keepnames class com.google.android.gms.** {*;}
 
--keep class com.github.mantasjasikenas.namiokai.model.* { *; }
 
-# Recommended flags for Firebase Auth
 -keepattributes Signature
 -keepattributes *Annotation*
+-keepattributes EnclosingMethod
+-keepattributes InnerClasses
+
+
+-keepclassmembers class com.github.mantasjasikenas.namiokai.model.** {
+    *;
+}
+
 
 -dontwarn org.bouncycastle.jsse.BCSSLParameters
 -dontwarn org.bouncycastle.jsse.BCSSLSocket

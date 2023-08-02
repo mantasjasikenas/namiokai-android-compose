@@ -3,12 +3,13 @@ package com.github.mantasjasikenas.namiokai.ui.main
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.github.mantasjasikenas.namiokai.data.BaseFirebaseRepository
 import com.github.mantasjasikenas.namiokai.data.UsersRepository
+import com.github.mantasjasikenas.namiokai.data.repository.preferences.PreferencesRepository
 import com.github.mantasjasikenas.namiokai.model.Period
 import com.github.mantasjasikenas.namiokai.model.User
 import com.github.mantasjasikenas.namiokai.model.getMonthlyPeriod
 import com.github.mantasjasikenas.namiokai.model.previousMonthly
+import com.github.mantasjasikenas.namiokai.model.theme.ThemePreferences
 import com.github.mantasjasikenas.namiokai.utils.toUser
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
@@ -29,12 +30,13 @@ private const val TAG = "MainViewModel"
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    val baseFirebaseRepository: BaseFirebaseRepository,
-    private val usersRepository: UsersRepository
+    private val usersRepository: UsersRepository,
+    private val preferencesRepository: PreferencesRepository
 ) : ViewModel() {
 
     private val _mainUiState = MutableStateFlow(MainUiState(currentUser = getUserFromAuth()))
     val mainUiState = _mainUiState.asStateFlow()
+
 
     private val _periodState = MutableStateFlow(
         PeriodUiState(
@@ -46,24 +48,33 @@ class MainViewModel @Inject constructor(
 
 
     init {
-        setLoadingStatus(true)
-        Log.d(
-            TAG,
-            "MainViewModel init"
-        )
-
-        getUsersFromDatabase()
-        getCurrentUserDetails()
+        getThemePreferences()
+        getUsersDetails()
         addConfigUpdateListener()
 
-        setLoadingStatus(false)
+        viewModelScope.launch {
+            //delay(1000)
+            //setLoadingStatus(false)
+        }
     }
 
-    fun init() {
-        Log.d(
-            TAG,
-            "init called"
-        )
+    private fun getThemePreferences() {
+        viewModelScope.launch {
+            preferencesRepository.themePreferences.collect { themePreferences ->
+                _mainUiState.update {
+                    it.copy(
+                        themePreferences = themePreferences,
+                        isLoading = false
+                    )
+                }
+            }
+        }
+    }
+
+    fun updateThemePreferences(themePreferences: ThemePreferences) {
+        viewModelScope.launch {
+            preferencesRepository.updateThemePreferences(themePreferences)
+        }
     }
 
     fun updateUserSelectedPeriodState(period: Period) {
@@ -77,9 +88,7 @@ class MainViewModel @Inject constructor(
         _mainUiState.update { it.copy(isLoading = isLoading) }
     }
 
-    private fun getUserFromAuth() = Firebase.auth.currentUser?.toUser() ?: User()
-
-    private fun getUsersFromDatabase() {
+    private fun getUsersDetails() {
         if (Firebase.auth.currentUser == null) {
             return
         }
@@ -89,43 +98,23 @@ class MainViewModel @Inject constructor(
                 usersRepository.getUsers()
                     .collect { users ->
                         val usersMap = users.associateBy { it.uid }
-                        _mainUiState.update { it.copy(usersMap = usersMap) }
+                        val currentUser = usersMap[Firebase.auth.currentUser!!.uid]
+
+                        _mainUiState.update {
+                            it.copy(
+                                usersMap = usersMap,
+                                currentUser = currentUser ?: User()
+                            )
+                        }
                     }
             }
         }
     }
 
-    private fun getCurrentUserDetails() {
-        if (Firebase.auth.currentUser == null) {
-            return
-        }
-
-        viewModelScope.launch {
-            withContext(Dispatchers.IO) {
-                Firebase.auth.currentUser?.uid?.let { uid ->
-                    usersRepository.getUser(uid)
-                        .collect { user ->
-                            println(uid)
-                            println(user)
-                            _mainUiState.update { it.copy(currentUser = user) }
-                            Log.d(
-                                TAG,
-                                "Is admin? ${user.admin}"
-                            )
-                        }
-                }
-            }
-
-        }
-    }
 
     private fun fetchStartDateFromConfig() {
         Firebase.remoteConfig.fetchAndActivate()
             .addOnCompleteListener {
-                Log.d(
-                    TAG,
-                    "Remote config updated"
-                )
                 val value = Firebase.remoteConfig.getLong("period_start_day")
                     .toInt()
                 _periodState.update {
@@ -133,11 +122,6 @@ class MainViewModel @Inject constructor(
                         currentPeriod = Period.getMonthlyPeriod(startDayInclusive = value)
                     )
                 }
-                Log.d(
-                    TAG,
-                    "New value: $value"
-                )
-
             }
     }
 
@@ -149,8 +133,7 @@ class MainViewModel @Inject constructor(
     }
 
     fun fetchDataAfterLogin() {
-        getCurrentUserDetails()
-        getUsersFromDatabase()
+        getUsersDetails()
     }
 
 
@@ -158,29 +141,15 @@ class MainViewModel @Inject constructor(
 
         Firebase.remoteConfig.addOnConfigUpdateListener(object : ConfigUpdateListener {
             override fun onUpdate(configUpdate: ConfigUpdate) {
-                Log.d(
-                    TAG,
-                    "Updated keys: " + configUpdate.updatedKeys
-                )
-
                 if (configUpdate.updatedKeys.contains("period_start_day")) {
                     Firebase.remoteConfig.activate()
                         .addOnCompleteListener {
-                            Log.d(
-                                TAG,
-                                "Remote config updated"
-                            )
                             val value = getStartDate()
                             _periodState.update {
                                 it.copy(
                                     currentPeriod = Period.getMonthlyPeriod(startDayInclusive = value)
                                 )
                             }
-                            Log.d(
-                                TAG,
-                                "New value: $value"
-                            )
-
                         }
                 }
             }
@@ -233,4 +202,6 @@ class MainViewModel @Inject constructor(
 
         return periods
     }
+
+    private fun getUserFromAuth() = Firebase.auth.currentUser?.toUser() ?: User()
 }

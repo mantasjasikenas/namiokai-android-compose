@@ -3,7 +3,9 @@ package com.github.mantasjasikenas.namiokai.ui.screens.flat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.mantasjasikenas.namiokai.data.FlatBillsRepository
+import com.github.mantasjasikenas.namiokai.model.Filter
 import com.github.mantasjasikenas.namiokai.model.bills.FlatBill
+import com.github.mantasjasikenas.namiokai.model.filter
 import com.github.mantasjasikenas.namiokai.utils.Constants
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
@@ -29,20 +31,37 @@ class FlatViewModel @Inject constructor(private val flatBillsRepository: FlatBil
         getFlatBills()
     }
 
+    fun onFiltersChanged(filters: List<Filter<FlatBill, Any>>) {
+        _flatUiState.update {
+            it.copy(
+                filters = filters,
+                filteredFlatBills = it.flatBills.filter(filters)
+            )
+        }
+
+    }
 
     private fun getFlatBills() {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                flatBillsRepository.getFlatBills().collect { flatBills ->
-                    _flatUiState.update { it.copy(flatBills = flatBills) }
-                }
+                flatBillsRepository.getFlatBills()
+                    .collect { flatBills ->
+                        _flatUiState.update {
+                            val filters = it.filters
+                            it.copy(
+                                flatBills = flatBills,
+                                filteredFlatBills = flatBills.filter(filters)
+                            )
+                        }
+                    }
             }
         }
     }
 
     fun insertFlatBill(flatBill: FlatBill) {
         val formatter = DateTimeFormatter.ofPattern(Constants.DATE_TIME_FORMAT)
-        val currentDateTime = LocalDateTime.now().format(formatter)
+        val currentDateTime = LocalDateTime.now()
+            .format(formatter)
 
         flatBill.date = currentDateTime
         flatBill.createdByUid = Firebase.auth.uid ?: ""
