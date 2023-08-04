@@ -11,3 +11,4 @@ data class Notification(
     val text: String,
     val date: Long,
 )
+

@@ -55,7 +55,7 @@ class PreferencesRepository @Inject constructor(@ApplicationContext private val 
         dataStore.edit { preferences ->
             preferences[PreferenceKeys.THEME_TYPE] = themePreferences.themeType.name
             preferences[PreferenceKeys.THEME] = themePreferences.theme.name
-            preferences[PreferenceKeys.CUSTOM_COLOR] = themePreferences.customColor.toArgb()
+            preferences[PreferenceKeys.ACCENT_COLOR] = themePreferences.accentColor.toArgb()
         }
     }
 
@@ -67,7 +67,7 @@ class PreferencesRepository @Inject constructor(@ApplicationContext private val 
             theme = Theme.valueOf(
                 preferences[PreferenceKeys.THEME] ?: Theme.DEFAULT.name
             ),
-            customColor = Color(preferences[PreferenceKeys.CUSTOM_COLOR] ?: Color.Unspecified.toArgb())
+            accentColor = Color(preferences[PreferenceKeys.ACCENT_COLOR] ?: Color.Unspecified.toArgb())
         )
     }
 
@@ -119,7 +119,7 @@ fun rememberThemePreferences(): MutableState<ThemePreferences> {
                     theme = Theme.valueOf(
                         preferences[PreferenceKeys.THEME] ?: Theme.DEFAULT.name
                     ),
-                    customColor = Color(preferences[PreferenceKeys.CUSTOM_COLOR] ?: Color.Unspecified.toArgb())
+                    accentColor = Color(preferences[PreferenceKeys.ACCENT_COLOR] ?: Color.Unspecified.toArgb())
                 )
             }
     }.collectAsState(initial = ThemePreferences())
@@ -133,7 +133,7 @@ fun rememberThemePreferences(): MutableState<ThemePreferences> {
                         context.dataStore.edit {
                             it[PreferenceKeys.THEME_TYPE] = value.themeType.name
                             it[PreferenceKeys.THEME] = value.theme.name
-                            it[PreferenceKeys.CUSTOM_COLOR] = value.customColor.toArgb()
+                            it[PreferenceKeys.ACCENT_COLOR] = value.accentColor.toArgb()
                         }
                     }
                 }

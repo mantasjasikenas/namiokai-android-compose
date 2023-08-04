@@ -24,7 +24,7 @@ fun getColorScheme(
     return getColorScheme(
         themeType = themePreferences.themeType,
         theme = themePreferences.theme,
-        customColor = themePreferences.customColor,
+        customColor = themePreferences.accentColor,
     )
 }
 

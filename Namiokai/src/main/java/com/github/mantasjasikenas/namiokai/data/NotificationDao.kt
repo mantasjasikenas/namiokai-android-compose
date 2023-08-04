@@ -26,3 +26,4 @@ interface NotificationDao {
     @Delete
     suspend fun delete(notification: Notification)
 }
+

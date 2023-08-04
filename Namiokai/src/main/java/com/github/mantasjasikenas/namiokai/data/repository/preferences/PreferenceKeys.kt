@@ -4,7 +4,7 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 
 object PreferenceKeys {
-    val CUSTOM_COLOR = intPreferencesKey("custom_color")
+    val ACCENT_COLOR = intPreferencesKey("custom_color")
     val THEME_TYPE = stringPreferencesKey("theme_type")
     val THEME = stringPreferencesKey("theme")
 }

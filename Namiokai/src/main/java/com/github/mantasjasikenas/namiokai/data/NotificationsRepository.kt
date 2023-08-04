@@ -28,3 +28,4 @@ interface NotificationsRepository {
      */
     suspend fun updateNotification(notification: Notification)
 }
+

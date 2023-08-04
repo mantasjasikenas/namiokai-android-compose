@@ -56,7 +56,6 @@ class MainActivity : ComponentActivity(), AnalyticsLogger by AnalyticsLoggerImpl
         registerLifecycleOwner(this)
 
         setContent {
-            //val themePreferences by rememberThemePreferences()
             val mainUiState by mainViewModel.mainUiState.collectAsState()
 
             NamiokaiTheme(

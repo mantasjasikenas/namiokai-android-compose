@@ -5,10 +5,12 @@ import androidx.room.RoomDatabase
 
 
 @Database(
-    entities = [Notification::class],
+    entities = [Notification::class, AccentColor::class],
     version = 1,
     exportSchema = false
 )
-abstract class NotificationsDatabase : RoomDatabase() {
+abstract class AppDatabase : RoomDatabase() {
     abstract fun notificationDao(): NotificationDao
+
+    abstract fun accentColorDao(): AccentColorDao
 }

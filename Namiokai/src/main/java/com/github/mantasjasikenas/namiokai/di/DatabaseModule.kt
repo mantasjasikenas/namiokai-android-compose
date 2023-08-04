@@ -2,8 +2,11 @@ package com.github.mantasjasikenas.namiokai.di
 
 import android.content.Context
 import androidx.room.Room
+import com.github.mantasjasikenas.namiokai.data.AccentColorDao
+import com.github.mantasjasikenas.namiokai.data.AccentColorRepository
+import com.github.mantasjasikenas.namiokai.data.AccentColorRepositoryImpl
+import com.github.mantasjasikenas.namiokai.data.AppDatabase
 import com.github.mantasjasikenas.namiokai.data.NotificationDao
-import com.github.mantasjasikenas.namiokai.data.NotificationsDatabase
 import com.github.mantasjasikenas.namiokai.data.NotificationsRepository
 import com.github.mantasjasikenas.namiokai.data.NotificationsRepositoryImpl
 import dagger.Module
@@ -17,18 +20,23 @@ import javax.inject.Singleton
 @Module
 class DatabaseModule {
     @Provides
-    fun provideNotificationsDao(appDatabase: NotificationsDatabase): NotificationDao {
+    fun provideNotificationsDao(appDatabase: AppDatabase): NotificationDao {
         return appDatabase.notificationDao()
+    }
+
+    @Provides
+    fun provideAccentColorDao(appDatabase: AppDatabase): AccentColorDao {
+        return appDatabase.accentColorDao()
     }
 
     @Provides
     @Singleton
     fun provideAppDatabase(@ApplicationContext appContext: Context):
-            NotificationsDatabase {
+            AppDatabase {
         return Room.databaseBuilder(
             appContext,
-            NotificationsDatabase::class.java,
-            "notification_database"
+            AppDatabase::class.java,
+            "app_database"
         )
             .fallbackToDestructiveMigration()
             .build()
@@ -37,4 +45,8 @@ class DatabaseModule {
     @Provides
     fun providesNotificationsRepository(notificationDao: NotificationDao): NotificationsRepository =
         NotificationsRepositoryImpl(notificationDao)
+
+    @Provides
+    fun providesAccentColorRepository(accentColorDao: AccentColorDao): AccentColorRepository =
+        AccentColorRepositoryImpl(accentColorDao)
 }

@@ -57,6 +57,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.github.mantasjasikenas.namiokai.R
+import com.github.mantasjasikenas.namiokai.model.Filter
 import com.github.mantasjasikenas.namiokai.model.User
 import com.github.mantasjasikenas.namiokai.model.bills.FlatBill
 import com.github.mantasjasikenas.namiokai.model.bills.resolveBillCost
@@ -67,10 +68,9 @@ import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiBottomSheet
 import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiSpacer
 import com.github.mantasjasikenas.namiokai.ui.common.VerticalDivider
 import com.github.mantasjasikenas.namiokai.ui.common.rememberState
-import com.github.mantasjasikenas.namiokai.ui.components.EmptyView
-import com.github.mantasjasikenas.namiokai.model.Filter
 import com.github.mantasjasikenas.namiokai.ui.components.FiltersRow
 import com.github.mantasjasikenas.namiokai.ui.components.NamiokaiConfirmDialog
+import com.github.mantasjasikenas.namiokai.ui.components.NoResultsFound
 import com.github.mantasjasikenas.namiokai.ui.main.MainUiState
 import com.github.mantasjasikenas.namiokai.ui.main.MainViewModel
 import com.github.mantasjasikenas.namiokai.ui.main.UsersMap
@@ -101,7 +101,7 @@ fun FlatScreen(
 
 
     if (flatUiState.flatBills.isEmpty()) {
-        EmptyView()
+        NoResultsFound(label = "No flat bills found.")
     }
     else {
         LazyColumn(modifier = modifier.fillMaxSize()) {

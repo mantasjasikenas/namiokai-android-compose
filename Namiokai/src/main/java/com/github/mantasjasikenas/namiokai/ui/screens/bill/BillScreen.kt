@@ -2,10 +2,6 @@ package com.github.mantasjasikenas.namiokai.ui.screens.bill
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.LinearOutSlowInEasing
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -57,6 +53,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -75,9 +72,9 @@ import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiBottomSheet
 import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiSpacer
 import com.github.mantasjasikenas.namiokai.ui.common.VerticalDivider
 import com.github.mantasjasikenas.namiokai.ui.common.rememberState
-import com.github.mantasjasikenas.namiokai.ui.components.EmptyView
 import com.github.mantasjasikenas.namiokai.ui.components.FiltersRow
 import com.github.mantasjasikenas.namiokai.ui.components.NamiokaiConfirmDialog
+import com.github.mantasjasikenas.namiokai.ui.components.NoResultsFound
 import com.github.mantasjasikenas.namiokai.ui.main.MainUiState
 import com.github.mantasjasikenas.namiokai.ui.main.MainViewModel
 import com.github.mantasjasikenas.namiokai.ui.main.UsersMap
@@ -107,7 +104,7 @@ fun BillScreen(
     }
 
     if (billUiState.purchaseBills.isEmpty()) {
-        EmptyView()
+        NoResultsFound(label = "No bills found.")
     }
     else {
         LazyColumn(modifier = modifier.fillMaxSize()) {
@@ -147,8 +144,8 @@ fun BillScreen(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class,
-    ExperimentalFoundationApi::class
+@OptIn(
+    ExperimentalMaterial3Api::class
 )
 @Composable
 private fun BillCard(
@@ -243,13 +240,13 @@ private fun BillCard(
                         horizontal = 20.dp,
                         vertical = 5.dp
                     )
-                    .fillMaxSize()
-                    .animateContentSize(
-                        animationSpec = tween(
-                            durationMillis = 300,
-                            easing = LinearOutSlowInEasing
-                        )
-                    ),
+                    .fillMaxSize(),
+                /*.animateContentSize(
+                animationSpec = tween(
+                    durationMillis = 300,
+                    easing = LinearOutSlowInEasing
+                )
+                )*/
                 onClick = {
                     openBottomSheet = !openBottomSheet
                 },
@@ -299,8 +296,12 @@ private fun BillCard(
                                 )
 
 
-                                NamiokaiSpacer(width = 6) // old 6
-                                Text(text = usersMap[purchaseBill.paymasterUid]?.displayName ?: "-")
+                                NamiokaiSpacer(width = 6)
+                                Text(
+                                    text = usersMap[purchaseBill.paymasterUid]?.displayName ?: "-",
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
                             }
                             NamiokaiSpacer(height = 5)
 
@@ -314,7 +315,9 @@ private fun BillCard(
                                 NamiokaiSpacer(width = 7)
                                 Text(
                                     text = purchaseBill.shoppingList,
-                                    style = MaterialTheme.typography.labelMedium
+                                    style = MaterialTheme.typography.labelMedium,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
                                 )
                             }
 

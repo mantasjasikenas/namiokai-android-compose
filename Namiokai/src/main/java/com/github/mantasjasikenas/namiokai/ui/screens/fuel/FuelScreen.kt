@@ -56,6 +56,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -63,6 +64,7 @@ import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
 import com.github.mantasjasikenas.namiokai.R
 import com.github.mantasjasikenas.namiokai.model.Destination
+import com.github.mantasjasikenas.namiokai.model.Filter
 import com.github.mantasjasikenas.namiokai.model.User
 import com.github.mantasjasikenas.namiokai.model.bills.TripBill
 import com.github.mantasjasikenas.namiokai.model.bills.resolveBillCost
@@ -73,10 +75,9 @@ import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiBottomSheet
 import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiSpacer
 import com.github.mantasjasikenas.namiokai.ui.common.VerticalDivider
 import com.github.mantasjasikenas.namiokai.ui.common.rememberState
-import com.github.mantasjasikenas.namiokai.ui.components.EmptyView
-import com.github.mantasjasikenas.namiokai.model.Filter
 import com.github.mantasjasikenas.namiokai.ui.components.FiltersRow
 import com.github.mantasjasikenas.namiokai.ui.components.NamiokaiConfirmDialog
+import com.github.mantasjasikenas.namiokai.ui.components.NoResultsFound
 import com.github.mantasjasikenas.namiokai.ui.main.MainUiState
 import com.github.mantasjasikenas.namiokai.ui.main.MainViewModel
 import com.github.mantasjasikenas.namiokai.ui.main.UsersMap
@@ -105,7 +106,7 @@ fun FuelScreen(
     val currentUser = mainUiState.currentUser
 
     if (fuelUiState.tripBills.isEmpty()) {
-        EmptyView()
+        NoResultsFound(label = "No trips found.")
     }
     else {
         LazyColumn(modifier = modifier.fillMaxSize()) {
@@ -342,7 +343,11 @@ private fun FuelCard(
                                         .size(18.dp)
                                 )
                                 NamiokaiSpacer(width = 6)
-                                Text(text = usersMap[tripBill.paymasterUid]?.displayName ?: "-")
+                                Text(
+                                    text = usersMap[tripBill.paymasterUid]?.displayName ?: "-",
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
                             }
                             NamiokaiSpacer(height = 5)
 

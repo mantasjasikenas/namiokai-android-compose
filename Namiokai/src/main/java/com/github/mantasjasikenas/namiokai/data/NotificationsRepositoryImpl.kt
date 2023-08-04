@@ -13,3 +13,4 @@ class NotificationsRepositoryImpl(private val notificationDao: NotificationDao) 
 
     override suspend fun updateNotification(notification: Notification) = notificationDao.update(notification)
 }
+

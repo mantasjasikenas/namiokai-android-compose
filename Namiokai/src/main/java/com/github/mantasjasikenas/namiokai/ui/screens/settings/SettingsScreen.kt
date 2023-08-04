@@ -1,12 +1,16 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package com.github.mantasjasikenas.namiokai.ui.screens.settings
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,20 +28,31 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.RichTooltipBox
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberRichTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -49,18 +64,20 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.github.mantasjasikenas.namiokai.R
-import com.github.mantasjasikenas.namiokai.data.repository.preferences.PreferenceKeys
-import com.github.mantasjasikenas.namiokai.data.repository.preferences.rememberPreference
+import com.github.mantasjasikenas.namiokai.data.AccentColor
 import com.github.mantasjasikenas.namiokai.model.theme.Theme
 import com.github.mantasjasikenas.namiokai.model.theme.ThemePreferences
 import com.github.mantasjasikenas.namiokai.model.theme.ThemeType
 import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiSpacer
+import com.github.mantasjasikenas.namiokai.ui.common.conditional
 import com.github.mantasjasikenas.namiokai.ui.common.noRippleClickable
 import com.github.mantasjasikenas.namiokai.ui.common.rememberState
 import com.github.mantasjasikenas.namiokai.ui.components.FancyIndicatorTabs
@@ -71,13 +88,14 @@ import com.github.mantasjasikenas.namiokai.ui.main.MainUiState
 import com.github.mantasjasikenas.namiokai.ui.main.MainViewModel
 import com.github.mantasjasikenas.namiokai.ui.theme.getColorScheme
 import com.github.mantasjasikenas.namiokai.ui.theme.md_theme_dark_primary
-import com.github.mantasjasikenas.namiokai.utils.Constants.IMAGES_TYPE
+import com.github.mantasjasikenas.namiokai.utils.Constants
 import com.github.mantasjasikenas.namiokai.utils.toHex
 import com.github.skydoves.colorpicker.compose.AlphaTile
 import com.github.skydoves.colorpicker.compose.BrightnessSlider
 import com.github.skydoves.colorpicker.compose.HsvColorPicker
 import com.github.skydoves.colorpicker.compose.drawColorIndicator
 import com.github.skydoves.colorpicker.compose.rememberColorPickerController
+import kotlinx.coroutines.launch
 
 @Composable
 fun SettingsScreen(
@@ -86,6 +104,7 @@ fun SettingsScreen(
     navController: NavHostController
 ) {
     val mainUiState by mainViewModel.mainUiState.collectAsState()
+    val settingsUiState by settingsViewModel.settingsUiState.collectAsState()
     val themePreferences = mainUiState.themePreferences
 
 
@@ -98,7 +117,11 @@ fun SettingsScreen(
         SettingsGroupSpacer()
         AppearanceSettingsGroup(
             themePreferences = themePreferences,
-            updateThemePreferences = mainViewModel::updateThemePreferences
+            updateThemePreferences = mainViewModel::updateThemePreferences,
+            accentColors = settingsUiState.accentColors,
+            onSaveAccentColor = settingsViewModel::insertAccentColor,
+            onClearAccentColorsClick = settingsViewModel::clearUnpinnedAccentColors,
+            onAccentColorPin = settingsViewModel::updateAccentColorPin
         )
         ProfileSettingsGroup(
             settingsViewModel = settingsViewModel,
@@ -122,20 +145,19 @@ private fun ProfileSettingsGroup(
         }
     }
 
-
-    SettingsEntryGroupText(title = "Profile")
-    SettingsEntry(title = "Change profile picture",
-        text = "Update your profile picture",
-        onClick = {
-            galleryLauncher.launch(IMAGES_TYPE)
-        })
-    SettingsEntry(title = "Change display name",
-        text = "Update display name",
-        onClick = {
-            setUpdateNameDialogState(true)
-        })
     AnimatedVisibility(visible = currentUser.uid.isNotEmpty()) {
         Column {
+            SettingsEntryGroupText(title = "Profile")
+            SettingsEntry(title = "Change profile picture",
+                text = "Update your profile picture",
+                onClick = {
+                    galleryLauncher.launch(Constants.IMAGES_TYPE)
+                })
+            SettingsEntry(title = "Change display name",
+                text = "Update display name",
+                onClick = {
+                    setUpdateNameDialogState(true)
+                })
             SettingsGroupSpacer()
             SettingsEntryGroupText(title = "Account")
             SettingsEntry(title = "Email",
@@ -171,10 +193,13 @@ private fun ProfileSettingsGroup(
 
 @Composable
 private fun ColumnScope.AppearanceSettingsGroup(
+    accentColors: List<AccentColor>,
     themePreferences: ThemePreferences,
-    updateThemePreferences: (ThemePreferences) -> Unit
+    updateThemePreferences: (ThemePreferences) -> Unit,
+    onSaveAccentColor: (AccentColor) -> Unit,
+    onAccentColorPin: (Int, Boolean) -> Unit,
+    onClearAccentColorsClick: () -> Unit
 ) {
-    //val (themePreferences, setThemePreferences) = rememberThemePreferences()
     var colorDialogState by rememberState { false }
 
     val onColorsDialogDismiss = {
@@ -185,9 +210,26 @@ private fun ColumnScope.AppearanceSettingsGroup(
         colorDialogState = true
     }
     val onColorsSaveClick = { color: Color ->
+        if (themePreferences.accentColor != color) {
+            updateThemePreferences(
+                themePreferences.copy(
+                    accentColor = color
+                )
+            )
+            onSaveAccentColor(
+                AccentColor(
+                    color = color.toArgb(),
+                    date = System.currentTimeMillis()
+                )
+            )
+        }
+
+        onColorsDialogDismiss()
+    }
+    val onAccentColorClick = { accentColor: AccentColor ->
         updateThemePreferences(
             themePreferences.copy(
-                customColor = color
+                accentColor = Color(accentColor.color)
             )
         )
         onColorsDialogDismiss()
@@ -243,7 +285,6 @@ private fun ColumnScope.AppearanceSettingsGroup(
                 modifier = Modifier
                     .fillMaxWidth(),
                 contentPadding = PaddingValues(
-                    //top = 8.dp,
                     bottom = 8.dp
                 ),
                 horizontalArrangement = Arrangement.Start,
@@ -262,7 +303,7 @@ private fun ColumnScope.AppearanceSettingsGroup(
                         ThemePreferences(
                             themeType = themePreferences.themeType,
                             theme = theme,
-                            customColor = themePreferences.customColor
+                            accentColor = themePreferences.accentColor
                         )
                     )
 
@@ -297,7 +338,8 @@ private fun ColumnScope.AppearanceSettingsGroup(
                     }
                 }
             }
-            AnimatedVisibility(visible = (themePreferences.theme == Theme.CUSTOM),
+            AnimatedVisibility(
+                visible = (themePreferences.theme == Theme.CUSTOM),
             ) {
                 SettingsEntry(
                     modifier = Modifier.offset(x = (-32).dp),
@@ -316,25 +358,33 @@ private fun ColumnScope.AppearanceSettingsGroup(
 
     if (colorDialogState) {
         ColorPickerDialog(
+            themePreferences = themePreferences,
             onSaveClick = onColorsSaveClick,
-            onDismiss = onColorsDialogDismiss
+            onDismiss = onColorsDialogDismiss,
+            accentColors = accentColors,
+            onAccentColorClick = onAccentColorClick,
+            onClearAccentColorsClick = onClearAccentColorsClick,
+            onAccentColorPin = onAccentColorPin
         )
     }
 
 }
 
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun ColorPickerDialog(
+    themePreferences: ThemePreferences,
     onSaveClick: (Color) -> Unit,
+    onAccentColorClick: (AccentColor) -> Unit,
+    onAccentColorPin: (Int, Boolean) -> Unit,
+    onClearAccentColorsClick: () -> Unit,
     onDismiss: () -> Unit,
+    accentColors: List<AccentColor>
 ) {
     val controller = rememberColorPickerController()
-    val colorArgb by rememberPreference(
-        key = PreferenceKeys.CUSTOM_COLOR,
-        defaultValue = colorScheme.primary.toArgb()
-    )
     val clipboardManager = LocalClipboardManager.current
+
 
     NamiokaiDialog(
         title = "Pick a color",
@@ -345,7 +395,7 @@ private fun ColorPickerDialog(
         HsvColorPicker(
             modifier = Modifier
                 .padding(10.dp)
-                .height(300.dp),
+                .height(250.dp),
             controller = controller,
             drawOnPosSelected = {
                 drawColorIndicator(
@@ -353,7 +403,7 @@ private fun ColorPickerDialog(
                     controller.selectedColor.value
                 )
             },
-            initialColor = Color(colorArgb)
+            initialColor = themePreferences.accentColor
         )
         BrightnessSlider(
             modifier = Modifier
@@ -361,25 +411,166 @@ private fun ColorPickerDialog(
                 .padding(10.dp)
                 .height(35.dp),
             controller = controller,
+            initialColor = themePreferences.accentColor
         )
         Column(
             modifier = Modifier.noRippleClickable {
                 clipboardManager.setText(AnnotatedString(controller.selectedColor.value.toHex()))
-            }
+            },
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
                 modifier = Modifier.padding(top = 10.dp),
                 text = controller.selectedColor.value.toHex(),
-                style = typography.bodyMedium,
+                style = typography.bodySmall,
+                fontWeight = FontWeight.SemiBold
             )
             AlphaTile(
                 modifier = Modifier
                     .padding()
-                    .size(60.dp)
+                    .size(50.dp)
                     .clip(RoundedCornerShape(6.dp)),
-                controller = controller
+                controller = controller,
             )
         }
+
+        AnimatedVisibility(accentColors.isNotEmpty()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(10.dp)
+            ) {
+                NamiokaiSpacer(height = 20)
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Recent colors",
+                        style = typography.labelLarge,
+                    )
+
+
+                    val tooltipState = rememberRichTooltipState(isPersistent = true)
+                    val scope = rememberCoroutineScope()
+                    RichTooltipBox(
+                        title = { Text("Recent colors") },
+                        action = {
+                            TextButton(
+                                onClick = { scope.launch { tooltipState.dismiss() } }
+                            ) { Text("OK") }
+                        },
+                        text = {
+                            Column {
+                                Text(text = "Click - selects as accent color")
+                                Text(text = "Long click - pins color")
+                                NamiokaiSpacer(height = 10)
+                                Text(text = "Pinned colors are not cleared.\nThese colors are displayed \nat the top of the list.")
+                            }
+                        },
+                        tooltipState = tooltipState
+                    ) {
+                        IconButton(
+                            onClick = { scope.launch { tooltipState.show() } },
+                            modifier = Modifier.tooltipTrigger()
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Info,
+                                contentDescription = "Localized Description"
+                            )
+                        }
+                    }
+                }
+
+
+                LazyRow(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    contentPadding = PaddingValues(top = 10.dp),
+                    horizontalArrangement = Arrangement.spacedBy(
+                        4.dp,
+                        Alignment.Start
+                    ),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    items(accentColors) {
+                        val cornerColor = colorScheme.inverseSurface
+
+                        Column(
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            AlphaTile(
+                                modifier = Modifier
+                                    .padding()
+                                    .size(40.dp)
+                                    .clip(RoundedCornerShape(6.dp))
+                                    .conditional(
+                                        condition = it.pinned,
+                                        modifier = {
+                                            this
+                                                /*.background(
+                                                    color = cornerColor,
+                                                    RoundedCornerShape(6.dp)
+                                                )*/
+                                                .clip(CutCornerShape(topEnd = 16.dp))
+                                        }
+                                    )
+
+                                    .combinedClickable(
+                                        onClick = { onAccentColorClick(it) },
+                                        onLongClick = {
+                                            onAccentColorPin(
+                                                it.id,
+                                                it.pinned.not()
+                                            )
+                                        }
+                                    ),
+                                selectedColor = it.toColor()
+                            )
+                        }
+                    }
+                }
+
+                NamiokaiSpacer(height = 20) // 12
+
+                Row {
+                    OutlinedButton(
+                        onClick = {
+                            // FIXME replace this with a proper function
+                            accentColors.forEach {
+                                onAccentColorPin(
+                                    it.id,
+                                    false
+                                )
+                            }
+                        },
+                        //contentPadding = PaddingValues(0.dp),
+                    ) {
+                        Text(
+                            text = "Unpin all",
+                            style = typography.labelMedium,
+                        )
+                    }
+                    NamiokaiSpacer(width = 10)
+
+                    Button(
+                        onClick = onClearAccentColorsClick,
+                        //contentPadding = PaddingValues(0.dp),
+                    ) {
+                        Text(
+                            text = "Clear unpinned",
+                            style = typography.labelMedium,
+                        )
+                    }
+                }
+            }
+        }
+
     }
 }
 
@@ -705,4 +896,29 @@ inline fun <T> ValueSelectorDialog(
     }
 }
 //endregion
+
+@Preview(
+    backgroundColor = 0xFFFFFFFF,
+    showBackground = true
+)
+@Composable
+fun SettingsEntryPreview() {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        AlphaTile(
+            modifier = Modifier
+                .padding()
+                .size(40.dp)
+                .background(
+                    color = Color.Red,
+                    RoundedCornerShape(8.dp)
+                )
+                .clip(RoundedCornerShape(8.dp))
+                .clip(CutCornerShape(topEnd = 16.dp)),
+            selectedColor = Color.Magenta
+        )
+    }
+}
 
