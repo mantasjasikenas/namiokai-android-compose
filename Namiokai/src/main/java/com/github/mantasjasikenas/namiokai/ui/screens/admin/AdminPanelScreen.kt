@@ -12,10 +12,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.github.mantasjasikenas.namiokai.ui.screens.settings.SettingsEntry
-import com.github.mantasjasikenas.namiokai.ui.screens.settings.SettingsEntryGroupText
-import com.github.mantasjasikenas.namiokai.ui.screens.settings.SettingsGroupSpacer
-import com.github.mantasjasikenas.namiokai.ui.screens.settings.SwitchSettingEntry
+import com.github.mantasjasikenas.namiokai.ui.components.SettingsEntry
+import com.github.mantasjasikenas.namiokai.ui.components.SettingsEntryGroupText
+import com.github.mantasjasikenas.namiokai.ui.components.SettingsGroupSpacer
+import com.github.mantasjasikenas.namiokai.ui.components.SwitchSettingEntry
+
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable

@@ -63,4 +63,7 @@ fun Color.toHex(): String {
     return String.format("#%06X", 0xFFFFFF and this.toArgb())
 }
 
+fun Int.toHex(): String {
+    return String.format("#%06X", 0xFFFFFF and this)
+}
 

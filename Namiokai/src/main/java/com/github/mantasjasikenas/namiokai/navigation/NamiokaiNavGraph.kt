@@ -11,6 +11,7 @@ import com.github.mantasjasikenas.namiokai.ui.screens.flat.FlatScreen
 import com.github.mantasjasikenas.namiokai.ui.screens.fuel.FuelScreen
 import com.github.mantasjasikenas.namiokai.ui.screens.home.HomeScreen
 import com.github.mantasjasikenas.namiokai.ui.screens.notifications.NotificationsScreen
+import com.github.mantasjasikenas.namiokai.ui.screens.profile.ProfileScreen
 import com.github.mantasjasikenas.namiokai.ui.screens.settings.SettingsScreen
 import com.github.mantasjasikenas.namiokai.ui.screens.test.TestScreen
 
@@ -45,5 +46,8 @@ fun NavGraphBuilder.namiokaiNavGraph(
     }
     composable(route = Screen.AdminPanel.route) {
         AdminPanelScreen()
+    }
+    composable(route = Screen.Profile.route) {
+        ProfileScreen(mainViewModel = mainViewModel)
     }
 }

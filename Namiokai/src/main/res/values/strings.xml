@@ -63,4 +63,5 @@
     <string name="auth_graph_label">AuthGraph</string>
     <string name="notifications_name">Notifications</string>
     <string name="notifications_menu_label">Notifications</string>
+    <string name="profile_label">Profile</string>
 </resources>

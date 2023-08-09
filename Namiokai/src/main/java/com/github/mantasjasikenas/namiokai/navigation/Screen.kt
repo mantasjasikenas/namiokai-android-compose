@@ -9,6 +9,7 @@ import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.LocalGasStation
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Payments
+import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.ShoppingBag
 import androidx.compose.material.icons.outlined.Sync
@@ -80,6 +81,12 @@ sealed class Screen(
         Icons.Outlined.Cottage
     )
 
+    object Profile : Screen(
+        "profile",
+        R.string.profile_label,
+        Icons.Outlined.Person
+    )
+
     companion object {
         val initialScreen = Home
 
@@ -100,7 +107,8 @@ sealed class Screen(
             Notifications,
             Login,
             Test,
-            AdminPanel
+            AdminPanel,
+            Profile
         )
 
         //private val screens = Screen::class.sealedSubclasses.map { it.objectInstance }

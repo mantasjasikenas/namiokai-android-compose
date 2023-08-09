@@ -30,8 +30,8 @@ import kotlin.time.Duration.Companion.days
 @Composable
 fun SwipePeriod(
     periods: List<Period>,
-    userSelectedPeriod: Period,
-    currentPeriod: Period,
+    selectedPeriod: Period,
+    appPeriod: Period,
     onPeriodReset: () -> Unit,
     onPeriodUpdate: (Period) -> Unit,
     modifier: Modifier = Modifier,
@@ -41,9 +41,8 @@ fun SwipePeriod(
     ),
 ) {
     val coroutineScope = rememberCoroutineScope()
-    val currentPeriodIndex = periods.indexOf(userSelectedPeriod)
     val pagerState = rememberPagerState(
-        initialPage = currentPeriodIndex,
+        initialPage = periods.indexOf(selectedPeriod),
         pageCount = {
             periods.size
         })
@@ -54,8 +53,8 @@ fun SwipePeriod(
         datePickerState = true
     }
 
-    if (!periods.contains(userSelectedPeriod)) {
-        Text(text = "$userSelectedPeriod",
+    if (!periods.contains(selectedPeriod)) {
+        Text(text = "$selectedPeriod",
             style = textStyle,
             modifier = modifier.clickable {
                 onPeriodClick()
@@ -67,7 +66,8 @@ fun SwipePeriod(
             periods = periods,
             pagerState = pagerState,
             onPeriodClick = onPeriodClick,
-            onPeriodUpdate = onPeriodUpdate
+            onPeriodUpdate = onPeriodUpdate,
+            selectedPeriod = selectedPeriod,
         )
     }
 
@@ -81,15 +81,15 @@ fun SwipePeriod(
             onResetRequest = {
                 onPeriodReset()
                 coroutineScope.launch {
-                    val index = periods.indexOf(currentPeriod)
+                    val index = periods.indexOf(appPeriod)
                     pagerState.animateScrollToPage(index)
                 }
                 datePickerState = false
             },
-            initialSelectedStartDateMillis = userSelectedPeriod.start.atStartOfDayIn(TimeZone.currentSystemDefault())
+            initialSelectedStartDateMillis = selectedPeriod.start.atStartOfDayIn(TimeZone.currentSystemDefault())
                 .plus(1.days)
                 .toEpochMilliseconds(),
-            initialSelectedEndDateMillis = userSelectedPeriod.end.atStartOfDayIn(TimeZone.currentSystemDefault())
+            initialSelectedEndDateMillis = selectedPeriod.end.atStartOfDayIn(TimeZone.currentSystemDefault())
                 .plus(1.days)
                 .toEpochMilliseconds()
         )
@@ -99,6 +99,7 @@ fun SwipePeriod(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun PeriodsHorizontalPager(
+    selectedPeriod: Period,
     periods: List<Period>,
     pagerState: PagerState,
     onPeriodClick: () -> Unit,
@@ -112,6 +113,13 @@ fun PeriodsHorizontalPager(
         snapshotFlow { pagerState.currentPage }.collect { page ->
             onPeriodUpdate(periods[page])
         }
+    }
+
+    LaunchedEffect(
+        key1 = selectedPeriod,
+    ){
+        val index = periods.indexOf(selectedPeriod)
+        pagerState.scrollToPage(index)
     }
 
     HorizontalPager(

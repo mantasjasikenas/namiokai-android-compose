@@ -15,6 +15,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.outlined.AdminPanelSettings
 import androidx.compose.material.icons.outlined.BugReport
 import androidx.compose.material.icons.outlined.Notifications
+import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.Update
 import androidx.compose.material3.CircularProgressIndicator
@@ -130,7 +131,7 @@ fun NamiokaiScreen(
 
 
     when (navBackStackEntry?.destination?.route) {
-        Screen.Settings.route, Screen.AdminPanel.route, Screen.Notifications.route -> {
+        Screen.Settings.route, Screen.AdminPanel.route, Screen.Notifications.route, Screen.Profile.route -> {
             bottomBarState.value = false
             topBarState.value = true
         }
@@ -314,6 +315,17 @@ fun TopBarDropdownMenu(
             leadingIcon = {
                 Icon(
                     Icons.Outlined.Settings,
+                    contentDescription = null
+                )
+            })
+        DropdownMenuItem(text = { Text(stringResource(R.string.profile_label)) },
+            onClick = {
+                navigateScreen(Screen.Profile)
+                expanded = false
+            },
+            leadingIcon = {
+                Icon(
+                    Icons.Outlined.Person,
                     contentDescription = null
                 )
             })

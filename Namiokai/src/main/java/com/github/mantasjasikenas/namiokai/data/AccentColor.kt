@@ -15,4 +15,7 @@ data class AccentColor(
 ) {
     @Ignore
     fun toColor() = Color(this.color)
+
+    @Ignore
+    fun toHex() = String.format("#%06X", 0xFFFFFF and color)
 }
