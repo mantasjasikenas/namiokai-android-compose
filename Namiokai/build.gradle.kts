@@ -19,8 +19,8 @@ android {
         applicationId = "com.namiokai"
         minSdk = 26
         targetSdk = 34
-        versionCode = 20
-        versionName = "0.2.0"
+        versionCode = 21
+        versionName = "0.2.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -89,14 +89,14 @@ android {
 dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
     implementation("org.jetbrains.kotlinx:kotlinx-datetime-jvm:0.4.0")
-    implementation("androidx.core:core-ktx:1.12.0-alpha05")
+    implementation("androidx.core:core-ktx:1.12.0-beta01")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")
     implementation("androidx.activity:activity-compose:1.7.2")
-    implementation(platform("androidx.compose:compose-bom:2023.06.01"))
-    implementation("androidx.compose.ui:ui:1.6.0-alpha01")
-    implementation("androidx.compose.ui:ui-graphics:1.6.0-alpha01")
-    implementation("androidx.compose.ui:ui-tooling-preview:1.6.0-alpha01")
-    implementation("androidx.compose.material3:material3:1.2.0-alpha03")
+    implementation(platform("androidx.compose:compose-bom:2023.08.00"))
+    implementation("androidx.compose.ui:ui:1.6.0-alpha02")
+    implementation("androidx.compose.ui:ui-graphics:1.6.0-alpha02")
+    implementation("androidx.compose.ui:ui-tooling-preview:1.6.0-alpha02")
+    implementation("androidx.compose.material3:material3:1.2.0-alpha04")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.1")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1")
@@ -104,7 +104,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.1")
     implementation("androidx.navigation:navigation-compose:2.6.0")
     implementation("org.jetbrains.kotlin:kotlin-reflect:1.9.0")
-    implementation("androidx.compose.material:material-icons-extended:1.4.3")
+    implementation("androidx.compose.material:material-icons-extended:1.5.0")
     implementation("com.google.accompanist:accompanist-permissions:0.30.1")
     implementation("androidx.work:work-runtime-ktx:2.8.1")
     implementation("com.google.accompanist:accompanist-flowlayout:0.30.1")
@@ -120,11 +120,11 @@ dependencies {
 
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
-    androidTestImplementation(platform("androidx.compose:compose-bom:2023.06.01"))
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.6.0-alpha01")
+    androidTestImplementation(platform("androidx.compose:compose-bom:2023.08.00"))
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.6.0-alpha02")
 
-    debugImplementation("androidx.compose.ui:ui-tooling:1.6.0-alpha01")
-    debugImplementation("androidx.compose.ui:ui-test-manifest:1.6.0-alpha01")
+    debugImplementation("androidx.compose.ui:ui-tooling:1.6.0-alpha02")
+    debugImplementation("androidx.compose.ui:ui-test-manifest:1.6.0-alpha02")
 
     debugImplementation ("androidx.customview:customview:1.2.0-alpha02")
     debugImplementation ("androidx.customview:customview-poolingcontainer:1.0.0")
@@ -134,10 +134,10 @@ dependencies {
 
 
     // Firebase
-    implementation(platform("com.google.firebase:firebase-bom:32.2.0"))
-    implementation("com.google.firebase:firebase-auth-ktx:22.1.0")
+    implementation(platform("com.google.firebase:firebase-bom:32.2.2"))
+    implementation("com.google.firebase:firebase-auth-ktx:22.1.1")
     implementation("com.google.firebase:firebase-firestore-ktx:24.7.0")
-    implementation("com.google.firebase:firebase-messaging-ktx:23.2.0")
+    implementation("com.google.firebase:firebase-messaging-ktx:23.2.1")
     implementation ("com.google.firebase:firebase-analytics-ktx:21.3.0")
     implementation ("com.google.firebase:firebase-storage-ktx:20.2.1")
     implementation ("com.google.firebase:firebase-config-ktx:21.4.1")
@@ -164,7 +164,7 @@ dependencies {
 
     //Room
     implementation("androidx.room:room-runtime:2.5.2")
-    implementation("androidx.core:core-ktx:1.10.1")
+    implementation("androidx.core:core-ktx:1.12.0-beta01")
     ksp("androidx.room:room-compiler:2.5.2")
     implementation("androidx.room:room-ktx:2.5.2")
 }

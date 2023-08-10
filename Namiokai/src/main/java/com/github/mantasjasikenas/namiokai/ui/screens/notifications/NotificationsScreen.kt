@@ -24,12 +24,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavHostController
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
 import com.github.mantasjasikenas.namiokai.R
 import com.github.mantasjasikenas.namiokai.data.Notification
 import com.github.mantasjasikenas.namiokai.ui.common.NamiokaiSpacer
+import com.github.mantasjasikenas.namiokai.ui.common.noRippleClickable
 import com.github.mantasjasikenas.namiokai.ui.components.NoResultsFound
 import com.github.mantasjasikenas.namiokai.ui.main.MainViewModel
 import kotlinx.datetime.Clock
@@ -41,11 +41,11 @@ import java.util.Locale
 
 @Composable
 fun NotificationsScreen(
+    @Suppress("UNUSED_PARAMETER")
     mainViewModel: MainViewModel = hiltViewModel(),
     notificationsViewModel: NotificationsViewModel = hiltViewModel(),
-    navController: NavHostController
 ) {
-    val mainUiState by mainViewModel.mainUiState.collectAsState()
+    //val mainUiState by mainViewModel.mainUiState.collectAsState()
     val notificationsUiState by notificationsViewModel.notificationsUiState.collectAsState()
 
     if (notificationsUiState.notificationList.isEmpty()) {
@@ -111,7 +111,9 @@ fun NotificationItem(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(6.dp),
+            .padding(6.dp)
+            .noRippleClickable { onClick() }
+        ,
         horizontalAlignment = Alignment.Start,
         verticalArrangement = Arrangement.Center
     ) {

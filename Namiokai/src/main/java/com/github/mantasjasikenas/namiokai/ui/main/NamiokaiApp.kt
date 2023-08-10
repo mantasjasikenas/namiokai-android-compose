@@ -19,10 +19,10 @@ import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.Update
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -48,8 +48,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.ViewModel
-import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -184,10 +182,11 @@ fun NamiokaiAppNavigationBar(
     currentDestination: NavDestination?,
     bottomBarState: Boolean
 ) {
-    AnimatedVisibility(visible = bottomBarState,
+    AnimatedVisibility(
+        visible = bottomBarState,
         enter = fadeIn(),
         exit = ExitTransition.None,
-        ) {
+    ) {
         NavigationBar {
             Screen.navBarScreens.forEach { screen ->
                 NavigationBarItem(icon = {
@@ -228,7 +227,8 @@ fun NamiokaiAppTopBar(
     navigateUp: () -> Unit
 ) {
     Surface {
-        AnimatedVisibility(visible = topBarState,
+        AnimatedVisibility(
+            visible = topBarState,
             enter = fadeIn(),
             exit = ExitTransition.None
         ) {
@@ -357,7 +357,7 @@ fun TopBarDropdownMenu(
 
         AnimatedVisibility(visible = adminModeEnabled) {
             Column {
-                Divider()
+                HorizontalDivider()
                 DropdownMenuItem(text = { Text(stringResource(R.string.admin_panel_menu_label)) },
                     onClick = {
                         navigateScreen(Screen.AdminPanel)
@@ -403,6 +403,7 @@ fun TopBarDropdownMenu(
 
 }
 
+/*
 @Composable
 inline fun <reified T : ViewModel> NavBackStackEntry.sharedViewModel(navController: NavHostController): T {
     val navGraphRoute = destination.parent?.route ?: return hiltViewModel()
@@ -412,4 +413,4 @@ inline fun <reified T : ViewModel> NavBackStackEntry.sharedViewModel(navControll
     }
 
     return hiltViewModel(parentEntry)
-}
+}*/

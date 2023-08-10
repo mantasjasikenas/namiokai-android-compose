@@ -56,7 +56,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavHostController
 import com.github.mantasjasikenas.namiokai.R
 import com.github.mantasjasikenas.namiokai.data.AccentColor
 import com.github.mantasjasikenas.namiokai.model.theme.Theme
@@ -85,8 +84,7 @@ import com.github.skydoves.colorpicker.compose.rememberColorPickerController
 @Composable
 fun SettingsScreen(
     mainViewModel: MainViewModel = hiltViewModel(),
-    settingsViewModel: SettingsViewModel = hiltViewModel(),
-    navController: NavHostController
+    settingsViewModel: SettingsViewModel = hiltViewModel()
 ) {
     val mainUiState by mainViewModel.mainUiState.collectAsState()
     val settingsUiState by settingsViewModel.settingsUiState.collectAsState()
@@ -361,6 +359,7 @@ private fun ColumnScope.AppearanceSettingsGroup(
 private fun ColorPickerDialog(
     themePreferences: ThemePreferences,
     onSaveClick: (Color) -> Unit,
+    @Suppress("UNUSED_PARAMETER")
     onAccentColorClick: (AccentColor) -> Unit,
     onAccentColorPin: (Int, Boolean) -> Unit,
     onClearAccentColorsClick: () -> Unit,

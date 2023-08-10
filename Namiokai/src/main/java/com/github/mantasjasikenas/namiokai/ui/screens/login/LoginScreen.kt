@@ -12,14 +12,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
 import com.github.mantasjasikenas.namiokai.presentation.sign_in.SignInContent
 import com.github.mantasjasikenas.namiokai.presentation.sign_in.SignInViewModel
 import kotlinx.coroutines.launch
 
 @Composable
 fun LoginScreen(
-    navController: NavController,
     viewModel: SignInViewModel = hiltViewModel(),
     onSuccessfulLogin: () -> Unit
 ) {

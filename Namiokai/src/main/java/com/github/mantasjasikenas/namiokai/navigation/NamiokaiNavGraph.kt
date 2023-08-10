@@ -17,6 +17,7 @@ import com.github.mantasjasikenas.namiokai.ui.screens.test.TestScreen
 
 
 fun NavGraphBuilder.namiokaiNavGraph(
+    @Suppress("UNUSED_PARAMETER")
     navController: NavHostController,
     mainViewModel: MainViewModel,
 ) {
@@ -36,10 +37,10 @@ fun NavGraphBuilder.namiokaiNavGraph(
         FlatScreen(mainViewModel = mainViewModel)
     }
     composable(route = Screen.Settings.route) {
-        SettingsScreen(navController = navController, mainViewModel = mainViewModel)
+        SettingsScreen(mainViewModel = mainViewModel)
     }
     composable(route = Screen.Notifications.route) {
-        NotificationsScreen(navController = navController, mainViewModel = mainViewModel)
+        NotificationsScreen(mainViewModel = mainViewModel)
     }
     composable(route = Screen.Test.route) {
         TestScreen()

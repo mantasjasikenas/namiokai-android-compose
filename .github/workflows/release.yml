@@ -1,10 +1,7 @@
 name: Android Publish Play Store
 
 env:
-  # The name of the main module repository
   main_project_module: Namiokai
-
-  # The name of the Play Store
   playstore_name: Namiokai
 
 on:
@@ -12,7 +9,6 @@ on:
     branches:
       - 'release/**'
 
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
 jobs:
@@ -52,23 +48,11 @@ jobs:
           echo $GOOGLE_SERVICES_JSON | base64 -di > ./Namiokai/src/release/google-services.json
           echo $GOOGLE_SERVICES_JSON_DEBUG | base64 -di > ./Namiokai/src/debug/google-services.json
 
-      #- name: Run Tests
-      #  run: ./gradlew test
-
       - name: Build Project
         run: ./gradlew build
 
       - name: Build Release AAB
         run: ./gradlew bundleRelease
-
-#      - name: Sign AAB
-#        uses: r0adkll/sign-android-release@v1
-#        with:
-#          releaseDirectory: Namiokai/build/outputs/bundle/release
-#          signingKeyBase64: ${{ secrets.SIGN_KEY }}
-#          alias: ${{ secrets.ALIAS }}
-#          keyStorePassword: ${{ secrets.STORE_KEY_PASSWORD }}
-#          keyPassword: ${{ secrets.KEY_PASSWORD }}
 
       - name: Deploy to Play Store
         uses: r0adkll/upload-google-play@v1
@@ -76,5 +60,6 @@ jobs:
           serviceAccountJsonPlainText: ${{secrets.SERVICE_ACCOUNT}}
           packageName: com.namiokai
           releaseFiles: Namiokai/build/outputs/bundle/release/Namiokai-release.aab
+          whatsNewDirectory: distribution/whatsnew
           track: internal
-          status: draft
+          status: completed

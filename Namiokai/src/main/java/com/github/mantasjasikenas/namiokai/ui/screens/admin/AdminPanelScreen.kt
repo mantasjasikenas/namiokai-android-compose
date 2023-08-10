@@ -28,7 +28,7 @@ fun AdminPanelScreen(
     val (advancedMode, setAdvancedMode) = remember { mutableStateOf(false) }
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
             .padding()

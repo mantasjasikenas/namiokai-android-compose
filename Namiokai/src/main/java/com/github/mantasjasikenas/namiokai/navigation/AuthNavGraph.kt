@@ -19,10 +19,9 @@ fun NavGraphBuilder.authNavGraph(
     ) {
         composable(route = Screen.Login.route) {
             val viewModel: SignInViewModel = hiltViewModel()
-                //it.sharedViewModel(navController = navController)
+            //it.sharedViewModel(navController = navController)
 
-            LoginScreen(navController = navController,
-                viewModel = viewModel,
+            LoginScreen(viewModel = viewModel,
                 onSuccessfulLogin = {
                     viewModel.resetState()
                     mainViewModel.fetchDataAfterLogin()

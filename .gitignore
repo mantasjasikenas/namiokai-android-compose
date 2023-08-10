@@ -21,3 +21,6 @@ app/google-services.json
 /Namiokai/debug/*
 /namiokai-debug.jks
 /namiokai-release.jks
+/.secrets
+/.env
+/.github/workflows/release-local.yml

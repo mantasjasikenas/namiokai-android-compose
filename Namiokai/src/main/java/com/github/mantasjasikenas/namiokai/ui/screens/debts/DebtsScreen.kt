@@ -21,7 +21,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -291,9 +291,9 @@ private fun DebtsCard(
         }
 
         if ((currentUserDebts.size) > 1) {
-            Divider(
+            HorizontalDivider(
                 modifier = Modifier.padding(vertical = 3.dp),
-                thickness = 2.dp,
+                thickness = 2.dp
             )
             EuroIconTextRow(
                 label = "Total",
@@ -439,7 +439,7 @@ private fun DebtorCard(
                 }
 
                 if (userDebts.size > 1) {
-                    Divider(
+                    HorizontalDivider(
                         modifier = Modifier.padding(vertical = 3.dp),
                         thickness = 2.dp,
                     )
