@@ -37,9 +37,9 @@ android {
         }
         create("namiokai-release") {
             storeFile = rootProject.file("namiokai-release.jks")
-            storePassword = "namiokai-release"
-            keyAlias = "namiokai-release"
-            keyPassword = "namiokai-release"
+            storePassword = "namiokai123"
+            keyAlias = "debug_key"
+            keyPassword = "namiokai123"
         }
     }
 
