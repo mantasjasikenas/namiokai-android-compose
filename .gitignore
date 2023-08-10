@@ -19,3 +19,5 @@ app/google-services.json
 /Namiokai/src/release/google-services.json
 /Namiokai/src/google-services.json
 /Namiokai/debug/*
+/namiokai-debug.jks
+/namiokai-release.jks

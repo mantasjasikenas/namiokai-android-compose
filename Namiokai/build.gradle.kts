@@ -30,13 +30,13 @@ android {
 
     signingConfigs {
         create("namiokai-debug") {
-            storeFile = file("C:\\Users\\tutta\\.android\\namiokai-debug.jks")
+            storeFile = rootProject.file("namiokai-debug.jks")
             storePassword = "namiokai-debug"
             keyAlias = "namiokai-debug"
             keyPassword = "namiokai-debug"
         }
         create("namiokai-release") {
-            storeFile = file("C:\\Users\\tutta\\.android\\namiokai-release.jks")
+            storeFile = rootProject.file("namiokai-release.jks")
             storePassword = "namiokai-release"
             keyAlias = "namiokai-release"
             keyPassword = "namiokai-release"
