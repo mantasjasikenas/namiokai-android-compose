@@ -22,22 +22,26 @@ import com.github.mantasjasikenas.namiokai.R
 import com.github.mantasjasikenas.namiokai.model.bills.FlatBill
 import com.github.mantasjasikenas.namiokai.ui.common.UsersPicker
 import com.github.mantasjasikenas.namiokai.ui.components.NamiokaiDialog
-import com.github.mantasjasikenas.namiokai.ui.components.NamiokaiTextField
+import com.github.mantasjasikenas.namiokai.ui.components.NamiokaiNumberField
 import com.github.mantasjasikenas.namiokai.ui.main.UsersMap
 
 @Composable
 fun FlatBillPopup(
     initialFlatBill: FlatBill = FlatBill(),
-    onSaveClick: (FlatBill) -> Unit, onDismiss: () -> Unit, usersMap: UsersMap
+    onSaveClick: (FlatBill) -> Unit,
+    onDismiss: () -> Unit,
+    usersMap: UsersMap
 ) {
     val flatBill by remember {
         mutableStateOf(initialFlatBill)
     }
     val paymasterHashMap = remember {
-        usersMap.map { it.value.uid to false }.toMutableStateMap()
+        usersMap.map { it.value.uid to false }
+            .toMutableStateMap()
     }
     val splitBillHashMap = remember {
-        usersMap.map { it.value.uid to false }.toMutableStateMap()
+        usersMap.map { it.value.uid to false }
+            .toMutableStateMap()
     }
     val context = LocalContext.current
 
@@ -50,21 +54,33 @@ fun FlatBillPopup(
 
 
     NamiokaiDialog(
-        title = "Select flat bill details", selectedValue = flatBill, onSaveClick = {
+        title = "Select flat bill details",
+        selectedValue = flatBill,
+        onSaveClick = {
             flatBill.splitUsersUid = splitBillHashMap.filter { it.value }.keys.map { it }
-            flatBill.paymasterUid = paymasterHashMap.filter { it.value }.keys.map { it }.firstOrNull() ?: ""
+            flatBill.paymasterUid = paymasterHashMap.filter { it.value }.keys.map { it }
+                .firstOrNull() ?: ""
 
 
             if (!flatBill.isValid()) {
                 Toast.makeText(
-                    context, R.string.please_fill_all_fields, Toast.LENGTH_SHORT
-                ).show()
+                    context,
+                    R.string.please_fill_all_fields,
+                    Toast.LENGTH_SHORT
+                )
+                    .show()
                 return@NamiokaiDialog
             }
             onDismiss()
             onSaveClick(flatBill)
-            Toast.makeText(context, R.string.bill_saved, Toast.LENGTH_SHORT).show()
-        }, onDismiss = onDismiss
+            Toast.makeText(
+                context,
+                R.string.bill_saved,
+                Toast.LENGTH_SHORT
+            )
+                .show()
+        },
+        onDismiss = onDismiss
     ) {
 
         Text(
@@ -74,26 +90,28 @@ fun FlatBillPopup(
             modifier = Modifier.padding(bottom = 5.dp)
         )
         UsersPicker(
-            usersMap = usersMap, usersPickup = paymasterHashMap, isMultipleSelectEnabled = false
+            usersMap = usersMap,
+            usersPickup = paymasterHashMap,
+            isMultipleSelectEnabled = false
         )
-        NamiokaiTextField(
+        NamiokaiNumberField(
             modifier = Modifier.padding(
                 vertical = 10.dp,
                 horizontal = 30.dp
             ),
             label = "Rent",
             initialTextFieldValue = (if (flatBill.rentTotal == 0.0) "" else flatBill.rentTotal.toString()),
-            onValueChange = { flatBill.rentTotal = it.replace(',', '.').toDoubleOrNull() ?: 0.0 },
+            onValueChange = { flatBill.rentTotal = it },
             keyboardType = KeyboardType.Number
         )
-        NamiokaiTextField(
+        NamiokaiNumberField(
             modifier = Modifier.padding(
                 vertical = 10.dp,
                 horizontal = 30.dp
             ),
             label = "Taxes",
             initialTextFieldValue = (if (flatBill.taxesTotal == 0.0) "" else flatBill.taxesTotal.toString()),
-            onValueChange = { flatBill.taxesTotal = it.replace(',', '.').toDoubleOrNull() ?: 0.0 },
+            onValueChange = { flatBill.taxesTotal = it },
             keyboardType = KeyboardType.Number
         )
         Spacer(modifier = Modifier.height(20.dp))
@@ -104,7 +122,9 @@ fun FlatBillPopup(
             modifier = Modifier.padding(bottom = 5.dp)
         )
         UsersPicker(
-            usersMap = usersMap, usersPickup = splitBillHashMap, isMultipleSelectEnabled = true
+            usersMap = usersMap,
+            usersPickup = splitBillHashMap,
+            isMultipleSelectEnabled = true
         )
     }
 }

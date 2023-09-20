@@ -3,14 +3,15 @@ package com.github.mantasjasikenas.namiokai.model
 import kotlinx.datetime.Clock
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 import kotlinx.datetime.toLocalDateTime
 
 data class Period(
-    val start: LocalDate,
-    val end: LocalDate
+    val start: LocalDate = LocalDate(1, 1, 1),
+    val end: LocalDate = LocalDate(1, 1, 1)
 ) {
     companion object;
 
@@ -66,6 +67,15 @@ fun Period.nextMonthly(
     return Period(
         periodStart,
         periodEnd
+    )
+}
+
+fun Period.contains(isoDate: String): Boolean {
+    val parsed = LocalDateTime.parse(isoDate).date
+
+    return parsed.isBetween(
+        start,
+        end
     )
 }
 

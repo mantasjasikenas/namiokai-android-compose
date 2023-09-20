@@ -2,10 +2,13 @@ package com.github.mantasjasikenas.namiokai.ui.screens.bill
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,9 +20,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ReadMore
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.EuroSymbol
-import androidx.compose.material.icons.outlined.ReadMore
 import androidx.compose.material.icons.outlined.Receipt
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -53,6 +56,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -61,9 +65,11 @@ import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
 import com.github.mantasjasikenas.namiokai.R
 import com.github.mantasjasikenas.namiokai.model.Filter
+import com.github.mantasjasikenas.namiokai.model.Period
 import com.github.mantasjasikenas.namiokai.model.User
 import com.github.mantasjasikenas.namiokai.model.bills.PurchaseBill
 import com.github.mantasjasikenas.namiokai.model.bills.resolveBillCost
+import com.github.mantasjasikenas.namiokai.model.contains
 import com.github.mantasjasikenas.namiokai.ui.common.CardText
 import com.github.mantasjasikenas.namiokai.ui.common.CardTextColumn
 import com.github.mantasjasikenas.namiokai.ui.common.DateTimeCardColumn
@@ -77,19 +83,21 @@ import com.github.mantasjasikenas.namiokai.ui.components.NamiokaiConfirmDialog
 import com.github.mantasjasikenas.namiokai.ui.components.NoResultsFound
 import com.github.mantasjasikenas.namiokai.ui.main.MainUiState
 import com.github.mantasjasikenas.namiokai.ui.main.MainViewModel
+import com.github.mantasjasikenas.namiokai.ui.main.PeriodUiState
 import com.github.mantasjasikenas.namiokai.ui.main.UsersMap
 import com.github.mantasjasikenas.namiokai.utils.format
 import com.github.mantasjasikenas.namiokai.utils.tryParse
-import com.google.accompanist.flowlayout.FlowRow
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.Month
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import java.time.format.TextStyle
 import java.util.Locale
 
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun BillScreen(
     modifier: Modifier = Modifier,
@@ -99,6 +107,7 @@ fun BillScreen(
     val billUiState by viewModel.uiState.collectAsState()
     val mainUiState by mainViewModel.mainUiState.collectAsState()
     val currentUser = mainUiState.currentUser
+    val periodUiState by mainViewModel.periodState.collectAsState()
     val popupState = remember {
         mutableStateOf(false)
     }
@@ -107,27 +116,88 @@ fun BillScreen(
         NoResultsFound(label = "No bills found.")
     }
     else {
-        LazyColumn(modifier = modifier.fillMaxSize()) {
-            item { NamiokaiSpacer(height = 15) }
-            item {
-                PurchaseBillFiltersRow(
-                    mainUiState = mainUiState,
-                    billUiState = billUiState,
-                    onFiltersChanged = {
-                        viewModel.onFiltersChanged(it)
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = 5.dp)
+        ) {
+            PurchaseBillFiltersRow(mainUiState = mainUiState,
+                billUiState = billUiState,
+                periodUiState = periodUiState,
+                onFiltersChanged = {
+                    viewModel.onFiltersChanged(it)
+                })
+            NamiokaiSpacer(height = 15)
+
+//            HorizontalDivider(
+//                modifier = Modifier.padding(vertical = 6.dp)
+//            )
+
+            LazyColumn(
+                modifier = modifier
+                    .fillMaxSize()
+            ) {
+                if (billUiState.filteredPurchaseBills.isEmpty()) {
+                    item {
+                        NoResultsFound(
+                            modifier = Modifier.padding(top = 30.dp),
+                            label = "No results found."
+                        )
                     }
-                )
+                }
+                else {
+                    val grouped = billUiState.filteredPurchaseBills.groupBy {
+                        Month(
+                            it.date.substring(
+                                5,
+                                7
+                            )
+                                .toInt()
+                        ).getDisplayName(
+                            TextStyle.FULL,
+                            Locale.getDefault()
+                        )
+                    }
+
+                    grouped.forEach { (initial, bills) ->
+                        item {
+                            Text(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(start = 20.dp),
+                                text = initial,
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                textAlign = TextAlign.Start
+                            )
+                        }
+
+                        items(items = bills,
+                            key = { it.documentId }
+                        ) { bill ->
+                            BillCard(
+                                modifier = Modifier.animateItemPlacement(),
+                                purchaseBill = bill,
+                                isAllowedModification = (currentUser.admin || bill.createdByUid == currentUser.uid),
+                                usersMap = mainUiState.usersMap,
+                                viewModel = viewModel,
+                                currentUser = currentUser
+                            )
+                        }
+                    }
+
+                    /*items(billUiState.filteredPurchaseBills) { bill ->
+                        BillCard(
+                            purchaseBill = bill,
+                            isAllowedModification = (currentUser.admin || bill.createdByUid == currentUser.uid),
+                            usersMap = mainUiState.usersMap,
+                            viewModel = viewModel,
+                            currentUser = currentUser
+                        )
+                    }*/
+                }
+                item { NamiokaiSpacer(height = 120) }
             }
-            items(billUiState.filteredPurchaseBills) { bill ->
-                BillCard(
-                    purchaseBill = bill,
-                    isAllowedModification = (currentUser.admin || bill.createdByUid == currentUser.uid),
-                    usersMap = mainUiState.usersMap,
-                    viewModel = viewModel,
-                    currentUser = currentUser
-                )
-            }
-            item { NamiokaiSpacer(height = 120) }
         }
     }
 
@@ -145,7 +215,8 @@ fun BillScreen(
 }
 
 @OptIn(
-    ExperimentalMaterial3Api::class
+    ExperimentalMaterial3Api::class,
+    ExperimentalLayoutApi::class
 )
 @Composable
 private fun BillCard(
@@ -211,7 +282,7 @@ private fun BillCard(
                     .background(color),
             ) {
                 Icon(
-                    imageVector = Icons.Outlined.ReadMore,
+                    imageVector = Icons.AutoMirrored.Outlined.ReadMore,
                     tint = MaterialTheme.colorScheme.primary,
                     contentDescription = "",
                     modifier = Modifier
@@ -396,8 +467,8 @@ private fun BillCard(
             )
             NamiokaiSpacer(height = 7)
             FlowRow(
-                mainAxisSpacing = 7.dp,
-                crossAxisSpacing = 7.dp
+                horizontalArrangement = Arrangement.spacedBy(7.dp),
+                verticalArrangement = Arrangement.spacedBy(7.dp),
             ) {
                 usersMap.filter { purchaseBill.splitUsersUid.contains(it.key) }.values.forEach {
                     OutlinedCard(
@@ -465,7 +536,8 @@ private fun BillCard(
 private fun PurchaseBillFiltersRow(
     mainUiState: MainUiState,
     billUiState: BillUiState,
-    onFiltersChanged: (List<Filter<PurchaseBill, Any>>) -> Unit
+    periodUiState: PeriodUiState,
+    onFiltersChanged: (List<Filter<PurchaseBill, Any>>) -> Unit,
 ) {
     val users = mainUiState.usersMap.map { (_, user) ->
         user.displayName
@@ -479,21 +551,26 @@ private fun PurchaseBillFiltersRow(
     var filters by rememberState {
         billUiState.filters.ifEmpty {
             mutableStateListOf<Filter<PurchaseBill, Any>>(
-                Filter(
-                    displayLabel = "Paymaster",
+                Filter(displayLabel = "Paymaster",
                     filterName = "paymaster",
                     values = users,
-                    predicate = { bill, value -> bill.paymasterUid == getUserUid(value as String) }
-                ),
-                Filter(
-                    displayLabel = "Splitter",
+                    predicate = { bill, value -> bill.paymasterUid == getUserUid(value as String) }),
+                Filter(displayLabel = "Splitter",
                     filterName = "splitter",
                     values = users,
-                    predicate = { bill, value -> bill.splitUsersUid.contains(getUserUid(value as String)) }
-                ),
+                    predicate = { bill, value -> bill.splitUsersUid.contains(getUserUid(value as String)) }),
+                Filter(displayLabel = "Period",
+                    filterName = "period",
+                    values = periodUiState.periods.sortedByDescending { it.start },
+                    //selectedValue = periodUiState.currentPeriod,
+                    predicate = { bill, value -> (value as Period).contains(bill.date) }),
             )
         }
     }
+
+/*    LaunchedEffect(true) {
+        onFiltersChanged(filters)
+    }*/
 
     FiltersRow(
         filters = filters,

@@ -37,25 +37,43 @@ class MainViewModel @Inject constructor(
     private val _mainUiState = MutableStateFlow(MainUiState(currentUser = getUserFromAuth()))
     val mainUiState = _mainUiState.asStateFlow()
 
-
-    private val _periodState = MutableStateFlow(
-        PeriodUiState(
-            currentPeriod = Period.getMonthlyPeriod(getStartDate()),
-            userSelectedPeriod = Period.getMonthlyPeriod(getStartDate())
-        )
-    )
+    private val _periodState = MutableStateFlow(PeriodUiState())
     val periodState = _periodState.asStateFlow()
-
 
     init {
         getThemePreferences()
         getUsersDetails()
+        initPeriodState()
         addConfigUpdateListener()
+    }
 
+    private fun initPeriodState() {
         viewModelScope.launch {
-            //delay(1000)
-            //setLoadingStatus(false)
+            withContext(Dispatchers.IO) {
+                _periodState.update {
+                    val period = Period.getMonthlyPeriod(getStartDate())
+                    val periods = generatePeriods(period)
+                    it.copy(
+                        currentPeriod = period,
+                        userSelectedPeriod = period,
+                        periods = periods
+                    )
+                }
+            }
         }
+    }
+
+    private fun generatePeriods(currentPeriod: Period): List<Period> {
+        //val currentPeriod = periodState.value.currentPeriod
+        val nextPeriodsCount = 0
+        val previousPeriodsCount = 3
+        val totalPeriodsCount = nextPeriodsCount + previousPeriodsCount + 1
+
+        val periods = (0 until totalPeriodsCount).map {
+            currentPeriod.previousMonthly(previousPeriodsCount - it)
+        }
+
+        return periods
     }
 
     private fun getThemePreferences() {
@@ -187,20 +205,6 @@ class MainViewModel @Inject constructor(
         _periodState.update {
             it.copy(userSelectedPeriod = it.currentPeriod)
         }
-    }
-
-    fun getPeriods(): List<Period> {
-        val currentPeriod = periodState.value.currentPeriod
-
-        val nextPeriodsCount = 1
-        val previousPeriodsCount = 6
-        val totalPeriodsCount = nextPeriodsCount + previousPeriodsCount + 1
-
-        val periods = (0 until totalPeriodsCount).map {
-            currentPeriod.previousMonthly(previousPeriodsCount - it)
-        }
-
-        return periods
     }
 
     private fun getUserFromAuth() = Firebase.auth.currentUser?.toUser() ?: User()

@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Login
+import androidx.compose.material.icons.automirrored.outlined.Login
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
@@ -45,7 +45,7 @@ fun SignInContent(
                 onClick = onSignInClick,
                 shape = RoundedCornerShape(4.dp)
             ) {
-                Icon(imageVector = Icons.Outlined.Login, contentDescription = null)
+                Icon(imageVector = Icons.AutoMirrored.Outlined.Login, contentDescription = null)
                 Text(text = "Sign in")
             }
 

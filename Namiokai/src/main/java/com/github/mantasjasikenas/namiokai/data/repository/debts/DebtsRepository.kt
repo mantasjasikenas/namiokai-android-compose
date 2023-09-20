@@ -58,5 +58,4 @@ class DebtsRepository {
 
         return debts
     }
-
 }

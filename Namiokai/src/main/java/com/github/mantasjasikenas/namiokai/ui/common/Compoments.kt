@@ -6,6 +6,8 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -59,9 +61,6 @@ import androidx.compose.ui.window.DialogProperties
 import com.github.mantasjasikenas.namiokai.model.Period
 import com.github.mantasjasikenas.namiokai.model.Uid
 import com.github.mantasjasikenas.namiokai.ui.main.UsersMap
-import com.google.accompanist.flowlayout.FlowCrossAxisAlignment
-import com.google.accompanist.flowlayout.FlowRow
-import com.google.accompanist.flowlayout.MainAxisAlignment
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -221,6 +220,7 @@ fun EuroIconTextRow(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun UsersPicker(
     usersMap: UsersMap,
@@ -228,9 +228,8 @@ fun UsersPicker(
     isMultipleSelectEnabled: Boolean = true
 ) {
     FlowRow(
-        mainAxisAlignment = MainAxisAlignment.Center,
-        mainAxisSpacing = 7.dp,
-        crossAxisAlignment = FlowCrossAxisAlignment.Center,
+        horizontalArrangement = Arrangement.spacedBy(7.dp, Alignment.CenterHorizontally),
+        verticalArrangement = Arrangement.Center
     ) {
         usersPickup.forEach { (uid, selected) ->
             FlowRowItemCard(usersMap[uid]?.displayName ?: "Missing display name",
