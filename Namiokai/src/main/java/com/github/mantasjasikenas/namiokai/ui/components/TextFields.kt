@@ -17,6 +17,8 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import com.github.keelar.exprk.Expressions
+import com.github.mantasjasikenas.namiokai.utils.format
 
 @Composable
 fun NamiokaiTextField(
@@ -46,6 +48,63 @@ fun NamiokaiTextField(
         onValueChange = {
             text = it
             onValueChange(it.text)
+        },
+        singleLine = singleLine,
+        modifier = modifier
+    )
+}
+
+@Composable
+fun NamiokaiNumberField(
+    modifier: Modifier = Modifier,
+    label: String,
+    initialTextFieldValue: String = "",
+    onValueChange: (Double) -> Unit,
+    keyboardType: KeyboardType = KeyboardType.Text,
+    singleLine: Boolean = true
+) {
+    var text by remember { mutableStateOf(TextFieldValue(initialTextFieldValue)) }
+    var number by remember { mutableStateOf(0.0) }
+    val focusManager = LocalFocusManager.current
+
+    OutlinedTextField(
+        value = text,
+        label = {
+            number.takeIf { it == 0.0 }
+                ?.let {
+                    Text(text = label)
+                } ?: Text(text = "$label is ${number.format(2)}")
+        },
+        keyboardOptions = KeyboardOptions(
+            imeAction = ImeAction.Next,
+            keyboardType = keyboardType
+        ),
+        keyboardActions = KeyboardActions(onNext = {
+            val isMoved = focusManager.moveFocus(FocusDirection.Down)
+            if (!isMoved) {
+                focusManager.clearFocus()
+            }
+        }),
+        onValueChange = {
+            // TODO review implementation logic
+            text = it
+
+            if (it.text.isEmpty()) {
+                onValueChange(0.0)
+                number = 0.0
+                return@OutlinedTextField
+            }
+
+            try {
+                number = Expressions()
+                    .eval(it.text)
+                    .toDouble()
+
+                onValueChange(number)
+
+            } catch (_: Throwable) {
+                onValueChange(it.text.toDoubleOrNull() ?: 0.0)
+            }
         },
         singleLine = singleLine,
         modifier = modifier

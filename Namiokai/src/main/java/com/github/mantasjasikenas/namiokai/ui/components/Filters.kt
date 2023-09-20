@@ -2,6 +2,8 @@
 
 package com.github.mantasjasikenas.namiokai.ui.components
 
+import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -179,6 +181,7 @@ fun FiltersPreview() {
 }
 
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun <T> FiltersRow(
     modifier: Modifier = Modifier,
@@ -194,13 +197,22 @@ fun <T> FiltersRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         item {
-            ResetFilterChip(onReset = {
-                filters.forEach { it.selectedValue = null }
-                onFilterChanged(filters)
-            })
+            ResetFilterChip(
+                modifier = Modifier
+                    .animateItemPlacement()
+                    .animateContentSize(),
+                onReset = {
+                    filters.forEach { it.selectedValue = null }
+                    onFilterChanged(filters)
+                })
         }
-        items(filters) { filter: Filter<T, Any> ->
+        items(items = filters.sortedBy { it.selectedValue == null },
+            key = { it.filterName }
+        ) { filter: Filter<T, Any> ->
             FilterItem(
+                modifier = Modifier
+                    .animateItemPlacement()
+                    .animateContentSize(),
                 filter = filter,
                 onValueSelected = {
                     filter.selectedValue = it
@@ -214,6 +226,47 @@ fun <T> FiltersRow(
             )
         }
     }
+}
+
+// TODO Implement this someday :)
+@Composable
+fun <T> FiltersDialog(
+    modifier: Modifier = Modifier,
+    filters: List<Filter<T, Any>>,
+    onFilterChanged: (List<Filter<T, Any>>) -> Unit = {}
+) {
+
+    Column(
+        modifier = modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        filters.forEach { filter ->
+            Text(text = filter.displayLabel)
+            AvailableValueCard(
+                onValueSelected = {
+//                    onClear()
+//                    onDismissRequest()
+                },
+                value = "All",
+                isSelected = filter.selectedValue == null,
+            )
+            filter.values.forEach { value ->
+                AvailableValueCard(
+                    onValueSelected = {
+                        //val filters = filters.toMutableList()
+                        filter.selectedValue = value
+                        onFilterChanged(filters)
+                    },
+                    value = value.toString(),
+                    isSelected = filter.selectedValue == value,
+                )
+            }
+            NamiokaiSpacer(height = 20)
+
+
+        }
+    }
+
 }
 
 

@@ -118,7 +118,7 @@ fun DebtsScreen(
         ) { pageIndex ->
             when (pageIndex) {
                 0 -> {
-                    UserDebtsPage(
+                    PersonalDebtsPage(
                         mainUiState = mainUiState,
                         mainViewModel = mainViewModel,
                         periodUiState = periodUiState,
@@ -140,7 +140,7 @@ fun DebtsScreen(
 }
 
 @Composable
-private fun UserDebtsPage(
+private fun PersonalDebtsPage(
     mainUiState: MainUiState,
     mainViewModel: MainViewModel,
     periodUiState: PeriodUiState,
@@ -158,7 +158,7 @@ private fun UserDebtsPage(
                 fontWeight = FontWeight.Bold
             )
             SwipePeriod(
-                periods = mainViewModel.getPeriods(),
+                periods = periodUiState.periods,
                 selectedPeriod = periodUiState.userSelectedPeriod,
                 appPeriod = periodUiState.currentPeriod,
                 onPeriodReset = {
@@ -203,7 +203,7 @@ private fun DebtsPage(
                 fontWeight = FontWeight.Bold
             )
             SwipePeriod(
-                periods = mainViewModel.getPeriods(),
+                periods = periodUiState.periods,
                 selectedPeriod = periodUiState.userSelectedPeriod,
                 appPeriod = periodUiState.currentPeriod,
                 onPeriodReset = {
@@ -236,10 +236,13 @@ private fun DebtsPage(
                 modifier = Modifier
                     .fillMaxSize()
             ) {
-                items(usersDebts.toList()) { (user, debts) ->
+                items(items = usersDebts.toList(),
+                    key = { it.first }
+                ) { (user, debts) ->
                     if (debts.isEmpty() || usersMap[user] == null) return@items
 
                     DebtorCard(
+                        modifier = Modifier.animateItemPlacement(),
                         debtorUser = usersMap[user]!!,
                         userDebts = debts,
                         usersMap = usersMap
@@ -324,6 +327,7 @@ fun NoDebtsFound(
 
 @Composable
 private fun DebtorCard(
+    modifier: Modifier = Modifier,
     debtorUser: User,
     userDebts: UserDebtsMap,
     usersMap: UsersMap
@@ -335,7 +339,7 @@ private fun DebtorCard(
         onClick = { expandedState = !expandedState }) {
 
         Column(
-            modifier = Modifier
+            modifier = modifier
                 .padding(0.dp),
             horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.Center

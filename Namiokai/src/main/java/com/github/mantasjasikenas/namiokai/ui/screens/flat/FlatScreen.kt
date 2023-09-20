@@ -1,3 +1,7 @@
+@file:OptIn(ExperimentalFoundationApi::class,
+    ExperimentalFoundationApi::class
+)
+
 package com.github.mantasjasikenas.namiokai.ui.screens.flat
 
 import androidx.compose.animation.AnimatedVisibility
@@ -5,10 +9,13 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,10 +26,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ReadMore
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.EuroSymbol
 import androidx.compose.material.icons.outlined.Flood
-import androidx.compose.material.icons.outlined.ReadMore
 import androidx.compose.material.icons.outlined.WaterDrop
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DismissDirection
@@ -76,7 +83,6 @@ import com.github.mantasjasikenas.namiokai.ui.main.MainViewModel
 import com.github.mantasjasikenas.namiokai.ui.main.UsersMap
 import com.github.mantasjasikenas.namiokai.utils.format
 import com.github.mantasjasikenas.namiokai.utils.tryParse
-import com.google.accompanist.flowlayout.FlowRow
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDateTime
@@ -104,27 +110,48 @@ fun FlatScreen(
         NoResultsFound(label = "No flat bills found.")
     }
     else {
-        LazyColumn(modifier = modifier.fillMaxSize()) {
-            item { NamiokaiSpacer(height = 15) }
-            item {
-                FlatBillFiltersRow(
-                    mainUiState = mainUiState,
-                    flatUiState = flatUiState,
-                    onFiltersChanged = {
-                        flatViewModel.onFiltersChanged(it)
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = 5.dp)
+        ) {
+            FlatBillFiltersRow(
+                mainUiState = mainUiState,
+                flatUiState = flatUiState,
+                onFiltersChanged = {
+                    flatViewModel.onFiltersChanged(it)
+                }
+            )
+            LazyColumn(
+                modifier = modifier
+                    .fillMaxSize()
+            ) {
+                if (flatUiState.filteredFlatBills.isEmpty()) {
+                    item {
+                        NoResultsFound(
+                            modifier = Modifier.padding(top = 30.dp),
+                            label = "No results found."
+                        )
                     }
-                )
+                }
+                else {
+                    items(items = flatUiState.filteredFlatBills,
+                        key = { it.documentId }
+                    ) { flatBill ->
+                        FlatCard(
+                            modifier = Modifier.animateItemPlacement(),
+                            flatBill = flatBill,
+                            isAllowedModification = (currentUser.admin || flatBill.createdByUid == currentUser.uid),
+                            usersMap = mainUiState.usersMap,
+                            viewModel = flatViewModel,
+                            currentUser = currentUser
+                        )
+                    }
+                }
+
+                item { NamiokaiSpacer(height = 120) }
             }
-            items(flatUiState.filteredFlatBills) { flatBill ->
-                FlatCard(
-                    flatBill = flatBill,
-                    isAllowedModification = (currentUser.admin || flatBill.createdByUid == currentUser.uid),
-                    usersMap = mainUiState.usersMap,
-                    viewModel = flatViewModel,
-                    currentUser = currentUser
-                )
-            }
-            item { NamiokaiSpacer(height = 120) }
         }
     }
 
@@ -183,7 +210,10 @@ private fun FlatBillFiltersRow(
 }
 
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(
+    ExperimentalMaterial3Api::class,
+    ExperimentalLayoutApi::class
+)
 @Composable
 private fun FlatCard(
     flatBill: FlatBill,
@@ -246,7 +276,7 @@ private fun FlatCard(
                     .background(color),
             ) {
                 Icon(
-                    imageVector = Icons.Outlined.ReadMore,
+                    imageVector = Icons.AutoMirrored.Outlined.ReadMore,
                     contentDescription = "",
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier
@@ -431,8 +461,8 @@ private fun FlatCard(
             )
             NamiokaiSpacer(height = 7)
             FlowRow(
-                mainAxisSpacing = 7.dp,
-                crossAxisSpacing = 7.dp
+                horizontalArrangement = Arrangement.spacedBy(7.dp),
+                verticalArrangement = Arrangement.spacedBy(7.dp),
             ) {
                 usersMap.filter { flatBill.splitUsersUid.contains(it.key) }.values.forEach {
                     OutlinedCard(shape = RoundedCornerShape(25)) {

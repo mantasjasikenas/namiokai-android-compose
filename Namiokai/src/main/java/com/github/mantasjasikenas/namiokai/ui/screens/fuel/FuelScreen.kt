@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalFoundationApi::class)
+
 package com.github.mantasjasikenas.namiokai.ui.screens.fuel
 
 import androidx.compose.animation.AnimatedVisibility
@@ -5,10 +7,13 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -20,9 +25,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ReadMore
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.EuroSymbol
-import androidx.compose.material.icons.outlined.ReadMore
 import androidx.compose.material.icons.outlined.TripOrigin
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -56,6 +61,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -65,9 +71,11 @@ import coil.request.ImageRequest
 import com.github.mantasjasikenas.namiokai.R
 import com.github.mantasjasikenas.namiokai.model.Destination
 import com.github.mantasjasikenas.namiokai.model.Filter
+import com.github.mantasjasikenas.namiokai.model.Period
 import com.github.mantasjasikenas.namiokai.model.User
 import com.github.mantasjasikenas.namiokai.model.bills.TripBill
 import com.github.mantasjasikenas.namiokai.model.bills.resolveBillCost
+import com.github.mantasjasikenas.namiokai.model.contains
 import com.github.mantasjasikenas.namiokai.ui.common.CardText
 import com.github.mantasjasikenas.namiokai.ui.common.DateTimeCardColumn
 import com.github.mantasjasikenas.namiokai.ui.common.FloatingAddButton
@@ -80,13 +88,14 @@ import com.github.mantasjasikenas.namiokai.ui.components.NamiokaiConfirmDialog
 import com.github.mantasjasikenas.namiokai.ui.components.NoResultsFound
 import com.github.mantasjasikenas.namiokai.ui.main.MainUiState
 import com.github.mantasjasikenas.namiokai.ui.main.MainViewModel
+import com.github.mantasjasikenas.namiokai.ui.main.PeriodUiState
 import com.github.mantasjasikenas.namiokai.ui.main.UsersMap
 import com.github.mantasjasikenas.namiokai.utils.format
 import com.github.mantasjasikenas.namiokai.utils.tryParse
-import com.google.accompanist.flowlayout.FlowRow
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.Month
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import java.time.format.TextStyle
@@ -100,6 +109,7 @@ fun FuelScreen(
 ) {
     val fuelUiState by viewModel.uiState.collectAsState()
     val mainUiState by mainViewModel.mainUiState.collectAsState()
+    val periodUiState by mainViewModel.periodState.collectAsState()
     val popupState = remember {
         mutableStateOf(false)
     }
@@ -109,28 +119,93 @@ fun FuelScreen(
         NoResultsFound(label = "No trips found.")
     }
     else {
-        LazyColumn(modifier = modifier.fillMaxSize()) {
-            item { NamiokaiSpacer(height = 15) }
-            item {
-                TripBillFiltersRow(
-                    mainUiState = mainUiState,
-                    fuelUiState = fuelUiState,
-                    onFiltersChanged = {
-                        viewModel.onFiltersChanged(it)
+
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = 5.dp)
+        ) {
+            TripBillFiltersRow(
+                mainUiState = mainUiState,
+                fuelUiState = fuelUiState,
+                periodUiState = periodUiState,
+                onFiltersChanged = {
+                    viewModel.onFiltersChanged(it)
+                }
+            )
+            LazyColumn(
+                modifier = modifier
+                    .fillMaxSize()
+            ) {
+                if (fuelUiState.filteredTripBills.isEmpty()) {
+                    item {
+                        NoResultsFound(
+                            modifier = Modifier.padding(top = 30.dp),
+                            label = "No results found."
+                        )
                     }
-                )
+                }
+                else {
+
+                    val grouped = fuelUiState.filteredTripBills.groupBy {
+                        Month(
+                            it.date.substring(
+                                5,
+                                7
+                            )
+                                .toInt()
+                        ).getDisplayName(
+                            TextStyle.FULL,
+                            Locale.getDefault()
+                        )
+                    }
+
+                    grouped.forEach { (initial, trips) ->
+                        item {
+                            Text(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(start = 20.dp),
+                                text = initial,
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                textAlign = TextAlign.Start
+                            )
+                        }
+
+                        items(items = trips,
+                            key = { it.documentId }
+                        ) { fuel ->
+                            FuelCard(
+                                modifier = Modifier.animateItemPlacement(),
+                                tripBill = fuel,
+                                isAllowedModification = (currentUser.admin || fuel.createdByUid == currentUser.uid),
+                                destinations = fuelUiState.destinations,
+                                usersMap = mainUiState.usersMap,
+                                viewModel = viewModel,
+                                currentUser = currentUser
+                            )
+                        }
+                    }
+
+                    /*items(items = fuelUiState.filteredTripBills,
+                        key = { it.documentId }
+                        ) { fuel ->
+                        FuelCard(
+                            modifier = Modifier.animateItemPlacement(),
+                            tripBill = fuel,
+                            isAllowedModification = (currentUser.admin || fuel.createdByUid == currentUser.uid),
+                            destinations = fuelUiState.destinations,
+                            usersMap = mainUiState.usersMap,
+                            viewModel = viewModel,
+                            currentUser = currentUser
+                        )
+                    }*/
+                }
+
+                item { NamiokaiSpacer(height = 120) }
             }
-            items(fuelUiState.filteredTripBills) { fuel ->
-                FuelCard(
-                    tripBill = fuel,
-                    isAllowedModification = (currentUser.admin || fuel.createdByUid == currentUser.uid),
-                    destinations = fuelUiState.destinations,
-                    usersMap = mainUiState.usersMap,
-                    viewModel = viewModel,
-                    currentUser = currentUser
-                )
-            }
-            item { NamiokaiSpacer(height = 120) }
         }
     }
 
@@ -151,6 +226,7 @@ fun FuelScreen(
 private fun TripBillFiltersRow(
     mainUiState: MainUiState,
     fuelUiState: FuelUiState,
+    periodUiState: PeriodUiState,
     onFiltersChanged: (List<Filter<TripBill, Any>>) -> Unit
 ) {
     val users = mainUiState.usersMap.map { (_, user) ->
@@ -183,9 +259,18 @@ private fun TripBillFiltersRow(
                     values = fuelUiState.destinations.map { it.name },
                     predicate = { bill, value -> bill.tripDestination == value }
                 ),
+                Filter(displayLabel = "Period",
+                    filterName = "period",
+                    values = periodUiState.periods.sortedByDescending { it.start },
+                    //selectedValue = periodUiState.currentPeriod,
+                    predicate = { bill, value -> (value as Period).contains(bill.date) }),
             )
         }
     }
+
+//    LaunchedEffect(true) {
+//        onFiltersChanged(filters)
+//    }
 
     FiltersRow(
         filters = filters,
@@ -197,7 +282,10 @@ private fun TripBillFiltersRow(
 }
 
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(
+    ExperimentalMaterial3Api::class,
+    ExperimentalLayoutApi::class
+)
 @Composable
 private fun FuelCard(
     tripBill: TripBill,
@@ -262,7 +350,7 @@ private fun FuelCard(
                     .background(color),
             ) {
                 Icon(
-                    imageVector = Icons.Outlined.ReadMore,
+                    imageVector = Icons.AutoMirrored.Outlined.ReadMore,
                     tint = MaterialTheme.colorScheme.primary,
                     contentDescription = "",
                     modifier = Modifier
@@ -420,8 +508,8 @@ private fun FuelCard(
             )
             NamiokaiSpacer(height = 7)
             FlowRow(
-                mainAxisSpacing = 7.dp,
-                crossAxisSpacing = 7.dp
+                horizontalArrangement = Arrangement.spacedBy(7.dp),
+                verticalArrangement = Arrangement.spacedBy(7.dp),
             ) {
                 usersMap.filter { tripBill.splitUsersUid.contains(it.key) }.values.forEach {
                     OutlinedCard(shape = RoundedCornerShape(25)) {

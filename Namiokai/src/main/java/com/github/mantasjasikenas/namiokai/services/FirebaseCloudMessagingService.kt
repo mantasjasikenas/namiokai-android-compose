@@ -45,7 +45,6 @@ class FirebaseCloudMessagingService : FirebaseMessagingService() {
     }
 
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
-
         Log.d(
             TAG,
             "From: ${remoteMessage.from}"
@@ -55,13 +54,6 @@ class FirebaseCloudMessagingService : FirebaseMessagingService() {
                 TAG,
                 "Message data payload: ${remoteMessage.data}"
             )
-            /* if (false) {
-                 // For long-running tasks (10 seconds or more) use WorkManager.
-                 scheduleJob()
-             } else {
-                 // Handle message within 10 seconds
-                 handleNow()
-             }*/
         }
         remoteMessage.notification?.let {
             Log.d(
@@ -69,8 +61,6 @@ class FirebaseCloudMessagingService : FirebaseMessagingService() {
                 "Message Notification Body: ${it.body}"
             )
 
-
-            // TODO add more data to notification
             coroutineScope.launch {
                 notificationsRepository.insertNotification(
                     Notification(

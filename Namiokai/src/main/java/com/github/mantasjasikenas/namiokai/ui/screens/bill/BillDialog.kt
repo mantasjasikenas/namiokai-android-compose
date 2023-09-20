@@ -15,13 +15,13 @@ import androidx.compose.runtime.toMutableStateMap
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.github.mantasjasikenas.namiokai.R
 import com.github.mantasjasikenas.namiokai.model.bills.PurchaseBill
 import com.github.mantasjasikenas.namiokai.ui.common.UsersPicker
 import com.github.mantasjasikenas.namiokai.ui.components.NamiokaiDialog
+import com.github.mantasjasikenas.namiokai.ui.components.NamiokaiNumberField
 import com.github.mantasjasikenas.namiokai.ui.components.NamiokaiTextField
 import com.github.mantasjasikenas.namiokai.ui.main.UsersMap
 
@@ -89,7 +89,6 @@ fun BillPopup(
         },
         onDismiss = onDismiss
     ) {
-
         Text(
             text = stringResource(R.string.paymaster),
             style = MaterialTheme.typography.titleSmall,
@@ -109,7 +108,7 @@ fun BillPopup(
             label = stringResource(R.string.shopping_list),
             initialTextFieldValue = bill.shoppingList,
             onValueChange = { bill.shoppingList = it })
-        NamiokaiTextField(
+        NamiokaiNumberField(
             modifier = Modifier.padding(
                 vertical = 10.dp,
                 horizontal = 30.dp
@@ -117,14 +116,10 @@ fun BillPopup(
             label = stringResource(R.string.total_price),
             initialTextFieldValue = (if (bill.total == 0.0) "" else bill.total.toString()),
             onValueChange = {
-                bill.total = it.replace(
-                    ',',
-                    '.'
-                )
-                    .toDoubleOrNull() ?: 0.0
-            },
-            keyboardType = KeyboardType.Number
+                bill.total = it
+            }
         )
+
         Spacer(modifier = Modifier.height(20.dp))
         Text(
             text = stringResource(R.string.split_bill_with),

@@ -15,6 +15,7 @@ data class MainUiState(
 )
 
 data class PeriodUiState(
-    val currentPeriod: Period,
-    val userSelectedPeriod: Period,
+    val currentPeriod: Period = Period(),
+    val userSelectedPeriod: Period = Period(),
+    val periods: List<Period> = emptyList(),
 )
