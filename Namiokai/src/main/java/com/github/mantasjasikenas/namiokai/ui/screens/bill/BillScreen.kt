@@ -127,11 +127,7 @@ fun BillScreen(
                 onFiltersChanged = {
                     viewModel.onFiltersChanged(it)
                 })
-            NamiokaiSpacer(height = 15)
-
-//            HorizontalDivider(
-//                modifier = Modifier.padding(vertical = 6.dp)
-//            )
+//            NamiokaiSpacer(height = 15)
 
             LazyColumn(
                 modifier = modifier

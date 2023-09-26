@@ -88,8 +88,9 @@ fun NamiokaiNumberField(
         onValueChange = {
             // TODO review implementation logic
             text = it
+            val expr = it.text.replace(",", ".")
 
-            if (it.text.isEmpty()) {
+            if (expr.isEmpty()) {
                 onValueChange(0.0)
                 number = 0.0
                 return@OutlinedTextField
@@ -97,13 +98,13 @@ fun NamiokaiNumberField(
 
             try {
                 number = Expressions()
-                    .eval(it.text)
+                    .eval(expr)
                     .toDouble()
 
                 onValueChange(number)
 
             } catch (_: Throwable) {
-                onValueChange(it.text.toDoubleOrNull() ?: 0.0)
+                onValueChange(expr.toDoubleOrNull() ?: 0.0)
             }
         },
         singleLine = singleLine,
