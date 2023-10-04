@@ -30,7 +30,8 @@ fun SignInContent(
                 context,
                 error,
                 Toast.LENGTH_LONG
-            ).show()
+            )
+                .show()
         }
     }
 
@@ -45,7 +46,10 @@ fun SignInContent(
                 onClick = onSignInClick,
                 shape = RoundedCornerShape(4.dp)
             ) {
-                Icon(imageVector = Icons.AutoMirrored.Outlined.Login, contentDescription = null)
+                Icon(
+                    imageVector = Icons.AutoMirrored.Outlined.Login,
+                    contentDescription = null
+                )
                 Text(text = "Sign in")
             }
 

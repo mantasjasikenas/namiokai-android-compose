@@ -182,6 +182,7 @@ private fun PersonalDebtsPage(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun DebtsPage(
     mainViewModel: MainViewModel,

@@ -21,67 +21,67 @@ sealed class Screen(
     @StringRes val titleResourceId: Int,
     val imageVector: ImageVector = Icons.Outlined.BrokenImage
 ) {
-    object Home : Screen(
+    data object Home : Screen(
         "home",
         R.string.home_menu_label,
         Icons.Outlined.Home
     )
 
-    object Debts : Screen(
+    data object Debts : Screen(
         "debt",
         R.string.debts_name,
         Icons.Outlined.Payments
     )
 
-    object Fuel : Screen(
+    data object Fuel : Screen(
         "fuel",
         R.string.trips_name,
         Icons.Outlined.LocalGasStation
     )
 
-    object Bill : Screen(
+    data object Bill : Screen(
         "bill",
         R.string.bill_name,
         Icons.Outlined.ShoppingBag
     )
 
-    object Settings : Screen(
+    data object Settings : Screen(
         "settings",
         R.string.settings_name,
         Icons.Outlined.Settings
     )
 
-    object Notifications : Screen(
+    data object Notifications : Screen(
         "notifications",
         R.string.notifications_name,
         Icons.Outlined.Notifications
     )
 
-    object Login : Screen(
+    data object Login : Screen(
         "login",
         R.string.login_name,
         Icons.Outlined.Sync
     )
 
-    object Test : Screen(
+    data object Test : Screen(
         "test",
         R.string.test_name,
         Icons.Outlined.Sync
     )
 
-    object AdminPanel : Screen(
+    data object AdminPanel : Screen(
         "admin_panel",
         R.string.admin_panel_menu_label,
         Icons.Outlined.AdminPanelSettings
     )
 
-    object Flat : Screen(
+    data object Flat : Screen(
         "flat",
         R.string.flat_label,
         Icons.Outlined.Cottage
     )
 
-    object Profile : Screen(
+    data object Profile : Screen(
         "profile",
         R.string.profile_label,
         Icons.Outlined.Person
@@ -116,6 +116,7 @@ sealed class Screen(
         fun fromRoute(route: String?): Screen {
             if (route == null) return initialScreen
 
+            @Suppress("SENSELESS_COMPARISON")
             return screens.firstOrNull { it != null && it.route == route } ?: initialScreen
         }
     }

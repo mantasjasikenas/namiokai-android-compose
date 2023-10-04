@@ -1,12 +1,14 @@
+@file:Suppress("DSL_SCOPE_VIOLATION")
 
 plugins {
-    kotlin("android")
-    id("com.android.application")
-    id("com.google.gms.google-services")
-    id("kotlin-kapt")
-    id("com.google.dagger.hilt.android")
-    id("com.google.devtools.ksp")
-    kotlin("plugin.serialization") version "1.9.0"
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.android.kotlin)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.kotlin.serialization)
+
+    id(libs.plugins.google.gms.services.get().pluginId)
+    id(libs.plugins.kotlin.kapt.get().pluginId)
+    id(libs.plugins.dagger.hilt.android.get().pluginId)
 }
 
 android {
@@ -17,8 +19,8 @@ android {
         applicationId = "com.namiokai"
         minSdk = 26
         targetSdk = 34
-        versionCode = 23
-        versionName = "0.2.3"
+        versionCode = 24
+        versionName = "0.2.4"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -59,7 +61,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-           signingConfig = signingConfigs.getByName("namiokai-release")
+            signingConfig = signingConfigs.getByName("namiokai-release")
         }
 
     }
@@ -73,10 +75,10 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.0"
+        kotlinCompilerExtensionVersion = "1.5.3"
     }
-    packaging{
-        resources{
+    packaging {
+        resources {
             excludes.add("/META-INF/{AL2.0,LGPL2.1}")
             excludes.add("META-INF/*")
             excludes.add("META-INF/*.version")
@@ -85,87 +87,81 @@ android {
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-datetime-jvm:0.4.1")
-    implementation("androidx.core:core-ktx:1.12.0")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
-    implementation("androidx.activity:activity-compose:1.7.2")
-    implementation(platform("androidx.compose:compose-bom:2023.09.00"))
-    implementation("androidx.compose.ui:ui:1.6.0-alpha05")
-    implementation("androidx.compose.ui:ui-graphics:1.6.0-alpha05")
-    implementation("androidx.compose.ui:ui-tooling-preview:1.6.0-alpha05")
-    implementation("androidx.compose.material3:material3:1.2.0-alpha07")
-    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.2")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-savedstate:2.6.2")
-    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.2")
-    implementation("androidx.navigation:navigation-compose:2.7.2")
-    implementation("org.jetbrains.kotlin:kotlin-reflect:1.9.10")
-    implementation("androidx.compose.material:material-icons-extended:1.5.1")
-    implementation("com.google.accompanist:accompanist-permissions:0.32.0")
-    implementation("androidx.work:work-runtime-ktx:2.8.1")
-    implementation("com.google.accompanist:accompanist-flowlayout:0.32.0")
-
-
-    implementation("io.coil-kt:coil-compose:2.4.0")
-
-    // Datastore
-    implementation("androidx.datastore:datastore-preferences:1.0.0")
-    implementation("com.google.android.material:material:1.9.0")
-    implementation(files("libs/ExprK-1.0-SNAPSHOT.jar"))
-
-    testImplementation("junit:junit:4.13.2")
-
-    androidTestImplementation("androidx.test.ext:junit:1.1.5")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
-    androidTestImplementation(platform("androidx.compose:compose-bom:2023.09.00"))
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.6.0-alpha05")
-
-    debugImplementation("androidx.compose.ui:ui-tooling:1.6.0-alpha05")
-    debugImplementation("androidx.compose.ui:ui-test-manifest:1.6.0-alpha05")
-
-    debugImplementation ("androidx.customview:customview:1.2.0-alpha02")
-    debugImplementation ("androidx.customview:customview-poolingcontainer:1.0.0")
-
-    implementation("com.google.android.gms:play-services-auth:20.7.0")
-
-
+    //  Compose
+    implementation(platform(libs.compose.bom))
+    implementation(libs.bundles.compose)
 
     // Firebase
-    implementation(platform("com.google.firebase:firebase-bom:32.2.3"))
-    implementation("com.google.firebase:firebase-auth-ktx")
-    implementation("com.google.firebase:firebase-firestore-ktx")
-    implementation("com.google.firebase:firebase-messaging-ktx")
-    implementation ("com.google.firebase:firebase-analytics-ktx")
-    implementation ("com.google.firebase:firebase-storage-ktx")
-    implementation ("com.google.firebase:firebase-config-ktx")
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.bundles.firebase)
 
     //Dagger - Hilt
-    implementation("com.google.dagger:hilt-android:2.48")
-    ksp("com.google.dagger:hilt-compiler:2.48")
-    implementation("androidx.hilt:hilt-navigation-compose:1.1.0-alpha01")
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
+    implementation(libs.androidx.hilt.navigation.compose)
 
-    // For instrumentation tests
-    androidTestImplementation("com.google.dagger:hilt-android-testing:2.48")
-    kspAndroidTest("com.google.dagger:hilt-compiler:2.48")
-
-    // For local unit tests
-    testImplementation("com.google.dagger:hilt-android-testing:2.48")
-    kspTest("com.google.dagger:hilt-compiler:2.48")
-
-    implementation("androidx.core:core-splashscreen:1.0.1")
-
-    implementation("com.google.android.play:app-update:2.1.0")
-    implementation("com.google.android.play:app-update-ktx:2.1.0")
-
-    implementation("com.github.skydoves:colorpicker-compose:1.0.4")
+    // Datastore
+    implementation(libs.datastore.preferences)
+    implementation(libs.material)
 
     //Room
-    implementation("androidx.room:room-runtime:2.5.2")
-    implementation("androidx.core:core-ktx:1.12.0")
-    ksp("androidx.room:room-compiler:2.5.2")
-    implementation("androidx.room:room-ktx:2.5.2")
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.core.ktx)
+    ksp(libs.androidx.room.compiler)
+    implementation(libs.androidx.room.ktx)
+
+    // Lifecycle
+    implementation(libs.androidx.lifecycle.livedata.ktx)
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    implementation(libs.androidx.lifecycle.viewmodel.savedstate)
+    implementation(libs.androidx.lifecycle.livedata.ktx)
+    implementation(libs.lifecycle.runtime.ktx)
+
+    // Updates
+    implementation(libs.app.update)
+    implementation(libs.app.update.ktx)
+
+    // Custom dependencies
+    implementation(libs.colorpicker.compose)
+    implementation(files("libs/ExprK-1.0-SNAPSHOT.jar"))
+
+    // Accompanist
+    implementation(libs.accompanist.permissions)
+    implementation(libs.accompanist.flowlayout)
+
+    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.kotlinx.datetime.jvm)
+    implementation(libs.kotlin.reflect)
+    implementation(libs.core.ktx)
+    implementation(libs.activity.compose)
+
+    implementation(libs.androidx.core.splashscreen)
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.work.runtime.ktx)
+
+    implementation(libs.coil.compose)
+    implementation(libs.play.services.auth)
+
+    // Testing
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(platform(libs.compose.bom))
+    debugImplementation(libs.androidx.customview)
+    debugImplementation(libs.androidx.customview.poolingcontainer)
+
+    // Compose Testing
+    androidTestImplementation(libs.compose.ui.test.junit4)
+    debugImplementation(libs.compose.ui.tooling)
+    debugImplementation(libs.compose.ui.test.manifest)
+
+    // Hilt Testing
+    androidTestImplementation(libs.hilt.android.testing)
+    kspAndroidTest(libs.hilt.compiler)
+    testImplementation(libs.google.hilt.android.testing)
+    kspTest(libs.hilt.compiler)
+
+
 }
 
 
