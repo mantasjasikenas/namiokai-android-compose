@@ -1,11 +1,9 @@
 package com.github.mantasjasikenas.core.domain.repository
 
-import android.content.Context
 import android.content.Intent
 import android.content.IntentSender
 import com.github.mantasjasikenas.core.common.util.Constants.SIGN_IN_REQUEST
 import com.github.mantasjasikenas.core.domain.model.SignInResult
-import com.github.mantasjasikenas.core.domain.model.User
 import com.github.mantasjasikenas.core.domain.model.toUser
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.SignInClient
@@ -17,7 +15,6 @@ import kotlinx.coroutines.tasks.await
 import javax.inject.Named
 
 class AuthRepository(
-    private val context: Context,
     private val oneTapClient: SignInClient,
     private val usersRepository: UsersRepository,
     @Named(SIGN_IN_REQUEST)
@@ -28,7 +25,6 @@ class AuthRepository(
     suspend fun signIn(): IntentSender? {
         val result = try {
             oneTapClient.beginSignIn(
-//                buildSignInRequest()
                 signInRequest
             )
                 .await()
@@ -37,6 +33,7 @@ class AuthRepository(
             if (e is CancellationException) throw e
             null
         }
+
         return result?.pendingIntent?.intentSender
     }
 
@@ -84,7 +81,4 @@ class AuthRepository(
         }
     }
 
-    fun getSignedInUser(): User? = auth.currentUser?.run {
-        toUser()
-    }
 }

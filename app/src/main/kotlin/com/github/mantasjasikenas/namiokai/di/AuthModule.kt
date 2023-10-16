@@ -27,14 +27,11 @@ object AuthModule {
     @Provides
     @Singleton
     fun provideAuthRepository(
-        @ApplicationContext
-        context: Context,
         oneTapClient: SignInClient,
         usersRepository: UsersRepository,
         @Named(SIGN_IN_REQUEST)
         signInRequest: BeginSignInRequest,
     ) = AuthRepository(
-        context = context,
         oneTapClient = oneTapClient,
         usersRepository = usersRepository,
         signInRequest = signInRequest

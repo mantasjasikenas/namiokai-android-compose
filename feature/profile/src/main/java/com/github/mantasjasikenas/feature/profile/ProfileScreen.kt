@@ -1,6 +1,5 @@
 package com.github.mantasjasikenas.feature.profile
 
-import android.widget.Toast
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -41,7 +40,8 @@ fun ProfileScreen(
 
         is ProfileUiState.Success -> {
             ProfileScreenContent(
-                user = (profileUiState as ProfileUiState.Success).currentUser
+                user = (profileUiState as ProfileUiState.Success).currentUser,
+                onLogout = profileViewModel::logout
             )
         }
     }
@@ -49,24 +49,9 @@ fun ProfileScreen(
 
 @Composable
 private fun ProfileScreenContent(
-    user: User
+    user: User,
+    onLogout: () -> Unit
 ) {
-    val context = LocalContext.current
-    val showToast = {
-        Toast.makeText(
-            context,
-            "ARE YOU CRAZY!?",
-            Toast.LENGTH_SHORT
-        )
-            .show()
-        Toast.makeText(
-            context,
-            "Under construction!",
-            Toast.LENGTH_SHORT
-        )
-            .show()
-    }
-
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
@@ -100,13 +85,13 @@ private fun ProfileScreenContent(
         Text(text = user.email)
         NamiokaiSpacer(height = 32)
 
-        Button(onClick = { showToast() }) {
+        /*Button(onClick = { showToast() }) {
             Text(text = "Change display name")
         }
         Button(onClick = { showToast() }) {
             Text(text = "Change profile picture")
-        }
-        Button(onClick = { showToast() }) {
+        }*/
+        Button(onClick = onLogout) {
             Text(text = "Sign out")
         }
 

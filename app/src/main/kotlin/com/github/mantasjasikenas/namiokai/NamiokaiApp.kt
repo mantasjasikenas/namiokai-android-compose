@@ -58,7 +58,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
-import com.github.mantasjasikenas.core.common.util.Constants.NAMIOKAI_ASSETS_URL
+import com.github.mantasjasikenas.core.common.util.Constants.GITHUB_URL
 import com.github.mantasjasikenas.core.domain.model.SharedState
 import com.github.mantasjasikenas.core.domain.model.isNotLoggedIn
 import com.github.mantasjasikenas.core.ui.common.NamiokaiCircularProgressIndicator
@@ -97,7 +97,13 @@ fun NamiokaiApp(mainActivityViewModel: MainActivityViewModel = hiltViewModel()) 
         startDestination = startDestination
     ) {
         authNavGraph(
-            navController = navController,
+            onSuccessfulLogin = {
+                navController.navigate(NavGraph.Home.route) {
+                    popUpTo(NavGraph.Root.route) {
+                        inclusive = false
+                    }
+                }
+            },
             mainActivityViewModel = mainActivityViewModel
         )
         composable(route = NavGraph.Home.route) {
@@ -113,6 +119,13 @@ fun NamiokaiApp(mainActivityViewModel: MainActivityViewModel = hiltViewModel()) 
             }
 
             NamiokaiScreen(
+                navigateToAuth = {
+                    navController.navigate(NavGraph.Auth.route) {
+                        popUpTo(NavGraph.Root.route) {
+                            inclusive = false
+                        }
+                    }
+                },
                 sharedState = sharedState,
             )
 
@@ -125,6 +138,7 @@ fun NamiokaiApp(mainActivityViewModel: MainActivityViewModel = hiltViewModel()) 
 fun NamiokaiScreen(
     modifier: Modifier = Modifier,
     sharedState: SharedState,
+    navigateToAuth: () -> Unit,
     @Suppress("UNUSED_PARAMETER")
     mainActivityViewModel: MainActivityViewModel = hiltViewModel()
 ) {
@@ -179,7 +193,8 @@ fun NamiokaiScreen(
         ) {
             namiokaiNavGraph(
                 navController = navController,
-                sharedState = sharedState
+                sharedState = sharedState,
+                navigateToAuth = navigateToAuth
             )
         }
     }
@@ -286,7 +301,7 @@ fun TopBarDropdownMenu(
     val urlIntent = remember {
         Intent(
             Intent.ACTION_VIEW,
-            Uri.parse(NAMIOKAI_ASSETS_URL)
+            Uri.parse(GITHUB_URL)
         )
     }
 

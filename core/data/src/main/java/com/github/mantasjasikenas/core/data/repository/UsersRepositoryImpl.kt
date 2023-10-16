@@ -10,8 +10,11 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.snapshots
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.storage.FirebaseStorage
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
 import kotlinx.serialization.json.Json
@@ -34,14 +37,31 @@ class UsersRepositoryImpl @Inject constructor(
 ) :
     UsersRepository {
 
-    override val currentUser: Flow<User> = auth.uid?.let { uid ->
-        db.collection(USERS_COLLECTION)
-            .document(uid)
-            .snapshots()
-            .map {
-                it.toObject<User>()!!
+    private fun getAuthState() = callbackFlow {
+        val authStateListener = FirebaseAuth.AuthStateListener { auth ->
+            trySend(auth.currentUser == null)
+        }
+
+        auth.addAuthStateListener(authStateListener)
+
+        awaitClose {
+            auth.removeAuthStateListener(authStateListener)
+        }
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override val currentUser: Flow<User> =
+        getAuthState().flatMapLatest { isUserLoggedOut ->
+            if (isUserLoggedOut) {
+                callbackFlow {
+                    trySend(User())
+                    awaitClose()
+                }
             }
-    } ?: flowOf(User())
+            else {
+                getUser(auth.currentUser!!.uid)
+            }
+        }
 
     override fun getUsers(): Flow<List<User>> =
         db.collection(USERS_COLLECTION)

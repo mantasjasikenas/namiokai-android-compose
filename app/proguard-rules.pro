@@ -35,6 +35,10 @@
     *;
 }
 
+-keepclassmembers class com.github.mantasjasikenas.core.domain.model.** {
+    *;
+}
+
 
 -dontwarn org.bouncycastle.jsse.BCSSLParameters
 -dontwarn org.bouncycastle.jsse.BCSSLSocket

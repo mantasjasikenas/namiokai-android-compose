@@ -19,7 +19,9 @@ import com.github.mantasjasikenas.feature.trips.TripsScreen
 fun NavGraphBuilder.namiokaiNavGraph(
     @Suppress("UNUSED_PARAMETER")
     navController: NavHostController,
-    sharedState: SharedState
+    sharedState: SharedState,
+    @Suppress("UNUSED_PARAMETER")
+    navigateToAuth: () -> Unit
 ) {
     composable(route = Screen.Home.route) {
         HomeScreen()
@@ -37,7 +39,9 @@ fun NavGraphBuilder.namiokaiNavGraph(
         FlatScreen(sharedState = sharedState)
     }
     composable(route = Screen.Settings.route) {
-        SettingsScreen()
+        SettingsScreen(navigateToAuth = {
+//            navigateToAuth()
+        })
     }
     composable(route = Screen.Notifications.route) {
         NotificationsScreen()

@@ -1,8 +1,8 @@
 package com.github.mantasjasikenas.feature.login
 
 import androidx.lifecycle.ViewModel
-import com.github.mantasjasikenas.core.domain.repository.AuthRepository
 import com.github.mantasjasikenas.core.domain.model.SignInResult
+import com.github.mantasjasikenas.core.domain.repository.AuthRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 
 @HiltViewModel
-class SignInViewModel @Inject constructor(
+class LoginViewModel @Inject constructor(
     val authRepository: AuthRepository
 ): ViewModel() {
 
