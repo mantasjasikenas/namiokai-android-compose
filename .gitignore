@@ -15,12 +15,13 @@
 .cxx
 local.properties
 app/google-services.json
-/Namiokai/src/main/java/com/github/mantasjasikenas/namiokai/FEATURE.md
-/Namiokai/src/release/google-services.json
-/Namiokai/src/google-services.json
-/Namiokai/debug/*
+/app/src/main/java/com/github/mantasjasikenas/namiokai/FEATURE.md
+/app/src/release/google-services.json
+/app/src/google-services.json
+/app/debug/*
 /namiokai-debug.jks
 /namiokai-release.jks
 /.secrets
 /.env
 /.github/workflows/release-local.yml
+/app/src/main/kotlin/com/github/mantasjasikenas/namiokai/FEATURE.md

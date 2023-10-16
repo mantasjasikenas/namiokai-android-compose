@@ -1,0 +1,28 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="app_name" tools:keep="@string/app_name">Namiokai</string>
+    <string name="app_name_debug" tools:keep="@string/app_name_debug">NamiokaiDebug</string>
+    <string name="fuel_name" tools:keep="@string/fuel_name">Fuel</string>
+    <string name="settings_button" tools:keep="@string/settings_button">Settings</string>
+    <string name="auth_name" tools:keep="@string/auth_name">Auth</string>
+    <string name="auth_menu_label" tools:keep="@string/auth_menu_label">Auth</string>
+    <string name="sign_in_with_google" tools:keep="@string/sign_in_with_google">Sign in with Google</string>
+    <string name="sign_out" tools:keep="@string/sign_out">Sign out</string>
+    <string name="select_paymaster" tools:keep="@string/select_paymaster">Select paymaster</string>
+    <string name="select_split_bill_users" tools:keep="@string/select_split_bill_users">Select split bill users</string>
+    <string name="cancel" tools:keep="@string/cancel">Cancel</string>
+    <string name="save" tools:keep="@string/save">Save</string>
+    <string name="bill_date" tools:keep="@string/bill_date">Bill date</string>
+    <string name="split_bill_to" tools:keep="@string/split_bill_to">Split bill to</string>
+    <string name="no_data_available">No data available</string>
+    <string name="select_driver" tools:keep="@string/select_driver">Select driver</string>
+    <string name="select_passengers" tools:keep="@string/select_passengers">Select passengers</string>
+    <string name="split_fuel_to" tools:keep="@string/split_fuel_to">Split fuel to</string>
+    <string name="trip_destination" tools:keep="@string/trip_destination">Trip destination</string>
+    <string name="display_name">Display name</string>
+    <string name="email">Email</string>
+    <string name="photo">Photo</string>
+    <string name="uid">Uid</string>
+    <string name="split_bill_users" tools:keep="@string/split_bill_users">Split bill users</string>
+    <string name="split_fuel_with" tools:keep="@string/split_fuel_with">Split trip costs</string>
+    <string name="payment_date" tools:keep="@string/payment_date">Payment date</string>
+</resources>

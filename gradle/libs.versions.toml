@@ -1,9 +1,14 @@
 [versions]
+jvm = "17"
+
 accompanist = "0.32.0"
 app-update = "2.1.0"
 hilt = "2.48"
 
-activity-compose = "1.7.2"
+compose = "1.5.10-beta02"
+androidxComposeCompiler = "1.5.3"
+
+activity-compose = "1.8.0"
 androidx-datastore-preferences = "1.0.0"
 androidx-junit = "1.1.5"
 coil-compose = "2.4.0"
@@ -14,32 +19,50 @@ customview-poolingcontainer = "1.0.0"
 customview = "1.2.0-alpha02"
 espresso-core = "3.5.1"
 google-services = "4.4.0"
-gradle = "8.3.0-alpha06"
-hilt-navigation-compose = "1.1.0-alpha01"
+gradle = "8.3.0-alpha07"
+hilt-navigation-compose = "1.1.0-beta01"
+gmsPlugin = "4.4.0"
 
 junit = "4.13.2"
+ksvg = "master-SNAPSHOT"
 lifecycle-livedata-ktx = "2.6.2"
 lifecycle-runtime-ktx = "2.6.2"
-material = "1.9.0"
-navigation-compose = "2.7.3"
+material = "1.10.0"
+navigation-compose = "2.7.4"
 play-services-auth = "20.7.0"
 room = "2.5.2"
-ui = "1.6.0-alpha06"
+ui = "1.6.0-alpha07"
 work-runtime-ktx = "2.8.1"
 
-compose-bom = "2023.09.02"
+compose-bom = "2023.10.00"
 firebase-bom = "32.3.1"
 
-android-gradle = "8.2.0-alpha03"
+android-gradle = "8.3.0-alpha07"
 kotlin = "1.9.10"
 kotlin-gradle-plugin = "1.8.21"
 kotlin-reflect = "1.9.10"
 kotlinx-datetime-jvm = "0.4.1"
 kotlinx-serialization-json = "1.6.0"
 ksp = "1.9.10-1.0.13"
-compose-material3 = "1.2.0-alpha08"
+compose-material3 = "1.2.0-alpha09"
+appcompat = "1.6.1"
+ui-graphics-android = "1.5.3"
+androidx-ui-graphics-android = "1.5.3"
+firebase-auth-ktx = "22.1.2"
+firebase-firestore-ktx = "24.8.1"
+firebase-storage-ktx = "20.2.1"
+lifecycleRuntimeCompose = "2.6.2"
+firebaseConfigKtx = "21.4.1"
 
 [libraries]
+
+# Dependencies of the included build-logic
+android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "android-gradle" }
+kotlin-gradlePlugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
+ksp-gradlePlugin = { group = "com.google.devtools.ksp", name = "com.google.devtools.ksp.gradle.plugin", version.ref = "ksp" }
+compose-gradlePlugin = { group = "org.jetbrains.compose", name = "compose-gradle-plugin", version.ref = "compose" }
+
+
 accompanist-flowlayout = { module = "com.google.accompanist:accompanist-flowlayout", version.ref = "accompanist" }
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanist" }
 activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activity-compose" }
@@ -71,18 +94,16 @@ hilt-android-testing = { module = "com.google.dagger:hilt-android-testing", vers
 hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hilt" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
 junit = { module = "junit:junit", version.ref = "junit" }
-kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin-gradle-plugin" }
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin-reflect" }
 kotlinx-datetime-jvm = { module = "org.jetbrains.kotlinx:kotlinx-datetime-jvm", version.ref = "kotlinx-datetime-jvm" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization-json" }
+ksvg = { module = "com.github.nwillc.ksvg:ksvg", version.ref = "ksvg" }
 lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycle-runtime-ktx" }
 material = { module = "com.google.android.material:material", version.ref = "material" }
 play-services-auth = { module = "com.google.android.gms:play-services-auth", version.ref = "play-services-auth" }
 
-# Compose dependencies
-compose-ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4", version.ref = "ui" }
-compose-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest", version.ref = "ui" }
 
+# Compose dependencies
 compose-bom = { module = "androidx.compose:compose-bom", version.ref = "compose-bom" }
 compose-ui = { module = "androidx.compose.ui:ui", version.ref = "ui" }
 compose-ui-graphics = { module = "androidx.compose.ui:ui-graphics", version.ref = "ui" }
@@ -90,6 +111,10 @@ compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview"
 compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "ui" }
 compose-material3 = { module = "androidx.compose.material3:material3", version.ref = "compose-material3" }
 compose-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "ui" }
+
+compose-ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4", version.ref = "ui" }
+compose-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest", version.ref = "ui" }
+
 
 # Firebase dependencies
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebase-bom" }
@@ -99,6 +124,14 @@ firebase-messaging-ktx = { module = "com.google.firebase:firebase-messaging-ktx"
 firebase-analytics-ktx = { module = "com.google.firebase:firebase-analytics-ktx" }
 firebase-storage-ktx = { module = "com.google.firebase:firebase-storage-ktx" }
 firebase-config-ktx = { module = "com.google.firebase:firebase-config-ktx" }
+appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+androidx-ui-graphics-android = { group = "androidx.compose.ui", name = "ui-graphics-android", version.ref = "ui-graphics-android" }
+ui-graphics-android = { group = "androidx.compose.ui", name = "ui-graphics-android", version.ref = "androidx-ui-graphics-android" }
+google-firebase-auth-ktx = { group = "com.google.firebase", name = "firebase-auth-ktx", version.ref = "firebase-auth-ktx" }
+google-firebase-firestore-ktx = { group = "com.google.firebase", name = "firebase-firestore-ktx", version.ref = "firebase-firestore-ktx" }
+google-firebase-storage-ktx = { group = "com.google.firebase", name = "firebase-storage-ktx", version.ref = "firebase-storage-ktx" }
+androidx-lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycleRuntimeCompose" }
+google-firebase-config-ktx = { group = "com.google.firebase", name = "firebase-config-ktx", version.ref = "firebaseConfigKtx" }
 
 
 [bundles]
@@ -117,11 +150,28 @@ firebase = ["firebase-auth-ktx",
     "firebase-config-ktx"]
 
 [plugins]
+
+# Plugins defined by this project
+namiokai-android-application = { id = "app.namiokai.android.application", version = "unspecified" }
+namiokai-android-library = { id = "app.namiokai.android.library", version = "unspecified" }
+namiokai-compose-application = { id = "app.namiokai.compose.application", version = "unspecified" }
+namiokai-compose-library = { id = "app.namiokai.compose.library", version = "unspecified" }
+
+
 android-application = { id = "com.android.application", version.ref = "android-gradle" }
-android-kotlin = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+androidLibrary = { id = "com.android.library", version.ref = "android-gradle" }
+
 
 google-gms-services = { id = "com.google.gms.google-services" }
 kotlin-kapt = { id = "kotlin-kapt", version.ref = "kotlin" }
 dagger-hilt-android = { id = "com.google.dagger.hilt.android" }
+
+
+android-kotlin = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+gms = { id = "com.google.gms.google-services", version.ref = "gmsPlugin" }
+hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+
+compose = { id = "org.jetbrains.compose", version.ref = "compose" }
