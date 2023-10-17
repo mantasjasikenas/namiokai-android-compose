@@ -73,7 +73,9 @@ class UsersRepositoryImpl @Inject constructor(
             }
 
     override fun getUser(uid: String): Flow<User> = getUsers().map { userList ->
-        userList.first { it.uid == uid }
+        userList.firstOrNull { user ->
+            user.uid == uid
+        } ?: User()
     }
 
     override suspend fun insertUser(user: User) {
