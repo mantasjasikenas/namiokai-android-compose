@@ -59,7 +59,7 @@ jobs:
         with:
           serviceAccountJsonPlainText: ${{secrets.SERVICE_ACCOUNT}}
           packageName: com.namiokai
-          releaseFiles: Namiokai/build/outputs/bundle/release/Namiokai-release.aab
+          releaseFiles: app/build/outputs/bundle/release/Namiokai-release.aab
           whatsNewDirectory: distribution/whatsnew
           track: internal
           status: completed
