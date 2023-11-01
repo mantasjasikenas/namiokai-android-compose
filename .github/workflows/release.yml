@@ -45,8 +45,8 @@ jobs:
         run: |
           mkdir -p ./Namiokai/src/release
           mkdir -p ./Namiokai/src/debug
-          echo $GOOGLE_SERVICES_JSON | base64 -di > ./Namiokai/src/release/google-services.json
-          echo $GOOGLE_SERVICES_JSON_DEBUG | base64 -di > ./Namiokai/src/debug/google-services.json
+          echo $GOOGLE_SERVICES_JSON | base64 -di > ./app/src/release/google-services.json
+          echo $GOOGLE_SERVICES_JSON_DEBUG | base64 -di > ./app/src/debug/google-services.json
 
       - name: Build Project
         run: ./gradlew build
