@@ -14,12 +14,12 @@ dependencies {
 
 
     implementation(libs.hilt.android)
-    implementation(libs.firebase.firestore.ktx)
-    implementation(libs.firebase.storage.ktx)
-    implementation(libs.firebase.auth.ktx)
+    implementation(libs.firebase.firestore)
+    implementation(libs.firebase.storage)
+    implementation(libs.firebase.auth)
 
     implementation(libs.datastore.preferences)
-    implementation(libs.google.firebase.config.ktx)
+    implementation(libs.firebase.config)
 
     ksp(libs.hilt.compiler)
     implementation(libs.androidx.hilt.navigation.compose)

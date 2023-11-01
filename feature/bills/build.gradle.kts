@@ -29,7 +29,7 @@ dependencies {
     implementation(libs.core.ktx)
     implementation(libs.appcompat)
     implementation(libs.material)
-    implementation(libs.google.firebase.auth.ktx)
+    implementation(libs.firebase.auth)
 
     implementation(libs.androidx.lifecycle.runtime.compose)
     testImplementation(libs.junit)

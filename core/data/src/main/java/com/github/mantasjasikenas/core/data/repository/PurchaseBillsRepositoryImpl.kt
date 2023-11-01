@@ -7,8 +7,8 @@ import com.github.mantasjasikenas.core.domain.repository.BaseFirebaseRepository
 import com.github.mantasjasikenas.core.domain.repository.PurchaseBillsRepository
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
-import com.google.firebase.firestore.ktx.snapshots
-import com.google.firebase.firestore.ktx.toObject
+import com.google.firebase.firestore.snapshots
+import com.google.firebase.firestore.toObject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
