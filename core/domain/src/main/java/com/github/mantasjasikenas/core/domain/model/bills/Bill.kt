@@ -27,11 +27,19 @@ fun Bill.resolveBillCost(currentUser: User): String {
 
     return if (!isCurrentUserPaymaster && isCurrentUserInSplitUsers) {
         "-${splitPricePerUser.format(2)}"
-    } else if (isCurrentUserPaymaster && !isCurrentUserInSplitUsers) {
-        "+${totalCost.format(2)}"
-    } else if (isCurrentUserPaymaster) {
-        "+${(totalCost - splitPricePerUser).format(2)}"
-    } else {
-        "0.00"
     }
+    else if (isCurrentUserPaymaster && !isCurrentUserInSplitUsers) {
+        "+${totalCost.format(2)}"
+    }
+    else if (isCurrentUserPaymaster) {
+        "+${(totalCost - splitPricePerUser).format(2)}"
+    }
+    else {
+        totalCost.format(2)
+    }
+}
+
+fun Bill.isUserAssociated(currentUser: User): Boolean {
+    return this.paymasterUid == currentUser.uid ||
+            this.splitUsersUid.any { it == currentUser.uid }
 }

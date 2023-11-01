@@ -53,6 +53,7 @@ class BillViewModel @Inject constructor(private val purchaseBillsRepository: Pur
                                 filteredPurchaseBills = bills.filter(filters)
                             )
                         }
+
                     }
             }
         }
