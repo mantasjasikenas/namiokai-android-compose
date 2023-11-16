@@ -31,6 +31,9 @@ class DebtsViewModel @Inject constructor(
             .map { users ->
                 DebtsUiState.Success(users = users)
             }
+            .combine(usersRepository.currentUser) { uiState, currentUser ->
+                uiState.copy(currentUser = currentUser)
+            }
             .combine(periodRepository.getPeriodState()) { uiState, periodState ->
                 uiState.copy(periodState = periodState)
             }

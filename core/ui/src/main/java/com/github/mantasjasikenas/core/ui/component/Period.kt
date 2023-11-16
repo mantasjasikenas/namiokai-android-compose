@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.github.mantasjasikenas.core.domain.model.Period
 import com.github.mantasjasikenas.core.ui.common.NamiokaiDateRangePicker
 import com.github.mantasjasikenas.core.ui.common.rememberState
 import kotlinx.coroutines.launch
@@ -28,11 +29,11 @@ import kotlin.time.Duration.Companion.days
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun SwipePeriod(
-    periods: List<com.github.mantasjasikenas.core.domain.model.Period>,
-    selectedPeriod: com.github.mantasjasikenas.core.domain.model.Period,
-    appPeriod: com.github.mantasjasikenas.core.domain.model.Period,
+    periods: List<Period>,
+    selectedPeriod: Period,
+    appPeriod: Period,
     onPeriodReset: () -> Unit,
-    onPeriodUpdate: (com.github.mantasjasikenas.core.domain.model.Period) -> Unit,
+    onPeriodUpdate: (Period) -> Unit,
     modifier: Modifier = Modifier,
     textStyle: TextStyle = MaterialTheme.typography.labelLarge.copy(
         color = MaterialTheme.colorScheme.primary,
@@ -81,7 +82,7 @@ fun SwipePeriod(
                 onPeriodReset()
                 coroutineScope.launch {
                     val index = periods.indexOf(appPeriod)
-                    pagerState.animateScrollToPage(index)
+                    pagerState.scrollToPage(index)
                 }
                 datePickerState = false
             },
@@ -98,11 +99,11 @@ fun SwipePeriod(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun PeriodsHorizontalPager(
-    selectedPeriod: com.github.mantasjasikenas.core.domain.model.Period,
-    periods: List<com.github.mantasjasikenas.core.domain.model.Period>,
+    selectedPeriod: Period,
+    periods: List<Period>,
     pagerState: PagerState,
     onPeriodClick: () -> Unit,
-    onPeriodUpdate: (com.github.mantasjasikenas.core.domain.model.Period) -> Unit,
+    onPeriodUpdate: (Period) -> Unit,
     textStyle: TextStyle = MaterialTheme.typography.labelLarge.copy(
         color = MaterialTheme.colorScheme.primary,
         fontWeight = FontWeight.Bold
@@ -114,22 +115,25 @@ fun PeriodsHorizontalPager(
         }
     }
 
-    LaunchedEffect(
-        key1 = selectedPeriod,
-    ) {
-        val index = periods.indexOf(selectedPeriod)
-        pagerState.scrollToPage(index)
-    }
+//    LaunchedEffect(
+//        key1 = selectedPeriod,
+//    ) {
+//        val index = periods.indexOf(selectedPeriod)
+//        pagerState.scrollToPage(index)
+//
+//    }
 
     HorizontalPager(
-        modifier = Modifier.width(180.dp),
+        modifier = Modifier
+            .width(180.dp)
+            .clickable { onPeriodClick() },
         state = pagerState,
         pageSpacing = 8.dp,
     ) { page ->
         Text(
             text = "${periods[page]}",
             style = textStyle,
-            modifier = Modifier.clickable { onPeriodClick() }
+//            modifier = Modifier.clickable { onPeriodClick() }
         )
     }
 }

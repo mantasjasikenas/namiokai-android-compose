@@ -164,7 +164,7 @@ fun BillScreen(
                     }
 
                     grouped.forEach { (initial, bills) ->
-                        item {
+                        item(key = initial) {
                             Text(
                                 modifier = Modifier
                                     .fillMaxSize()
@@ -566,8 +566,10 @@ private fun PurchaseBillFiltersRow(
                 Filter(displayLabel = "Period",
                     filterName = "period",
                     values = periodState.periods.sortedByDescending { it.start },
-                    //selectedValue = periodUiState.currentPeriod,
-                    predicate = { bill, value -> (value as Period).contains(bill.date) }),
+//                    selectedValue = periodState.currentPeriod,
+                    predicate = { bill, value ->
+                        (value as Period).contains(bill.date)
+                    }),
             )
         }
     }

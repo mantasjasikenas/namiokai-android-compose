@@ -58,6 +58,7 @@ import com.github.mantasjasikenas.core.ui.common.EuroIconTextRow
 import com.github.mantasjasikenas.core.ui.common.NamiokaiCircularProgressIndicator
 import com.github.mantasjasikenas.core.ui.common.NamiokaiSpacer
 import com.github.mantasjasikenas.core.ui.common.PagesFlowRow
+import com.github.mantasjasikenas.core.ui.component.NamiokaiElevatedCard
 import com.github.mantasjasikenas.core.ui.component.NamiokaiElevatedOutlinedCard
 import com.github.mantasjasikenas.core.ui.component.NamiokaiOutlinedCard
 import com.github.mantasjasikenas.core.ui.component.SwipePeriod
@@ -100,7 +101,6 @@ fun DebtsScreenContent(
     val usersMap = debtsUiState.users.associateBy { it.uid }
     val usersDebts = debtsUiState.debts
     val currentUserDebts = usersDebts[currentUser.uid]
-
 
     val pages = listOf(
         "Personal",
@@ -252,17 +252,18 @@ private fun DebtsPage(
                 modifier = Modifier
                     .fillMaxSize()
             ) {
-                items(items = usersDebts.toList(),
+                items(items = usersDebts.toList()
+                    .filter { it.second.isNotEmpty() },
                     key = { it.first }
                 ) { (user, debts) ->
-                    if (debts.isEmpty() || usersMap[user] == null) return@items
-
-                    DebtorCard(
-                        modifier = Modifier.animateItemPlacement(),
-                        debtorUser = usersMap[user]!!,
-                        userDebts = debts,
-                        usersMap = usersMap
-                    )
+                    if (!(debts.isEmpty() || usersMap[user] == null)) {
+                        DebtorCard(
+                            modifier = Modifier.animateItemPlacement(),
+                            debtorUser = usersMap[user]!!,
+                            userDebts = debts,
+                            usersMap = usersMap
+                        )
+                    }
                 }
             }
         }
@@ -350,8 +351,8 @@ private fun DebtorCard(
 ) {
     var expandedState by remember { mutableStateOf(false) }
 
-    com.github.mantasjasikenas.core.ui.component.NamiokaiElevatedCard(modifier = Modifier
-        .animateContentSize(),
+    NamiokaiElevatedCard(
+        modifier = Modifier.animateContentSize(),
         onClick = { expandedState = !expandedState }) {
 
         Column(
