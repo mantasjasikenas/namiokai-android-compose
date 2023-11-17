@@ -38,7 +38,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
-import androidx.compose.material3.SwipeToDismiss
+import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDismissState
@@ -127,8 +127,6 @@ fun TripsScreen(
         NoResultsFound(label = "No trips found.")
     }
     else {
-
-
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -155,7 +153,6 @@ fun TripsScreen(
                     }
                 }
                 else {
-
                     val grouped = fuelUiState.filteredTripBills.groupBy {
                         Month(
                             it.date.substring(
@@ -186,7 +183,8 @@ fun TripsScreen(
                             key = { it.documentId }
                         ) { fuel ->
                             FuelCard(
-                                modifier = Modifier.animateItemPlacement(),
+                                // FIXME: Removed animation due to bug
+//                                modifier = Modifier.animateItemPlacement(),
                                 tripBill = fuel,
                                 isAllowedModification = (currentUser.admin || fuel.createdByUid == currentUser.uid),
                                 destinations = fuelUiState.destinations,
@@ -348,8 +346,8 @@ private fun FuelCard(
         label = ""
     )
 
-    SwipeToDismiss(state = dismissState,
-        background = {
+    SwipeToDismissBox(state = dismissState,
+        backgroundContent = {
             Box(
                 modifier = Modifier
                     .padding(vertical = 5.dp)
@@ -380,7 +378,7 @@ private fun FuelCard(
             DismissDirection.EndToStart
         )
         else setOf(),
-        dismissContent = {
+        content = {
             ElevatedCard(
                 modifier = modifier
                     .padding(

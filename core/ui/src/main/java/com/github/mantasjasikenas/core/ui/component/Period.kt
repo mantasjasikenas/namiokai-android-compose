@@ -109,19 +109,22 @@ fun PeriodsHorizontalPager(
         fontWeight = FontWeight.Bold
     ),
 ) {
+
     LaunchedEffect(pagerState) {
         snapshotFlow { pagerState.currentPage }.collect { page ->
             onPeriodUpdate(periods[page])
         }
     }
 
-//    LaunchedEffect(
-//        key1 = selectedPeriod,
-//    ) {
-//        val index = periods.indexOf(selectedPeriod)
-//        pagerState.scrollToPage(index)
-//
-//    }
+    LaunchedEffect(
+        key1 = selectedPeriod,
+    ) {
+        val index = periods.indexOf(selectedPeriod)
+
+        if (index != pagerState.currentPage && index != -1) {
+            pagerState.scrollToPage(index)
+        }
+    }
 
     HorizontalPager(
         modifier = Modifier
@@ -133,7 +136,6 @@ fun PeriodsHorizontalPager(
         Text(
             text = "${periods[page]}",
             style = textStyle,
-//            modifier = Modifier.clickable { onPeriodClick() }
         )
     }
 }

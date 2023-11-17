@@ -33,7 +33,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
-import androidx.compose.material3.SwipeToDismiss
+import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDismissState
@@ -164,7 +164,7 @@ fun BillScreen(
                     }
 
                     grouped.forEach { (initial, bills) ->
-                        item(key = initial) {
+                        item {
                             Text(
                                 modifier = Modifier
                                     .fillMaxSize()
@@ -180,7 +180,8 @@ fun BillScreen(
                             key = { it.documentId }
                         ) { bill ->
                             BillCard(
-                                modifier = Modifier.animateItemPlacement(),
+                                // FIXME: Removed animation due to bug
+//                                modifier = Modifier.animateItemPlacement(),
                                 purchaseBill = bill,
                                 isAllowedModification = (currentUser.admin || bill.createdByUid == currentUser.uid),
                                 usersMap = usersMap,
@@ -275,9 +276,9 @@ private fun BillCard(
         label = ""
     )
 
-    SwipeToDismiss(state = dismissState,
+    SwipeToDismissBox(state = dismissState,
         modifier = modifier,
-        background = {
+        backgroundContent = {
             Box(
                 modifier = Modifier
                     .padding(vertical = 5.dp)
@@ -308,7 +309,7 @@ private fun BillCard(
             DismissDirection.EndToStart
         )
         else setOf(),
-        dismissContent = {
+        content = {
             ElevatedCard(
                 modifier = Modifier
                     .padding(

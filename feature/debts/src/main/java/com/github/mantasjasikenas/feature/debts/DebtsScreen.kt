@@ -3,7 +3,15 @@
 package com.github.mantasjasikenas.feature.debts
 
 import android.content.Intent
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -15,8 +23,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.items
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
@@ -28,7 +34,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -58,11 +63,11 @@ import com.github.mantasjasikenas.core.ui.common.EuroIconTextRow
 import com.github.mantasjasikenas.core.ui.common.NamiokaiCircularProgressIndicator
 import com.github.mantasjasikenas.core.ui.common.NamiokaiSpacer
 import com.github.mantasjasikenas.core.ui.common.PagesFlowRow
+import com.github.mantasjasikenas.core.ui.common.rememberState
 import com.github.mantasjasikenas.core.ui.component.NamiokaiElevatedCard
 import com.github.mantasjasikenas.core.ui.component.NamiokaiElevatedOutlinedCard
 import com.github.mantasjasikenas.core.ui.component.NamiokaiOutlinedCard
 import com.github.mantasjasikenas.core.ui.component.SwipePeriod
-import kotlinx.coroutines.launch
 
 
 @Composable
@@ -86,17 +91,17 @@ fun DebtsScreen(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(
+    ExperimentalFoundationApi::class,
+    ExperimentalAnimationApi::class
+)
 @Composable
 fun DebtsScreenContent(
     debtsUiState: DebtsUiState.Success,
     onPeriodReset: () -> Unit,
     onPeriodUpdate: (Period) -> Unit,
 ) {
-    val coroutineScope = rememberCoroutineScope()
-
     val periodState = debtsUiState.periodState
-
     val currentUser = debtsUiState.currentUser
     val usersMap = debtsUiState.users.associateBy { it.uid }
     val usersDebts = debtsUiState.debts
@@ -106,14 +111,9 @@ fun DebtsScreenContent(
         "Personal",
         "All"
     )
-    val pageCount = pages.size
-    val pagerState = rememberPagerState(
-        initialPage = 0,
-        pageCount = {
-            pageCount
-        }
-    )
-
+    var currentPage by rememberState {
+        0
+    }
     Column(modifier = Modifier.fillMaxSize()) {
         Row(
             Modifier
@@ -123,19 +123,35 @@ fun DebtsScreenContent(
         ) {
             PagesFlowRow(
                 pages = pages,
-                currentPage = pagerState.currentPage,
+                currentPage = currentPage,
                 onPageClick = {
-                    coroutineScope.launch {
-                        pagerState.animateScrollToPage(it)
-                    }
+                    currentPage = it
                 }
             )
         }
 
-        HorizontalPager(
-            state = pagerState
-        ) { pageIndex ->
-            when (pageIndex) {
+        AnimatedContent(
+            targetState = currentPage,
+            label = "",
+            transitionSpec = {
+                // Compare the incoming number with the previous number.
+                if (targetState > initialState) {
+                    // If the target number is larger, it slides up and fades in
+                    // while the initial (smaller) number slides up and fades out.
+                    (slideInHorizontally { height -> height } + fadeIn()).togetherWith(slideOutHorizontally { height -> -height } + fadeOut())
+                }
+                else {
+                    // If the target number is smaller, it slides down and fades in
+                    // while the initial number slides down and fades out.
+                    (slideInHorizontally { height -> -height } + fadeIn()).togetherWith(slideOutHorizontally { height -> height } + fadeOut())
+                }.using(
+                    // Disable clipping since the faded slide-in/out should
+                    // be displayed out of bounds.
+                    SizeTransform(clip = false)
+                )
+            },
+        ) {
+            when (it) {
                 0 -> {
                     PersonalDebtsPage(
                         periodState = periodState,
@@ -156,7 +172,35 @@ fun DebtsScreenContent(
                     )
                 }
             }
+
         }
+
+
+//        HorizontalPager(
+//            state = pagerState
+//        ) { pageIndex ->
+//            when (pageIndex) {
+//                0 -> {
+//                    PersonalDebtsPage(
+//                        periodState = periodState,
+//                        currentUserDebts = currentUserDebts,
+//                        onPeriodReset = onPeriodReset,
+//                        onPeriodUpdate = onPeriodUpdate,
+//                        usersMap = usersMap
+//                    )
+//                }
+//
+//                1 -> {
+//                    DebtsPage(
+//                        periodState = periodState,
+//                        usersDebts = usersDebts,
+//                        usersMap = usersMap,
+//                        onPeriodReset = onPeriodReset,
+//                        onPeriodUpdate = onPeriodUpdate,
+//                    )
+//                }
+//            }
+//        }
     }
 }
 
