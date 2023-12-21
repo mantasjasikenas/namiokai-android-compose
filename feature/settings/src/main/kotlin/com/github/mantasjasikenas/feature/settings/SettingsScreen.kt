@@ -558,8 +558,11 @@ private fun ColorPickerDialog(
                                         .clip(RoundedCornerShape(6.dp))
                                         .combinedClickable(
                                             onClick = {
-                                                //onAccentColorClick(it)
                                                 selectedColor.value = it.toColor()
+                                                controller.selectByColor(
+                                                    it.toColor(),
+                                                    true
+                                                )
                                             },
                                             onLongClick = {
                                                 onAccentColorPin(
@@ -574,11 +577,10 @@ private fun ColorPickerDialog(
                             Row(
                                 modifier = Modifier.heightIn(14.dp),
                             ) {
-                                //if (it.pinned) {
                                 Icon(
                                     modifier = Modifier
                                         .padding(1.dp)
-                                        .size(16.dp) // 12
+                                        .size(16.dp)
                                         .conditional(
                                             condition = it.pinned,
                                             modifier = {
@@ -594,20 +596,6 @@ private fun ColorPickerDialog(
                                     imageVector = if (it.pinned) Icons.Filled.PushPin else Icons.Outlined.PushPin,
                                     contentDescription = null,
                                 )
-                                // }
-                                /*Text(
-                                    modifier = Modifier.combinedClickable(
-                                        onClick = {
-
-                                        },
-                                        onLongClick = {
-                                            clipboardManager.setText(AnnotatedString(it.toHex()))
-                                        }
-                                    ),
-                                    text = it.toHex(),
-                                    style = typography.bodySmall, // bodySmall
-                                    fontWeight = FontWeight.SemiBold
-                                )*/
                             }
                         }
                     }

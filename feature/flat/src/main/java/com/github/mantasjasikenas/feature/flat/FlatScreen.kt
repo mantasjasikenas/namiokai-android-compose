@@ -33,18 +33,17 @@ import androidx.compose.material.icons.outlined.EuroSymbol
 import androidx.compose.material.icons.outlined.Flood
 import androidx.compose.material.icons.outlined.WaterDrop
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.DismissDirection
-import androidx.compose.material3.DismissValue
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
-import androidx.compose.material3.SwipeToDismiss
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberDismissState
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberSwipeToDismissState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -241,15 +240,15 @@ private fun FlatCard(
     val bottomSheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = true
     )
-    val dismissState = rememberDismissState(
+    val dismissState = rememberSwipeToDismissState(
         confirmValueChange = {
             when (it) {
-                DismissValue.DismissedToEnd -> {
+                SwipeToDismissValue.StartToEnd -> {
                     openBottomSheet = !openBottomSheet
                     false
                 }
 
-                DismissValue.DismissedToStart -> {
+                SwipeToDismissValue.EndToStart -> {
                     modifyPopupState.value = !modifyPopupState.value
                     false
                 }
@@ -265,14 +264,14 @@ private fun FlatCard(
     )
     val color by animateColorAsState(
         when (dismissState.targetValue) {
-            DismissValue.Default -> Color.Transparent
-            DismissValue.DismissedToEnd, DismissValue.DismissedToStart -> MaterialTheme.colorScheme.secondaryContainer
+            SwipeToDismissValue.Settled -> Color.Transparent
+            SwipeToDismissValue.StartToEnd, SwipeToDismissValue.EndToStart -> MaterialTheme.colorScheme.secondaryContainer
         },
         label = ""
     )
 
-    SwipeToDismiss(state = dismissState,
-        background = {
+    SwipeToDismissBox(state = dismissState,
+        backgroundContent = {
             Box(
                 modifier = Modifier
                     .padding(vertical = 5.dp)
@@ -298,12 +297,9 @@ private fun FlatCard(
                 )
             }
         },
-        directions = if (isAllowedModification) setOf(
-            DismissDirection.StartToEnd,
-            DismissDirection.EndToStart
-        )
-        else setOf(),
-        dismissContent = {
+        enableDismissFromEndToStart = isAllowedModification,
+        enableDismissFromStartToEnd = true,
+        content = {
             ElevatedCard(
                 modifier = modifier
                     .padding(

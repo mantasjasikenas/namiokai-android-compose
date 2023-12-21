@@ -10,8 +10,8 @@ android {
     defaultConfig {
         applicationId = "com.namiokai"
 
-        versionCode = 26
-        versionName = "0.2.6"
+        versionCode = 27
+        versionName = "0.2.7"
 
     }
 

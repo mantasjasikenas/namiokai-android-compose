@@ -10,8 +10,16 @@ import kotlinx.datetime.plus
 import kotlinx.datetime.toLocalDateTime
 
 data class Period(
-    val start: LocalDate = LocalDate(1, 1, 1),
-    val end: LocalDate = LocalDate(1, 1, 1)
+    val start: LocalDate = LocalDate(
+        1,
+        1,
+        1
+    ),
+    val end: LocalDate = LocalDate(
+        1,
+        1,
+        1
+    )
 ) {
     companion object;
 
@@ -90,19 +98,22 @@ fun Period.Companion.getPeriod(
     startDayInclusive: Int,
     endDateExclusive: Int
 ): Period {
-    val periodStart: LocalDate
-    val periodEnd: LocalDate
-
     val currentDate = Clock.System.now()
         .toLocalDateTime(
             TimeZone.currentSystemDefault()
         ).date
 
+    val periodStart: LocalDate
+    val periodEnd: LocalDate
+
     if (currentDate.dayOfMonth < startDayInclusive) {
         periodStart = LocalDate(
             currentDate.year,
-            currentDate.monthNumber - 1,
+            currentDate.monthNumber,
             startDayInclusive
+        ).minus(
+            1,
+            DateTimeUnit.MONTH
         )
         periodEnd = LocalDate(
             currentDate.year,
@@ -118,8 +129,11 @@ fun Period.Companion.getPeriod(
         )
         periodEnd = LocalDate(
             currentDate.year,
-            currentDate.monthNumber + 1,
+            currentDate.monthNumber,
             endDateExclusive - 1
+        ).plus(
+            1,
+            DateTimeUnit.MONTH
         )
     }
 

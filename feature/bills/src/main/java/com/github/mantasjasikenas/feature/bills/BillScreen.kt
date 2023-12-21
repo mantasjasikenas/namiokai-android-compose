@@ -2,7 +2,6 @@ package com.github.mantasjasikenas.feature.bills
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -26,18 +25,17 @@ import androidx.compose.material.icons.outlined.EuroSymbol
 import androidx.compose.material.icons.outlined.Receipt
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DismissDirection
-import androidx.compose.material3.DismissValue
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberDismissState
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberSwipeToDismissState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -96,7 +94,6 @@ import java.time.format.TextStyle
 import java.util.Locale
 
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun BillScreen(
     modifier: Modifier = Modifier,
@@ -246,15 +243,16 @@ private fun BillCard(
     val bottomSheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = true
     )
-    val dismissState = rememberDismissState(
+
+    val dismissState = rememberSwipeToDismissState(
         confirmValueChange = {
             when (it) {
-                DismissValue.DismissedToEnd -> {
+                SwipeToDismissValue.StartToEnd -> {
                     openBottomSheet = !openBottomSheet
                     false
                 }
 
-                DismissValue.DismissedToStart -> {
+                SwipeToDismissValue.EndToStart -> {
                     modifyPopupState.value = !modifyPopupState.value
                     false
                 }
@@ -270,8 +268,8 @@ private fun BillCard(
     )
     val color by animateColorAsState(
         when (dismissState.targetValue) {
-            DismissValue.Default -> Color.Transparent
-            DismissValue.DismissedToEnd, DismissValue.DismissedToStart -> MaterialTheme.colorScheme.secondaryContainer
+            SwipeToDismissValue.Settled -> Color.Transparent
+            SwipeToDismissValue.StartToEnd, SwipeToDismissValue.EndToStart -> MaterialTheme.colorScheme.secondaryContainer
         },
         label = ""
     )
@@ -304,11 +302,8 @@ private fun BillCard(
                 )
             }
         },
-        directions = if (isAllowedModification) setOf(
-            DismissDirection.StartToEnd,
-            DismissDirection.EndToStart
-        )
-        else setOf(),
+        enableDismissFromEndToStart = isAllowedModification,
+        enableDismissFromStartToEnd = true,
         content = {
             ElevatedCard(
                 modifier = Modifier
