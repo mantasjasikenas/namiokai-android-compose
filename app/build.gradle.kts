@@ -10,8 +10,8 @@ android {
     defaultConfig {
         applicationId = "com.namiokai"
 
-        versionCode = 27
-        versionName = "0.2.7"
+        versionCode = libs.versions.versionCode.get().toInt()
+        versionName = libs.versions.versionName.get()
 
     }
 

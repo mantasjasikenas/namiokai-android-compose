@@ -91,10 +91,6 @@ fun DebtsScreen(
     }
 }
 
-@OptIn(
-    ExperimentalFoundationApi::class,
-    ExperimentalAnimationApi::class
-)
 @Composable
 fun DebtsScreenContent(
     debtsUiState: DebtsUiState.Success,

@@ -1,7 +1,3 @@
-@file:OptIn(
-    ExperimentalMaterial3Api::class,
-)
-
 package com.github.mantasjasikenas.core.ui.component
 
 import androidx.compose.animation.animateContentSize

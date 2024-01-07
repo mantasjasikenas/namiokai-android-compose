@@ -348,7 +348,6 @@ fun <T, V> FilterItem(
 }
 
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PeriodFilterChip(
     modifier: Modifier = Modifier,
