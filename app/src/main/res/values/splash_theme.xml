@@ -5,6 +5,8 @@
         <item name="windowSplashScreenBackground">#FFFFFFFF</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/avd_namiokai</item>
         <item name="windowSplashScreenAnimationDuration">1000</item>
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
         <item name="postSplashScreenTheme">@style/Theme.Namiokai</item>
     </style>
 
