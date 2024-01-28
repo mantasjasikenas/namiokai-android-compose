@@ -7,6 +7,8 @@ import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -27,6 +29,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -211,14 +214,17 @@ fun NamiokaiAppNavigationBar(
         enter = fadeIn(),
         exit = ExitTransition.None,
     ) {
-        NavigationBar {
+        NavigationBar(
+            windowInsets = NavigationBarDefaults.windowInsets.exclude(WindowInsets(bottom = 12.dp))
+        ) {
             Screen.navBarScreens.forEach { screen ->
-                NavigationBarItem(icon = {
-                    Icon(
-                        screen.imageVector,
-                        contentDescription = null
-                    )
-                },
+                NavigationBarItem(
+                    icon = {
+                        Icon(
+                            screen.imageVector,
+                            contentDescription = null
+                        )
+                    },
                     label = { Text(stringResource(screen.titleResourceId)) },
                     selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true,
                     onClick = {

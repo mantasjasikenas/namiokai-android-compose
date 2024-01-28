@@ -1,17 +1,23 @@
 package com.github.mantasjasikenas.namiokai
 
 import com.android.build.gradle.BaseExtension
+import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.dependencies
 
 fun Project.configureAndroid() {
     android {
-        compileSdkVersion(Versions.COMPILE_SDK)
+        compileSdkVersion(
+            libs.getVersion("compileSdk")
+                .toInt()
+        )
 
         defaultConfig {
-            minSdk = Versions.MIN_SDK
-            targetSdk = Versions.TARGET_SDK
+            minSdk = libs.getVersion("minSdk")
+                .toInt()
+            targetSdk = libs.getVersion("targetSdk")
+                .toInt()
 
             testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
             vectorDrawables {
@@ -20,8 +26,14 @@ fun Project.configureAndroid() {
         }
 
         compileOptions {
-            sourceCompatibility = Versions.JAVA
-            targetCompatibility = Versions.JAVA
+            sourceCompatibility = JavaVersion.toVersion(
+                libs.findVersion("jvm")
+                    .get().displayName
+            )
+            targetCompatibility = JavaVersion.toVersion(
+                libs.findVersion("jvm")
+                    .get().displayName
+            )
         }
     }
 

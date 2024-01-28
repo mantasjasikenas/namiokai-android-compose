@@ -34,11 +34,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.SwipeToDismissBox
-import androidx.compose.material3.SwipeToDismissValue
+import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
-import androidx.compose.material3.rememberSwipeToDismissState
+import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -311,15 +311,15 @@ private fun FuelCard(
     val bottomSheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = true
     )
-    val dismissState = rememberSwipeToDismissState(
+    val dismissState = rememberSwipeToDismissBoxState(
         confirmValueChange = {
             when (it) {
-                SwipeToDismissValue.StartToEnd -> {
+                SwipeToDismissBoxValue.StartToEnd -> {
                     openBottomSheet = !openBottomSheet
                     false
                 }
 
-                SwipeToDismissValue.EndToStart -> {
+                SwipeToDismissBoxValue.EndToStart -> {
                     modifyPopupState.value = !modifyPopupState.value
                     false
                 }
@@ -335,8 +335,8 @@ private fun FuelCard(
     )
     val color by animateColorAsState(
         when (dismissState.targetValue) {
-            SwipeToDismissValue.Settled -> Color.Transparent
-            SwipeToDismissValue.StartToEnd, SwipeToDismissValue.EndToStart -> MaterialTheme.colorScheme.secondaryContainer
+            SwipeToDismissBoxValue.Settled -> Color.Transparent
+            SwipeToDismissBoxValue.StartToEnd, SwipeToDismissBoxValue.EndToStart -> MaterialTheme.colorScheme.secondaryContainer
         },
         label = ""
     )

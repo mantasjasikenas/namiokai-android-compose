@@ -10,7 +10,8 @@ android {
     defaultConfig {
         applicationId = "com.namiokai"
 
-        versionCode = libs.versions.versionCode.get().toInt()
+        versionCode = libs.versions.versionCode.get()
+            .toInt()
         versionName = libs.versions.versionName.get()
 
     }
@@ -54,10 +55,10 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.toVersion(libs.versions.jvm.get())
+        targetCompatibility = JavaVersion.toVersion(libs.versions.jvm.get())
     }
-    kotlinOptions { jvmTarget = "17" }
+    kotlinOptions { jvmTarget = libs.versions.jvm.get() }
 
     packaging {
         resources {

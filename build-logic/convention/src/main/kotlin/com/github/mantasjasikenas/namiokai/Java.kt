@@ -8,7 +8,12 @@ import org.gradle.kotlin.dsl.configure
 fun Project.configureJava() {
     java {
         toolchain {
-            languageVersion.set(JavaLanguageVersion.of(Versions.JAVA.toString()))
+            languageVersion.set(
+                JavaLanguageVersion.of(
+                    libs.findVersion("jvm")
+                        .get().displayName
+                )
+            )
         }
     }
 }
