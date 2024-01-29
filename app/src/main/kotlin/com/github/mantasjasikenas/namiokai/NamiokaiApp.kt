@@ -12,6 +12,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.exclude
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -40,7 +41,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -54,6 +54,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -79,53 +80,61 @@ import com.github.mantasjasikenas.namiokai.navigation.namiokaiNavGraph
 @Composable
 fun NamiokaiApp(mainActivityViewModel: MainActivityViewModel = hiltViewModel()) {
 
-    val navController = rememberNavController()
-    val sharedUiState by mainActivityViewModel.sharedUiState.collectAsState()
+    val rootNavController = rememberNavController()
+    val sharedUiState by mainActivityViewModel.sharedUiState.collectAsStateWithLifecycle()
 
     if (sharedUiState is SharedUiState.Loading) {
         NamiokaiCircularProgressIndicator()
         return
     }
 
-    val sharedState = (sharedUiState as SharedUiState.Success).sharedState
-
-    val startDestination = if (sharedState.currentUser.isNotLoggedIn()) {
+    /*val startDestination = if (sharedState.currentUser.isNotLoggedIn()) {
         NavGraph.Auth.route
     }
     else {
         NavGraph.Home.route
-    }
+    }*/
+
+    val sharedState = (sharedUiState as SharedUiState.Success).sharedState
+    val startDestination = NavGraph.Home.route
 
     NavHost(
-        navController = navController,
+        modifier = Modifier.fillMaxSize(),
+        navController = rootNavController,
         route = NavGraph.Root.route,
-        startDestination = startDestination
+        startDestination = startDestination,
+        enterTransition = {
+            fadeIn(animationSpec = tween(500))
+        },
+        exitTransition = {
+            fadeOut(animationSpec = tween(500))
+        }
     ) {
         authNavGraph(
             onSuccessfulLogin = {
-                navController.navigate(NavGraph.Home.route) {
+                rootNavController.navigate(NavGraph.Home.route) {
                     popUpTo(NavGraph.Root.route) {
                         inclusive = false
                     }
                 }
-            },
-            mainActivityViewModel = mainActivityViewModel
+            }
         )
-        composable(route = NavGraph.Home.route) {
 
+        composable(route = NavGraph.Home.route) {
             LaunchedEffect(key1 = sharedState.currentUser) {
                 if (sharedState.currentUser.isNotLoggedIn()) {
-                    navController.navigate(NavGraph.Auth.route) {
+                    rootNavController.navigate(NavGraph.Auth.route) {
                         popUpTo(NavGraph.Root.route) {
                             inclusive = false
                         }
+
                     }
                 }
             }
 
             NamiokaiScreen(
                 navigateToAuth = {
-                    navController.navigate(NavGraph.Auth.route) {
+                    rootNavController.navigate(NavGraph.Auth.route) {
                         popUpTo(NavGraph.Root.route) {
                             inclusive = false
                         }
@@ -136,6 +145,8 @@ fun NamiokaiApp(mainActivityViewModel: MainActivityViewModel = hiltViewModel()) 
 
         }
     }
+
+
 }
 
 
@@ -144,7 +155,6 @@ fun NamiokaiScreen(
     modifier: Modifier = Modifier,
     sharedState: SharedState,
     navigateToAuth: () -> Unit,
-    @Suppress("UNUSED_PARAMETER")
     mainActivityViewModel: MainActivityViewModel = hiltViewModel()
 ) {
     val navController: NavHostController = rememberNavController()
@@ -203,9 +213,7 @@ fun NamiokaiScreen(
             }
         ) {
             namiokaiNavGraph(
-                navController = navController,
                 sharedState = sharedState,
-                navigateToAuth = navigateToAuth
             )
         }
     }

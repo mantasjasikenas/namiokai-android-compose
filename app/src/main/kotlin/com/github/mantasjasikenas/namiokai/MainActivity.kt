@@ -9,9 +9,9 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.github.mantasjasikenas.core.ui.common.NamiokaiCircularProgressIndicator
 import com.github.mantasjasikenas.core.ui.common.PermissionsHandler
@@ -54,7 +54,9 @@ class MainActivity : ComponentActivity(), AnalyticsLogger by AnalyticsLoggerImpl
             appUpdateManager.registerListener(installStateUpdatedListener)
         }
 
-        installSplashScreen().setKeepOnScreenCondition {
+        val splashScreen = installSplashScreen()
+
+        splashScreen.setKeepOnScreenCondition {
             mainActivityViewModel.isLoading()
         }
 
@@ -63,7 +65,7 @@ class MainActivity : ComponentActivity(), AnalyticsLogger by AnalyticsLoggerImpl
         registerLifecycleOwner(this)
 
         setContent {
-            val userDataUiState by mainActivityViewModel.userDataUiState.collectAsState()
+            val userDataUiState by mainActivityViewModel.userDataUiState.collectAsStateWithLifecycle()
 
             when (userDataUiState) {
                 is UserDataUiState.Loading -> {

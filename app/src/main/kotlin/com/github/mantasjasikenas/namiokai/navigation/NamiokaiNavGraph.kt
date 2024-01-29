@@ -1,7 +1,6 @@
 package com.github.mantasjasikenas.namiokai.navigation
 
 import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import com.github.mantasjasikenas.core.domain.model.SharedState
 import com.github.mantasjasikenas.feature.admin.AdminPanelScreen
@@ -17,11 +16,7 @@ import com.github.mantasjasikenas.feature.trips.TripsScreen
 
 
 fun NavGraphBuilder.namiokaiNavGraph(
-    @Suppress("UNUSED_PARAMETER")
-    navController: NavHostController,
-    sharedState: SharedState,
-    @Suppress("UNUSED_PARAMETER")
-    navigateToAuth: () -> Unit
+    sharedState: SharedState
 ) {
     composable(route = Screen.Home.route) {
         HomeScreen()

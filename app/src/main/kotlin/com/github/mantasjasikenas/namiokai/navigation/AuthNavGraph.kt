@@ -6,11 +6,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.github.mantasjasikenas.feature.login.LoginScreen
 import com.github.mantasjasikenas.feature.login.LoginViewModel
-import com.github.mantasjasikenas.namiokai.MainActivityViewModel
 
 fun NavGraphBuilder.authNavGraph(
-    @Suppress("UNUSED_PARAMETER")
-    mainActivityViewModel: MainActivityViewModel,
     onSuccessfulLogin: () -> Unit
 ) {
     navigation(

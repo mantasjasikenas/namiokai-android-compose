@@ -107,7 +107,7 @@ fun SignInContent(
         }
     }
 
-    Surface {
+    Surface(modifier = Modifier.fillMaxSize()) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
