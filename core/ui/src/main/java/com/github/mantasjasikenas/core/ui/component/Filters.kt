@@ -196,7 +196,7 @@ fun <T> FiltersRow(
         ),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        item {
+        item(key = "reset") {
             ResetFilterChip(
                 modifier = Modifier
                     .animateItemPlacement()

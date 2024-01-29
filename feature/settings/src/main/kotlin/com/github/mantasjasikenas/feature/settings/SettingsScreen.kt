@@ -81,8 +81,7 @@ import com.github.skydoves.colorpicker.compose.rememberColorPickerController
 
 @Composable
 fun SettingsScreen(
-    viewModel: SettingsViewModel = hiltViewModel(),
-    navigateToAuth: () -> Unit
+    viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val settingsUiState by viewModel.settingsUiState.collectAsStateWithLifecycle()
 
@@ -97,7 +96,6 @@ fun SettingsScreen(
         validateNewDisplayName = viewModel::validateDisplayName,
         onLogoutClick = {
             viewModel.logout()
-            navigateToAuth()
         },
     )
 

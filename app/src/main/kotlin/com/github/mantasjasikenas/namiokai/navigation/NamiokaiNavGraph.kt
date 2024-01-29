@@ -39,9 +39,7 @@ fun NavGraphBuilder.namiokaiNavGraph(
         FlatScreen(sharedState = sharedState)
     }
     composable(route = Screen.Settings.route) {
-        SettingsScreen(navigateToAuth = {
-//            navigateToAuth()
-        })
+        SettingsScreen()
     }
     composable(route = Screen.Notifications.route) {
         NotificationsScreen()

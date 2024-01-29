@@ -45,16 +45,6 @@ import kotlinx.datetime.toLocalDateTime
 fun HomeScreen(
     homeViewModel: HomeViewModel = hiltViewModel(),
 ) {
-    /*    currentUser = mainUiState.currentUser,
-        usersDebts = usersDebts,
-        period = periodUiState.currentPeriod
-
-            val mainUiState by mainViewModel.mainUiState.collectAsState()
-        val periodUiState by mainViewModel.periodState.collectAsState()
-        val usersDebts by homeViewModel.getDebts(periodUiState.currentPeriod)
-            .collectAsState(initial = emptyMap())
-
-        */
     val homeUiState by homeViewModel.homeUiState.collectAsStateWithLifecycle()
 
     when (homeUiState) {

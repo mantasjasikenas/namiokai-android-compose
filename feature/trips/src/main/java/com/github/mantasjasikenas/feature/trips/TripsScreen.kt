@@ -40,7 +40,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -62,6 +61,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
 import com.github.mantasjasikenas.core.common.util.format
@@ -90,7 +90,6 @@ import com.github.mantasjasikenas.core.ui.component.NoResultsFound
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.Month
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import java.time.format.TextStyle
@@ -102,7 +101,8 @@ fun TripsScreen(
     viewModel: FuelViewModel = hiltViewModel(),
     sharedState: SharedState
 ) {
-    val fuelUiState by viewModel.uiState.collectAsState()
+    val fuelUiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val groupedTrips by viewModel.groupedTrips.collectAsStateWithLifecycle()
 
     if (fuelUiState.isLoading()) {
         NamiokaiCircularProgressIndicator()
@@ -148,26 +148,15 @@ fun TripsScreen(
                     }
                 }
                 else {
-                    val grouped = fuelUiState.filteredTripBills.groupBy {
-                        Month(
-                            it.date.substring(
-                                5,
-                                7
-                            )
-                                .toInt()
-                        ).getDisplayName(
-                            TextStyle.FULL,
-                            Locale.getDefault()
-                        )
-                    }
+                    groupedTrips.forEach { (pair, trips) ->
+                        val (year, month) = pair
 
-                    grouped.forEach { (initial, trips) ->
-                        item {
+                        item(key = "$year-$month") {
                             Text(
                                 modifier = Modifier
                                     .fillMaxSize()
                                     .padding(start = 20.dp),
-                                text = initial,
+                                text = "$month $year",
                                 style = MaterialTheme.typography.bodyMedium,
                                 fontWeight = FontWeight.SemiBold,
                                 textAlign = TextAlign.Start

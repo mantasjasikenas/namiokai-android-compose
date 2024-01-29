@@ -4,8 +4,11 @@ import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.Month
 import kotlinx.datetime.toJavaLocalDateTime
 import java.time.format.DateTimeFormatter
+import java.time.format.TextStyle
+import java.util.Locale
 import kotlin.math.round
 
 fun <K, V> Map<K, V>.toMutableStateMap() = SnapshotStateMap<K, V>().also { it.putAll(this) }
@@ -62,6 +65,28 @@ fun Int.toHex(): String {
     return String.format(
         "#%06X",
         0xFFFFFF and this
+    )
+}
+
+fun String.toYearMonthPair(): Pair<String, String> {
+    val year = this.substring(
+        0,
+        4
+    )
+    val month = Month(
+        this.substring(
+            5,
+            7
+        )
+            .toInt()
+    ).getDisplayName(
+        TextStyle.FULL,
+        Locale.getDefault()
+    )
+
+    return Pair(
+        year,
+        month
     )
 }
 

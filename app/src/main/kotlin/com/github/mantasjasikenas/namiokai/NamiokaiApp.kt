@@ -3,8 +3,11 @@ package com.github.mantasjasikenas.namiokai
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
@@ -85,7 +88,6 @@ fun NamiokaiApp(mainActivityViewModel: MainActivityViewModel = hiltViewModel()) 
     }
 
     val sharedState = (sharedUiState as SharedUiState.Success).sharedState
-
 
     val startDestination = if (sharedState.currentUser.isNotLoggedIn()) {
         NavGraph.Auth.route
@@ -192,7 +194,13 @@ fun NamiokaiScreen(
             navController = navController,
             route = NavGraph.Home.route,
             startDestination = Screen.initialScreen.route,
-            modifier = modifier.padding(innerPadding)
+            modifier = modifier.padding(innerPadding),
+            enterTransition = {
+                fadeIn(animationSpec = tween(500))
+            },
+            exitTransition = {
+                fadeOut(animationSpec = tween(500))
+            }
         ) {
             namiokaiNavGraph(
                 navController = navController,
@@ -211,7 +219,7 @@ fun NamiokaiAppNavigationBar(
 ) {
     AnimatedVisibility(
         visible = bottomBarState,
-        enter = fadeIn(),
+        enter = EnterTransition.None,  //fadeIn(),
         exit = ExitTransition.None,
     ) {
         NavigationBar(
@@ -259,7 +267,7 @@ fun NamiokaiAppTopBar(
     Surface {
         AnimatedVisibility(
             visible = topBarState,
-            enter = fadeIn(),
+            enter = EnterTransition.None, //fadeIn(),
             exit = ExitTransition.None
         ) {
             TopAppBar(title = {

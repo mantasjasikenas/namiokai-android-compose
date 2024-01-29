@@ -37,7 +37,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -59,6 +58,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
 import com.github.mantasjasikenas.core.common.util.format
@@ -87,7 +87,6 @@ import com.github.mantasjasikenas.core.ui.component.NoResultsFound
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.Month
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import java.time.format.TextStyle
@@ -100,13 +99,13 @@ fun BillScreen(
     sharedState: SharedState,
     viewModel: BillViewModel = hiltViewModel(),
 ) {
-    val billUiState by viewModel.billUiState.collectAsState()
+    val billUiState by viewModel.billUiState.collectAsStateWithLifecycle()
+    val groupedBills by viewModel.groupedBills.collectAsStateWithLifecycle()
 
     if (billUiState.isLoading()) {
         NamiokaiCircularProgressIndicator()
         return
     }
-
 
     val currentUser = sharedState.currentUser
     val periodState = sharedState.periodState
@@ -132,8 +131,6 @@ fun BillScreen(
                 onFiltersChanged = {
                     viewModel.onFiltersChanged(it)
                 })
-//            NamiokaiSpacer(height = 15)
-
             LazyColumn(
                 modifier = modifier
                     .fillMaxSize()
@@ -147,26 +144,15 @@ fun BillScreen(
                     }
                 }
                 else {
-                    val grouped = billUiState.filteredPurchaseBills.groupBy {
-                        Month(
-                            it.date.substring(
-                                5,
-                                7
-                            )
-                                .toInt()
-                        ).getDisplayName(
-                            TextStyle.FULL,
-                            Locale.getDefault()
-                        )
-                    }
+                    groupedBills.forEach { (pair, bills) ->
+                        val (year, month) = pair
 
-                    grouped.forEach { (initial, bills) ->
-                        item {
+                        item(key = "$year-$month") {
                             Text(
                                 modifier = Modifier
                                     .fillMaxSize()
                                     .padding(start = 20.dp),
-                                text = initial,
+                                text = "$month $year",
                                 style = MaterialTheme.typography.bodyMedium,
                                 fontWeight = FontWeight.SemiBold,
                                 textAlign = TextAlign.Start
@@ -188,15 +174,15 @@ fun BillScreen(
                         }
                     }
 
-                    /*items(billUiState.filteredPurchaseBills) { bill ->
-                        BillCard(
-                            purchaseBill = bill,
-                            isAllowedModification = (currentUser.admin || bill.createdByUid == currentUser.uid),
-                            usersMap = mainUiState.usersMap,
-                            viewModel = viewModel,
-                            currentUser = currentUser
-                        )
-                    }*/
+                    /* items(billUiState.filteredPurchaseBills) { bill ->
+                         BillCard(
+                             purchaseBill = bill,
+                             isAllowedModification = (currentUser.admin || bill.createdByUid == currentUser.uid),
+                             usersMap = usersMap,
+                             viewModel = viewModel,
+                             currentUser = currentUser
+                         )
+                     }*/
                 }
                 item { NamiokaiSpacer(height = 120) }
             }
@@ -569,10 +555,6 @@ private fun PurchaseBillFiltersRow(
             )
         }
     }
-
-    /*    LaunchedEffect(true) {
-            onFiltersChanged(filters)
-        }*/
 
     FiltersRow(
         filters = filters,

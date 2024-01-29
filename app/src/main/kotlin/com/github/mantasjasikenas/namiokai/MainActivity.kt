@@ -55,10 +55,8 @@ class MainActivity : ComponentActivity(), AnalyticsLogger by AnalyticsLoggerImpl
         }
 
         installSplashScreen().setKeepOnScreenCondition {
-            mainActivityViewModel.userDataUiState.value is UserDataUiState.Loading ||
-                    mainActivityViewModel.sharedUiState.value is SharedUiState.Loading
+            mainActivityViewModel.isLoading()
         }
-
 
         subscribeToTopics()
         checkForAppUpdates()

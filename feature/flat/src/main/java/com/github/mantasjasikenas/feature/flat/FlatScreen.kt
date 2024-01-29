@@ -45,7 +45,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -63,6 +62,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.github.mantasjasikenas.core.common.util.format
 import com.github.mantasjasikenas.core.common.util.tryParse
 import com.github.mantasjasikenas.core.domain.model.Filter
@@ -97,7 +97,7 @@ fun FlatScreen(
     flatViewModel: FlatViewModel = hiltViewModel(),
     sharedState: SharedState
 ) {
-    val flatUiState by flatViewModel.flatUiState.collectAsState()
+    val flatUiState by flatViewModel.flatUiState.collectAsStateWithLifecycle()
 
     if (flatUiState.isLoading()) {
         NamiokaiCircularProgressIndicator()
