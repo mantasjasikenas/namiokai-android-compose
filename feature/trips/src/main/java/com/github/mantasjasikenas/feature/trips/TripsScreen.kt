@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -101,6 +102,7 @@ fun TripsScreen(
     viewModel: FuelViewModel = hiltViewModel(),
     sharedState: SharedState
 ) {
+    val coroutineScope = rememberCoroutineScope()
     val fuelUiState by viewModel.uiState.collectAsStateWithLifecycle()
     val groupedTrips by viewModel.groupedTrips.collectAsStateWithLifecycle()
 
@@ -116,6 +118,7 @@ fun TripsScreen(
     val popupState = remember {
         mutableStateOf(false)
     }
+    val state = rememberLazyListState()
 
 
     if (fuelUiState.tripBills.isEmpty()) {
@@ -137,7 +140,8 @@ fun TripsScreen(
             )
             LazyColumn(
                 modifier = modifier
-                    .fillMaxSize()
+                    .fillMaxSize(),
+                state = state
             ) {
                 if (fuelUiState.filteredTripBills.isEmpty()) {
                     item {
@@ -203,7 +207,12 @@ fun TripsScreen(
 
     if (popupState.value) {
         FuelPopup(
-            onSaveClick = { viewModel.insertFuel(it) },
+            onSaveClick = {
+                viewModel.insertFuel(it)
+                coroutineScope.launch {
+                    state.scrollToItem(0)
+                }
+            },
             onDismiss = { popupState.value = false },
             usersMap = usersMap,
             destinations = fuelUiState.destinations

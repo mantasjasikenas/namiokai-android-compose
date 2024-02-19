@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -99,6 +100,7 @@ fun BillScreen(
     sharedState: SharedState,
     viewModel: BillViewModel = hiltViewModel(),
 ) {
+    val coroutineScope = rememberCoroutineScope()
     val billUiState by viewModel.billUiState.collectAsStateWithLifecycle()
     val groupedBills by viewModel.groupedBills.collectAsStateWithLifecycle()
 
@@ -114,6 +116,8 @@ fun BillScreen(
     val popupState = remember {
         mutableStateOf(false)
     }
+
+    val state = rememberLazyListState()
 
     if (billUiState.purchaseBills.isEmpty()) {
         NoResultsFound(label = "No bills found.")
@@ -133,7 +137,8 @@ fun BillScreen(
                 })
             LazyColumn(
                 modifier = modifier
-                    .fillMaxSize()
+                    .fillMaxSize(),
+                state = state
             ) {
                 if (billUiState.filteredPurchaseBills.isEmpty()) {
                     item {
@@ -195,7 +200,12 @@ fun BillScreen(
 
     if (popupState.value) {
         BillPopup(
-            onSaveClick = { viewModel.insertBill(it) },
+            onSaveClick = {
+                viewModel.insertBill(it)
+                coroutineScope.launch {
+                    state.scrollToItem(0)
+                }
+            },
             onDismiss = { popupState.value = false },
             usersMap = usersMap
         )

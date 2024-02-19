@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ReadMore
@@ -110,6 +111,8 @@ fun FlatScreen(
     val popupState = remember {
         mutableStateOf(false)
     }
+    val state = rememberLazyListState()
+    val coroutineScope = rememberCoroutineScope()
 
     if (flatUiState.flatBills.isEmpty()) {
         NoResultsFound(label = "No flat bills found.")
@@ -130,7 +133,8 @@ fun FlatScreen(
             )
             LazyColumn(
                 modifier = modifier
-                    .fillMaxSize()
+                    .fillMaxSize(),
+                state = state
             ) {
                 if (flatUiState.filteredFlatBills.isEmpty()) {
                     item {
@@ -163,7 +167,12 @@ fun FlatScreen(
     FloatingAddButton(onClick = { popupState.value = true })
     if (popupState.value) {
         FlatBillPopup(
-            onSaveClick = { flatViewModel.insertFlatBill(it) },
+            onSaveClick = {
+                flatViewModel.insertFlatBill(it)
+                coroutineScope.launch {
+                    state.scrollToItem(0)
+                }
+            },
             onDismiss = { popupState.value = false },
             usersMap = usersMap
         )

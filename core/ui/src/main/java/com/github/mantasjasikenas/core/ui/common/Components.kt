@@ -33,10 +33,9 @@ import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
-import androidx.compose.material3.FloatingActionButtonDefaults
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LargeFloatingActionButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedCard
@@ -102,23 +101,34 @@ fun PagesFlowRow(
 @Composable
 fun FloatingAddButton(
     modifier: Modifier = Modifier,
+    horizontalAlignment: Alignment.Horizontal = Alignment.End,
     onClick: () -> Unit
 ) {
     Column(
         modifier = modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Bottom,
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = horizontalAlignment
     ) {
-        LargeFloatingActionButton(
+//        LargeFloatingActionButton(
+//            modifier = Modifier.padding(all = 15.dp),
+//            onClick = onClick,
+//            containerColor = MaterialTheme.colorScheme.primary,
+//            shape = CircleShape
+//        ) {
+//            Icon(
+//                Icons.Filled.Add,
+//                contentDescription = null,
+//                modifier = Modifier.size(FloatingActionButtonDefaults.LargeIconSize),
+//            )
+//        }
+
+        FloatingActionButton(
             modifier = Modifier.padding(all = 15.dp),
             onClick = onClick,
-            containerColor = MaterialTheme.colorScheme.primary,
-            shape = CircleShape
         ) {
             Icon(
-                Icons.Filled.Add,
-                contentDescription = null,
-                modifier = Modifier.size(FloatingActionButtonDefaults.LargeIconSize),
+                imageVector = Icons.Filled.Add,
+                contentDescription = null
             )
         }
     }

@@ -278,12 +278,13 @@ fun NamiokaiAppTopBar(
             enter = EnterTransition.None, //fadeIn(),
             exit = ExitTransition.None
         ) {
-            TopAppBar(title = {
-                Text(
-                    text = stringResource(id = currentScreen.titleResourceId),
-                    style = MaterialTheme.typography.titleLarge,
-                )
-            },
+            TopAppBar(
+                title = {
+                    Text(
+                        text = stringResource(id = currentScreen.titleResourceId),
+                        style = MaterialTheme.typography.titleLarge,
+                    )
+                },
                 modifier = modifier,
                 navigationIcon = {
                     if (canNavigateBack) {
