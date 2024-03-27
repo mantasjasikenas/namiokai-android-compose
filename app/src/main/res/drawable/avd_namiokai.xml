@@ -1,5 +1,4 @@
-<animated-vector
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:aapt="http://schemas.android.com/aapt">
     <aapt:attr name="android:drawable">
         <vector
@@ -14,10 +13,35 @@
                 android:pivotY="12"
                 android:scaleX="0.51"
                 android:scaleY="0.51">
+
                 <path
                     android:name="path"
-                    android:pathData="M 20 4 L 4 4 C 2.89 4 2.01 4.89 2.01 6 L 2 18 C 2 19.11 2.89 20 4 20 L 20 20 C 21.11 20 22 19.11 22 18 L 22 6 C 22 4.89 21.11 4 20 4 Z M 20 18 L 4 18 L 4 12 L 20 12 L 20 18 Z M 20 8 L 4 8 L 4 6 L 20 6 L 20 8 Z"
-                    android:fillColor="#1f3935"/>
+                    android:pathData="M 20 4 L 4 4 C 2.89 4 2.01 4.89 2.01 6 L 2 18 C 2 19.11 2.89 20 4 20 L 20 20 C 21.11 20 22 19.11 22 18 L 22 6 C 22 4.89 21.11 4 20 4 Z M 20 18 L 4 18 L 4 12 L 20 12 L 20 18 Z M 20 8 L 4 8 L 4 6 L 20 6 L 20 8 Z">
+                    <aapt:attr name="android:fillColor">
+                        <gradient
+                            android:endX="99"
+                            android:endY="54"
+                            android:startX="9"
+                            android:startY="54"
+                            android:type="linear">
+                            <item
+                                android:color="#FF4BB967"
+                                android:offset="0" />
+                            <item
+                                android:color="#FF57B354"
+                                android:offset="0.16" />
+                            <item
+                                android:color="#FF62AF43"
+                                android:offset="0.35" />
+                            <item
+                                android:color="#FF66AD3D"
+                                android:offset="0.5" />
+                            <item
+                                android:color="#FF44AA48"
+                                android:offset="1" />
+                        </gradient>
+                    </aapt:attr>
+                </path>
             </group>
         </vector>
     </aapt:attr>
@@ -25,29 +49,29 @@
         <aapt:attr name="android:animation">
             <set>
                 <objectAnimator
+                    android:duration="500"
+                    android:interpolator="@android:anim/overshoot_interpolator"
                     android:propertyName="scaleX"
                     android:startOffset="200"
-                    android:duration="500"
                     android:valueFrom="0"
                     android:valueTo="0.51"
-                    android:valueType="floatType"
-                    android:interpolator="@android:anim/overshoot_interpolator"/>
+                    android:valueType="floatType" />
                 <objectAnimator
+                    android:duration="500"
+                    android:interpolator="@android:anim/overshoot_interpolator"
                     android:propertyName="scaleY"
                     android:startOffset="200"
-                    android:duration="500"
                     android:valueFrom="0"
                     android:valueTo="0.51"
-                    android:valueType="floatType"
-                    android:interpolator="@android:anim/overshoot_interpolator"/>
+                    android:valueType="floatType" />
                 <objectAnimator
+                    android:duration="350"
+                    android:interpolator="@android:interpolator/fast_out_slow_in"
                     android:propertyName="rotation"
                     android:startOffset="250"
-                    android:duration="350"
                     android:valueFrom="0"
                     android:valueTo="360"
-                    android:valueType="floatType"
-                    android:interpolator="@android:interpolator/fast_out_slow_in"/>
+                    android:valueType="floatType" />
             </set>
         </aapt:attr>
     </target>

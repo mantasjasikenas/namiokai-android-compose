@@ -119,7 +119,7 @@ fun NotificationItem(
         ) {
             SubcomposeAsyncImage(
                 model = ImageRequest.Builder(LocalContext.current)
-                    .data(R.drawable.logo_large)
+                    .data(R.drawable.ic_launcher_foreground)
                     .crossfade(true)
                     .build(),
                 contentDescription = null,

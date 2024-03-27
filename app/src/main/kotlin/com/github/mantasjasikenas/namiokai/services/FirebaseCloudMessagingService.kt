@@ -12,8 +12,8 @@ import androidx.work.OneTimeWorkRequest
 import androidx.work.WorkManager
 import com.github.mantasjasikenas.core.database.Notification
 import com.github.mantasjasikenas.core.domain.repository.NotificationsRepository
-import com.github.mantasjasikenas.namiokai.R
 import com.github.mantasjasikenas.namiokai.MainActivity
+import com.github.mantasjasikenas.namiokai.R
 import com.github.mantasjasikenas.namiokai.workers.NotificationWorker
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
@@ -127,7 +127,7 @@ class FirebaseCloudMessagingService : FirebaseMessagingService() {
             .setContentTitle(messageTitle)
             .setContentText(messageBody)
             .setAutoCancel(true)
-            .setSmallIcon(R.drawable.logo_large)
+            .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setSound(defaultSoundUri)
             .setContentIntent(pendingIntent)
 
