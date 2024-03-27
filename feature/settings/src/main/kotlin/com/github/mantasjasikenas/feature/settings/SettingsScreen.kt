@@ -131,6 +131,7 @@ fun SettingsScreen(
         }
 
         SettingsGroupSpacer()
+
         AppearanceSettingsGroup(
             themePreferences = uiState.userData.themePreferences,
             accentColors = settingsUiState.accentColors,
@@ -139,6 +140,7 @@ fun SettingsScreen(
             onClearAccentColorsClick = onClearAccentColorsClick,
             onAccentColorPin = onAccentColorPin,
         )
+
         ProfileSettingsGroup(
             onImageAddToStorage = onImageAddToStorage,
             onLogoutClick = onLogoutClick,
@@ -254,9 +256,6 @@ private fun ColumnScope.AppearanceSettingsGroup(
         onColorsDialogDismiss()
     }
 
-
-
-
     SettingsEntryGroupText(title = "Appearance")
     Column(
         modifier = Modifier.padding(
@@ -266,7 +265,7 @@ private fun ColumnScope.AppearanceSettingsGroup(
     ) {
         Text(
             modifier = Modifier.padding(bottom = 8.dp),
-            text = "Colors",
+            text = "Mode",
             style = typography.titleMedium,
         )
         val values = ThemeType.entries
@@ -297,7 +296,7 @@ private fun ColumnScope.AppearanceSettingsGroup(
                 .padding(horizontal = 32.dp),
         ) {
             Text(
-                text = "Theme",
+                text = "Colour",
                 style = typography.titleMedium,
             )
             LazyRow(
