@@ -19,11 +19,7 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.datastore.preferences)
 
-    implementation(libs.core.ktx)
-    implementation(libs.appcompat)
     implementation(libs.material)
-
     implementation(libs.bundles.compose)
     implementation(libs.kotlinx.datetime.jvm)
-    implementation(libs.kotlinx.serialization.json)
 }

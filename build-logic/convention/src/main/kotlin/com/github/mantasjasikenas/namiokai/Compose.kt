@@ -10,14 +10,6 @@ internal fun Project.configureAndroidCompose(
         buildFeatures {
             compose = true
         }
-
-//        composeOptions {
-//            kotlinCompilerExtensionVersion = libs
-//                .findVersion("androidxComposeCompiler")
-//                .get()
-//                .toString()
-//        }
-
     }
 
 }

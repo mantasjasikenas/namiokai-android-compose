@@ -9,29 +9,19 @@ android {
 }
 
 dependencies {
-    implementation(libs.kotlinx.datetime.jvm)
+
     implementation(libs.bundles.compose)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
 
     implementation(libs.hilt.android)
-    implementation(project(":core:data"))
+
     ksp(libs.hilt.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
 
     implementation(projects.core.common)
-    implementation(projects.core.database)
+    implementation(projects.core.data)
     implementation(projects.core.domain)
     implementation(projects.core.ui)
 
-    implementation(libs.colorpicker.compose)
-
-    implementation(libs.core.ktx)
-    implementation(libs.appcompat)
-    implementation(libs.material)
     implementation(libs.firebase.auth)
-
-    implementation(libs.androidx.lifecycle.runtime.compose)
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
 }

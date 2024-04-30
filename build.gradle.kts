@@ -1,9 +1,6 @@
-// Lists all plugins used throughout the project without applying them.
 plugins {
     alias(libs.plugins.android.application) apply false
     alias(libs.plugins.androidLibrary) apply false
-
-//    alias(libs.plugins.compose) apply false
 
     alias(libs.plugins.android.kotlin) apply false
     alias(libs.plugins.kotlin.serialization) apply false
@@ -14,6 +11,8 @@ plugins {
     alias(libs.plugins.hilt) apply false
 
     alias(libs.plugins.compose) apply false
+
+    alias(libs.plugins.dependency.analysis) apply false
 }
 
 buildscript {

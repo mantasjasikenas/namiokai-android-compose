@@ -12,7 +12,6 @@ app-update = "2.1.0"
 hilt = "2.50"
 
 compose = "1.5.10"
-androidxComposeCompiler = "1.5.12"
 
 activity-compose = "1.9.0"
 androidx-datastore-preferences = "1.1.0"
@@ -44,7 +43,6 @@ ui = "1.6.6"
 work-runtime-ktx = "2.9.0"
 
 compose-bom = "2024.04.01"
-
 firebase-bom = "32.8.1"
 
 android-gradle = "8.5.0-alpha07"
@@ -59,6 +57,7 @@ appcompat = "1.6.1"
 ui-graphics-android = "1.6.4"
 androidx-ui-graphics-android = "1.6.6"
 lifecycleRuntimeCompose = "2.7.0"
+dependency-analysis = "1.31.0"
 
 [libraries]
 
@@ -177,3 +176,5 @@ kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", versi
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 
 compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+
+dependency-analysis = { id = "com.autonomousapps.dependency-analysis", version.ref = "dependency-analysis" }

@@ -8,7 +8,6 @@ android {
 }
 
 dependencies {
-
     implementation(projects.core.database)
     implementation(projects.core.common)
 
@@ -20,12 +19,9 @@ dependencies {
     implementation (libs.googleid)
 
     implementation(libs.hilt.android)
-
-    implementation(libs.core.ktx)
-    implementation(libs.appcompat)
-    implementation(libs.material)
-    implementation(libs.ui.graphics.android)
     implementation(libs.kotlinx.serialization.json)
+
+    implementation(libs.ui.graphics.android)
     implementation(libs.kotlinx.datetime.jvm)
     implementation(libs.play.services.auth)
 }

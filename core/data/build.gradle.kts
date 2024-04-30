@@ -12,7 +12,6 @@ dependencies {
     implementation(projects.core.common)
     implementation(projects.core.database)
 
-
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.storage)
     implementation(libs.firebase.auth)
@@ -22,12 +21,9 @@ dependencies {
 
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
-    implementation(libs.androidx.hilt.navigation.compose)
 
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kotlinx.datetime.jvm)
 
-    implementation(libs.core.ktx)
-    implementation(libs.appcompat)
-    implementation(libs.material)
+    implementation(libs.compose.ui.graphics)
 }
