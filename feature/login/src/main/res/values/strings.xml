@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sign_in_failed">Sign in failed</string>
+    <string name="welcome">Welcome, %1$s</string>
+    <string name="sign_in_with_google">Sign in with Google</string>
+</resources>

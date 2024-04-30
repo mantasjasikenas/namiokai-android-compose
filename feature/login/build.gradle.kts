@@ -18,9 +18,9 @@ dependencies {
     implementation(libs.androidx.hilt.navigation.compose)
 
     implementation(projects.core.common)
-    implementation(project(":core:database"))
-    implementation(project(":core:domain"))
-    implementation(project(":core:ui"))
+    implementation(projects.core.database)
+    implementation(projects.core.domain)
+    implementation(projects.core.ui)
 
     implementation(libs.colorpicker.compose)
 
@@ -30,7 +30,4 @@ dependencies {
     implementation(libs.firebase.auth)
 
     implementation(libs.androidx.lifecycle.runtime.compose)
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
 }

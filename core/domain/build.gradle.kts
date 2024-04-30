@@ -15,6 +15,12 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.bundles.firebase)
 
+    implementation (libs.credentials)
+    implementation (libs.credentials.play.services.auth)
+    implementation (libs.googleid)
+
+    implementation(libs.hilt.android)
+
     implementation(libs.core.ktx)
     implementation(libs.appcompat)
     implementation(libs.material)

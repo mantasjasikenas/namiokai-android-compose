@@ -1,6 +1,6 @@
 package com.github.mantasjasikenas.core.domain.model
 
 data class SignInResult(
-    val data: User?,
+    val user: User?,
     val errorMessage: String?
 )

@@ -88,6 +88,10 @@ dependencies {
     implementation(projects.core.data)
     implementation(projects.core.ui)
 
+    implementation (libs.credentials)
+    implementation (libs.credentials.play.services.auth)
+    implementation (libs.googleid)
+
     //  Compose
     implementation(platform(libs.compose.bom))
     implementation(libs.bundles.compose)

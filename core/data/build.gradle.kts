@@ -13,7 +13,6 @@ dependencies {
     implementation(projects.core.database)
 
 
-    implementation(libs.hilt.android)
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.storage)
     implementation(libs.firebase.auth)
@@ -21,6 +20,7 @@ dependencies {
     implementation(libs.datastore.preferences)
     implementation(libs.firebase.config)
 
+    implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
 

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="no_credentials_found_please_add_a_google_account_to_your_device">No credentials found. Please add a Google account to your device.</string>
+    <string name="sign_in_failed">Sign in failed</string>
+</resources>

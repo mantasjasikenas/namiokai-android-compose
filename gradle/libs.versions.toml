@@ -29,6 +29,9 @@ gradle = "8.3.1"
 hilt-navigation-compose = "1.2.0"
 gmsPlugin = "4.4.1"
 
+credentials = "1.2.2"
+googleid = "1.1.0"
+
 junit = "4.13.2"
 ksvg = "master-SNAPSHOT"
 lifecycle-livedata-ktx = "2.7.0"
@@ -63,6 +66,11 @@ lifecycleRuntimeCompose = "2.7.0"
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "android-gradle" }
 kotlin-gradlePlugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
 ksp-gradlePlugin = { group = "com.google.devtools.ksp", name = "com.google.devtools.ksp.gradle.plugin", version.ref = "ksp" }
+
+
+credentials-play-services-auth = { module = "androidx.credentials:credentials-play-services-auth", version.ref = "credentials" }
+credentials = { module = "androidx.credentials:credentials", version.ref = "credentials" }
+googleid = { module = "com.google.android.libraries.identity.googleid:googleid", version.ref = "googleid" }
 
 accompanist-flowlayout = { module = "com.google.accompanist:accompanist-flowlayout", version.ref = "accompanist" }
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanist" }
