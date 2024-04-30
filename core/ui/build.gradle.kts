@@ -15,7 +15,6 @@ dependencies {
 
     implementation(files("libs/ExprK-1.0-SNAPSHOT.jar"))
 
-
     implementation(libs.accompanist.permissions)
     implementation(libs.coil.compose)
     implementation(libs.datastore.preferences)

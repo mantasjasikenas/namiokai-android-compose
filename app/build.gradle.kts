@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.namiokai.android.application)
     alias(libs.plugins.namiokai.compose.application)
+    alias(libs.plugins.compose)
 }
 
 
@@ -73,6 +74,10 @@ androidComponents {
     onVariants(selector().withBuildType("release")) {
         it.packaging.resources.excludes.add("META-INF/**")
     }
+}
+
+composeCompiler {
+    enableStrongSkippingMode = true
 }
 
 dependencies {
@@ -169,7 +174,7 @@ dependencies {
     // Hilt Testing
     androidTestImplementation(libs.hilt.android.testing)
     kspAndroidTest(libs.hilt.compiler)
-    testImplementation(libs.google.hilt.android.testing)
+    testImplementation(libs.hilt.android.testing)
     kspTest(libs.hilt.compiler)
 
 

@@ -12,7 +12,7 @@ dependencies {
     implementation(libs.core.ktx)
     implementation(libs.appcompat)
     implementation(libs.material)
-    implementation(libs.androidx.ui.graphics.android)
+    implementation(libs.ui.graphics.android)
 
     implementation(libs.androidx.room.runtime)
     implementation(libs.core.ktx)
