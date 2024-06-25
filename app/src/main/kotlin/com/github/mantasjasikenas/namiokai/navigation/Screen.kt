@@ -81,6 +81,12 @@ sealed class Screen(
         Icons.Outlined.Cottage
     )
 
+    data object FlatBillList : Screen(
+        "flat_bill_list",
+        R.string.flat_bill_label,
+        Icons.Outlined.Cottage
+    )
+
     data object Profile : Screen(
         "profile",
         R.string.profile_label,
@@ -103,6 +109,7 @@ sealed class Screen(
             Bill,
             Trips,
             Flat,
+            FlatBillList,
             Settings,
             Notifications,
             Login,

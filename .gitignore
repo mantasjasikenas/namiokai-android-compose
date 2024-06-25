@@ -25,3 +25,5 @@ app/google-services.json
 /.env
 /.github/workflows/release-local.yml
 /app/src/main/kotlin/com/github/mantasjasikenas/namiokai/FEATURE.md
+/.kotlin
+/app/release/app-release.aab

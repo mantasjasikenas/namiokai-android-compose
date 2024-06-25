@@ -1,72 +1,55 @@
-@file:OptIn(
-    ExperimentalFoundationApi::class,
-    ExperimentalFoundationApi::class
-)
-
 package com.github.mantasjasikenas.feature.flat
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.ReadMore
-import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.EuroSymbol
 import androidx.compose.material.icons.outlined.Flood
 import androidx.compose.material.icons.outlined.WaterDrop
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
-import androidx.compose.material3.SwipeToDismissBox
-import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
-import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.github.mantasjasikenas.core.common.util.format
 import com.github.mantasjasikenas.core.common.util.tryParse
-import com.github.mantasjasikenas.core.domain.model.Filter
 import com.github.mantasjasikenas.core.domain.model.SharedState
 import com.github.mantasjasikenas.core.domain.model.User
 import com.github.mantasjasikenas.core.domain.model.UsersMap
@@ -74,13 +57,10 @@ import com.github.mantasjasikenas.core.domain.model.bills.FlatBill
 import com.github.mantasjasikenas.core.domain.model.bills.resolveBillCost
 import com.github.mantasjasikenas.core.ui.common.CardTextColumn
 import com.github.mantasjasikenas.core.ui.common.DateTimeCardColumn
-import com.github.mantasjasikenas.core.ui.common.FloatingAddButton
 import com.github.mantasjasikenas.core.ui.common.NamiokaiBottomSheet
 import com.github.mantasjasikenas.core.ui.common.NamiokaiCircularProgressIndicator
 import com.github.mantasjasikenas.core.ui.common.NamiokaiSpacer
 import com.github.mantasjasikenas.core.ui.common.VerticalDivider
-import com.github.mantasjasikenas.core.ui.common.rememberState
-import com.github.mantasjasikenas.core.ui.component.FiltersRow
 import com.github.mantasjasikenas.core.ui.component.NamiokaiConfirmDialog
 import com.github.mantasjasikenas.core.ui.component.NoResultsFound
 import kotlinx.coroutines.launch
@@ -91,12 +71,12 @@ import kotlinx.datetime.toLocalDateTime
 import java.time.format.TextStyle
 import java.util.Locale
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun FlatScreen(
     modifier: Modifier = Modifier,
     flatViewModel: FlatViewModel = hiltViewModel(),
-    sharedState: SharedState
+    sharedState: SharedState,
+    onNavigateToFlatBill: () -> Unit,
 ) {
     val flatUiState by flatViewModel.flatUiState.collectAsStateWithLifecycle()
 
@@ -106,121 +86,126 @@ fun FlatScreen(
     }
 
     val currentUser = sharedState.currentUser
-    val usersMap: UsersMap = sharedState.usersMap
+    val usersMap= sharedState.usersMap
 
-    val popupState = remember {
-        mutableStateOf(false)
-    }
-    val state = rememberLazyListState()
-    val coroutineScope = rememberCoroutineScope()
+    val scrollState = rememberScrollState()
 
     if (flatUiState.flatBills.isEmpty()) {
         NoResultsFound(label = "No flat bills found.")
     }
     else {
-
         Column(
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxWidth()
                 .padding(top = 5.dp)
+                .verticalScroll(scrollState),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            FlatBillFiltersRow(
+            FlatBillSummary(
+                bills = flatUiState.flatBills,
                 usersMap = usersMap,
-                flatUiState = flatUiState,
-                onFiltersChanged = {
-                    flatViewModel.onFiltersChanged(it)
+                currentUser = currentUser,
+                flatViewModel = flatViewModel,
+                onSeeAllClick = {
+                    onNavigateToFlatBill()
+                },
+            )
+
+            FlatStatisticsContainer(
+                data = flatUiState.flatBills.reversed(), // TODO remove reversed
+                title = "Total rent and taxes",
+                subtitle = "Rent and taxes statistics",
+                xAxisLabels = flatUiState.flatBills.mapNotNull {
+                    it.date.split("T")
+                        .firstOrNull()
+                }
+                    .let { dates ->
+                        if (dates.size >= 3) {
+                            listOf(
+                                dates.first(),
+                                dates[dates.size / 2],
+                                dates.last()
+                            )
+                        }
+                        else {
+                            dates
+                        }
+                    }
+                    .reversed(),
+                selectedValueTitle = { bill ->
+                    bill.date.split("T")
+                        .firstOrNull() ?: ""
                 }
             )
-            LazyColumn(
-                modifier = modifier
-                    .fillMaxSize(),
-                state = state
-            ) {
-                if (flatUiState.filteredFlatBills.isEmpty()) {
-                    item {
-                        NoResultsFound(
-                            modifier = Modifier.padding(top = 30.dp),
-                            label = "No results found."
-                        )
-                    }
-                }
-                else {
-                    items(items = flatUiState.filteredFlatBills,
-                        key = { it.documentId }
-                    ) { flatBill ->
-                        FlatCard(
-                            modifier = Modifier.animateItemPlacement(),
-                            flatBill = flatBill,
-                            isAllowedModification = (currentUser.admin || flatBill.createdByUid == currentUser.uid),
-                            usersMap = usersMap,
-                            viewModel = flatViewModel,
-                            currentUser = currentUser
-                        )
-                    }
-                }
 
-                item { NamiokaiSpacer(height = 120) }
-            }
+            MonthlyComparisonCard(
+                bills = flatUiState.flatBills,
+                usersMap = usersMap,
+                currentUser = currentUser,
+                flatViewModel = flatViewModel
+            )
+
+            Spacer(modifier = Modifier.height(6.dp))
         }
     }
 
-    FloatingAddButton(onClick = { popupState.value = true })
-    if (popupState.value) {
-        FlatBillPopup(
-            onSaveClick = {
-                flatViewModel.insertFlatBill(it)
-                coroutineScope.launch {
-                    state.scrollToItem(0)
-                }
-            },
-            onDismiss = { popupState.value = false },
-            usersMap = usersMap
-        )
-    }
 
 }
 
 @Composable
-private fun FlatBillFiltersRow(
+fun MonthlyComparisonCard(
+    modifier: Modifier = Modifier,
+    bills: List<FlatBill>,
     usersMap: UsersMap,
-    flatUiState: FlatUiState,
-    onFiltersChanged: (List<Filter<FlatBill, Any>>) -> Unit
+    currentUser: User,
+    flatViewModel: FlatViewModel,
 ) {
-    val users = usersMap.map { (_, user) ->
-        user.displayName
-    }
-    val getUserUid = { displayName: String ->
-        usersMap.values.firstOrNull { user ->
-            user.displayName == displayName
-        }?.uid
-    }
+    ElevatedCardContainer(
+        modifier = modifier,
+        title = "Monthly comparison",
+    ) {
 
-    var filters by rememberState {
-        flatUiState.filters.ifEmpty {
-            mutableStateListOf<Filter<FlatBill, Any>>(
-                Filter(
-                    displayLabel = "Paymaster",
-                    filterName = "paymaster",
-                    values = users,
-                    predicate = { bill, value -> bill.paymasterUid == getUserUid(value as String) }
-                ),
-                Filter(
-                    displayLabel = "Splitter",
-                    filterName = "splitter",
-                    values = users,
-                    predicate = { bill, value -> bill.splitUsersUid.contains(getUserUid(value as String)) }
-                ),
-            )
+    }
+}
+
+
+@Composable
+fun FlatBillSummary(
+    modifier: Modifier = Modifier,
+    bills: List<FlatBill>,
+    onSeeAllClick: () -> Unit,
+    usersMap: UsersMap,
+    currentUser: User,
+    flatViewModel: FlatViewModel
+) {
+    val visibleBills = bills.take(3)
+
+    ElevatedCardContainer(
+        modifier = modifier,
+        title = "Flat bills",
+    ) {
+        Column {
+            visibleBills.forEach { flatBill ->
+                CompactFlatCard(
+                    flatBill = flatBill,
+                    isAllowedModification = (currentUser.admin || flatBill.createdByUid == currentUser.uid),
+                    usersMap = usersMap,
+                    viewModel = flatViewModel,
+                    currentUser = currentUser
+                )
+            }
         }
-    }
 
-    FiltersRow(
-        filters = filters,
-        onFilterChanged = {
-            filters = it.toMutableStateList()
-            onFiltersChanged(filters)
-        },
-    )
+        Text(
+            text = "See all",
+            modifier = Modifier
+                .padding(top = 8.dp)
+                .fillMaxWidth()
+                .clickable { onSeeAllClick() },
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.primary
+        )
+    }
 }
 
 
@@ -229,7 +214,7 @@ private fun FlatBillFiltersRow(
     ExperimentalLayoutApi::class
 )
 @Composable
-private fun FlatCard(
+private fun CompactFlatCard(
     flatBill: FlatBill,
     isAllowedModification: Boolean,
     usersMap: UsersMap,
@@ -250,167 +235,100 @@ private fun FlatCard(
     val bottomSheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = true
     )
-    val dismissState = rememberSwipeToDismissBoxState(
-        confirmValueChange = {
-            when (it) {
-                SwipeToDismissBoxValue.StartToEnd -> {
-                    openBottomSheet = !openBottomSheet
-                    false
-                }
 
-                SwipeToDismissBoxValue.EndToStart -> {
-                    modifyPopupState.value = !modifyPopupState.value
-                    false
-                }
-
-                else -> {
-                    false
-                }
-            }
-        },
-        /*positionalThreshold = {
-            200.dp.toPx()
-        }*/
-    )
-    val color by animateColorAsState(
-        when (dismissState.targetValue) {
-            SwipeToDismissBoxValue.Settled -> Color.Transparent
-            SwipeToDismissBoxValue.StartToEnd, SwipeToDismissBoxValue.EndToStart -> MaterialTheme.colorScheme.secondaryContainer
-        },
-        label = ""
-    )
-
-    SwipeToDismissBox(state = dismissState,
-        backgroundContent = {
-            Box(
-                modifier = Modifier
-                    .padding(vertical = 5.dp)
-                    .fillMaxSize()
-                    .clip(CardDefaults.elevatedShape)
-                    .background(color),
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Outlined.ReadMore,
-                    contentDescription = "",
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier
-                        .padding(20.dp)
-                        .align(Alignment.CenterStart)
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .clip(CardDefaults.elevatedShape)
+            .animateContentSize(
+                animationSpec = tween(
+                    durationMillis = 300,
+                    easing = LinearOutSlowInEasing
                 )
-                Icon(
-                    imageVector = Icons.Outlined.Edit,
-                    tint = MaterialTheme.colorScheme.primary,
-                    contentDescription = "",
-                    modifier = Modifier
-                        .padding(20.dp)
-                        .align(Alignment.CenterEnd)
-                )
+            )
+            .clickable {
+                openBottomSheet = !openBottomSheet
             }
-        },
-        enableDismissFromEndToStart = isAllowedModification,
-        enableDismissFromStartToEnd = true,
-        content = {
-            ElevatedCard(
-                modifier = modifier
-                    .padding(
-                        horizontal = 20.dp,
-                        vertical = 5.dp
+            .padding(
+                vertical = 6.dp
+            ),
+        horizontalAlignment = Alignment.Start,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Start,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            NamiokaiSpacer(width = 10)
+            DateTimeCardColumn(
+                day = dateTime.date.dayOfMonth.toString(),
+                month = dateTime.month.getDisplayName(
+                    TextStyle.SHORT,
+                    Locale.getDefault()
+                )
+            )
+
+            NamiokaiSpacer(width = 20)
+            VerticalDivider(modifier = Modifier.height(60.dp))
+            NamiokaiSpacer(width = 20)
+
+            Column(modifier = Modifier.weight(1f)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Outlined.WaterDrop,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp),
+                        tint = MaterialTheme.colorScheme.primary
                     )
-                    .fillMaxSize()
-                    .animateContentSize(
-                        animationSpec = tween(
-                            durationMillis = 300,
-                            easing = LinearOutSlowInEasing
-                        )
-                    ),
-                onClick = { openBottomSheet = !openBottomSheet }
-            ) {
-
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(15.dp),
-                    horizontalAlignment = Alignment.Start,
-                    verticalArrangement = Arrangement.Center
-                ) {
-
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Start,
-                        modifier = Modifier.fillMaxSize()
-                    ) {
-                        NamiokaiSpacer(width = 10)
-                        DateTimeCardColumn(
-                            day = dateTime.date.dayOfMonth.toString(),
-                            month = dateTime.month.getDisplayName(
-                                TextStyle.SHORT,
-                                Locale.getDefault()
-                            )
-                        )
-
-                        NamiokaiSpacer(width = 20)
-                        VerticalDivider(modifier = Modifier.height(60.dp))
-                        NamiokaiSpacer(width = 20)
-
-                        Column(modifier = Modifier.weight(1f)) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(
-                                    imageVector = Icons.Outlined.WaterDrop,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(18.dp),
-                                    tint = MaterialTheme.colorScheme.primary
-                                )
-                                NamiokaiSpacer(width = 7)
-                                Text(
-                                    text = "€${flatBill.taxesTotal.format(2)}",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
-                            NamiokaiSpacer(height = 10)
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(
-                                    imageVector = Icons.Outlined.Flood,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(18.dp),
-                                    tint = MaterialTheme.colorScheme.primary
-                                )
-                                NamiokaiSpacer(width = 7)
-                                Text(
-                                    text = "€${flatBill.rentTotal.format(2)}",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
-                        }
-
-                        NamiokaiSpacer(width = 30)
-                        Column(horizontalAlignment = Alignment.End) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(
-                                    text = flatBill.resolveBillCost(currentUser),
-                                    color = MaterialTheme.colorScheme.onSurface,
-                                    fontWeight = FontWeight.Bold,
-                                    style = MaterialTheme.typography.headlineSmall.copy(
-                                        fontSize = 18.sp
-                                    )
-                                )
-                                Icon(
-                                    imageVector = Icons.Outlined.EuroSymbol,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(18.dp),
-                                    tint = MaterialTheme.colorScheme.primary
-                                )
-                            }
-                        }
-                        NamiokaiSpacer(width = 10)
-
-                    }
-
+                    NamiokaiSpacer(width = 7)
+                    Text(
+                        text = "€${flatBill.taxesTotal.format(2)}",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+                NamiokaiSpacer(height = 10)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Outlined.Flood,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                    NamiokaiSpacer(width = 7)
+                    Text(
+                        text = "€${flatBill.rentTotal.format(2)}",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Bold
+                    )
                 }
             }
+
+            NamiokaiSpacer(width = 30)
+            Column(horizontalAlignment = Alignment.End) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = flatBill.resolveBillCost(currentUser),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.headlineSmall.copy(
+                            fontSize = 18.sp
+                        )
+                    )
+                    Icon(
+                        imageVector = Icons.Outlined.EuroSymbol,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
+            NamiokaiSpacer(width = 10)
+
         }
-    )
+
+    }
 
 
     if (openBottomSheet) {
@@ -531,6 +449,4 @@ private fun FlatCard(
             usersMap = usersMap
         )
     }
-
 }
-

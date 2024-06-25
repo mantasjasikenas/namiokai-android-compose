@@ -1,11 +1,13 @@
 package com.github.mantasjasikenas.namiokai.navigation
 
+import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.github.mantasjasikenas.core.domain.model.SharedState
 import com.github.mantasjasikenas.feature.admin.AdminPanelScreen
 import com.github.mantasjasikenas.feature.bills.BillScreen
 import com.github.mantasjasikenas.feature.debts.DebtsScreen
+import com.github.mantasjasikenas.feature.flat.FlatBillListPage
 import com.github.mantasjasikenas.feature.flat.FlatScreen
 import com.github.mantasjasikenas.feature.home.HomeScreen
 import com.github.mantasjasikenas.feature.notifications.NotificationsScreen
@@ -16,7 +18,8 @@ import com.github.mantasjasikenas.feature.trips.TripsScreen
 
 
 fun NavGraphBuilder.namiokaiNavGraph(
-    sharedState: SharedState
+    sharedState: SharedState,
+    navController: NavController
 ) {
     composable(route = Screen.Home.route) {
         HomeScreen()
@@ -31,7 +34,17 @@ fun NavGraphBuilder.namiokaiNavGraph(
         TripsScreen(sharedState = sharedState)
     }
     composable(route = Screen.Flat.route) {
-        FlatScreen(sharedState = sharedState)
+        FlatScreen(
+            sharedState = sharedState,
+            onNavigateToFlatBill = {
+                navController.navigate(Screen.FlatBillList.route) {
+                    launchSingleTop = true
+                }
+            }
+        )
+    }
+    composable(route = Screen.FlatBillList.route) {
+        FlatBillListPage(sharedState = sharedState)
     }
     composable(route = Screen.Settings.route) {
         SettingsScreen()

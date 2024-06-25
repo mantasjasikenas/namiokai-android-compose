@@ -169,7 +169,7 @@ fun NamiokaiScreen(
     val currentUser = sharedState.currentUser
 
     when (navBackStackEntry?.destination?.route) {
-        Screen.Settings.route, Screen.AdminPanel.route, Screen.Notifications.route, Screen.Profile.route -> {
+        Screen.Settings.route, Screen.AdminPanel.route, Screen.Notifications.route, Screen.Profile.route, Screen.FlatBillList.route -> {
             bottomBarState.value = false
             topBarState.value = true
         }
@@ -200,8 +200,8 @@ fun NamiokaiScreen(
                 currentDestination = currentDestination,
                 bottomBarState = bottomBarState.value
             )
-        }) { innerPadding ->
-
+        }
+    ) { innerPadding ->
         NavHost(
             navController = navController,
             route = NavGraph.Home.route,
@@ -216,6 +216,7 @@ fun NamiokaiScreen(
         ) {
             namiokaiNavGraph(
                 sharedState = sharedState,
+                navController = navController
             )
         }
     }
