@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,14 +17,20 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.ArrowDropUp
+import androidx.compose.material.icons.outlined.CalendarToday
 import androidx.compose.material.icons.outlined.EuroSymbol
 import androidx.compose.material.icons.outlined.Flood
 import androidx.compose.material.icons.outlined.WaterDrop
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -41,6 +48,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -57,12 +65,14 @@ import com.github.mantasjasikenas.core.domain.model.bills.FlatBill
 import com.github.mantasjasikenas.core.domain.model.bills.resolveBillCost
 import com.github.mantasjasikenas.core.ui.common.CardTextColumn
 import com.github.mantasjasikenas.core.ui.common.DateTimeCardColumn
+import com.github.mantasjasikenas.core.ui.common.FloatingAddButton
 import com.github.mantasjasikenas.core.ui.common.NamiokaiBottomSheet
 import com.github.mantasjasikenas.core.ui.common.NamiokaiCircularProgressIndicator
 import com.github.mantasjasikenas.core.ui.common.NamiokaiSpacer
 import com.github.mantasjasikenas.core.ui.common.VerticalDivider
 import com.github.mantasjasikenas.core.ui.component.NamiokaiConfirmDialog
 import com.github.mantasjasikenas.core.ui.component.NoResultsFound
+import com.github.mantasjasikenas.core.ui.component.ProgressGraph
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDateTime
@@ -70,6 +80,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import java.time.format.TextStyle
 import java.util.Locale
+import kotlin.math.absoluteValue
 
 @Composable
 fun FlatScreen(
@@ -88,81 +99,217 @@ fun FlatScreen(
     val currentUser = sharedState.currentUser
     val usersMap = sharedState.usersMap
 
-    val scrollState = rememberScrollState()
+    val popupState = remember {
+        mutableStateOf(false)
+    }
 
     if (flatUiState.flatBills.isEmpty()) {
         NoResultsFound(label = "No flat bills found.")
     } else {
-        Column(
+        LazyVerticalGrid(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 5.dp)
-                .verticalScroll(scrollState),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .fillMaxWidth(),
+            columns = GridCells.Fixed(2),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            contentPadding = PaddingValues(top = 5.dp, bottom = 16.dp, start = 16.dp, end = 16.dp)
         ) {
-            FlatBillSummary(
-                bills = flatUiState.flatBills,
-                usersMap = usersMap,
-                currentUser = currentUser,
-                flatViewModel = flatViewModel,
-                onSeeAllClick = {
-                    onNavigateToFlatBill()
-                },
-            )
-
-            FlatStatisticsContainer(
-                data = flatUiState.flatBills.reversed(), // TODO remove reversed
-                title = "Total rent and taxes",
-                subtitle = "Rent and taxes statistics",
-                xAxisLabels = flatUiState.flatBills.mapNotNull {
-                    it.date.split("T")
-                        .firstOrNull()
-                }
-                    .let { dates ->
-                        if (dates.size >= 3) {
-                            listOf(
-                                dates.first(),
-                                dates[dates.size / 2],
-                                dates.last()
-                            )
-                        } else {
-                            dates
+            item(span = {
+                GridItemSpan(maxLineSpan)
+            }) {
+                FlatBillSummary(
+                    bills = flatUiState.flatBills,
+                    usersMap = usersMap,
+                    currentUser = currentUser,
+                    flatViewModel = flatViewModel,
+                    onSeeAllClick = {
+                        onNavigateToFlatBill()
+                    },
+                )
+            }
+            item(span = {
+                GridItemSpan(maxLineSpan)
+            }) {
+                FlatStatisticsContainer(
+                    data = flatUiState.flatBills.reversed(),
+                    title = "Total rent and taxes",
+                    subtitle = "Rent and taxes statistics",
+                    xAxisLabels = flatUiState.flatBills
+                        .let { dates ->
+                            if (dates.size >= 3) {
+                                listOf(
+                                    dates.first(),
+                                    dates[dates.size / 2],
+                                    dates.last()
+                                )
+                            } else {
+                                dates
+                            }
                         }
+                        .mapNotNull {
+                            it.date.split("T")
+                                .firstOrNull()
+                        }
+                        .reversed(),
+                    selectedValueTitle = { bill ->
+                        bill.date.split("T")
+                            .firstOrNull() ?: ""
                     }
-                    .reversed(),
-                selectedValueTitle = { bill ->
-                    bill.date.split("T")
-                        .firstOrNull() ?: ""
-                }
-            )
+                )
+            }
 
-            MonthlyComparisonCard(
-                bills = flatUiState.flatBills,
-                usersMap = usersMap,
-                currentUser = currentUser,
-                flatViewModel = flatViewModel
-            )
+            item {
+                LatestTwoBillsComparisonCard(
+                    modifier = Modifier.fillMaxWidth(),
+                    bills = flatUiState.flatBills.reversed(),
+                )
+            }
 
-            Spacer(modifier = Modifier.height(6.dp))
+            item {
+                LatestBillCard(
+                    flatBill = flatUiState.flatBills.last()
+                )
+            }
         }
     }
 
+    FloatingAddButton(onClick = { popupState.value = true })
 
+    if (popupState.value) {
+        FlatBillPopup(
+            onSaveClick = {
+                flatViewModel.insertFlatBill(it)
+            },
+            onDismiss = { popupState.value = false },
+            usersMap = usersMap
+        )
+    }
 }
 
 @Composable
-fun MonthlyComparisonCard(
+fun LatestBillCard(
     modifier: Modifier = Modifier,
-    bills: List<FlatBill>,
-    usersMap: UsersMap,
-    currentUser: User,
-    flatViewModel: FlatViewModel,
+    flatBill: FlatBill
 ) {
     ElevatedCardContainer(
         modifier = modifier,
-        title = "Monthly comparison",
+        title = "Latest bill"
     ) {
+        Column {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Outlined.CalendarToday,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
 
+                NamiokaiSpacer(width = 7)
+
+                Text(
+                    text = flatBill.date.toLocalDateTime().format("yyyy-MM-dd"),
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
+            NamiokaiSpacer(height = 10)
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Outlined.WaterDrop,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+
+                NamiokaiSpacer(width = 7)
+
+                Text(
+                    text = "€${flatBill.taxesTotal.format(2)}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
+            NamiokaiSpacer(height = 10)
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Outlined.Flood,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+
+                NamiokaiSpacer(width = 7)
+
+                Text(
+                    text = "€${flatBill.rentTotal.format(2)}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
+
+    }
+}
+
+@Composable
+fun LatestTwoBillsComparisonCard(
+    modifier: Modifier = Modifier,
+    bills: List<FlatBill>
+) {
+    val lastTwoBills = bills.takeLast(2)
+    val previous = lastTwoBills.first()
+    val latest = lastTwoBills.last()
+
+    val change = latest.total - previous.total
+    val changePercentage = change / previous.total * 100
+
+    val changeColor = when {
+        change < 0 -> MaterialTheme.colorScheme.primary
+        change > 0 -> MaterialTheme.colorScheme.error
+        else -> MaterialTheme.colorScheme.onSurface
+    }
+
+    ElevatedCardContainer(
+        modifier = modifier,
+        title = "Last two bills comparison",
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.End
+        ) {
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(0.dp, Alignment.Start)
+            ) {
+                Icon(
+                    imageVector = if (change > 0) Icons.Default.ArrowDropUp else Icons.Default.ArrowDropDown,
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp),
+                    tint = changeColor
+                )
+
+                Text(
+                    text = "€${change.absoluteValue.format(2)}",
+                    color = changeColor,
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.headlineSmall
+                )
+            }
+
+            Text(
+                text = "${changePercentage.absoluteValue.format(2)}%",
+                style = MaterialTheme.typography.bodyLarge,
+                color = changeColor,
+                fontWeight = FontWeight.SemiBold
+            )
+        }
+
+        NamiokaiSpacer(height = 10)
     }
 }
 
@@ -445,6 +592,181 @@ private fun CompactFlatCard(
             onSaveClick = { viewModel.updateFlatBill(it) },
             onDismiss = { modifyPopupState.value = false },
             usersMap = usersMap
+        )
+    }
+}
+
+@Composable
+internal fun FlatStatisticsContainer(
+    data: List<FlatBill>,
+    title: String,
+    subtitle: String,
+    xAxisLabels: List<String> = emptyList(),
+    selectedValueTitle: (FlatBill) -> String,
+    selectedInitial: FlatBill? = data.lastOrNull(),
+) {
+    var selectedRecord by remember {
+        mutableStateOf(selectedInitial)
+    }
+
+    ElevatedCardContainer(
+        modifier = Modifier,
+        title = title,
+    ) {
+        TextLabelWithDivider(
+            data = listOf(
+                "Rent" to "${(selectedRecord?.rentTotal ?: 0.0).format(2)}€",
+                "Taxes" to "${(selectedRecord?.taxesTotal ?: 0.0).format(2)}€",
+                "Total" to "${(selectedRecord?.total ?: 0.0).format(2)}€",
+            ),
+            horizontalArrangement = Arrangement.Start,
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        TextLabelWithDivider(
+            data = listOf(
+                "Date" to (selectedRecord?.date?.split("T")?.firstOrNull() ?: "-"),
+            ),
+            horizontalArrangement = Arrangement.Start,
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        ProgressGraph(
+            modifier = Modifier
+                .height(180.dp)
+                .fillMaxWidth(),
+            data = data.map { it.total }
+                .ifEmpty {
+                    List(xAxisLabels.size) { 0 }
+                },
+            xAxisLabels = xAxisLabels,
+            onSelectedIndexChange = { index ->
+                selectedRecord = data.getOrNull(index)
+            },
+            selected = data.indexOf(selectedRecord),
+            dataUnit = "€"
+        )
+    }
+}
+
+
+@Composable
+internal fun ElevatedCardContainer(
+    modifier: Modifier = Modifier,
+    title: String,
+    subtitle: String? = null,
+    content: @Composable () -> Unit,
+) {
+    ElevatedCard {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.Start,
+        ) {
+            if (subtitle != null) {
+                Text(
+                    modifier = Modifier.padding(bottom = 6.dp),
+                    text = title,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.ExtraBold,
+                )
+
+                Text(
+                    modifier = Modifier.padding(bottom = 16.dp),
+                    text = subtitle,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontWeight = FontWeight.Light
+                )
+            } else {
+                Text(
+                    modifier = Modifier.padding(bottom = 16.dp),
+                    text = title,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+
+
+            content()
+        }
+    }
+}
+
+
+@Composable
+fun <T> TextLabelWithDivider(
+    data: List<Pair<String, T>>,
+    dividerVisible: Boolean = true,
+    textStyle: androidx.compose.ui.text.TextStyle = MaterialTheme.typography.bodyLarge.copy(
+        fontWeight = FontWeight.Bold
+    ),
+    labelStyle: androidx.compose.ui.text.TextStyle = MaterialTheme.typography.labelMedium,
+    horizontalArrangement: Arrangement.Horizontal = Arrangement.SpaceEvenly,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = horizontalArrangement,
+    ) {
+        data.forEachIndexed { index, (label, value) ->
+            TextWithLabel(
+                label = label,
+                text = value.toString(),
+                textStyle = textStyle,
+                labelStyle = labelStyle,
+            )
+
+            val isLast = index == data.lastIndex
+
+            if (!isLast && dividerVisible) {
+                VerticalDivider(
+                    modifier = Modifier
+                        .height(18.dp)
+                        .padding(horizontal = 16.dp),
+                    thickness = 1.dp,
+                )
+            }
+
+            if (!isLast && !dividerVisible) {
+                Spacer(modifier = Modifier.width(16.dp))
+            }
+        }
+    }
+}
+
+@Composable
+fun TextWithLabel(
+    modifier: Modifier = Modifier,
+    label: String,
+    text: String,
+    horizontalAlignment: Alignment.Horizontal = Alignment.CenterHorizontally,
+    textStyle: androidx.compose.ui.text.TextStyle = MaterialTheme.typography.bodyLarge.copy(
+        fontWeight = FontWeight.Bold,
+    ),
+    labelStyle: androidx.compose.ui.text.TextStyle = MaterialTheme.typography.labelMedium,
+) {
+    val textColor = textStyle.color.takeOrElse {
+        MaterialTheme.colorScheme.primary
+    }
+
+    Column(
+        modifier = modifier,
+        horizontalAlignment = horizontalAlignment,
+    ) {
+        Text(
+            text = label,
+            style = labelStyle,
+        )
+        Text(
+            text = text,
+            style = textStyle,
+            color = textColor,
         )
     }
 }
