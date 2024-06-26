@@ -65,7 +65,9 @@ fun rememberThemePreferences(): MutableState<ThemePreferences> {
                     theme = Theme.valueOf(
                         preferences[PreferenceKeys.THEME] ?: Theme.DEFAULT.name
                     ),
-                    accentColor = Color(preferences[PreferenceKeys.ACCENT_COLOR] ?: Color.Unspecified.toArgb())
+                    accentColor = Color(
+                        preferences[PreferenceKeys.ACCENT_COLOR] ?: Color.Unspecified.toArgb()
+                    )
                 )
             }
     }.collectAsState(initial = ThemePreferences())

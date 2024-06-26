@@ -5,8 +5,8 @@ import androidx.core.app.NotificationCompat
 import androidx.work.CoroutineWorker
 import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
-import com.github.mantasjasikenas.namiokai.R
 import com.github.mantasjasikenas.core.common.util.Constants.DOWNLOAD_CHANNEL_ID
+import com.github.mantasjasikenas.namiokai.R
 import java.util.Random
 
 class NotificationWorker(private val context: Context, workerParams: WorkerParameters) :

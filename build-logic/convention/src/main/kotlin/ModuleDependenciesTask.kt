@@ -1,4 +1,3 @@
-
 import org.gradle.api.DefaultTask
 import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.tasks.TaskAction

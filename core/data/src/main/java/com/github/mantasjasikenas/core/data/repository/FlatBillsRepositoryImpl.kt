@@ -92,6 +92,10 @@ class FlatBillsRepositoryImpl @Inject constructor(
     }
 
     override suspend fun backupCollection(fileName: String) {
-        baseFirebaseRepository.backupCollection(FLAT_BILLS_COLLECTION, BACKUP_FLAT_BILLS_PATH, fileName)
+        baseFirebaseRepository.backupCollection(
+            FLAT_BILLS_COLLECTION,
+            BACKUP_FLAT_BILLS_PATH,
+            fileName
+        )
     }
 }

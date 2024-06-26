@@ -160,11 +160,12 @@ private fun ProfileSettingsGroup(
     validateNewDisplayName: (String) -> Boolean,
 ) {
     val (updateDisplayNameDialogState, setUpdateNameDialogState) = remember { mutableStateOf(false) }
-    val galleryLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { imageUri ->
-        imageUri?.let {
-            onImageAddToStorage(it)
+    val galleryLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { imageUri ->
+            imageUri?.let {
+                onImageAddToStorage(it)
+            }
         }
-    }
 
     AnimatedVisibility(visible = currentUser.uid.isNotEmpty()) {
         Column {

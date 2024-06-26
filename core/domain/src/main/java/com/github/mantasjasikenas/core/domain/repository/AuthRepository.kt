@@ -77,8 +77,7 @@ class AuthRepository(
                             e
                         )
                     }
-                }
-                else {
+                } else {
                     Log.e(
                         TAG,
                         "Unexpected type of credential"

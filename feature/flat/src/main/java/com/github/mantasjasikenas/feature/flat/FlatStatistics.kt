@@ -106,8 +106,7 @@ internal fun ElevatedCardContainer(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontWeight = FontWeight.Light
                 )
-            }
-            else {
+            } else {
                 Text(
                     modifier = Modifier.padding(bottom = 16.dp),
                     text = title,

@@ -76,8 +76,7 @@ fun SettingsEntry(
                 onClick = {
                     if (confirmClick) {
                         showDialog = true
-                    }
-                    else {
+                    } else {
                         onClick()
                     }
                 })
@@ -296,8 +295,7 @@ inline fun <T> ValueSelectorDialog(
                                         center = size.center,
                                     )
                                 }
-                            }
-                            else {
+                            } else {
                                 Spacer(
                                     modifier = Modifier
                                         .size(18.dp)

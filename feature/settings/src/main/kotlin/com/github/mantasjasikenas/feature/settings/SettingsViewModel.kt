@@ -5,11 +5,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.mantasjasikenas.core.common.util.ToastManager
 import com.github.mantasjasikenas.core.database.AccentColor
-import com.github.mantasjasikenas.core.domain.repository.AuthRepository
 import com.github.mantasjasikenas.core.domain.model.Response
 import com.github.mantasjasikenas.core.domain.model.UserData
 import com.github.mantasjasikenas.core.domain.model.theme.ThemePreferences
 import com.github.mantasjasikenas.core.domain.repository.AccentColorRepository
+import com.github.mantasjasikenas.core.domain.repository.AuthRepository
 import com.github.mantasjasikenas.core.domain.repository.UserDataRepository
 import com.github.mantasjasikenas.core.domain.repository.UsersRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -80,8 +80,7 @@ class SettingsViewModel @Inject constructor(
         val response = usersRepository.changeCurrentUserNameInFirestore(newName)
         if (response is Response.Success) {
             toastManager.show("Name changed successfully")
-        }
-        else {
+        } else {
             toastManager.show("Name change failed")
         }
     }

@@ -123,8 +123,7 @@ fun TripsScreen(
 
     if (fuelUiState.tripBills.isEmpty()) {
         NoResultsFound(label = "No trips found.")
-    }
-    else {
+    } else {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -150,8 +149,7 @@ fun TripsScreen(
                             label = "No results found."
                         )
                     }
-                }
-                else {
+                } else {
                     groupedTrips.forEach { (pair, trips) ->
                         val (year, month) = pair
 

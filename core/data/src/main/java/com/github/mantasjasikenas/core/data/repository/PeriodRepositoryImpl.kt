@@ -73,8 +73,7 @@ class PeriodRepositoryImpl @Inject constructor(
 
         if (value in 1..31) {
             return value
-        }
-        else {
+        } else {
             Log.e(
                 TAG,
                 "Invalid value for period_start_day: $value"

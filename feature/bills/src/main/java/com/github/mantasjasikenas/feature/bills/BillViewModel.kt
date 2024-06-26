@@ -25,7 +25,8 @@ import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 @HiltViewModel
-class BillViewModel @Inject constructor(private val purchaseBillsRepository: PurchaseBillsRepository) : ViewModel() {
+class BillViewModel @Inject constructor(private val purchaseBillsRepository: PurchaseBillsRepository) :
+    ViewModel() {
 
     private val _billUiState: MutableStateFlow<BillUiState> = MutableStateFlow(BillUiState())
     val billUiState = _billUiState.asStateFlow()

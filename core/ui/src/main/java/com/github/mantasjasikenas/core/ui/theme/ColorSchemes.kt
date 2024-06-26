@@ -42,7 +42,10 @@ fun getColorScheme(
             when {
                 theme == Theme.DEFAULT -> DarkColorScheme
                 theme == Theme.AMOLED -> AmoledColorScheme
-                theme == Theme.DYNAMIC && dynamicColorsAvailable -> dynamicDarkColorScheme(LocalContext.current)
+                theme == Theme.DYNAMIC && dynamicColorsAvailable -> dynamicDarkColorScheme(
+                    LocalContext.current
+                )
+
                 theme == Theme.CUSTOM -> customDarkColorScheme(customColor)
                 else -> DarkColorScheme
             }
@@ -51,7 +54,10 @@ fun getColorScheme(
         ThemeType.LIGHT -> {
             when {
                 theme == Theme.DEFAULT -> LightColorScheme
-                theme == Theme.DYNAMIC && dynamicColorsAvailable -> dynamicLightColorScheme(LocalContext.current)
+                theme == Theme.DYNAMIC && dynamicColorsAvailable -> dynamicLightColorScheme(
+                    LocalContext.current
+                )
+
                 theme == Theme.CUSTOM -> customLightColorScheme(customColor)
                 else -> LightColorScheme
             }

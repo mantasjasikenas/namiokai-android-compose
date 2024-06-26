@@ -92,8 +92,7 @@ fun NotificationItem(
                     '0'
                 )
         }"
-    }
-    else {
+    } else {
         "${
             dateTime.month.getDisplayName(
                 TextStyle.SHORT,

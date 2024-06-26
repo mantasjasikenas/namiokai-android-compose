@@ -27,14 +27,11 @@ fun Bill.resolveBillCost(currentUser: User): String {
 
     return if (!isCurrentUserPaymaster && isCurrentUserInSplitUsers) {
         "-${splitPricePerUser.format(2)}"
-    }
-    else if (isCurrentUserPaymaster && !isCurrentUserInSplitUsers) {
+    } else if (isCurrentUserPaymaster && !isCurrentUserInSplitUsers) {
         "+${totalCost.format(2)}"
-    }
-    else if (isCurrentUserPaymaster) {
+    } else if (isCurrentUserPaymaster) {
         "+${(totalCost - splitPricePerUser).format(2)}"
-    }
-    else {
+    } else {
         totalCost.format(2)
     }
 }

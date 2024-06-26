@@ -54,7 +54,7 @@ dependencyResolutionManagement {
 rootProject.name = "Namiokai"
 
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
-include (":app")
+include(":app")
 include(":core:database")
 include(":core:domain")
 include(":core:ui")

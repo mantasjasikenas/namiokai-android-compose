@@ -110,8 +110,7 @@ fun FlatBillListPage(
 
     if (flatUiState.flatBills.isEmpty()) {
         NoResultsFound(label = "No flat bills found.")
-    }
-    else {
+    } else {
         Column {
             FlatBillFiltersRow(
                 usersMap = usersMap,
@@ -133,8 +132,7 @@ fun FlatBillListPage(
                             label = "No results found."
                         )
                     }
-                }
-                else {
+                } else {
                     items(items = flatUiState.filteredFlatBills,
                         key = { it.documentId }
                     ) { flatBill ->

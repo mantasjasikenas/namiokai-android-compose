@@ -120,8 +120,7 @@ fun Period.Companion.getPeriod(
             currentDate.monthNumber,
             endDateExclusive - 1
         )
-    }
-    else {
+    } else {
         periodStart = LocalDate(
             currentDate.year,
             currentDate.monthNumber,

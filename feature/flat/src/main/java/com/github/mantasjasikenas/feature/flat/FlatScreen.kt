@@ -86,14 +86,13 @@ fun FlatScreen(
     }
 
     val currentUser = sharedState.currentUser
-    val usersMap= sharedState.usersMap
+    val usersMap = sharedState.usersMap
 
     val scrollState = rememberScrollState()
 
     if (flatUiState.flatBills.isEmpty()) {
         NoResultsFound(label = "No flat bills found.")
-    }
-    else {
+    } else {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -126,8 +125,7 @@ fun FlatScreen(
                                 dates[dates.size / 2],
                                 dates.last()
                             )
-                        }
-                        else {
+                        } else {
                             dates
                         }
                     }

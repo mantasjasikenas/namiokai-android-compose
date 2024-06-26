@@ -95,7 +95,8 @@ class PurchaseBillsRepositoryImpl @Inject constructor(
 
     override suspend fun loadBillsFromStorage(fileName: String): Response<Boolean> {
         return try {
-            val billsJson = baseFirebaseRepository.getFileFromStorage("$BACKUP_BILLS_PATH/$fileName")
+            val billsJson =
+                baseFirebaseRepository.getFileFromStorage("$BACKUP_BILLS_PATH/$fileName")
             val purchaseBills = Json.decodeFromString<List<PurchaseBill>>(billsJson)
             purchaseBills.forEach { insertBill(it) }
 

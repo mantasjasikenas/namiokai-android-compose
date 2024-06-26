@@ -60,8 +60,7 @@ fun SwipePeriod(
                 onPeriodClick()
             }
         )
-    }
-    else {
+    } else {
         PeriodsHorizontalPager(
             periods = periods,
             pagerState = pagerState,

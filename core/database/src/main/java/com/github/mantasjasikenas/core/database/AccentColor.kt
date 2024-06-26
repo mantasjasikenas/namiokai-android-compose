@@ -10,7 +10,7 @@ data class AccentColor(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
     val color: Int,
-    val pinned : Boolean = false,
+    val pinned: Boolean = false,
     val date: Long,
 ) {
     @Ignore

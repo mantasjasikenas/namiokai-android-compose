@@ -186,8 +186,7 @@ fun VerticalDivider(
 ) {
     val targetThickness = if (thickness == Dp.Hairline) {
         (1f / LocalDensity.current.density).dp
-    }
-    else {
+    } else {
         thickness
     }
     Box(
@@ -483,7 +482,8 @@ fun NamiokaiCircularProgressIndicator(
 }
 
 @Composable
-inline fun <T> rememberState(crossinline producer: @DisallowComposableCalls () -> T) = remember { mutableStateOf(producer()) }
+inline fun <T> rememberState(crossinline producer: @DisallowComposableCalls () -> T) =
+    remember { mutableStateOf(producer()) }
 
 @Composable
 inline fun <T> rememberState(

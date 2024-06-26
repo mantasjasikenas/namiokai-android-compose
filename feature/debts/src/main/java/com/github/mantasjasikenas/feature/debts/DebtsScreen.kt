@@ -4,7 +4,6 @@ package com.github.mantasjasikenas.feature.debts
 
 import android.content.Intent
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.fadeIn
@@ -134,12 +133,13 @@ fun DebtsScreenContent(
                 if (targetState > initialState) {
                     // If the target number is larger, it slides up and fades in
                     // while the initial (smaller) number slides up and fades out.
-                    (slideInHorizontally { height -> height } + fadeIn()).togetherWith(slideOutHorizontally { height -> -height } + fadeOut())
-                }
-                else {
+                    (slideInHorizontally { height -> height } + fadeIn()).togetherWith(
+                        slideOutHorizontally { height -> -height } + fadeOut())
+                } else {
                     // If the target number is smaller, it slides down and fades in
                     // while the initial number slides down and fades out.
-                    (slideInHorizontally { height -> -height } + fadeIn()).togetherWith(slideOutHorizontally { height -> height } + fadeOut())
+                    (slideInHorizontally { height -> -height } + fadeIn()).togetherWith(
+                        slideOutHorizontally { height -> height } + fadeOut())
                 }.using(
                     // Disable clipping since the faded slide-in/out should
                     // be displayed out of bounds.
@@ -230,8 +230,7 @@ private fun PersonalDebtsPage(
 
         if (currentUserDebts.isNullOrEmpty()) {
             NoDebtsFound()
-        }
-        else {
+        } else {
             DebtsCard(
                 currentUserDebts = currentUserDebts,
                 usersMap = usersMap
@@ -279,8 +278,7 @@ private fun DebtsPage(
                 NoDebtsFound()
             }
             return@Column
-        }
-        else {
+        } else {
             NamiokaiSpacer(height = 20) // looks good with 8?
             LazyVerticalStaggeredGrid(
                 columns = StaggeredGridCells.Fixed(2),
@@ -322,7 +320,8 @@ private fun DebtsCard(
     val clipboardManager = LocalClipboardManager.current
     val context = LocalContext.current
     val launchSwedbank = {
-        val launchIntent: Intent? = context.packageManager.getLaunchIntentForPackage("lt.swedbank.mobile")
+        val launchIntent: Intent? =
+            context.packageManager.getLaunchIntentForPackage("lt.swedbank.mobile")
         if (launchIntent != null) {
             ContextCompat.startActivity(
                 context,

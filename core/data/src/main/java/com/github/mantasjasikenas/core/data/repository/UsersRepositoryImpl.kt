@@ -57,8 +57,7 @@ class UsersRepositoryImpl @Inject constructor(
                     trySend(User())
                     awaitClose()
                 }
-            }
-            else {
+            } else {
                 getUser(auth.currentUser!!.uid)
             }
         }
@@ -99,7 +98,8 @@ class UsersRepositoryImpl @Inject constructor(
 
     override suspend fun loadUsersFromStorage(fileName: String): Response<Boolean> {
         return try {
-            val usersJson = baseFirebaseRepository.getFileFromStorage("$BACKUP_USERS_PATH/$fileName")
+            val usersJson =
+                baseFirebaseRepository.getFileFromStorage("$BACKUP_USERS_PATH/$fileName")
             val users = Json.decodeFromString<List<User>>(usersJson)
             users.forEach { insertUser(it) }
 

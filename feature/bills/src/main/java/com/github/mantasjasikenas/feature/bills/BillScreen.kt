@@ -121,8 +121,7 @@ fun BillScreen(
 
     if (billUiState.purchaseBills.isEmpty()) {
         NoResultsFound(label = "No bills found.")
-    }
-    else {
+    } else {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -147,8 +146,7 @@ fun BillScreen(
                             label = "No results found."
                         )
                     }
-                }
-                else {
+                } else {
                     groupedBills.forEach { (pair, bills) ->
                         val (year, month) = pair
 

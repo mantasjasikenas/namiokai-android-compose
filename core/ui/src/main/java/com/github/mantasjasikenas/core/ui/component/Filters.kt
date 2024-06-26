@@ -296,7 +296,8 @@ fun <T, V> FilterItem(
         selected = filter.selectedValue != null,
         onClick = onClickRequest,
         label = {
-            val label = if (filter.selectedValue == null) filter.displayLabel else filter.selectedValue.toString()
+            val label =
+                if (filter.selectedValue == null) filter.displayLabel else filter.selectedValue.toString()
             Text(text = label)
         },
         leadingIcon = {
