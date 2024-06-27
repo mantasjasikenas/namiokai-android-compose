@@ -108,7 +108,7 @@ fun FlatScreen(
             columns = GridCells.Fixed(2),
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
-            contentPadding = PaddingValues(top = 5.dp, bottom = 16.dp, start = 16.dp, end = 16.dp)
+            contentPadding = PaddingValues(top = 5.dp, bottom = 80.dp, start = 16.dp, end = 16.dp)
         ) {
             item {
                 LatestTwoBillsComparisonCard(
@@ -136,6 +136,7 @@ fun FlatScreen(
                     },
                 )
             }
+
             item(span = {
                 GridItemSpan(maxLineSpan)
             }) {
