@@ -1,6 +1,6 @@
 [versions]
-versionCode = "35"
-versionName = "0.3.5"
+versionCode = "36"
+versionName = "0.3.6"
 
 jvm = "21"
 compileSdk = "34"
@@ -15,21 +15,21 @@ compose = "1.5.10"
 
 activity-compose = "1.9.0"
 androidx-datastore-preferences = "1.1.1"
-androidx-junit = "1.1.5"
+androidx-junit = "1.2.1"
 coil-compose = "2.6.0"
 colorpicker-compose = "1.0.7"
 core-ktx = "1.13.1"
 core-splashscreen = "1.0.1"
 customview-poolingcontainer = "1.0.0"
 customview = "1.2.0-alpha02"
-espresso-core = "3.5.1"
+espresso-core = "3.6.1"
 google-services = "4.4.2"
 gradle = "8.3.1"
 hilt-navigation-compose = "1.2.0"
 gmsPlugin = "4.4.2"
 
 credentials = "1.2.2"
-googleid = "1.1.0"
+googleid = "1.1.1"
 
 junit = "4.13.2"
 ksvg = "master-SNAPSHOT"
@@ -43,9 +43,9 @@ ui = "1.6.8"
 work-runtime-ktx = "2.9.0"
 
 compose-bom = "2024.06.00"
-firebase-bom = "33.1.0"
+firebase-bom = "33.1.1"
 
-android-gradle = "8.6.0-alpha07"
+android-gradle = "8.5.0"
 kotlin = "2.0.0"
 kotlin-gradle-plugin = "1.8.21"
 kotlin-reflect = "1.9.22"
@@ -68,7 +68,6 @@ ksp-gradlePlugin = { group = "com.google.devtools.ksp", name = "com.google.devto
 
 
 credentials-play-services-auth = { module = "androidx.credentials:credentials-play-services-auth", version.ref = "credentials" }
-#noinspection CredentialDependency
 credentials = { module = "androidx.credentials:credentials", version.ref = "credentials" }
 googleid = { module = "com.google.android.libraries.identity.googleid:googleid", version.ref = "googleid" }
 
