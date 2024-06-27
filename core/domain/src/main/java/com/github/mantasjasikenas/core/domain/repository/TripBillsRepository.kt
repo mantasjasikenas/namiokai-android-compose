@@ -10,7 +10,7 @@ interface TripBillsRepository {
     suspend fun getTripBills(): Flow<List<TripBill>>
     suspend fun getTripBills(period: Period): Flow<List<TripBill>>
     suspend fun clearFuel()
-    suspend fun getDestinations(): Flow<List<Destination>>
+    fun getDestinations(): Flow<List<Destination>>
     suspend fun insertFuel(tripBill: TripBill)
     suspend fun updateFuel(tripBill: TripBill)
     suspend fun deleteFuel(tripBill: TripBill)

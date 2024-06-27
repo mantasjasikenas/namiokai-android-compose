@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.outlined.AdminPanelSettings
 import androidx.compose.material.icons.outlined.BugReport
 import androidx.compose.material.icons.outlined.Notifications
@@ -28,6 +29,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -168,8 +170,8 @@ fun NamiokaiScreen(
 
     val currentUser = sharedState.currentUser
 
-    when (navBackStackEntry?.destination?.route) {
-        Screen.Settings.route, Screen.AdminPanel.route, Screen.Notifications.route, Screen.Profile.route, Screen.FlatBillList.route -> {
+    when (currentScreen) {
+        Screen.Settings, Screen.AdminPanel, Screen.Notifications, Screen.Profile, Screen.FlatBillList, Screen.CreateBill -> {
             bottomBarState.value = false
             topBarState.value = true
         }
@@ -180,27 +182,47 @@ fun NamiokaiScreen(
         }
     }
 
-
-    Scaffold(topBar = {
-        NamiokaiAppTopBar(
-            navController = navController,
-            topBarState = topBarState.value,
-            currentScreen = currentScreen,
-            canNavigateBack = navController.previousBackStackEntry != null && !Screen.navBarScreens.contains(
-                currentScreen
-            ),
-            navigateUp = { navController.navigateUp() },
-            adminModeEnabled = currentUser.admin,
-            photoUrl = currentUser.photoUrl
-        )
-    },
+    Scaffold(
+        topBar = {
+            NamiokaiAppTopBar(
+                navController = navController,
+                topBarState = topBarState.value,
+                currentScreen = currentScreen,
+                canNavigateBack = navController.previousBackStackEntry != null && !Screen.navBarScreens.contains(
+                    currentScreen
+                ),
+                navigateUp = { navController.navigateUp() },
+                adminModeEnabled = currentUser.admin,
+                photoUrl = currentUser.photoUrl
+            )
+        },
         bottomBar = {
             NamiokaiAppNavigationBar(
                 navController = navController,
                 currentDestination = currentDestination,
                 bottomBarState = bottomBarState.value
             )
-        }
+        },
+        floatingActionButton = {
+            AnimatedVisibility(
+                visible = bottomBarState.value,
+                enter = EnterTransition.None,  //fadeIn(),
+                exit = ExitTransition.None,
+            ) {
+                FloatingActionButton(
+                    onClick = {
+                        navController.navigate("${Screen.CreateBill.route}/${currentScreen.route}") {
+                            launchSingleTop = true
+                        }
+                    }
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Add,
+                        contentDescription = null
+                    )
+                }
+            }
+        },
     ) { innerPadding ->
         NavHost(
             navController = navController,

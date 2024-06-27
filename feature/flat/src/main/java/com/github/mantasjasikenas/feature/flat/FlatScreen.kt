@@ -65,7 +65,6 @@ import com.github.mantasjasikenas.core.domain.model.bills.FlatBill
 import com.github.mantasjasikenas.core.domain.model.bills.resolveBillCost
 import com.github.mantasjasikenas.core.ui.common.CardTextColumn
 import com.github.mantasjasikenas.core.ui.common.DateTimeCardColumn
-import com.github.mantasjasikenas.core.ui.common.FloatingAddButton
 import com.github.mantasjasikenas.core.ui.common.NamiokaiBottomSheet
 import com.github.mantasjasikenas.core.ui.common.NamiokaiCircularProgressIndicator
 import com.github.mantasjasikenas.core.ui.common.NamiokaiSpacer
@@ -90,6 +89,7 @@ fun FlatScreen(
     onNavigateToFlatBill: () -> Unit,
 ) {
     val flatUiState by flatViewModel.flatUiState.collectAsStateWithLifecycle()
+    val flatBills = flatUiState.flatBills.reversed()
 
     if (flatUiState.isLoading()) {
         NamiokaiCircularProgressIndicator()
@@ -98,10 +98,6 @@ fun FlatScreen(
 
     val currentUser = sharedState.currentUser
     val usersMap = sharedState.usersMap
-
-    val popupState = remember {
-        mutableStateOf(false)
-    }
 
     if (flatUiState.flatBills.isEmpty()) {
         NoResultsFound(label = "No flat bills found.")
@@ -114,6 +110,19 @@ fun FlatScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp),
             contentPadding = PaddingValues(top = 5.dp, bottom = 16.dp, start = 16.dp, end = 16.dp)
         ) {
+            item {
+                LatestTwoBillsComparisonCard(
+                    modifier = Modifier.fillMaxWidth(),
+                    bills = flatBills
+                )
+            }
+
+            item {
+                LatestBillCard(
+                    flatBill = flatBills.last()
+                )
+            }
+
             item(span = {
                 GridItemSpan(maxLineSpan)
             }) {
@@ -131,10 +140,10 @@ fun FlatScreen(
                 GridItemSpan(maxLineSpan)
             }) {
                 FlatStatisticsContainer(
-                    data = flatUiState.flatBills.reversed(),
+                    data = flatBills,
                     title = "Total rent and taxes",
                     subtitle = "Rent and taxes statistics",
-                    xAxisLabels = flatUiState.flatBills
+                    xAxisLabels = flatBills
                         .let { dates ->
                             if (dates.size >= 3) {
                                 listOf(
@@ -149,40 +158,14 @@ fun FlatScreen(
                         .mapNotNull {
                             it.date.split("T")
                                 .firstOrNull()
-                        }
-                        .reversed(),
+                        },
                     selectedValueTitle = { bill ->
                         bill.date.split("T")
                             .firstOrNull() ?: ""
                     }
                 )
             }
-
-            item {
-                LatestTwoBillsComparisonCard(
-                    modifier = Modifier.fillMaxWidth(),
-                    bills = flatUiState.flatBills.reversed(),
-                )
-            }
-
-            item {
-                LatestBillCard(
-                    flatBill = flatUiState.flatBills.last()
-                )
-            }
         }
-    }
-
-    FloatingAddButton(onClick = { popupState.value = true })
-
-    if (popupState.value) {
-        FlatBillPopup(
-            onSaveClick = {
-                flatViewModel.insertFlatBill(it)
-            },
-            onDismiss = { popupState.value = false },
-            usersMap = usersMap
-        )
     }
 }
 

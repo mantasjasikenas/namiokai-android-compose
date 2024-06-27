@@ -69,7 +69,6 @@ import com.github.mantasjasikenas.core.domain.model.bills.FlatBill
 import com.github.mantasjasikenas.core.domain.model.bills.resolveBillCost
 import com.github.mantasjasikenas.core.ui.common.CardTextColumn
 import com.github.mantasjasikenas.core.ui.common.DateTimeCardColumn
-import com.github.mantasjasikenas.core.ui.common.FloatingAddButton
 import com.github.mantasjasikenas.core.ui.common.NamiokaiBottomSheet
 import com.github.mantasjasikenas.core.ui.common.NamiokaiCircularProgressIndicator
 import com.github.mantasjasikenas.core.ui.common.NamiokaiSpacer
@@ -92,8 +91,6 @@ fun FlatBillListPage(
     sharedState: SharedState,
     flatViewModel: FlatViewModel = hiltViewModel(),
 ) {
-    val coroutineScope = rememberCoroutineScope()
-    val state = rememberLazyListState()
     val flatUiState by flatViewModel.flatUiState.collectAsStateWithLifecycle()
 
     if (flatUiState.isLoading()) {
@@ -101,12 +98,9 @@ fun FlatBillListPage(
         return
     }
 
+    val state = rememberLazyListState()
     val currentUser = sharedState.currentUser
     val usersMap: UsersMap = sharedState.usersMap
-
-    val popupState = remember {
-        mutableStateOf(false)
-    }
 
     if (flatUiState.flatBills.isEmpty()) {
         NoResultsFound(label = "No flat bills found.")
@@ -149,21 +143,6 @@ fun FlatBillListPage(
 
                 item { NamiokaiSpacer(height = 120) }
             }
-        }
-
-        FloatingAddButton(onClick = { popupState.value = true })
-
-        if (popupState.value) {
-            FlatBillPopup(
-                onSaveClick = {
-                    flatViewModel.insertFlatBill(it)
-                    coroutineScope.launch {
-                        state.scrollToItem(0)
-                    }
-                },
-                onDismiss = { popupState.value = false },
-                usersMap = usersMap
-            )
         }
     }
 }

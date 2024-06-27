@@ -81,6 +81,12 @@ sealed class Screen(
         Icons.Outlined.Cottage
     )
 
+    data object CreateBill : Screen(
+        "create_bill",
+        R.string.create_bill_label,
+        Icons.Outlined.Cottage
+    )
+
     data object FlatBillList : Screen(
         "flat_bill_list",
         R.string.flat_bill_label,
@@ -115,16 +121,17 @@ sealed class Screen(
             Login,
             Test,
             AdminPanel,
-            Profile
+            Profile,
+            CreateBill
         )
-
-        //private val screens = Screen::class.sealedSubclasses.map { it.objectInstance }
 
         fun fromRoute(route: String?): Screen {
             if (route == null) return initialScreen
 
             @Suppress("SENSELESS_COMPARISON")
-            return screens.firstOrNull { it != null && it.route == route } ?: initialScreen
+            return screens.firstOrNull {
+                it != null && (it.route == route || it.route == route.split("/").firstOrNull())
+            } ?: initialScreen
         }
     }
 }

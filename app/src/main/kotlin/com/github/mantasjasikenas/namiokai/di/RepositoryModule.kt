@@ -84,12 +84,10 @@ object RepositoryModule {
     fun provideTripBillsRepository(
         baseFirebaseRepository: BaseFirebaseRepository,
         db: FirebaseFirestore,
-        storage: FirebaseStorage
     ): TripBillsRepository =
         TripBillsRepositoryImpl(
             baseFirebaseRepository = baseFirebaseRepository,
             db = db,
-            storage = storage
         )
 
     @Provides

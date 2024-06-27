@@ -76,7 +76,6 @@ import com.github.mantasjasikenas.core.domain.model.contains
 import com.github.mantasjasikenas.core.ui.common.CardText
 import com.github.mantasjasikenas.core.ui.common.CardTextColumn
 import com.github.mantasjasikenas.core.ui.common.DateTimeCardColumn
-import com.github.mantasjasikenas.core.ui.common.FloatingAddButton
 import com.github.mantasjasikenas.core.ui.common.NamiokaiBottomSheet
 import com.github.mantasjasikenas.core.ui.common.NamiokaiCircularProgressIndicator
 import com.github.mantasjasikenas.core.ui.common.NamiokaiSpacer
@@ -100,7 +99,6 @@ fun BillScreen(
     sharedState: SharedState,
     viewModel: BillViewModel = hiltViewModel(),
 ) {
-    val coroutineScope = rememberCoroutineScope()
     val billUiState by viewModel.billUiState.collectAsStateWithLifecycle()
     val groupedBills by viewModel.groupedBills.collectAsStateWithLifecycle()
 
@@ -112,10 +110,6 @@ fun BillScreen(
     val currentUser = sharedState.currentUser
     val periodState = sharedState.periodState
     val usersMap: UsersMap = sharedState.usersMap
-
-    val popupState = remember {
-        mutableStateOf(false)
-    }
 
     val state = rememberLazyListState()
 
@@ -176,37 +170,10 @@ fun BillScreen(
                             )
                         }
                     }
-
-                    /* items(billUiState.filteredPurchaseBills) { bill ->
-                         BillCard(
-                             purchaseBill = bill,
-                             isAllowedModification = (currentUser.admin || bill.createdByUid == currentUser.uid),
-                             usersMap = usersMap,
-                             viewModel = viewModel,
-                             currentUser = currentUser
-                         )
-                     }*/
                 }
                 item { NamiokaiSpacer(height = 120) }
             }
         }
-    }
-
-    FloatingAddButton {
-        popupState.value = true
-    }
-
-    if (popupState.value) {
-        BillPopup(
-            onSaveClick = {
-                viewModel.insertBill(it)
-                coroutineScope.launch {
-                    state.scrollToItem(0)
-                }
-            },
-            onDismiss = { popupState.value = false },
-            usersMap = usersMap
-        )
     }
 }
 

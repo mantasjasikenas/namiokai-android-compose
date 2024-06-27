@@ -6,6 +6,7 @@ import androidx.navigation.compose.composable
 import com.github.mantasjasikenas.core.domain.model.SharedState
 import com.github.mantasjasikenas.feature.admin.AdminPanelScreen
 import com.github.mantasjasikenas.feature.bills.BillScreen
+import com.github.mantasjasikenas.feature.bills.create.CreateBillScreen
 import com.github.mantasjasikenas.feature.debts.DebtsScreen
 import com.github.mantasjasikenas.feature.flat.FlatBillListPage
 import com.github.mantasjasikenas.feature.flat.FlatScreen
@@ -32,6 +33,19 @@ fun NavGraphBuilder.namiokaiNavGraph(
     }
     composable(route = Screen.Trips.route) {
         TripsScreen(sharedState = sharedState)
+    }
+    composable(
+        route = "${Screen.CreateBill.route}/{navigatedFrom}",
+    ) {
+        val navigatedFrom = it.arguments?.getString("navigatedFrom")
+
+        CreateBillScreen(
+            navigatedFrom = navigatedFrom,
+            sharedState = sharedState,
+            onNavigateUp = {
+                navController.navigateUp()
+            }
+        )
     }
     composable(route = Screen.Flat.route) {
         FlatScreen(

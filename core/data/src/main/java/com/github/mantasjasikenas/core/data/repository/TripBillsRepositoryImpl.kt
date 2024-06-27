@@ -10,7 +10,6 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.snapshots
 import com.google.firebase.firestore.toObject
-import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
@@ -26,7 +25,6 @@ const val FUEL_IMPORT_FILE_NAME = "fuel.json"
 class TripBillsRepositoryImpl @Inject constructor(
     private val baseFirebaseRepository: BaseFirebaseRepository,
     private val db: FirebaseFirestore,
-    private val storage: FirebaseStorage
 ) :
     TripBillsRepository {
 
@@ -98,7 +96,7 @@ class TripBillsRepositoryImpl @Inject constructor(
     }
 
 
-    override suspend fun getDestinations(): Flow<List<Destination>> =
+    override fun getDestinations(): Flow<List<Destination>> =
         db.collection(DESTINATIONS_COLLECTION)
             .snapshots()
             .map {

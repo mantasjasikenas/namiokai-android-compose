@@ -109,19 +109,6 @@ fun FloatingAddButton(
         verticalArrangement = Arrangement.Bottom,
         horizontalAlignment = horizontalAlignment
     ) {
-//        LargeFloatingActionButton(
-//            modifier = Modifier.padding(all = 15.dp),
-//            onClick = onClick,
-//            containerColor = MaterialTheme.colorScheme.primary,
-//            shape = CircleShape
-//        ) {
-//            Icon(
-//                Icons.Filled.Add,
-//                contentDescription = null,
-//                modifier = Modifier.size(FloatingActionButtonDefaults.LargeIconSize),
-//            )
-//        }
-
         FloatingActionButton(
             modifier = Modifier.padding(all = 15.dp),
             onClick = onClick,

@@ -79,7 +79,6 @@ import com.github.mantasjasikenas.core.domain.model.bills.resolveBillCost
 import com.github.mantasjasikenas.core.domain.model.contains
 import com.github.mantasjasikenas.core.ui.common.CardText
 import com.github.mantasjasikenas.core.ui.common.DateTimeCardColumn
-import com.github.mantasjasikenas.core.ui.common.FloatingAddButton
 import com.github.mantasjasikenas.core.ui.common.NamiokaiBottomSheet
 import com.github.mantasjasikenas.core.ui.common.NamiokaiCircularProgressIndicator
 import com.github.mantasjasikenas.core.ui.common.NamiokaiSpacer
@@ -102,7 +101,6 @@ fun TripsScreen(
     viewModel: FuelViewModel = hiltViewModel(),
     sharedState: SharedState
 ) {
-    val coroutineScope = rememberCoroutineScope()
     val fuelUiState by viewModel.uiState.collectAsStateWithLifecycle()
     val groupedTrips by viewModel.groupedTrips.collectAsStateWithLifecycle()
 
@@ -115,11 +113,7 @@ fun TripsScreen(
     val periodState = sharedState.periodState
     val usersMap: UsersMap = sharedState.usersMap
 
-    val popupState = remember {
-        mutableStateOf(false)
-    }
     val state = rememberLazyListState()
-
 
     if (fuelUiState.tripBills.isEmpty()) {
         NoResultsFound(label = "No trips found.")
@@ -180,43 +174,12 @@ fun TripsScreen(
                             )
                         }
                     }
-
-                    /*items(items = fuelUiState.filteredTripBills,
-                        key = { it.documentId }
-                        ) { fuel ->
-                        FuelCard(
-                            modifier = Modifier.animateItemPlacement(),
-                            tripBill = fuel,
-                            isAllowedModification = (currentUser.admin || fuel.createdByUid == currentUser.uid),
-                            destinations = fuelUiState.destinations,
-                            usersMap = mainUiState.usersMap,
-                            viewModel = viewModel,
-                            currentUser = currentUser
-                        )
-                    }*/
                 }
 
                 item { NamiokaiSpacer(height = 120) }
             }
         }
     }
-
-    FloatingAddButton(onClick = { popupState.value = true })
-
-    if (popupState.value) {
-        FuelPopup(
-            onSaveClick = {
-                viewModel.insertFuel(it)
-                coroutineScope.launch {
-                    state.scrollToItem(0)
-                }
-            },
-            onDismiss = { popupState.value = false },
-            usersMap = usersMap,
-            destinations = fuelUiState.destinations
-        )
-    }
-
 }
 
 @Composable
