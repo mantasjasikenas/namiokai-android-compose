@@ -258,6 +258,7 @@ fun UsersPicker(
     isMultipleSelectEnabled: Boolean = true
 ) {
     FlowRow(
+        modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(
             7.dp,
             Alignment.CenterHorizontally

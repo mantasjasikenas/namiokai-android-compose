@@ -9,13 +9,19 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.EuroSymbol
+import androidx.compose.material.icons.outlined.ShoppingBag
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.SegmentedButton
@@ -29,6 +35,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.runtime.toMutableStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,6 +46,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.github.mantasjasikenas.core.common.util.Uid
 import com.github.mantasjasikenas.core.domain.model.Destination
 import com.github.mantasjasikenas.core.domain.model.SharedState
 import com.github.mantasjasikenas.core.domain.model.UsersMap
@@ -83,6 +91,7 @@ fun CreateBillScreen(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateBillContent(
     modifier: Modifier = Modifier,
@@ -115,7 +124,9 @@ fun CreateBillContent(
             modifier = Modifier.padding(bottom = 5.dp)
         )
 
-        SingleChoiceSegmentedButtonRow {
+        SingleChoiceSegmentedButtonRow(
+            modifier = Modifier.fillMaxWidth()
+        ) {
             options.forEachIndexed { index, label ->
                 SegmentedButton(
                     shape = SegmentedButtonDefaults.itemShape(index = index, count = options.size),
@@ -184,6 +195,27 @@ fun BillContainerWrapper(
     }
 }
 
+@Composable
+private fun UserPickerContainer(
+    modifier: Modifier = Modifier,
+    title: String,
+    usersMap: UsersMap,
+    usersSnapshotMap: SnapshotStateMap<Uid, Boolean>,
+    isMultipleSelectEnabled: Boolean
+) {
+    Text(
+        text = title,
+        style = MaterialTheme.typography.titleSmall,
+        textAlign = TextAlign.Center,
+        modifier = Modifier.padding(bottom = 5.dp)
+    )
+
+    UsersPicker(
+        usersMap = usersMap,
+        usersPickup = usersSnapshotMap,
+        isMultipleSelectEnabled = isMultipleSelectEnabled
+    )
+}
 
 @Composable
 fun PurchaseBillContent(
@@ -193,6 +225,10 @@ fun PurchaseBillContent(
 ) {
     val context = LocalContext.current
 
+    val bill by remember {
+        mutableStateOf(initialPurchaseBill)
+    }
+
     val splitBillHashMap = remember {
         usersMap.map { it.value.uid to false }
             .toMutableStateMap()
@@ -201,13 +237,9 @@ fun PurchaseBillContent(
         usersMap.map { it.value.uid to false }
             .toMutableStateMap()
     }
-    val bill by remember {
-        mutableStateOf(initialPurchaseBill)
-    }
 
     LaunchedEffect(Unit) {
         if (bill.isValid()) {
-
             bill.splitUsersUid.forEach { uid ->
                 splitBillHashMap[uid] = true
             }
@@ -218,53 +250,57 @@ fun PurchaseBillContent(
         }
     }
 
-    Text(
-        text = stringResource(R.string.paymaster),
-        style = MaterialTheme.typography.titleSmall,
-        textAlign = TextAlign.Center,
-        modifier = Modifier.padding(bottom = 5.dp)
-    )
-    UsersPicker(
+    UserPickerContainer(
+        title = stringResource(R.string.paymaster),
         usersMap = usersMap,
-        usersPickup = paymasterHashMap,
+        usersSnapshotMap = paymasterHashMap,
         isMultipleSelectEnabled = false
     )
+
+    Spacer(modifier = Modifier.height(20.dp))
+
+    UserPickerContainer(
+        title = stringResource(R.string.split_bill_with),
+        usersMap = usersMap,
+        usersSnapshotMap = splitBillHashMap,
+        isMultipleSelectEnabled = true
+    )
+
+    Spacer(modifier = Modifier.height(20.dp))
+
     NamiokaiTextField(
-        modifier = Modifier.padding(
-            vertical = 10.dp,
-            horizontal = 30.dp
-        ),
         label = stringResource(R.string.shopping_list),
         initialTextFieldValue = bill.shoppingList,
-        onValueChange = { bill.shoppingList = it })
-    NamiokaiNumberField(
-        modifier = Modifier.padding(
-            vertical = 10.dp,
-            horizontal = 30.dp
-        ),
-        label = stringResource(R.string.total_price),
-        initialTextFieldValue = (if (bill.total == 0.0) "" else bill.total.toString()),
-        onValueChange = {
-            bill.total = it
+        onValueChange = { bill.shoppingList = it },
+        leadingIcon = {
+            Icon(
+                modifier = Modifier.size(21.dp),
+                imageVector = Icons.Outlined.ShoppingBag,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary
+            )
         }
     )
 
     Spacer(modifier = Modifier.height(20.dp))
-    Text(
-        text = stringResource(R.string.split_bill_with),
-        style = MaterialTheme.typography.titleSmall,
-        textAlign = TextAlign.Center,
-        modifier = Modifier.padding(bottom = 5.dp)
-    )
-    UsersPicker(
-        usersMap = usersMap,
-        usersPickup = splitBillHashMap,
-        isMultipleSelectEnabled = true
+
+    NamiokaiNumberField(
+        label = stringResource(R.string.total_price),
+        initialTextFieldValue = (if (bill.total == 0.0) "" else bill.total.toString()),
+        onValueChange = {
+            bill.total = it
+        },
+        leadingIcon = {
+            Icon(
+                modifier = Modifier.size(21.dp),
+                imageVector = Icons.Outlined.EuroSymbol,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary
+            )
+        }
     )
 
-    Spacer(
-        modifier = Modifier.height(32.dp)
-    )
+    Spacer(modifier = Modifier.height(32.dp))
 
     Button(onClick = {
         bill.splitUsersUid = splitBillHashMap.filter { it.value }.keys.map { it }
@@ -301,6 +337,12 @@ fun TripBillContent(
     usersMap: UsersMap,
     destinations: List<Destination>
 ) {
+    val context = LocalContext.current
+
+    val trip by remember {
+        mutableStateOf(initialTripBill)
+    }
+
     // OPTIMIZE: This is a mess, refactor OK?
     val splitFuelHashMap = remember {
         usersMap.map { it.value.uid to false }
@@ -312,12 +354,6 @@ fun TripBillContent(
     }
 
     val (selectedOption, onOptionSelected) = remember { mutableStateOf(destinations[0]) }
-
-    val context = LocalContext.current
-
-    val trip by remember {
-        mutableStateOf(initialTripBill)
-    }
 
     LaunchedEffect(Unit) {
         if (trip.isValid()) {
@@ -331,31 +367,22 @@ fun TripBillContent(
 
     }
 
-    Text(
-        text = stringResource(R.string.driver),
-        style = MaterialTheme.typography.titleSmall,
-        modifier = Modifier.padding(bottom = 5.dp)
-    )
-
-    UsersPicker(
+    UserPickerContainer(
+        title = stringResource(R.string.driver),
         usersMap = usersMap,
-        usersPickup = driverSelectHashMap,
+        usersSnapshotMap = driverSelectHashMap,
         isMultipleSelectEnabled = false
     )
 
-    Spacer(modifier = Modifier.height(30.dp))
+    Spacer(modifier = Modifier.height(20.dp))
 
-    Text(
-        text = stringResource(R.string.passengers),
-        style = MaterialTheme.typography.titleSmall,
-        modifier = Modifier.padding(bottom = 5.dp)
-    )
-
-    UsersPicker(
+    UserPickerContainer(
+        title = stringResource(R.string.passengers),
         usersMap = usersMap,
-        usersPickup = splitFuelHashMap,
+        usersSnapshotMap = splitFuelHashMap,
         isMultipleSelectEnabled = true
     )
+
     Spacer(modifier = Modifier.height(20.dp))
 
     Text(
@@ -391,9 +418,7 @@ fun TripBillContent(
         }
     }
 
-    Spacer(
-        modifier = Modifier.height(32.dp)
-    )
+    Spacer(modifier = Modifier.height(32.dp))
 
     Button(onClick = {
         trip.paymasterUid =
@@ -437,6 +462,8 @@ fun FlatBillContent(
     onSaveClick: (FlatBill) -> Unit,
     usersMap: UsersMap
 ) {
+    val context = LocalContext.current
+
     val flatBill by remember {
         mutableStateOf(initialFlatBill)
     }
@@ -448,7 +475,6 @@ fun FlatBillContent(
         usersMap.map { it.value.uid to false }
             .toMutableStateMap()
     }
-    val context = LocalContext.current
 
     LaunchedEffect(Unit) {
         if (flatBill.isValid()) {
@@ -457,59 +483,57 @@ fun FlatBillContent(
         }
     }
 
-    Text(
-        text = stringResource(R.string.paymaster),
-        style = MaterialTheme.typography.titleSmall,
-        textAlign = TextAlign.Center,
-        modifier = Modifier.padding(bottom = 5.dp)
-    )
-
-    UsersPicker(
+    UserPickerContainer(
+        title = stringResource(R.string.paymaster),
         usersMap = usersMap,
-        usersPickup = paymasterHashMap,
+        usersSnapshotMap = paymasterHashMap,
         isMultipleSelectEnabled = false
-    )
-
-    NamiokaiNumberField(
-        modifier = Modifier.padding(
-            vertical = 10.dp,
-            horizontal = 30.dp
-        ),
-        label = "Rent",
-        initialTextFieldValue = (if (flatBill.rentTotal == 0.0) "" else flatBill.rentTotal.toString()),
-        onValueChange = { flatBill.rentTotal = it },
-        keyboardType = KeyboardType.Number
-    )
-
-    NamiokaiNumberField(
-        modifier = Modifier.padding(
-            vertical = 10.dp,
-            horizontal = 30.dp
-        ),
-        label = "Taxes",
-        initialTextFieldValue = (if (flatBill.taxesTotal == 0.0) "" else flatBill.taxesTotal.toString()),
-        onValueChange = { flatBill.taxesTotal = it },
-        keyboardType = KeyboardType.Number
     )
 
     Spacer(modifier = Modifier.height(20.dp))
 
-    Text(
-        text = stringResource(R.string.split_bill_with),
-        style = MaterialTheme.typography.titleSmall,
-        textAlign = TextAlign.Center,
-        modifier = Modifier.padding(bottom = 5.dp)
-    )
-
-    UsersPicker(
+    UserPickerContainer(
+        title = stringResource(R.string.split_bill_with),
         usersMap = usersMap,
-        usersPickup = splitBillHashMap,
+        usersSnapshotMap = splitBillHashMap,
         isMultipleSelectEnabled = true
     )
 
-    Spacer(
-        modifier = Modifier.height(32.dp)
+    Spacer(modifier = Modifier.height(20.dp))
+
+    NamiokaiNumberField(
+        label = "Rent",
+        initialTextFieldValue = (if (flatBill.rentTotal == 0.0) "" else flatBill.rentTotal.toString()),
+        onValueChange = { flatBill.rentTotal = it },
+        keyboardType = KeyboardType.Number,
+        leadingIcon = {
+            Icon(
+                modifier = Modifier.size(21.dp),
+                imageVector = Icons.Outlined.EuroSymbol,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary
+            )
+        }
     )
+
+    Spacer(modifier = Modifier.height(20.dp))
+
+    NamiokaiNumberField(
+        label = "Taxes",
+        initialTextFieldValue = (if (flatBill.taxesTotal == 0.0) "" else flatBill.taxesTotal.toString()),
+        onValueChange = { flatBill.taxesTotal = it },
+        keyboardType = KeyboardType.Number,
+        leadingIcon = {
+            Icon(
+                modifier = Modifier.size(21.dp),
+                imageVector = Icons.Outlined.EuroSymbol,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary
+            )
+        }
+    )
+
+    Spacer(modifier = Modifier.height(32.dp))
 
     Button(onClick = {
         flatBill.splitUsersUid = splitBillHashMap.filter { it.value }.keys.map { it }

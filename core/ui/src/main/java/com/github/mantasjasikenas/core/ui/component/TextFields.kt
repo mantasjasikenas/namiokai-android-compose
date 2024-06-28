@@ -1,10 +1,14 @@
 package com.github.mantasjasikenas.core.ui.component
 
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
@@ -13,6 +17,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -28,12 +33,14 @@ fun NamiokaiTextField(
     initialTextFieldValue: String = "",
     onValueChange: (String) -> Unit,
     keyboardType: KeyboardType = KeyboardType.Text,
-    singleLine: Boolean = true
+    singleLine: Boolean = true,
+    leadingIcon: @Composable (() -> Unit)? = null,
+    trailingIcon: @Composable (() -> Unit)? = null,
 ) {
     var text by remember { mutableStateOf(TextFieldValue(initialTextFieldValue)) }
     val focusManager = LocalFocusManager.current
 
-    OutlinedTextField(
+    TextField(
         value = text,
         label = { Text(text = label) },
         keyboardOptions = KeyboardOptions(
@@ -51,8 +58,18 @@ fun NamiokaiTextField(
             onValueChange(it.text)
         },
         singleLine = singleLine,
-        modifier = modifier
-    )
+        modifier = modifier,
+        shape = CircleShape,
+        colors = TextFieldDefaults.colors(
+            unfocusedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent,
+            disabledIndicatorColor = Color.Transparent
+        ),
+        leadingIcon = leadingIcon,
+        trailingIcon = trailingIcon,
+
+        )
 }
 
 @Composable
@@ -62,13 +79,15 @@ fun NamiokaiNumberField(
     initialTextFieldValue: String = "",
     onValueChange: (Double) -> Unit,
     keyboardType: KeyboardType = KeyboardType.Text,
-    singleLine: Boolean = true
+    singleLine: Boolean = true,
+    leadingIcon: @Composable (() -> Unit)? = null,
+    trailingIcon: @Composable (() -> Unit)? = null,
 ) {
     var text by remember { mutableStateOf(TextFieldValue(initialTextFieldValue)) }
     var number by remember { mutableDoubleStateOf(0.0) }
     val focusManager = LocalFocusManager.current
 
-    OutlinedTextField(
+    TextField(
         value = text,
         label = {
             number.takeIf { it == 0.0 }
@@ -96,7 +115,7 @@ fun NamiokaiNumberField(
             if (expr.isEmpty()) {
                 onValueChange(0.0)
                 number = 0.0
-                return@OutlinedTextField
+                return@TextField
             }
 
             try {
@@ -111,7 +130,16 @@ fun NamiokaiNumberField(
             }
         },
         singleLine = singleLine,
-        modifier = modifier
+        modifier = modifier,
+        shape = CircleShape,
+        colors = TextFieldDefaults.colors(
+            unfocusedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent,
+            disabledIndicatorColor = Color.Transparent
+        ),
+        leadingIcon = leadingIcon,
+        trailingIcon = trailingIcon,
     )
 }
 
