@@ -1,6 +1,6 @@
 [versions]
-versionCode = "37"
-versionName = "0.3.7"
+versionCode = "38"
+versionName = "0.3.8"
 
 jvm = "21"
 compileSdk = "34"
@@ -36,10 +36,10 @@ ksvg = "master-SNAPSHOT"
 lifecycle-livedata-ktx = "2.8.2"
 lifecycle-runtime-ktx = "2.8.2"
 material = "1.12.0"
-navigation-compose = "2.7.7"
+navigation-compose = "2.8.0-beta04"
 play-services-auth = "21.2.0"
 room = "2.6.1"
-ui = "1.6.8"
+ui = "1.7.0-beta04"
 work-runtime-ktx = "2.9.0"
 
 compose-bom = "2024.06.00"
@@ -50,7 +50,7 @@ kotlin = "2.0.0"
 kotlin-gradle-plugin = "1.8.21"
 kotlin-reflect = "1.9.22"
 kotlinx-datetime-jvm = "0.4.1"
-kotlinx-serialization-json = "1.6.0"
+kotlinx-serialization-json = "1.6.3"
 ksp = "2.0.0-1.0.22"
 compose-material3 = "1.2.1"
 appcompat = "1.7.0"
@@ -71,12 +71,9 @@ credentials-play-services-auth = { module = "androidx.credentials:credentials-pl
 credentials = { module = "androidx.credentials:credentials", version.ref = "credentials" }
 googleid = { module = "com.google.android.libraries.identity.googleid:googleid", version.ref = "googleid" }
 
-accompanist-flowlayout = { module = "com.google.accompanist:accompanist-flowlayout", version.ref = "accompanist" }
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanist" }
 activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activity-compose" }
 androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "core-splashscreen" }
-androidx-customview-poolingcontainer = { module = "androidx.customview:customview-poolingcontainer", version.ref = "customview-poolingcontainer" }
-androidx-customview = { module = "androidx.customview:customview", version.ref = "customview" }
 androidx-espresso-core = { module = "androidx.test.espresso:espresso-core", version.ref = "espresso-core" }
 androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hilt-navigation-compose" }
 androidx-junit = { module = "androidx.test.ext:junit", version.ref = "androidx-junit" }
@@ -110,13 +107,14 @@ play-services-auth = { module = "com.google.android.gms:play-services-auth", ver
 
 
 # Compose dependencies
-compose-bom = { module = "androidx.compose:compose-bom", version.ref = "compose-bom" }
+#compose-bom = { module = "androidx.compose:compose-bom", version.ref = "compose-bom" }
 compose-ui = { module = "androidx.compose.ui:ui", version.ref = "ui" }
 compose-ui-graphics = { module = "androidx.compose.ui:ui-graphics", version.ref = "ui" }
 compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview", version.ref = "ui" }
 compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "ui" }
 compose-material3 = { module = "androidx.compose.material3:material3", version.ref = "compose-material3" }
 compose-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "ui" }
+compose-foundation = { module = "androidx.compose.foundation:foundation",  version.ref = "ui" }
 
 compose-ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4", version.ref = "ui" }
 compose-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest", version.ref = "ui" }
@@ -142,7 +140,8 @@ compose = ["compose-ui",
     "compose-ui-tooling-preview",
     "compose-ui-tooling",
     "compose-material3",
-    "compose-material-icons-extended"]
+    "compose-material-icons-extended",
+    "compose-foundation"]
 
 firebase = ["firebase-auth",
     "firebase-firestore",

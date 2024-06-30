@@ -544,7 +544,7 @@ private fun ColorPickerDialog(
                         items = accentColors,
                         key = { it.id }) {
                         Column(
-                            modifier = Modifier.animateItemPlacement(),
+                            modifier = Modifier.animateItem(fadeInSpec = null, fadeOutSpec = null),
                             verticalArrangement = Arrangement.Center,
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {

@@ -198,8 +198,7 @@ fun <T> FiltersRow(
     ) {
         item(key = "reset") {
             ResetFilterChip(
-                modifier = Modifier
-                    .animateItemPlacement()
+                modifier = Modifier.animateItem(fadeInSpec = null, fadeOutSpec = null)
                     .animateContentSize(),
                 onReset = {
                     filters.forEach { it.selectedValue = null }
@@ -210,8 +209,7 @@ fun <T> FiltersRow(
             key = { it.filterName }
         ) { filter: Filter<T, Any> ->
             FilterItem(
-                modifier = Modifier
-                    .animateItemPlacement()
+                modifier = Modifier.animateItem(fadeInSpec = null, fadeOutSpec = null)
                     .animateContentSize(),
                 filter = filter,
                 onValueSelected = {

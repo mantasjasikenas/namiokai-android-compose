@@ -131,7 +131,7 @@ fun FlatBillListPage(
                         key = { it.documentId }
                     ) { flatBill ->
                         FlatCard(
-                            modifier = Modifier.animateItemPlacement(),
+                            modifier = Modifier.animateItem(fadeInSpec = null, fadeOutSpec = null),
                             flatBill = flatBill,
                             isAllowedModification = (currentUser.admin || flatBill.createdByUid == currentUser.uid),
                             usersMap = usersMap,

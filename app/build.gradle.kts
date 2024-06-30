@@ -104,7 +104,7 @@ dependencies {
     implementation(libs.credentials.play.services.auth)
     implementation(libs.googleid)
 
-    implementation(platform(libs.compose.bom))
+//    implementation(platform(libs.compose.bom))
     implementation(libs.bundles.compose)
 
     implementation(platform(libs.firebase.bom))

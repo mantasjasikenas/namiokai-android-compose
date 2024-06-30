@@ -296,7 +296,7 @@ private fun DebtsPage(
                 ) { (user, debts) ->
                     if (!(debts.isEmpty() || usersMap[user] == null)) {
                         DebtorCard(
-                            modifier = Modifier.animateItemPlacement(),
+                            modifier = Modifier.animateItem(fadeInSpec = null, fadeOutSpec = null),
                             debtorUser = usersMap[user]!!,
                             userDebts = debts,
                             usersMap = usersMap
