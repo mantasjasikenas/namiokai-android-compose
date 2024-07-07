@@ -58,17 +58,18 @@ class SettingsViewModel @Inject constructor(
     }
 
     fun addImageToStorage(imageUri: Uri) = viewModelScope.launch {
-        when (val addImageToStorageResponse =
-            usersRepository.addImageToFirebaseStorage(imageUri)) {
+        toastManager.show("Uploading image...")
+
+        when (val response = usersRepository.addImageToFirebaseStorage(imageUri)) {
             is Response.Success -> {
-                addImageToStorageResponse.data?.let { uri ->
+                response.data?.let { uri ->
                     usersRepository.changeCurrentUserImageUrlInFirestore(uri)
                 }
                 toastManager.show("Image uploaded successfully")
             }
 
             is Response.Failure -> {
-                println(addImageToStorageResponse.e)
+                println(response.e)
                 toastManager.show("Image upload failed")
             }
 
@@ -77,11 +78,18 @@ class SettingsViewModel @Inject constructor(
     }
 
     fun updateDisplayName(newName: String) = viewModelScope.launch {
+        toastManager.show("Updating name...")
+
         val response = usersRepository.changeCurrentUserNameInFirestore(newName)
-        if (response is Response.Success) {
-            toastManager.show("Name changed successfully")
-        } else {
-            toastManager.show("Name change failed")
+
+        when (response) {
+            is Response.Success -> {
+                toastManager.show("Name changed successfully")
+            }
+
+            else -> {
+                toastManager.show("Name change failed")
+            }
         }
     }
 
@@ -113,14 +121,6 @@ class SettingsViewModel @Inject constructor(
     ) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                /*val accentColor = settingsUiState.value.accentColors.firstOrNull {
-                    it.id == id
-                } ?: return@withContext
-
-                accentColorRepository.updateAccentColor(
-                    accentColor.copy(pinned = value)
-                )*/
-
                 accentColorRepository.updateAccentColorPinned(
                     id = id,
                     pinned = value
@@ -145,22 +145,9 @@ class SettingsViewModel @Inject constructor(
             }
         }
 
-//       if (newDisplayName == usersRepository.currentUser.displayName) {
-//           toastManager.show("Name is the same as before")
-//           return false
-//       }
-//
-//       mainUiState.usersMap.values.forEach {
-//           if (it.displayName == newDisplayName) {
-//               toastManager.show("Name already taken")
-//               return false
-//           }
-//       }
-
         return true
     }
 }
-
 
 sealed interface SettingsUiState {
     data object Loading : SettingsUiState
