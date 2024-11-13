@@ -199,7 +199,7 @@ fun LatestBillCard(
                 NamiokaiSpacer(width = 7)
 
                 Text(
-                    text = flatBill.date.toLocalDateTime().format("yyyy-MM-dd"),
+                    text = LocalDateTime.parse(flatBill.date).format("yyyy-MM-dd"),
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Bold
                 )

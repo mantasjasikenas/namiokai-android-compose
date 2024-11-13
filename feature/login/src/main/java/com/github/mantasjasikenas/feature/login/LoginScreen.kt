@@ -152,7 +152,7 @@ private fun GoogleLoginButton(
         ),
         onClick = onClick,
         shape = MaterialTheme.shapes.extraLarge,
-        border = ButtonDefaults.outlinedButtonBorder,
+        border = ButtonDefaults.outlinedButtonBorder(),
     ) {
         Icon(
             painter = painterResource(id = R.drawable.ic_google_logo),

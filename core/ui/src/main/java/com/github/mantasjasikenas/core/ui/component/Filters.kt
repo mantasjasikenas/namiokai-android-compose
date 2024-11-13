@@ -3,7 +3,6 @@
 package com.github.mantasjasikenas.core.ui.component
 
 import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -49,9 +48,9 @@ import com.github.mantasjasikenas.core.ui.common.NamiokaiDateRangePicker
 import com.github.mantasjasikenas.core.ui.common.NamiokaiSpacer
 import com.github.mantasjasikenas.core.ui.common.rememberState
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
-import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Duration.Companion.days
 
 
@@ -139,7 +138,7 @@ fun FiltersPreview() {
                 values = periods,
                 predicate = { bill, value ->
                     val period = value as Period
-                    val date = bill.date.toLocalDateTime()
+                    val date = LocalDateTime.parse(bill.date)
                     date.date >= period.start && date.date <= period.end
                 }
             )
@@ -181,7 +180,6 @@ fun FiltersPreview() {
 }
 
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun <T> FiltersRow(
     modifier: Modifier = Modifier,
@@ -268,6 +266,7 @@ fun <T> FiltersDialog(
 }
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun <T, V> FilterItem(
     modifier: Modifier = Modifier,

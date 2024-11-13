@@ -1,24 +1,22 @@
 [versions]
-versionCode = "38"
-versionName = "0.3.8"
+versionCode = "39"
+versionName = "0.3.9"
 
 jvm = "21"
-compileSdk = "34"
+compileSdk = "35"
 minSdk = "29"
 targetSdk = "34"
 
 accompanist = "0.32.0"
 app-update = "2.1.0"
 hilt = "2.50"
-
 compose = "1.5.10"
-
-activity-compose = "1.9.0"
+activity-compose = "1.9.3"
 androidx-datastore-preferences = "1.1.1"
 androidx-junit = "1.2.1"
 coil-compose = "2.6.0"
 colorpicker-compose = "1.0.7"
-core-ktx = "1.13.1"
+core-ktx = "1.15.0"
 core-splashscreen = "1.0.1"
 customview-poolingcontainer = "1.0.0"
 customview = "1.2.0-alpha02"
@@ -27,59 +25,48 @@ google-services = "4.4.2"
 gradle = "8.3.1"
 hilt-navigation-compose = "1.2.0"
 gmsPlugin = "4.4.2"
-
-credentials = "1.2.2"
+credentials = "1.3.0"
 googleid = "1.1.1"
-
 junit = "4.13.2"
 ksvg = "master-SNAPSHOT"
-lifecycle-livedata-ktx = "2.8.2"
-lifecycle-runtime-ktx = "2.8.2"
+lifecycle = "2.8.7"
 material = "1.12.0"
-navigation-compose = "2.8.0-beta04"
+navigation-compose = "2.8.3"
 play-services-auth = "21.2.0"
 room = "2.6.1"
-ui = "1.7.0-beta04"
-work-runtime-ktx = "2.9.0"
-
+ui = "1.7.5"
+work-runtime-ktx = "2.10.0"
 compose-bom = "2024.06.00"
-firebase-bom = "33.1.1"
-
-android-gradle = "8.5.0"
-kotlin = "2.0.0"
+firebase-bom = "33.5.1"
+android-gradle = "8.7.2"
+kotlin = "2.0.21"
+kotlin-reflect = "2.0.21"
+kotlinx-datetime-jvm = "0.6.1"
 kotlin-gradle-plugin = "1.8.21"
-kotlin-reflect = "1.9.22"
-kotlinx-datetime-jvm = "0.4.1"
 kotlinx-serialization-json = "1.6.3"
-ksp = "2.0.0-1.0.22"
-compose-material3 = "1.2.1"
+ksp = "2.0.21-1.0.27"
+compose-material3 = "1.3.1"
 appcompat = "1.7.0"
 ui-graphics-android = "1.6.4"
-androidx-ui-graphics-android = "1.6.8"
-lifecycleRuntimeCompose = "2.8.2"
+androidx-ui-graphics-android = "1.7.5"
 dependency-analysis = "1.31.0"
 
 [libraries]
-
-# Dependencies of the included build-logic
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "android-gradle" }
 kotlin-gradlePlugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
 ksp-gradlePlugin = { group = "com.google.devtools.ksp", name = "com.google.devtools.ksp.gradle.plugin", version.ref = "ksp" }
-
-
 credentials-play-services-auth = { module = "androidx.credentials:credentials-play-services-auth", version.ref = "credentials" }
 credentials = { module = "androidx.credentials:credentials", version.ref = "credentials" }
 googleid = { module = "com.google.android.libraries.identity.googleid:googleid", version.ref = "googleid" }
-
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanist" }
 activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activity-compose" }
 androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "core-splashscreen" }
 androidx-espresso-core = { module = "androidx.test.espresso:espresso-core", version.ref = "espresso-core" }
 androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hilt-navigation-compose" }
 androidx-junit = { module = "androidx.test.ext:junit", version.ref = "androidx-junit" }
-androidx-lifecycle-livedata-ktx = { module = "androidx.lifecycle:lifecycle-livedata-ktx", version.ref = "lifecycle-livedata-ktx" }
-androidx-lifecycle-viewmodel-savedstate = { module = "androidx.lifecycle:lifecycle-viewmodel-savedstate", version.ref = "lifecycle-livedata-ktx" }
-androidx-lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycle-livedata-ktx" }
+androidx-lifecycle-livedata-ktx = { module = "androidx.lifecycle:lifecycle-livedata-ktx", version.ref = "lifecycle" }
+androidx-lifecycle-viewmodel-savedstate = { module = "androidx.lifecycle:lifecycle-viewmodel-savedstate", version.ref = "lifecycle" }
+androidx-lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycle" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigation-compose" }
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
 androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
@@ -101,26 +88,18 @@ kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref =
 kotlinx-datetime-jvm = { module = "org.jetbrains.kotlinx:kotlinx-datetime-jvm", version.ref = "kotlinx-datetime-jvm" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization-json" }
 ksvg = { module = "com.github.nwillc.ksvg:ksvg", version.ref = "ksvg" }
-lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycle-runtime-ktx" }
+lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycle" }
 material = { module = "com.google.android.material:material", version.ref = "material" }
 play-services-auth = { module = "com.google.android.gms:play-services-auth", version.ref = "play-services-auth" }
-
-
-# Compose dependencies
-#compose-bom = { module = "androidx.compose:compose-bom", version.ref = "compose-bom" }
 compose-ui = { module = "androidx.compose.ui:ui", version.ref = "ui" }
 compose-ui-graphics = { module = "androidx.compose.ui:ui-graphics", version.ref = "ui" }
 compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview", version.ref = "ui" }
 compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "ui" }
 compose-material3 = { module = "androidx.compose.material3:material3", version.ref = "compose-material3" }
 compose-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "ui" }
-compose-foundation = { module = "androidx.compose.foundation:foundation",  version.ref = "ui" }
-
+compose-foundation = { module = "androidx.compose.foundation:foundation", version.ref = "ui" }
 compose-ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4", version.ref = "ui" }
 compose-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest", version.ref = "ui" }
-
-
-# Firebase dependencies
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebase-bom" }
 firebase-auth = { module = "com.google.firebase:firebase-auth" }
 firebase-firestore = { module = "com.google.firebase:firebase-firestore" }
@@ -128,11 +107,9 @@ firebase-messaging = { module = "com.google.firebase:firebase-messaging" }
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
 firebase-storage = { module = "com.google.firebase:firebase-storage" }
 firebase-config = { module = "com.google.firebase:firebase-config" }
-
-androidx-lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycleRuntimeCompose" }
+androidx-lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycle" }
 appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 ui-graphics-android = { group = "androidx.compose.ui", name = "ui-graphics-android", version.ref = "androidx-ui-graphics-android" }
-
 
 [bundles]
 compose = ["compose-ui",
@@ -142,7 +119,6 @@ compose = ["compose-ui",
     "compose-material3",
     "compose-material-icons-extended",
     "compose-foundation"]
-
 firebase = ["firebase-auth",
     "firebase-firestore",
     "firebase-messaging",
@@ -151,29 +127,20 @@ firebase = ["firebase-auth",
     "firebase-config"]
 
 [plugins]
-
-# Plugins defined by this project
 namiokai-android-application = { id = "app.namiokai.android.application", version = "unspecified" }
 namiokai-android-library = { id = "app.namiokai.android.library", version = "unspecified" }
 namiokai-compose-application = { id = "app.namiokai.compose.application", version = "unspecified" }
 namiokai-compose-library = { id = "app.namiokai.compose.library", version = "unspecified" }
-
 android-application = { id = "com.android.application", version.ref = "android-gradle" }
 androidLibrary = { id = "com.android.library", version.ref = "android-gradle" }
-
-
 google-gms-services = { id = "com.google.gms.google-services" }
 kotlin-kapt = { id = "kotlin-kapt", version.ref = "kotlin" }
 dagger-hilt-android = { id = "com.google.dagger.hilt.android" }
-
-
 android-kotlin = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 gms = { id = "com.google.gms.google-services", version.ref = "gmsPlugin" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
-
 compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
-
 dependency-analysis = { id = "com.autonomousapps.dependency-analysis", version.ref = "dependency-analysis" }

@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.compose.compiler.gradle.ComposeFeatureFlag
+
 plugins {
     alias(libs.plugins.namiokai.android.application)
     alias(libs.plugins.namiokai.compose.application)
@@ -77,7 +79,9 @@ androidComponents {
 }
 
 composeCompiler {
-    enableStrongSkippingMode = true
+   featureFlags = setOf(
+       ComposeFeatureFlag.StrongSkipping
+   )
 }
 
 dependencies {

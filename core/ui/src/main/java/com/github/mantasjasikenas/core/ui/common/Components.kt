@@ -266,7 +266,8 @@ fun UsersPicker(
         verticalArrangement = Arrangement.Center
     ) {
         usersPickup.forEach { (uid, selected) ->
-            FlowRowItemCard(usersMap[uid]?.displayName ?: "Missing display name",
+            FlowRowItemCard(
+                usersMap[uid]?.displayName ?: "Missing display name",
                 selected,
                 onItemSelected = { status ->
                     if (!isMultipleSelectEnabled) {
@@ -284,7 +285,8 @@ private fun FlowRowItemCard(
     selectedStatus: Boolean,
     onItemSelected: (status: Boolean) -> Unit,
 ) {
-    OutlinedCard(colors = CardDefaults.outlinedCardColors(containerColor = if (selectedStatus) MaterialTheme.colorScheme.surfaceTint else MaterialTheme.colorScheme.surface),
+    OutlinedCard(
+        colors = CardDefaults.outlinedCardColors(containerColor = if (selectedStatus) MaterialTheme.colorScheme.surfaceTint else MaterialTheme.colorScheme.surface),
         onClick = { onItemSelected(selectedStatus) }) {
         Text(
             text = text,
@@ -346,7 +348,7 @@ fun NamiokaiBottomSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = bottomSheetState,
-        windowInsets = BottomAppBarDefaults.windowInsets,
+        contentWindowInsets = { BottomAppBarDefaults.windowInsets },
         modifier = Modifier.padding(
             start = 10.dp,
             top = 0.dp,
@@ -410,7 +412,8 @@ fun NamiokaiDateRangePicker(
         initialSelectedEndDateMillis = initialSelectedEndDateMillis
     )
 
-    DatePickerDialog(modifier = Modifier.fillMaxSize(),
+    DatePickerDialog(
+        modifier = Modifier.fillMaxSize(),
         onDismissRequest = onDismissRequest,
         properties = DialogProperties(dismissOnClickOutside = true),
         dismissButton = {
