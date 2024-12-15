@@ -2,10 +2,11 @@ package com.github.mantasjasikenas.feature.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.github.mantasjasikenas.core.common.util.DebtsMap
-import com.github.mantasjasikenas.core.data.repository.debts.DebtsManager
+import com.github.mantasjasikenas.core.data.repository.debts.DebtsService
 import com.github.mantasjasikenas.core.domain.model.Period
 import com.github.mantasjasikenas.core.domain.model.User
+import com.github.mantasjasikenas.core.domain.model.debts.DebtsMap
+import com.github.mantasjasikenas.core.domain.model.debts.MutableDebtsMap
 import com.github.mantasjasikenas.core.domain.repository.PeriodRepository
 import com.github.mantasjasikenas.core.domain.repository.UsersRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -23,7 +24,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    debtsManager: DebtsManager,
+    debtsService: DebtsService,
     usersRepository: UsersRepository,
     periodRepository: PeriodRepository
 ) : ViewModel() {
@@ -35,7 +36,7 @@ class HomeViewModel @Inject constructor(
                     currentPeriod = period
                 )
             }
-            .combine(debtsManager.getCurrentPeriodDebts()) { uiState, debts ->
+            .combine(debtsService.getCurrentPeriodDebts()) { uiState, debts ->
                 uiState.copy(
                     debts = debts
                 )
@@ -56,7 +57,7 @@ class HomeViewModel @Inject constructor(
 sealed interface HomeUiState {
     data object Loading : HomeUiState
     data class Success(
-        val debts: DebtsMap = mutableMapOf(),
+        val debts: DebtsMap = MutableDebtsMap(),
         val currentPeriod: Period = Period(),
         val currentUser: User = User(),
         val lastUpdated: LocalDateTime = Clock.System.now()

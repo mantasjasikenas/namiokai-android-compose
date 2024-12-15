@@ -2,6 +2,7 @@ package com.github.mantasjasikenas.core.domain.repository
 
 import android.content.Context
 import android.util.Log
+import androidx.credentials.ClearCredentialStateRequest
 import androidx.credentials.CredentialManager
 import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
@@ -121,9 +122,12 @@ class AuthRepository(
         )
     }
 
-    fun signOut() {
+    suspend fun signOut() {
         try {
             auth.signOut()
+            credentialManager.clearCredentialState(
+                ClearCredentialStateRequest()
+            )
         } catch (e: Exception) {
             e.printStackTrace()
 
@@ -133,62 +137,3 @@ class AuthRepository(
         }
     }
 }
-
-//    suspend fun signIn(): IntentSender? {
-//        val result = try {
-//            oneTapClient.beginSignIn(
-//                signInRequest
-//            )
-//                .await()
-//        } catch (e: Exception) {
-//            e.printStackTrace()
-//            if (e is CancellationException) throw e
-//            null
-//        }
-//
-//        return result?.pendingIntent?.intentSender
-//    }
-//
-//    suspend fun signInWithIntent(intent: Intent): SignInResult {
-//        val credential = oneTapClient.getSignInCredentialFromIntent(intent)
-//        val googleIdToken = credential.googleIdToken
-//        val googleCredentials = GoogleAuthProvider.getCredential(
-//            googleIdToken,
-//            null
-//        )
-//        return try {
-//            val authResult = auth.signInWithCredential(googleCredentials)
-//                .await()
-//            val user = authResult.user
-//            val isNewUser = authResult.additionalUserInfo?.isNewUser ?: false
-//
-//            if (isNewUser && authResult.user != null) {
-//                usersRepository.insertUser(authResult.user!!.toUser())
-//            }
-//
-//            SignInResult(
-//                data = user?.run {
-//                    toUser()
-//                },
-//                errorMessage = null
-//            )
-//        } catch (e: Exception) {
-//            e.printStackTrace()
-//            if (e is CancellationException) throw e
-//            SignInResult(
-//                data = null,
-//                errorMessage = e.message
-//            )
-//        }
-//    }
-//
-//    suspend fun signOut() {
-//        try {
-//            oneTapClient.signOut()
-//                .await()
-//            auth.signOut()
-//        } catch (e: Exception) {
-//            e.printStackTrace()
-//            if (e is CancellationException) throw e
-//        }
-//    }

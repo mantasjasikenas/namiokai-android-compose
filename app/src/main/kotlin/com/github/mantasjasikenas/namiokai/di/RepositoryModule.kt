@@ -9,9 +9,11 @@ import com.github.mantasjasikenas.core.data.repository.PurchaseBillsRepositoryIm
 import com.github.mantasjasikenas.core.data.repository.TripBillsRepositoryImpl
 import com.github.mantasjasikenas.core.data.repository.UserDataRepositoryImpl
 import com.github.mantasjasikenas.core.data.repository.UsersRepositoryImpl
+import com.github.mantasjasikenas.core.data.repository.debts.DebtsRepositoryImpl
 import com.github.mantasjasikenas.core.data.repository.preferences.PreferencesRepository
 import com.github.mantasjasikenas.core.domain.repository.BaseFirebaseRepository
 import com.github.mantasjasikenas.core.domain.repository.BillsRepository
+import com.github.mantasjasikenas.core.domain.repository.DebtsRepository
 import com.github.mantasjasikenas.core.domain.repository.FlatBillsRepository
 import com.github.mantasjasikenas.core.domain.repository.PeriodRepository
 import com.github.mantasjasikenas.core.domain.repository.PurchaseBillsRepository
@@ -129,5 +131,9 @@ object RepositoryModule {
             periodRepository = periodRepository
         )
 
-
+    @Provides
+    @Singleton
+    fun provideDebtsRepository(): DebtsRepository {
+        return DebtsRepositoryImpl()
+    }
 }

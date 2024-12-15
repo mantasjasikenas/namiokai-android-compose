@@ -1,9 +1,10 @@
-@file:OptIn(ExperimentalFoundationApi::class)
+@file:OptIn(ExperimentalMaterial3Api::class)
 
 package com.github.mantasjasikenas.feature.debts
 
 import android.content.Intent
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.fadeIn
@@ -11,7 +12,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -25,11 +26,25 @@ import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Cottage
+import androidx.compose.material.icons.outlined.LocalGasStation
+import androidx.compose.material.icons.outlined.ShoppingBag
+import androidx.compose.material.icons.outlined.ShoppingCart
+import androidx.compose.material.icons.outlined.UnfoldLess
+import androidx.compose.material.icons.outlined.UnfoldMore
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -37,35 +52,48 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
-import com.github.mantasjasikenas.core.common.util.UserDebtsMap
 import com.github.mantasjasikenas.core.common.util.UserUid
 import com.github.mantasjasikenas.core.common.util.format
+import com.github.mantasjasikenas.core.common.util.parseLocalDateTime
 import com.github.mantasjasikenas.core.domain.model.Period
 import com.github.mantasjasikenas.core.domain.model.PeriodState
 import com.github.mantasjasikenas.core.domain.model.User
 import com.github.mantasjasikenas.core.domain.model.UsersMap
+import com.github.mantasjasikenas.core.domain.model.bills.Bill
+import com.github.mantasjasikenas.core.domain.model.bills.FlatBill
+import com.github.mantasjasikenas.core.domain.model.bills.PurchaseBill
+import com.github.mantasjasikenas.core.domain.model.bills.TripBill
+import com.github.mantasjasikenas.core.domain.model.debts.DebtBill
+import com.github.mantasjasikenas.core.domain.model.debts.DebtsMap
 import com.github.mantasjasikenas.core.ui.common.EuroIconTextRow
+import com.github.mantasjasikenas.core.ui.common.NamiokaiBottomSheet
 import com.github.mantasjasikenas.core.ui.common.NamiokaiCircularProgressIndicator
 import com.github.mantasjasikenas.core.ui.common.NamiokaiSpacer
 import com.github.mantasjasikenas.core.ui.common.PagesFlowRow
+import com.github.mantasjasikenas.core.ui.common.noRippleClickable
 import com.github.mantasjasikenas.core.ui.common.rememberState
 import com.github.mantasjasikenas.core.ui.component.NamiokaiElevatedCard
 import com.github.mantasjasikenas.core.ui.component.NamiokaiElevatedOutlinedCard
 import com.github.mantasjasikenas.core.ui.component.NamiokaiOutlinedCard
+import com.github.mantasjasikenas.core.ui.component.NoResultsFound
 import com.github.mantasjasikenas.core.ui.component.SwipePeriod
 
 
@@ -100,7 +128,7 @@ fun DebtsScreenContent(
     val currentUser = debtsUiState.currentUser
     val usersMap = debtsUiState.users.associateBy { it.uid }
     val usersDebts = debtsUiState.debts
-    val currentUserDebts = usersDebts[currentUser.uid]
+    val currentUserDebts = usersDebts.getUserDebts(currentUser.uid)
 
     val pages = listOf(
         "Personal",
@@ -129,20 +157,13 @@ fun DebtsScreenContent(
             targetState = currentPage,
             label = "",
             transitionSpec = {
-                // Compare the incoming number with the previous number.
                 if (targetState > initialState) {
-                    // If the target number is larger, it slides up and fades in
-                    // while the initial (smaller) number slides up and fades out.
                     (slideInHorizontally { height -> height } + fadeIn()).togetherWith(
                         slideOutHorizontally { height -> -height } + fadeOut())
                 } else {
-                    // If the target number is smaller, it slides down and fades in
-                    // while the initial number slides down and fades out.
                     (slideInHorizontally { height -> -height } + fadeIn()).togetherWith(
                         slideOutHorizontally { height -> height } + fadeOut())
                 }.using(
-                    // Disable clipping since the faded slide-in/out should
-                    // be displayed out of bounds.
                     SizeTransform(clip = false)
                 )
             },
@@ -170,33 +191,6 @@ fun DebtsScreenContent(
             }
 
         }
-
-
-//        HorizontalPager(
-//            state = pagerState
-//        ) { pageIndex ->
-//            when (pageIndex) {
-//                0 -> {
-//                    PersonalDebtsPage(
-//                        periodState = periodState,
-//                        currentUserDebts = currentUserDebts,
-//                        onPeriodReset = onPeriodReset,
-//                        onPeriodUpdate = onPeriodUpdate,
-//                        usersMap = usersMap
-//                    )
-//                }
-//
-//                1 -> {
-//                    DebtsPage(
-//                        periodState = periodState,
-//                        usersDebts = usersDebts,
-//                        usersMap = usersMap,
-//                        onPeriodReset = onPeriodReset,
-//                        onPeriodUpdate = onPeriodUpdate,
-//                    )
-//                }
-//            }
-//        }
     }
 }
 
@@ -204,7 +198,7 @@ fun DebtsScreenContent(
 private fun PersonalDebtsPage(
     usersMap: UsersMap,
     periodState: PeriodState,
-    currentUserDebts: MutableMap<UserUid, Double>?,
+    currentUserDebts: Map<UserUid, List<DebtBill>>?,
     onPeriodReset: () -> Unit,
     onPeriodUpdate: (Period) -> Unit,
 ) {
@@ -231,7 +225,7 @@ private fun PersonalDebtsPage(
         if (currentUserDebts.isNullOrEmpty()) {
             NoDebtsFound()
         } else {
-            DebtsCard(
+            PersonalDebts(
                 currentUserDebts = currentUserDebts,
                 usersMap = usersMap
             )
@@ -239,11 +233,10 @@ private fun PersonalDebtsPage(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun DebtsPage(
     periodState: PeriodState,
-    usersDebts: Map<UserUid, MutableMap<UserUid, Double>>,
+    usersDebts: DebtsMap,
     usersMap: UsersMap,
     onPeriodReset: () -> Unit,
     onPeriodUpdate: (Period) -> Unit,
@@ -279,7 +272,8 @@ private fun DebtsPage(
             }
             return@Column
         } else {
-            NamiokaiSpacer(height = 20) // looks good with 8?
+            NamiokaiSpacer(height = 20)
+
             LazyVerticalStaggeredGrid(
                 columns = StaggeredGridCells.Fixed(2),
                 verticalItemSpacing = 8.dp,
@@ -290,8 +284,11 @@ private fun DebtsPage(
                 modifier = Modifier
                     .fillMaxSize()
             ) {
-                items(items = usersDebts.toList()
-                    .filter { it.second.isNotEmpty() },
+                items(
+                    items = usersDebts
+                        .getAllDebts()
+                        .toList()
+                        .filter { it.second.isNotEmpty() },
                     key = { it.first }
                 ) { (user, debts) ->
                     if (!(debts.isEmpty() || usersMap[user] == null)) {
@@ -309,8 +306,8 @@ private fun DebtsPage(
 }
 
 @Composable
-private fun DebtsCard(
-    currentUserDebts: MutableMap<UserUid, Double>?,
+private fun PersonalDebts(
+    currentUserDebts: Map<UserUid, List<DebtBill>>?,
     usersMap: UsersMap,
 ) {
     if (currentUserDebts == null) {
@@ -319,6 +316,7 @@ private fun DebtsCard(
 
     val clipboardManager = LocalClipboardManager.current
     val context = LocalContext.current
+
     val launchSwedbank = {
         val launchIntent: Intent? =
             context.packageManager.getLaunchIntentForPackage("lt.swedbank.mobile")
@@ -332,21 +330,25 @@ private fun DebtsCard(
     }
 
     NamiokaiSpacer(height = 20)
+
     NamiokaiOutlinedCard(
         modifier = Modifier.verticalScroll(rememberScrollState())
     ) {
         var total = 0.0
-        currentUserDebts.forEach { (key, value) ->
+
+        currentUserDebts.forEach { (uid, debtBills) ->
+            val value = debtBills.sumOf { it.amount }
+
             total += value
+
             EuroIconTextRow(
-                label = usersMap[key]!!.displayName,
+                label = usersMap[uid]!!.displayName,
                 value = value.format(2),
                 onLongClick = {
                     clipboardManager.setText(AnnotatedString(value.format(2)))
                     launchSwedbank()
                 }
             )
-            //CustomSpacer(height = 3)
         }
 
         if ((currentUserDebts.size) > 1) {
@@ -374,7 +376,7 @@ fun NoDebtsFound(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        com.github.mantasjasikenas.core.ui.component.NoResultsFound(
+        NoResultsFound(
             label = "No debts was found.\nYou are all good!",
             modifier = modifier
         )
@@ -385,14 +387,15 @@ fun NoDebtsFound(
 private fun DebtorCard(
     modifier: Modifier = Modifier,
     debtorUser: User,
-    userDebts: UserDebtsMap,
+    userDebts: Map<UserUid, List<DebtBill>>,
     usersMap: UsersMap
 ) {
-    var expandedState by remember { mutableStateOf(false) }
+    val expandedState = remember { mutableStateOf(false) }
+    val expandAll = remember { mutableStateOf(false) }
 
     NamiokaiElevatedCard(
         modifier = Modifier.animateContentSize(),
-        onClick = { expandedState = !expandedState }) {
+        onClick = { expandedState.value = !expandedState.value }) {
 
         Column(
             modifier = modifier
@@ -420,13 +423,8 @@ private fun DebtorCard(
                         .size(31.dp)
                 )
 
-
                 NamiokaiSpacer(width = 10)
-                /*CardTextColumn(
-                    label = stringResource(R.string.debtor),
-                    value = debtorUser.displayName,
-                    modifier = Modifier.padding(start = 10.dp)
-                )*/
+
                 Column(modifier = Modifier.padding(start = 10.dp)) {
                     Text(
                         text = stringResource(R.string.debtor),
@@ -445,74 +443,263 @@ private fun DebtorCard(
 
     }
 
+    if (expandedState.value) {
+        DebtorBottomSheet(
+            debtorUser = debtorUser,
+            userDebts = userDebts,
+            usersMap = usersMap,
+            expandedState = expandedState,
+            expandAll = expandAll
+        )
+    }
+}
 
-    if (expandedState) {
-        com.github.mantasjasikenas.core.ui.component.NamiokaiDialog(
-            title = "Debts details",
-            buttonsVisible = false,
-            onSaveClick = { expandedState = false },
-            onDismiss = { expandedState = false })
-        {
-            Column {
-                if (userDebts.isEmpty()) {
-                    Text(
-                        text = "No debts",
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.primary,
-                        fontWeight = FontWeight.Bold,
-                    )
-                    return@NamiokaiDialog
-                }
-
-
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    com.github.mantasjasikenas.core.ui.common.CardText(
-                        label = "Debtor",
-                        value = debtorUser.displayName
-                    )
-                    /* CardText(
-                         label = "Period",
-                         value = "$debtsPeriod"
-                     )*/
-                }
-
-                //CustomSpacer(height = 8) // 16
+@Composable
+private fun DebtorBottomSheet(
+    debtorUser: User,
+    userDebts: Map<UserUid, List<DebtBill>>,
+    usersMap: UsersMap,
+    expandedState: MutableState<Boolean>,
+    expandAll: MutableState<Boolean>
+) {
+    NamiokaiBottomSheet(
+        title = "Debts details",
+        onDismiss = { expandedState.value = false },
+        bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    ) {
+        Column(
+            modifier = Modifier
+                .verticalScroll(rememberScrollState())
+        ) {
+            if (userDebts.isEmpty()) {
                 Text(
-                    text = "Debts",
-                    style = MaterialTheme.typography.labelMedium,
-                    fontWeight = FontWeight.Bold,
+                    text = "No debts",
+                    style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Start,
+                    fontWeight = FontWeight.Bold,
                 )
 
-                var total = 0.0
-                userDebts.forEach { (key, value) ->
-                    total += value
-                    EuroIconTextRow(
-                        label = usersMap[key]!!.displayName,
-                        value = value.format(2)
-                    )
-                }
+                return@NamiokaiBottomSheet
+            }
 
-                if (userDebts.size > 1) {
-                    HorizontalDivider(
-                        modifier = Modifier.padding(vertical = 3.dp),
-                        thickness = 2.dp,
-                    )
-                    EuroIconTextRow(
-                        label = "Total",
-                        value = total.format(2),
-                    )
+            DebtsDetailsHeader(
+                displayName = debtorUser.displayName,
+                onExpandAll = { expandAll.value = true },
+                onCollapseAll = { expandAll.value = false }
+            )
+
+            var totalDebt = 0.0
+
+            (userDebts).forEach { (key, debtBills) ->
+                val value = debtBills.sumOf { it.amount }
+
+                totalDebt += value
+
+                ExpandableDebtDetailsRow(
+                    expandAll = expandAll,
+                    usersMap = usersMap,
+                    userUid = key,
+                    value = value,
+                    debtBills = debtBills
+                )
+            }
+
+            if (userDebts.size > 1) {
+                DebtsDetailsFooter(
+                    totalDebt = totalDebt
+                )
+            }
+
+            NamiokaiSpacer(height = 8)
+        }
+
+    }
+}
+
+@Composable
+private fun ExpandableDebtDetailsRow(
+    expandAll: MutableState<Boolean>,
+    usersMap: UsersMap,
+    userUid: UserUid,
+    value: Double,
+    debtBills: List<DebtBill>
+) {
+    ExpandableSection(
+        initialExpandState = expandAll.value,
+        header = {
+            EuroIconTextRow(
+                modifier = Modifier.padding(horizontal = 8.dp),
+                label = usersMap[userUid]?.displayName ?: "",
+                value = value.format(2),
+            )
+        }
+    ) {
+        ElevatedCard(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp),
+            colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface),
+        ) {
+            Column(
+                modifier = Modifier
+                    .padding(8.dp)
+            ) {
+                debtBills.forEach { debtBill ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(
+                            4.dp,
+                            Alignment.Start
+                        )
+                    ) {
+                        Icon(
+                            imageVector = debtBill.bill.getIcon(),
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(12.dp)
+                        )
+                        EuroIconTextRow(
+                            label = debtBill.bill.getBillDescription(),
+                            value = debtBill.amount.format(2),
+                            labelTextStyle = MaterialTheme.typography.labelMedium,
+                            valueTextStyle = MaterialTheme.typography.labelMedium,
+                            iconSize = 12.dp,
+                        )
+                    }
                 }
-                NamiokaiSpacer(height = 8)
             }
         }
     }
 }
 
+@Composable
+private fun DebtsDetailsHeader(
+    displayName: String,
+    onExpandAll: () -> Unit,
+    onCollapseAll: () -> Unit
+) {
+    OutlinedCard(
+        modifier = Modifier.padding(bottom = 16.dp),
+        colors = CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(
+                8.dp,
+                Alignment.End
+            ),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            val debtorText = buildAnnotatedString {
+                withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                    append(displayName)
+                }
+                withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary)) {
+                    append(" owes")
+                }
+            }
 
+            Text(
+                modifier = Modifier
+                    .weight(1f),
+                text = debtorText,
+                style = MaterialTheme.typography.titleMedium,
+                textAlign = TextAlign.Start,
+            )
 
+            Icon(
+                imageVector = Icons.Outlined.UnfoldLess,
+                contentDescription = null,
+                modifier = Modifier.noRippleClickable {
+                    onCollapseAll()
+                }
+            )
+
+            Icon(
+                imageVector = Icons.Outlined.UnfoldMore,
+                contentDescription = null,
+                modifier = Modifier.clickable {
+                    onExpandAll()
+                }
+            )
+        }
+    }
+}
+
+@Composable
+private fun DebtsDetailsFooter(
+    totalDebt: Double
+) {
+    OutlinedCard(
+        modifier = Modifier.padding(top = 16.dp),
+        colors = CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
+    ) {
+        EuroIconTextRow(
+            modifier = Modifier.padding(8.dp),
+            label = "Total",
+            value = totalDebt.format(2),
+            labelTextStyle = MaterialTheme.typography.titleMedium,
+        )
+    }
+}
+
+@Composable
+private fun ExpandableSection(
+    modifier: Modifier = Modifier,
+    initialExpandState: Boolean = false,
+    header: @Composable () -> Unit = {},
+    content: @Composable () -> Unit
+) {
+    var isExpanded by remember(initialExpandState) { mutableStateOf(initialExpandState) }
+
+    Column(
+        modifier = modifier
+            .noRippleClickable {
+                isExpanded = !isExpanded
+            }
+            .fillMaxWidth()
+    ) {
+        header()
+
+        AnimatedVisibility(
+            modifier = Modifier
+                .fillMaxWidth(),
+            visible = isExpanded
+        ) {
+            content()
+        }
+    }
+}
+
+private fun Bill.getBillDescription(): String {
+    return when (this) {
+        is TripBill -> {
+            "Trip to $tripDestination"
+        }
+
+        is PurchaseBill -> {
+            shoppingList
+        }
+
+        is FlatBill -> {
+            date.parseLocalDateTime()?.format() ?: "Flat bill"
+        }
+
+        else -> {
+            "Bill"
+        }
+    }
+}
+
+private fun Bill.getIcon(): ImageVector {
+    return when (this) {
+        is TripBill -> Icons.Outlined.LocalGasStation
+        is PurchaseBill -> Icons.Outlined.ShoppingBag
+        is FlatBill -> Icons.Outlined.Cottage
+        else -> Icons.Outlined.ShoppingCart
+    }
+}

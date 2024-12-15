@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.compose.compiler.gradle.ComposeFeatureFlag
-
 plugins {
     alias(libs.plugins.namiokai.android.application)
     alias(libs.plugins.namiokai.compose.application)
@@ -36,18 +34,16 @@ android {
 
     buildTypes {
         getByName("debug") {
-            manifestPlaceholders += mapOf()
+            manifestPlaceholders += mapOf("appName" to "Namiokai Debug")
             applicationIdSuffix = ".debug"
-            manifestPlaceholders["appName"] = "Namiokai Debug"
             signingConfig = signingConfigs.getByName("namiokai-debug")
         }
 
         getByName("release") {
-            manifestPlaceholders += mapOf()
+            manifestPlaceholders += mapOf("appName" to "Namiokai")
             isMinifyEnabled = true
             isShrinkResources = true
             isDebuggable = false
-            manifestPlaceholders["appName"] = "Namiokai"
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -76,12 +72,6 @@ androidComponents {
     onVariants(selector().withBuildType("release")) {
         it.packaging.resources.excludes.add("META-INF/**")
     }
-}
-
-composeCompiler {
-   featureFlags = setOf(
-       ComposeFeatureFlag.StrongSkipping
-   )
 }
 
 dependencies {

@@ -1,13 +1,13 @@
 package com.github.mantasjasikenas.namiokai
 
-import com.github.mantasjasikenas.core.data.repository.debts.DebtsRepository
+import com.github.mantasjasikenas.core.data.repository.debts.DebtsRepositoryImpl
 import com.github.mantasjasikenas.core.domain.model.User
 import com.github.mantasjasikenas.core.domain.model.bills.PurchaseBill
 
 
 class DebsRepositoryTest {
 
-    private val repo = DebtsRepository()
+    private val repo = DebtsRepositoryImpl()
     private lateinit var purchaseBills: MutableList<PurchaseBill>
 
     private val sigisUser = User(

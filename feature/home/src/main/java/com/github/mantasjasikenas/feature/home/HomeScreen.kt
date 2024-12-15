@@ -29,10 +29,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.github.mantasjasikenas.core.common.util.UserUid
 import com.github.mantasjasikenas.core.common.util.format
 import com.github.mantasjasikenas.core.domain.model.Period
 import com.github.mantasjasikenas.core.domain.model.User
+import com.github.mantasjasikenas.core.domain.model.debts.DebtsMap
 import com.github.mantasjasikenas.core.ui.common.NamiokaiCircularProgressIndicator
 import com.github.mantasjasikenas.core.ui.common.PagesFlowRow
 import com.github.mantasjasikenas.core.ui.common.noRippleClickable
@@ -74,7 +74,7 @@ fun HomeScreen(
     @Suppress("UNUSED_PARAMETER")
     homeViewModel: HomeViewModel = hiltViewModel(),
     currentUser: User,
-    usersDebts: Map<UserUid, MutableMap<UserUid, Double>>,
+    usersDebts: DebtsMap,
     currentPeriod: Period
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -127,7 +127,7 @@ fun HomeScreen(
 @Composable
 private fun WidgetsPage(
     currentUser: User,
-    usersDebts: Map<UserUid, MutableMap<UserUid, Double>>,
+    usersDebts: DebtsMap,
     period: Period
 ) {
     Column(
@@ -145,7 +145,7 @@ private fun WidgetsPage(
 
 @Composable
 private fun Widgets(
-    usersDebts: Map<UserUid, MutableMap<UserUid, Double>>,
+    usersDebts: DebtsMap,
     currentUser: User,
     period: Period
 ) {
@@ -171,9 +171,7 @@ private fun Widgets(
             WidgetCard(
                 label = "Owed to you",
             ) {
-                val owedToYou = usersDebts.values.sumOf {
-                    it[currentUser.uid] ?: 0.0
-                }
+                val owedToYou = usersDebts.getTotalOwedToYou(currentUser.uid)
 
                 EuroIconText(
                     value = owedToYou.format(2),
@@ -185,8 +183,7 @@ private fun Widgets(
             WidgetCard(
                 label = "You owe",
             ) {
-                val value = usersDebts[currentUser.uid]?.values?.sum()
-                    ?.format(2) ?: 0.0.format(2)
+                val value = usersDebts.getTotalDebt(currentUser.uid).format(2)
 
                 EuroIconText(
                     value = value,
@@ -198,7 +195,7 @@ private fun Widgets(
             WidgetCard(
                 label = "Total debts",
             ) {
-                val value = (usersDebts[currentUser.uid]?.size ?: 0).toString()
+                val value = usersDebts.getTotalDebtsCount(currentUser.uid).toString()
 
                 Text(
                     text = value,

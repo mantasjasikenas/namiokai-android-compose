@@ -27,4 +27,5 @@ dependencies {
     implementation(libs.firebase.auth)
 
     implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.kotlinx.datetime.jvm)
 }

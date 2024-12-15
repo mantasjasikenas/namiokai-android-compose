@@ -36,6 +36,7 @@ import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedCard
@@ -56,8 +57,10 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -209,7 +212,10 @@ fun EuroIconTextRow(
     modifier: Modifier = Modifier,
     label: String,
     value: String,
-    onLongClick: (() -> Unit)? = null
+    onLongClick: (() -> Unit)? = null,
+    labelTextStyle: TextStyle = MaterialTheme.typography.labelLarge,
+    valueTextStyle: TextStyle = LocalTextStyle.current,
+    iconSize: Dp = 16.dp
 ) {
     val haptics = LocalHapticFeedback.current
 
@@ -217,7 +223,6 @@ fun EuroIconTextRow(
         modifier = modifier
             .fillMaxWidth()
             .conditional(onLongClick != null) {
-                //this.noRippleClickable { onClick?.invoke() }
                 this.combinedClickable(
                     onClick = { },
                     onLongClick = {
@@ -231,18 +236,27 @@ fun EuroIconTextRow(
     ) {
         Text(
             text = label,
-            style = MaterialTheme.typography.labelLarge,
+            style = labelTextStyle,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f)
         )
+
         Row(
+            modifier = Modifier.padding(start = 6.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.End
+            horizontalArrangement = Arrangement.End,
         ) {
-            Text(text = value)
+            Text(
+                text = value,
+                style = valueTextStyle,
+            )
+
             Icon(
                 imageVector = Icons.Outlined.EuroSymbol,
                 contentDescription = null,
                 modifier = Modifier
-                    .size(16.dp)
+                    .size(iconSize)
                     .fillMaxWidth(),
                 tint = MaterialTheme.colorScheme.primary
             )
@@ -356,7 +370,6 @@ fun NamiokaiBottomSheet(
             bottom = 10.dp
         )
     ) {
-
         Column(
             modifier = Modifier.padding(
                 start = 25.dp,
