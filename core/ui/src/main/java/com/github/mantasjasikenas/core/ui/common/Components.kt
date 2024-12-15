@@ -206,7 +206,6 @@ fun DateTimeCardColumn(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun EuroIconTextRow(
     modifier: Modifier = Modifier,
@@ -215,7 +214,62 @@ fun EuroIconTextRow(
     onLongClick: (() -> Unit)? = null,
     labelTextStyle: TextStyle = MaterialTheme.typography.labelLarge,
     valueTextStyle: TextStyle = LocalTextStyle.current,
-    iconSize: Dp = 16.dp
+    iconSize: Dp = 16.dp,
+) {
+    IconTextRow(
+        modifier = modifier,
+        label = label,
+        value = value,
+        onLongClick = onLongClick,
+        labelTextStyle = labelTextStyle,
+        valueTextStyle = valueTextStyle,
+        iconSize = iconSize,
+        icon = Icons.Outlined.EuroSymbol
+    )
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun IconTextRow(
+    modifier: Modifier = Modifier,
+    label: String,
+    value: String,
+    onLongClick: (() -> Unit)? = null,
+    labelTextStyle: TextStyle = MaterialTheme.typography.labelLarge,
+    valueTextStyle: TextStyle = LocalTextStyle.current,
+    iconSize: Dp = 16.dp,
+    icon: ImageVector
+) {
+    TextRow(
+        modifier = modifier,
+        label = label,
+        value = value,
+        onLongClick = onLongClick,
+        labelTextStyle = labelTextStyle,
+        valueTextStyle = valueTextStyle,
+        endContent = {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(iconSize)
+                    .fillMaxWidth(),
+                tint = MaterialTheme.colorScheme.primary
+            )
+        }
+    )
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun TextRow(
+    modifier: Modifier = Modifier,
+    label: String,
+    value: String,
+    onLongClick: (() -> Unit)? = null,
+    labelTextStyle: TextStyle = MaterialTheme.typography.labelLarge,
+    valueTextStyle: TextStyle = LocalTextStyle.current,
+    endContent: (@Composable () -> Unit)? = null
 ) {
     val haptics = LocalHapticFeedback.current
 
@@ -252,14 +306,7 @@ fun EuroIconTextRow(
                 style = valueTextStyle,
             )
 
-            Icon(
-                imageVector = Icons.Outlined.EuroSymbol,
-                contentDescription = null,
-                modifier = Modifier
-                    .size(iconSize)
-                    .fillMaxWidth(),
-                tint = MaterialTheme.colorScheme.primary
-            )
+            endContent?.invoke()
         }
     }
 }

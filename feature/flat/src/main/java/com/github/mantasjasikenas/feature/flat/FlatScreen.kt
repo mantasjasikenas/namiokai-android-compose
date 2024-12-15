@@ -29,12 +29,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material.icons.outlined.CalendarToday
+import androidx.compose.material.icons.outlined.ElectricalServices
 import androidx.compose.material.icons.outlined.EuroSymbol
 import androidx.compose.material.icons.outlined.Flood
 import androidx.compose.material.icons.outlined.WaterDrop
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
@@ -76,6 +78,7 @@ import com.github.mantasjasikenas.core.ui.common.DateTimeCardColumn
 import com.github.mantasjasikenas.core.ui.common.NamiokaiBottomSheet
 import com.github.mantasjasikenas.core.ui.common.NamiokaiCircularProgressIndicator
 import com.github.mantasjasikenas.core.ui.common.NamiokaiSpacer
+import com.github.mantasjasikenas.core.ui.common.TextRow
 import com.github.mantasjasikenas.core.ui.common.VerticalDivider
 import com.github.mantasjasikenas.core.ui.component.NamiokaiConfirmDialog
 import com.github.mantasjasikenas.core.ui.component.NoResultsFound
@@ -91,7 +94,6 @@ import kotlin.math.absoluteValue
 
 @Composable
 fun FlatScreen(
-    modifier: Modifier = Modifier,
     flatViewModel: FlatViewModel = hiltViewModel(),
     sharedState: SharedState,
     onNavigateToFlatBill: () -> Unit,
@@ -151,27 +153,24 @@ fun FlatScreen(
                 FlatStatisticsContainer(
                     flatBills = flatBills,
                     title = "Total rent and taxes",
-                    subtitle = "Rent and taxes statistics",
-                    xAxisLabels = flatBills
-                        .let { dates ->
-                            if (dates.size >= 3) {
-                                listOf(
-                                    dates.first(),
-                                    dates[dates.size / 2],
-                                    dates.last()
-                                )
-                            } else {
-                                dates
-                            }
-                        }
-                        .mapNotNull {
-                            it.date.split("T")
-                                .firstOrNull()
-                        },
-                    selectedValueTitle = { bill ->
-                        bill.date.split("T")
-                            .firstOrNull() ?: ""
-                    }
+                )
+            }
+
+            item(span = {
+                GridItemSpan(maxLineSpan)
+            }) {
+                ElectricityStatisticsContainer(
+                    electricity = flatUiState.electricitySummary?.electricityDifference
+                        ?: return@item,
+                    title = "Electricity consumption",
+                )
+            }
+
+            item(span = {
+                GridItemSpan(maxLineSpan)
+            }) {
+                ElectricitySummaryContainer(
+                    electricitySummary = flatUiState.electricitySummary ?: return@item,
                 )
             }
         }
@@ -305,6 +304,104 @@ fun LatestTwoBillsComparisonCard(
     }
 }
 
+
+@Composable
+fun ElectricitySummaryContainer(
+    modifier: Modifier = Modifier,
+    electricitySummary: ElectricitySummary,
+) {
+    val fields = listOf(
+        "Average" to electricitySummary.averageDifference,
+        "Minimum" to electricitySummary.minDifference,
+        "Maximum" to electricitySummary.maxDifference
+    )
+
+    var expanded = remember { mutableStateOf(false) }
+
+    ElevatedCardContainer(
+        modifier = modifier,
+        title = "Electricity consumption",
+    ) {
+        Column {
+            fields.forEach { (label, value) ->
+                TextRow(
+                    label = label,
+                    value = value.format(2),
+                    labelTextStyle = MaterialTheme.typography.labelMedium,
+                    valueTextStyle = MaterialTheme.typography.labelMedium,
+                    endContent = {
+                        Text(
+                            text = "kWh",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                )
+            }
+
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                AnimatedVisibility(visible = expanded.value) {
+                    Column {
+                        HorizontalDivider(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp)
+                        )
+
+                        electricitySummary.electricityDifference.reversed().forEach {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(
+                                    4.dp,
+                                    Alignment.Start
+                                )
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.ElectricalServices,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(12.dp)
+                                )
+                                TextRow(
+                                    label = it.firstBillDate.split('T')
+                                        .first() + " - " + it.secondBillDate.split('T').first(),
+                                    value = it.difference.format(2),
+                                    labelTextStyle = MaterialTheme.typography.labelMedium,
+                                    valueTextStyle = MaterialTheme.typography.labelMedium,
+                                    endContent = {
+                                        Text(
+                                            text = "kWh",
+                                            style = MaterialTheme.typography.labelMedium,
+                                            color = MaterialTheme.colorScheme.primary,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+
+            }
+            Text(
+                text = if (expanded.value) "Show less" else "Show more",
+                modifier = Modifier
+                    .padding(top = 8.dp)
+                    .fillMaxWidth()
+                    .clickable { expanded.value = !expanded.value },
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
+    }
+}
 
 @Composable
 fun FlatBillSummary(
@@ -592,11 +689,30 @@ private fun CompactFlatCard(
 internal fun FlatStatisticsContainer(
     flatBills: List<FlatBill>,
     title: String,
-    subtitle: String,
     xAxisLabels: List<String> = emptyList(),
-    selectedValueTitle: (FlatBill) -> String,
     selectedInitial: FlatBill? = flatBills.lastOrNull(),
 ) {
+    val xAxisLabels = if (xAxisLabels.isEmpty()) {
+        flatBills
+            .let { dates ->
+                if (dates.size >= 3) {
+                    listOf(
+                        dates.first(),
+                        dates[dates.size / 2],
+                        dates.last()
+                    )
+                } else {
+                    dates
+                }
+            }
+            .mapNotNull {
+                it.date.split("T")
+                    .firstOrNull()
+            }
+    } else {
+        xAxisLabels
+    }
+
     var selectedRecord by remember {
         mutableStateOf(selectedInitial)
     }
@@ -690,6 +806,97 @@ internal fun FlatStatisticsContainer(
     }
 }
 
+@Composable
+internal fun ElectricityStatisticsContainer(
+    electricity: List<BillDifference>,
+    title: String,
+    xAxisLabels: List<String> = emptyList(),
+    selectedInitial: BillDifference? = electricity.lastOrNull(),
+) {
+    val xLabels = if (xAxisLabels.isEmpty()) {
+        electricity
+            .let { dates ->
+                if (dates.size >= 3) {
+                    listOf(
+                        dates.first(),
+                        dates[dates.size / 2],
+                        dates.last()
+                    )
+                } else {
+                    dates
+                }
+            }
+            .mapNotNull {
+                it.firstBillDate.split("T")
+                    .firstOrNull()
+            }
+    } else {
+        xAxisLabels
+    }
+
+    var selectedRecord by remember {
+        mutableStateOf(selectedInitial)
+    }
+
+    var data by remember {
+        mutableStateOf(
+            electricity.map { it.difference }
+                .ifEmpty {
+                    List(xLabels.size) { 0 }
+                },
+        )
+    }
+
+    val statisticsFields = listOf(
+        "Start date" to (selectedRecord?.firstBillDate?.split("T")?.firstOrNull() ?: "-"),
+        "End date" to (selectedRecord?.secondBillDate?.split("T")?.firstOrNull() ?: "-"),
+        "Amount" to (selectedRecord?.difference ?: 0.0).format(2),
+    )
+
+    ElevatedCardContainer(
+        modifier = Modifier,
+        title = title,
+    ) {
+        statisticsFields.forEach { (label, value) ->
+            TextRow(
+                label = label,
+                value = value.format(2),
+                labelTextStyle = MaterialTheme.typography.labelMedium,
+                valueTextStyle = MaterialTheme.typography.labelMedium,
+                endContent = if (label == "Amount") {
+                    {
+                        Text(
+                            text = "kWh",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                } else {
+                    null
+                }
+            )
+        }
+
+        Spacer(modifier = Modifier.height(6.dp))
+
+        ProgressGraph(
+            modifier = Modifier
+                .height(180.dp)
+                .fillMaxWidth(),
+            data = data,
+            xAxisLabels = xLabels,
+            onSelectedIndexChange = { index ->
+                selectedRecord = electricity.getOrNull(index)
+            },
+            selected = electricity.indexOf(selectedRecord),
+            dataUnit = "kWh"
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+    }
+}
+
 
 @Composable
 internal fun ElevatedCardContainer(
@@ -698,7 +905,7 @@ internal fun ElevatedCardContainer(
     subtitle: String? = null,
     content: @Composable () -> Unit,
 ) {
-    ElevatedCard {
+    ElevatedCard(modifier = modifier) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -747,7 +954,7 @@ fun <T> TextLabelWithDivider(
     ),
     labelStyle: androidx.compose.ui.text.TextStyle = MaterialTheme.typography.labelMedium,
     horizontalArrangement: Arrangement.Horizontal = Arrangement.SpaceEvenly,
-    space : Dp = 16.dp
+    space: Dp = 16.dp
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),

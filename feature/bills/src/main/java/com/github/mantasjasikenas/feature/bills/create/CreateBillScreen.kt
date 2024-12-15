@@ -20,6 +20,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.EuroSymbol
 import androidx.compose.material.icons.outlined.ShoppingBag
 import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -52,6 +53,7 @@ import com.github.mantasjasikenas.core.domain.model.SharedState
 import com.github.mantasjasikenas.core.domain.model.UsersMap
 import com.github.mantasjasikenas.core.domain.model.bills.FlatBill
 import com.github.mantasjasikenas.core.domain.model.bills.PurchaseBill
+import com.github.mantasjasikenas.core.domain.model.bills.Taxes
 import com.github.mantasjasikenas.core.domain.model.bills.TripBill
 import com.github.mantasjasikenas.core.ui.common.NamiokaiCircularProgressIndicator
 import com.github.mantasjasikenas.core.ui.common.UsersPicker
@@ -464,9 +466,11 @@ fun FlatBillContent(
 ) {
     val context = LocalContext.current
 
-    val flatBill by remember {
+    var flatBill by remember {
         mutableStateOf(initialFlatBill)
     }
+    val (includeTaxes, onIncludeTaxesChange) = remember { mutableStateOf(false) }
+
     val paymasterHashMap = remember {
         usersMap.map { it.value.uid to false }
             .toMutableStateMap()
@@ -533,13 +537,62 @@ fun FlatBillContent(
         }
     )
 
+    Spacer(modifier = Modifier.height(20.dp))
+
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .height(46.dp)
+            .padding(horizontal = 16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center
+    ) {
+        Checkbox(
+            checked = includeTaxes,
+            onCheckedChange = {
+                val updatedValue = !includeTaxes
+
+                onIncludeTaxesChange(updatedValue)
+
+                flatBill = if (updatedValue) {
+                    flatBill.copy(taxes = Taxes())
+                } else {
+                    flatBill.copy(taxes = null)
+                }
+            },
+        )
+        Text(
+            text = "Include taxes",
+            style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier.padding(start = 8.dp)
+        )
+    }
+
+    if (includeTaxes && flatBill.taxes != null) {
+        Spacer(modifier = Modifier.height(20.dp))
+
+        NamiokaiNumberField(
+            label = "Electricity",
+            initialTextFieldValue = (if (flatBill.taxes!!.electricity == 0.0) "" else flatBill.taxes!!.electricity.toString()),
+            onValueChange = { flatBill.taxes!!.electricity = it },
+            keyboardType = KeyboardType.Number,
+            leadingIcon = {
+                Icon(
+                    modifier = Modifier.size(21.dp),
+                    imageVector = Icons.Outlined.EuroSymbol,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+        )
+    }
+
     Spacer(modifier = Modifier.height(32.dp))
 
     Button(onClick = {
         flatBill.splitUsersUid = splitBillHashMap.filter { it.value }.keys.map { it }
         flatBill.paymasterUid = paymasterHashMap.filter { it.value }.keys.map { it }
             .firstOrNull() ?: ""
-
 
         if (!flatBill.isValid()) {
             Toast.makeText(

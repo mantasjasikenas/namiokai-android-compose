@@ -15,6 +15,7 @@ data class FlatBill(
     override var date: String = "",
     var taxesTotal: Double = 0.0,
     var rentTotal: Double = 0.0,
+    var taxes: Taxes? = null,
 ) : Bill {
 
     @get:Exclude
@@ -27,7 +28,7 @@ data class FlatBill(
 
     @Exclude
     override fun isValid(): Boolean {
-        return paymasterUid.isNotEmpty() && total > 0.0 && splitUsersUid.isNotEmpty()
+        return paymasterUid.isNotEmpty() && total > 0.0 && splitUsersUid.isNotEmpty() && (taxes == null || taxes!!.isValid())
     }
 
 }
