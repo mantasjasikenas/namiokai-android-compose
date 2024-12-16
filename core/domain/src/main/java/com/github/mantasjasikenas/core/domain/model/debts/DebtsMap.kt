@@ -26,6 +26,9 @@ class MutableDebtsMap : DebtsMap {
         debts[fromUser]?.remove(toUser)
     }
 
+    val keys: Set<String>
+        get() = debts.keys
+
     override fun getDebts(fromUser: UserUid, toUser: UserUid): List<DebtBill> {
         return debts[fromUser]?.get(toUser) ?: emptyList()
     }
