@@ -685,6 +685,7 @@ private fun CompactFlatCard(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun FlatStatisticsContainer(
     flatBills: List<FlatBill>,
@@ -731,32 +732,30 @@ internal fun FlatStatisticsContainer(
         )
     }
 
+    val selectedRecordFields = listOf(
+        "Date" to (selectedRecord?.date?.split("T")?.firstOrNull() ?: "-"),
+        "Rent" to "${(selectedRecord?.rentTotal ?: 0.0).format(2)}€",
+        "Taxes" to "${(selectedRecord?.taxesTotal ?: 0.0).format(2)}€",
+        "Total" to "${(selectedRecord?.total ?: 0.0).format(2)}€",
+        "Split" to "${(selectedRecord?.splitPricePerUser() ?: 0.0).format(2)}€",
+    )
+
     ElevatedCardContainer(
         modifier = Modifier,
         title = title,
     ) {
-        TextLabelWithDivider(
-            data = listOf(
-                "Date" to (selectedRecord?.date?.split("T")?.firstOrNull() ?: "-"),
-                "Rent" to "${(selectedRecord?.rentTotal ?: 0.0).format(2)}€",
-                "Taxes" to "${(selectedRecord?.taxesTotal ?: 0.0).format(2)}€",
-            ),
-            horizontalArrangement = Arrangement.Start,
-            dividerVisible = false,
-            space = 24.dp
-        )
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            selectedRecordFields.forEach { (label, value) ->
+                TextWithLabel(
+                    label = label,
+                    text = value,
+                )
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        TextLabelWithDivider(
-            data = listOf(
-                "Total" to "${(selectedRecord?.total ?: 0.0).format(2)}€",
-                "Split" to "${(selectedRecord?.splitPricePerUser() ?: 0.0).format(2)}€",
-            ),
-            horizontalArrangement = Arrangement.Start,
-            dividerVisible = false,
-            space = 24.dp
-        )
+            }
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 

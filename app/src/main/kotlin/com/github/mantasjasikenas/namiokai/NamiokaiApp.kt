@@ -1,6 +1,7 @@
 package com.github.mantasjasikenas.namiokai
 
 import android.content.Intent
+import android.content.res.Configuration
 import android.net.Uri
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
@@ -53,6 +54,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
@@ -170,17 +172,20 @@ fun NamiokaiScreen(
 
     val currentUser = sharedState.currentUser
 
-    when (currentScreen) {
-        Screen.Settings, Screen.AdminPanel, Screen.Notifications, Screen.Profile, Screen.FlatBillList, Screen.CreateBill -> {
-            bottomBarState.value = false
-            topBarState.value = true
-        }
+    val configuration = LocalConfiguration.current
+    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 
-        else -> {
-            bottomBarState.value = true
-            topBarState.value = true
-        }
+    if (isLandscape) {
+        bottomBarState.value = false
+        topBarState.value = false
+    } else if (currentScreen == Screen.Settings || currentScreen == Screen.AdminPanel || currentScreen == Screen.Notifications || currentScreen == Screen.Profile || currentScreen == Screen.FlatBillList || currentScreen == Screen.CreateBill) {
+        bottomBarState.value = false
+        topBarState.value = true
+    } else {
+        bottomBarState.value = true
+        topBarState.value = true
     }
+
 
     Scaffold(
         topBar = {
@@ -206,7 +211,7 @@ fun NamiokaiScreen(
         floatingActionButton = {
             AnimatedVisibility(
                 visible = bottomBarState.value,
-                enter = EnterTransition.None,  //fadeIn(),
+                enter = EnterTransition.None,
                 exit = ExitTransition.None,
             ) {
                 FloatingActionButton(
@@ -252,7 +257,7 @@ fun NamiokaiAppNavigationBar(
 ) {
     AnimatedVisibility(
         visible = bottomBarState,
-        enter = EnterTransition.None,  //fadeIn(),
+        enter = EnterTransition.None,
         exit = ExitTransition.None,
     ) {
         NavigationBar(
