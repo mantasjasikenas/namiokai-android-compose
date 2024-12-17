@@ -55,14 +55,6 @@ class FlatViewModel @Inject constructor(private val flatBillsRepository: FlatBil
         }
     }
 
-    fun updateFlatBill(flatBill: FlatBill) {
-        viewModelScope.launch {
-            withContext(Dispatchers.IO) {
-                flatBillsRepository.updateFlatBill(flatBill)
-            }
-        }
-    }
-
     fun deleteFlatBill(flatBill: FlatBill) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
@@ -85,7 +77,7 @@ class FlatViewModel @Inject constructor(private val flatBillsRepository: FlatBil
             if (difference > 0.0) {
                 val startDate = if (previous.date < current.date) previous.date else current.date
                 val endDate = if (previous.date < current.date) current.date else previous.date
-                
+
                 BillDifference(startDate, endDate, difference)
             } else {
                 null

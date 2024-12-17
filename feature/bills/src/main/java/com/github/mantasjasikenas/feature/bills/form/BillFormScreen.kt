@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalMaterial3Api::class)
 
-package com.github.mantasjasikenas.feature.bills.create
+package com.github.mantasjasikenas.feature.bills.form
 
 import android.widget.Toast
 import androidx.compose.animation.Crossfade
@@ -51,6 +51,8 @@ import com.github.mantasjasikenas.core.common.util.Uid
 import com.github.mantasjasikenas.core.domain.model.Destination
 import com.github.mantasjasikenas.core.domain.model.SharedState
 import com.github.mantasjasikenas.core.domain.model.UsersMap
+import com.github.mantasjasikenas.core.domain.model.bills.Bill
+import com.github.mantasjasikenas.core.domain.model.bills.BillType
 import com.github.mantasjasikenas.core.domain.model.bills.FlatBill
 import com.github.mantasjasikenas.core.domain.model.bills.PurchaseBill
 import com.github.mantasjasikenas.core.domain.model.bills.Taxes
@@ -61,33 +63,30 @@ import com.github.mantasjasikenas.core.ui.component.NamiokaiNumberField
 import com.github.mantasjasikenas.core.ui.component.NamiokaiTextField
 import com.github.mantasjasikenas.feature.bills.R
 
-private enum class BillType {
-    Purchase, Trip, Flat
-}
-
 @Composable
-fun CreateBillScreen(
+fun BillFormScreen(
     modifier: Modifier = Modifier,
-    navigatedFrom: String? = null,
     sharedState: SharedState,
     onNavigateUp: () -> Unit,
-    createBillViewModel: CreateBillViewModel = hiltViewModel(),
+    billFormViewModel: BillFormViewModel = hiltViewModel(),
 ) {
-    val uiState by createBillViewModel.createBillUiState.collectAsStateWithLifecycle()
+    val uiState by billFormViewModel.billFormUiState.collectAsStateWithLifecycle()
 
     when (uiState) {
-        CreateBillUiState.Loading -> {
+        BillFormUiState.Loading -> {
             NamiokaiCircularProgressIndicator()
         }
 
-        is CreateBillUiState.Success -> {
-            CreateBillContent(
+        is BillFormUiState.Success -> {
+            println("BillForm: ${(uiState as BillFormUiState.Success).initialBill}")
+
+            BillFormContent(
                 modifier = modifier,
-                uiState = uiState as CreateBillUiState.Success,
+                uiState = uiState as BillFormUiState.Success,
                 usersMap = sharedState.usersMap,
-                createBillViewModel = createBillViewModel,
+                billFormViewModel = billFormViewModel,
                 onNavigateUp = onNavigateUp,
-                navigatedFrom = navigatedFrom
+                navigatedFrom = billFormViewModel.billFormRoute.navigatedFrom
             )
         }
     }
@@ -95,18 +94,35 @@ fun CreateBillScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CreateBillContent(
+fun BillFormContent(
     modifier: Modifier = Modifier,
-    uiState: CreateBillUiState.Success,
+    uiState: BillFormUiState.Success,
     usersMap: UsersMap,
-    createBillViewModel: CreateBillViewModel,
+    billFormViewModel: BillFormViewModel,
     onNavigateUp: () -> Unit,
     navigatedFrom: String?
 ) {
-    val billType = when (navigatedFrom) {
-        "trips" -> BillType.Trip
-        "flat" -> BillType.Flat
-        else -> BillType.Purchase
+    val initialBill = uiState.initialBill
+
+    val billType = when (initialBill) {
+        is PurchaseBill -> BillType.Purchase
+        is TripBill -> BillType.Trip
+        is FlatBill -> BillType.Flat
+        else -> {
+            when (navigatedFrom) {
+                "trips" -> BillType.Trip
+                "flat" -> BillType.Flat
+                else -> BillType.Purchase
+            }
+        }
+    }
+
+    val onSaveBill = { bill: Bill ->
+        if (initialBill == null) {
+            billFormViewModel.insertBill(bill)
+        } else {
+            billFormViewModel.updateBill(bill)
+        }
     }
 
     Column(
@@ -116,7 +132,13 @@ fun CreateBillContent(
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        var selectedIndex by remember { mutableIntStateOf(BillType.entries.indexOf(billType)) }
+        var selectedIndex by remember(billType) {
+            mutableIntStateOf(
+                BillType.entries.indexOf(
+                    billType
+                )
+            )
+        }
         val options = BillType.entries
 
         Text(
@@ -133,7 +155,8 @@ fun CreateBillContent(
                 SegmentedButton(
                     shape = SegmentedButtonDefaults.itemShape(index = index, count = options.size),
                     onClick = { selectedIndex = index },
-                    selected = index == selectedIndex
+                    selected = index == selectedIndex,
+                    enabled = initialBill == null
                 ) {
                     Text(text = label.name)
                 }
@@ -147,8 +170,9 @@ fun CreateBillContent(
                 when (BillType.entries[it]) {
                     BillType.Purchase -> {
                         PurchaseBillContent(
+                            initialPurchaseBill = initialBill as? PurchaseBill,
                             onSaveClick = {
-                                createBillViewModel.insertBill(it)
+                                onSaveBill(it)
                                 onNavigateUp()
                             },
                             usersMap = usersMap
@@ -157,8 +181,9 @@ fun CreateBillContent(
 
                     BillType.Trip -> {
                         TripBillContent(
+                            initialTripBill = initialBill as? TripBill,
                             onSaveClick = {
-                                createBillViewModel.insertFuel(it)
+                                onSaveBill(it)
                                 onNavigateUp()
                             },
                             usersMap = usersMap,
@@ -168,8 +193,9 @@ fun CreateBillContent(
 
                     BillType.Flat -> {
                         FlatBillContent(
+                            initialFlatBill = initialBill as? FlatBill,
                             onSaveClick = {
-                                createBillViewModel.insertFlatBill(it)
+                                onSaveBill(it)
                                 onNavigateUp()
                             },
                             usersMap = usersMap,
@@ -187,11 +213,11 @@ fun BillContainerWrapper(
     content: @Composable () -> Unit
 ) {
     Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-        modifier = Modifier
+        modifier = modifier
             .padding(16.dp)
-            .fillMaxSize()
+            .fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
         content()
     }
@@ -199,7 +225,6 @@ fun BillContainerWrapper(
 
 @Composable
 private fun UserPickerContainer(
-    modifier: Modifier = Modifier,
     title: String,
     usersMap: UsersMap,
     usersSnapshotMap: SnapshotStateMap<Uid, Boolean>,
@@ -221,14 +246,14 @@ private fun UserPickerContainer(
 
 @Composable
 fun PurchaseBillContent(
-    initialPurchaseBill: PurchaseBill = PurchaseBill(),
+    initialPurchaseBill: PurchaseBill? = null,
     onSaveClick: (PurchaseBill) -> Unit,
     usersMap: UsersMap
 ) {
     val context = LocalContext.current
 
-    val bill by remember {
-        mutableStateOf(initialPurchaseBill)
+    val bill by remember(initialPurchaseBill) {
+        mutableStateOf(initialPurchaseBill ?: PurchaseBill())
     }
 
     val splitBillHashMap = remember {
@@ -328,21 +353,21 @@ fun PurchaseBillContent(
         )
             .show()
     }) {
-        Text(text = "Save")
+        Text(text = if (initialPurchaseBill == null) "Save" else "Update")
     }
 }
 
 @Composable
 fun TripBillContent(
-    initialTripBill: TripBill = TripBill(),
+    initialTripBill: TripBill? = null,
     onSaveClick: (TripBill) -> Unit,
     usersMap: UsersMap,
     destinations: List<Destination>
 ) {
     val context = LocalContext.current
 
-    val trip by remember {
-        mutableStateOf(initialTripBill)
+    val trip by remember(initialTripBill) {
+        mutableStateOf(initialTripBill ?: TripBill())
     }
 
     // OPTIMIZE: This is a mess, refactor OK?
@@ -364,7 +389,7 @@ fun TripBillContent(
             }
 
             driverSelectHashMap[trip.paymasterUid] = true
-            onOptionSelected(destinations.first { it.name == initialTripBill.tripDestination })
+            onOptionSelected(destinations.first { it.name == trip.tripDestination })
         }
 
     }
@@ -454,20 +479,20 @@ fun TripBillContent(
         )
             .show()
     }) {
-        Text(text = "Save")
+        Text(text = if (initialTripBill == null) "Save" else "Update")
     }
 }
 
 @Composable
 fun FlatBillContent(
-    initialFlatBill: FlatBill = FlatBill(),
+    initialFlatBill: FlatBill? = null,
     onSaveClick: (FlatBill) -> Unit,
     usersMap: UsersMap
 ) {
     val context = LocalContext.current
 
-    var flatBill by remember {
-        mutableStateOf(initialFlatBill)
+    var flatBill by remember(initialFlatBill) {
+        mutableStateOf(initialFlatBill ?: FlatBill())
     }
     val (includeTaxes, onIncludeTaxesChange) = remember { mutableStateOf(false) }
 
@@ -613,6 +638,6 @@ fun FlatBillContent(
         )
             .show()
     }) {
-        Text(text = "Save")
+        Text(text = if (initialFlatBill == null) "Save" else "Update")
     }
 }

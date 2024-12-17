@@ -60,12 +60,20 @@ class PurchaseBillsRepositoryImpl @Inject constructor(
                 }
             }
 
-    override suspend fun insertBill(purchaseBill: PurchaseBill) {
+    override suspend fun getPurchaseBill(id: String): Flow<PurchaseBill> =
+        db.collection(BILLS_COLLECTION)
+            .document(id)
+            .snapshots()
+            .map {
+                it.toObject<PurchaseBill>()!!
+            }
+
+    override suspend fun insertPurchaseBill(purchaseBill: PurchaseBill) {
         db.collection(BILLS_COLLECTION)
             .add(purchaseBill)
     }
 
-    override suspend fun updateBill(purchaseBill: PurchaseBill) {
+    override suspend fun updatePurchaseBill(purchaseBill: PurchaseBill) {
         if (purchaseBill.documentId.isNotEmpty()) {
             db.collection(BILLS_COLLECTION)
                 .document(purchaseBill.documentId)
@@ -73,7 +81,7 @@ class PurchaseBillsRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun deleteBill(purchaseBill: PurchaseBill) {
+    override suspend fun deletePurchaseBill(purchaseBill: PurchaseBill) {
         if (purchaseBill.documentId.isNotEmpty()) {
             db.collection(BILLS_COLLECTION)
                 .document(purchaseBill.documentId)
@@ -81,7 +89,7 @@ class PurchaseBillsRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun clearBills() {
+    override suspend fun clearPurchaseBills() {
         db.collection(BILLS_COLLECTION)
             .get()
             .addOnSuccessListener { documents ->
@@ -93,12 +101,12 @@ class PurchaseBillsRepositoryImpl @Inject constructor(
             }
     }
 
-    override suspend fun loadBillsFromStorage(fileName: String): Response<Boolean> {
+    override suspend fun loadPurchaseBillsFromStorage(fileName: String): Response<Boolean> {
         return try {
             val billsJson =
                 baseFirebaseRepository.getFileFromStorage("$BACKUP_BILLS_PATH/$fileName")
             val purchaseBills = Json.decodeFromString<List<PurchaseBill>>(billsJson)
-            purchaseBills.forEach { insertBill(it) }
+            purchaseBills.forEach { insertPurchaseBill(it) }
 
             Response.Success(true)
         } catch (e: Exception) {

@@ -9,11 +9,12 @@ import kotlinx.coroutines.flow.Flow
 interface TripBillsRepository {
     suspend fun getTripBills(): Flow<List<TripBill>>
     suspend fun getTripBills(period: Period): Flow<List<TripBill>>
-    suspend fun clearFuel()
+    suspend fun getTripBill(id: String): Flow<TripBill>
+    suspend fun clearTripBills()
     fun getDestinations(): Flow<List<Destination>>
-    suspend fun insertFuel(tripBill: TripBill)
-    suspend fun updateFuel(tripBill: TripBill)
-    suspend fun deleteFuel(tripBill: TripBill)
-    suspend fun loadFuelFromStorage(fileName: String): Response<Boolean>
+    suspend fun insertTripBill(tripBill: TripBill)
+    suspend fun updateTripBill(tripBill: TripBill)
+    suspend fun deleteTripBill(tripBill: TripBill)
+    suspend fun loadTripsFromStorage(fileName: String): Response<Boolean>
     suspend fun backupCollection(fileName: String)
 }

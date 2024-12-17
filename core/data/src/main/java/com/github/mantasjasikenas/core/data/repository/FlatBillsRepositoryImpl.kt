@@ -56,6 +56,14 @@ class FlatBillsRepositoryImpl @Inject constructor(
                 }
             }
 
+    override suspend fun getFlatBill(id: String): Flow<FlatBill> =
+        db.collection(FLAT_BILLS_COLLECTION)
+            .document(id)
+            .snapshots()
+            .map {
+                it.toObject<FlatBill>()!!
+            }
+
     override suspend fun insertFlatBill(flatBill: FlatBill) {
         db.collection(FLAT_BILLS_COLLECTION)
             .add(flatBill)

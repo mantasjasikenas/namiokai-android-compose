@@ -1,5 +1,6 @@
 package com.github.mantasjasikenas.core.domain.model.bills
 
+import com.github.mantasjasikenas.core.common.util.UserUid
 import com.github.mantasjasikenas.core.common.util.format
 import com.github.mantasjasikenas.core.domain.model.User
 
@@ -16,13 +17,13 @@ interface Bill {
     fun isValid(): Boolean
 }
 
-fun Bill.resolveBillCost(currentUser: User): String {
+fun Bill.resolveBillCost(currentUserUid: UserUid): String {
     val totalCost = this.total
     val splitPricePerUser = this.splitPricePerUser()
 
 
-    val isCurrentUserPaymaster = this.paymasterUid == currentUser.uid
-    val isCurrentUserInSplitUsers = this.splitUsersUid.any { it == currentUser.uid }
+    val isCurrentUserPaymaster = this.paymasterUid == currentUserUid
+    val isCurrentUserInSplitUsers = this.splitUsersUid.any { it == currentUserUid }
 
 
     return if (!isCurrentUserPaymaster && isCurrentUserInSplitUsers) {

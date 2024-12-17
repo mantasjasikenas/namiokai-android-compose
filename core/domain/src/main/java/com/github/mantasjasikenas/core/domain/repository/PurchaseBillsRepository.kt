@@ -8,11 +8,11 @@ import kotlinx.coroutines.flow.Flow
 interface PurchaseBillsRepository {
     suspend fun getPurchaseBills(): Flow<List<PurchaseBill>>
     suspend fun getPurchaseBills(period: Period): Flow<List<PurchaseBill>>
-    suspend fun insertBill(purchaseBill: PurchaseBill)
-    suspend fun updateBill(purchaseBill: PurchaseBill)
-    suspend fun deleteBill(purchaseBill: PurchaseBill)
-    suspend fun clearBills()
-    suspend fun loadBillsFromStorage(fileName: String): Response<Boolean>
+    suspend fun getPurchaseBill(id: String): Flow<PurchaseBill>
+    suspend fun insertPurchaseBill(purchaseBill: PurchaseBill)
+    suspend fun updatePurchaseBill(purchaseBill: PurchaseBill)
+    suspend fun deletePurchaseBill(purchaseBill: PurchaseBill)
+    suspend fun clearPurchaseBills()
+    suspend fun loadPurchaseBillsFromStorage(fileName: String): Response<Boolean>
     suspend fun backupCollection(fileName: String)
-
 }

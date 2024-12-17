@@ -50,8 +50,8 @@ class AdminPanelViewModel @Inject constructor(
     fun clearBills() {
         toastManager.show("Records clear started")
         viewModelScope.launch {
-            purchaseBillsRepository.clearBills()
-            tripBillsRepository.clearFuel()
+            purchaseBillsRepository.clearPurchaseBills()
+            tripBillsRepository.clearTripBills()
             flatBillsRepository.clearFlatBills()
         }
             .invokeOnCompletion { throwable ->
@@ -66,7 +66,7 @@ class AdminPanelViewModel @Inject constructor(
         toastManager.show("Purchase bills clear started")
 
         viewModelScope.launch {
-            purchaseBillsRepository.clearBills()
+            purchaseBillsRepository.clearPurchaseBills()
         }
             .invokeOnCompletion { throwable ->
                 if (throwable != null)
@@ -80,7 +80,7 @@ class AdminPanelViewModel @Inject constructor(
         toastManager.show("Fuel clear started")
 
         viewModelScope.launch {
-            tripBillsRepository.clearFuel()
+            tripBillsRepository.clearTripBills()
         }
             .invokeOnCompletion { throwable ->
                 if (throwable != null)
@@ -138,7 +138,7 @@ class AdminPanelViewModel @Inject constructor(
 
     fun importBills() {
         viewModelScope.launch {
-            purchaseBillsRepository.loadBillsFromStorage(BILL_IMPORT_FILE_NAME)
+            purchaseBillsRepository.loadPurchaseBillsFromStorage(BILL_IMPORT_FILE_NAME)
         }
             .invokeOnCompletion { throwable ->
                 if (throwable != null)
@@ -150,7 +150,7 @@ class AdminPanelViewModel @Inject constructor(
 
     fun importFuel() {
         viewModelScope.launch {
-            tripBillsRepository.loadFuelFromStorage(FUEL_IMPORT_FILE_NAME)
+            tripBillsRepository.loadTripsFromStorage(FUEL_IMPORT_FILE_NAME)
         }
             .invokeOnCompletion { throwable ->
                 if (throwable != null)

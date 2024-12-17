@@ -62,12 +62,20 @@ class TripBillsRepositoryImpl @Inject constructor(
                 }
             }
 
-    override suspend fun insertFuel(tripBill: TripBill) {
+    override suspend fun getTripBill(id: String): Flow<TripBill> =
+        db.collection(FUEL_COLLECTION)
+            .document(id)
+            .snapshots()
+            .map {
+                it.toObject<TripBill>()!!
+            }
+
+    override suspend fun insertTripBill(tripBill: TripBill) {
         db.collection(FUEL_COLLECTION)
             .add(tripBill)
     }
 
-    override suspend fun updateFuel(tripBill: TripBill) {
+    override suspend fun updateTripBill(tripBill: TripBill) {
         if (tripBill.documentId.isNotEmpty()) {
             db.collection(FUEL_COLLECTION)
                 .document(tripBill.documentId)
@@ -75,7 +83,7 @@ class TripBillsRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun deleteFuel(tripBill: TripBill) {
+    override suspend fun deleteTripBill(tripBill: TripBill) {
         if (tripBill.documentId.isNotEmpty()) {
             db.collection(FUEL_COLLECTION)
                 .document(tripBill.documentId)
@@ -83,7 +91,7 @@ class TripBillsRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun clearFuel() {
+    override suspend fun clearTripBills() {
         db.collection(FUEL_COLLECTION)
             .get()
             .addOnSuccessListener { documents ->
@@ -105,11 +113,11 @@ class TripBillsRepositoryImpl @Inject constructor(
                 }
             }
 
-    override suspend fun loadFuelFromStorage(fileName: String): Response<Boolean> {
+    override suspend fun loadTripsFromStorage(fileName: String): Response<Boolean> {
         return try {
             val fuelJson = baseFirebaseRepository.getFileFromStorage("$BACKUP_FUEL_PATH/$fileName")
             val tripBill = Json.decodeFromString<List<TripBill>>(fuelJson)
-            tripBill.forEach { insertFuel(it) }
+            tripBill.forEach { insertTripBill(it) }
 
             Response.Success(true)
         } catch (e: Exception) {

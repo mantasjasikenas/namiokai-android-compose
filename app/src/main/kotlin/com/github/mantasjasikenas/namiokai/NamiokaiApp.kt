@@ -1,5 +1,6 @@
 package com.github.mantasjasikenas.namiokai
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.res.Configuration
 import android.net.Uri
@@ -73,12 +74,14 @@ import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
 import com.github.mantasjasikenas.core.common.util.Constants.GITHUB_URL
 import com.github.mantasjasikenas.core.domain.model.SharedState
+import com.github.mantasjasikenas.core.domain.model.bills.BillFormRoute
 import com.github.mantasjasikenas.core.domain.model.isNotLoggedIn
 import com.github.mantasjasikenas.core.ui.common.NamiokaiCircularProgressIndicator
 import com.github.mantasjasikenas.core.ui.common.rememberState
 import com.github.mantasjasikenas.core.ui.component.ReportBugDialog
 import com.github.mantasjasikenas.namiokai.navigation.NavGraph
 import com.github.mantasjasikenas.namiokai.navigation.Screen
+import com.github.mantasjasikenas.namiokai.navigation.Screen.Companion.bottomBarScreens
 import com.github.mantasjasikenas.namiokai.navigation.authNavGraph
 import com.github.mantasjasikenas.namiokai.navigation.namiokaiNavGraph
 
@@ -156,6 +159,7 @@ fun NamiokaiApp(mainActivityViewModel: MainActivityViewModel = hiltViewModel()) 
 }
 
 
+@SuppressLint("RestrictedApi")
 @Composable
 fun NamiokaiScreen(
     modifier: Modifier = Modifier,
@@ -175,17 +179,8 @@ fun NamiokaiScreen(
     val configuration = LocalConfiguration.current
     val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 
-    if (isLandscape) {
-        bottomBarState.value = false
-        topBarState.value = false
-    } else if (currentScreen == Screen.Settings || currentScreen == Screen.AdminPanel || currentScreen == Screen.Notifications || currentScreen == Screen.Profile || currentScreen == Screen.FlatBillList || currentScreen == Screen.CreateBill) {
-        bottomBarState.value = false
-        topBarState.value = true
-    } else {
-        bottomBarState.value = true
-        topBarState.value = true
-    }
-
+    bottomBarState.value = !isLandscape && Screen.isBottomBarVisible(currentDestination)
+    topBarState.value = !isLandscape && Screen.isTopBarVisible(currentDestination)
 
     Scaffold(
         topBar = {
@@ -193,7 +188,7 @@ fun NamiokaiScreen(
                 navController = navController,
                 topBarState = topBarState.value,
                 currentScreen = currentScreen,
-                canNavigateBack = navController.previousBackStackEntry != null && !Screen.navBarScreens.contains(
+                canNavigateBack = navController.previousBackStackEntry != null && !bottomBarScreens.contains(
                     currentScreen
                 ),
                 navigateUp = { navController.navigateUp() },
@@ -216,7 +211,11 @@ fun NamiokaiScreen(
             ) {
                 FloatingActionButton(
                     onClick = {
-                        navController.navigate("${Screen.CreateBill.route}/${currentScreen.route}") {
+                        navController.navigate(
+                            BillFormRoute(
+                                navigatedFrom = currentScreen?.route,
+                            )
+                        ) {
                             launchSingleTop = true
                         }
                     }
@@ -263,7 +262,7 @@ fun NamiokaiAppNavigationBar(
         NavigationBar(
             windowInsets = NavigationBarDefaults.windowInsets.exclude(WindowInsets(bottom = 12.dp))
         ) {
-            Screen.navBarScreens.forEach { screen ->
+            Screen.bottomBarScreens.forEach { screen ->
                 NavigationBarItem(
                     icon = {
                         Icon(
@@ -297,7 +296,7 @@ fun NamiokaiAppTopBar(
     navController: NavHostController,
     topBarState: Boolean,
     adminModeEnabled: Boolean,
-    currentScreen: Screen,
+    currentScreen: Screen?,
     canNavigateBack: Boolean,
     photoUrl: String,
     navigateUp: () -> Unit
@@ -315,7 +314,7 @@ fun NamiokaiAppTopBar(
                     ),
                 title = {
                     Text(
-                        text = stringResource(id = currentScreen.titleResourceId),
+                        text = if (currentScreen != null) stringResource(currentScreen.titleResourceId) else "",
                         style = MaterialTheme.typography.titleLarge,
                     )
                 },

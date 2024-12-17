@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.namiokai.android.library)
     alias(libs.plugins.namiokai.compose.library)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -18,6 +19,7 @@ dependencies {
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
+    implementation(libs.androidx.navigation.compose)
 
     implementation(projects.core.common)
     implementation(projects.core.domain)
@@ -25,4 +27,6 @@ dependencies {
 
     implementation(libs.firebase.auth)
     implementation(libs.androidx.lifecycle.runtime.compose)
+
+    implementation(libs.kotlinx.serialization.json)
 }

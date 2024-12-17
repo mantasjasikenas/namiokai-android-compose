@@ -14,6 +14,8 @@ import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.ShoppingBag
 import androidx.compose.material.icons.outlined.Sync
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.navigation.NavDestination
+import com.github.mantasjasikenas.core.domain.model.bills.BillFormRoute
 import com.github.mantasjasikenas.namiokai.R
 
 sealed class Screen(
@@ -102,7 +104,7 @@ sealed class Screen(
     companion object {
         val initialScreen = Home
 
-        val navBarScreens = listOf(
+        val bottomBarScreens = listOf(
             Home,
             Debts,
             Bill,
@@ -122,16 +124,42 @@ sealed class Screen(
             Test,
             AdminPanel,
             Profile,
-            CreateBill
+            CreateBill,
         )
 
-        fun fromRoute(route: String?): Screen {
-            if (route == null) return initialScreen
+        private val bottomBarVisibleDestinations = bottomBarScreens
+
+        private val topBarVisibleDestinations = bottomBarScreens + listOf(
+            Settings, AdminPanel, Notifications, Profile, FlatBillList, CreateBill
+        )
+
+        fun isTopBarVisible(currentDestination: NavDestination?): Boolean {
+            val route = currentDestination?.route
+
+            if (route == null) return false
+
+            return topBarVisibleDestinations.any {
+                it.route == route || it.route == route.split("/").firstOrNull()
+            } || route.split("?").firstOrNull() == BillFormRoute::class.qualifiedName
+        }
+
+        fun isBottomBarVisible(currentDestination: NavDestination?): Boolean {
+            val route = currentDestination?.route
+
+            if (route == null) return false
+
+            return bottomBarVisibleDestinations.any {
+                it.route == route || it.route == route.split("/").firstOrNull()
+            }
+        }
+
+        fun fromRoute(route: String?): Screen? {
+            if (route == null) return null
 
             @Suppress("SENSELESS_COMPARISON")
             return screens.firstOrNull {
                 it != null && (it.route == route || it.route == route.split("/").firstOrNull())
-            } ?: initialScreen
+            }
         }
     }
 }
