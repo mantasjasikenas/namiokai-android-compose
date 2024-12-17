@@ -35,10 +35,21 @@
     *;
 }
 
+-keepclassmembers class com.github.mantasjasikenas.core.domain.model.bills.** {
+    *;
+}
+
 -keepclassmembers class com.github.mantasjasikenas.core.domain.model.** {
     *;
 }
 
+-keep class * {
+ @kotlinx.serialization.SerialName <fields>;
+}
+
+-keepnames class com.path.to.your.ParcelableArg
+-keepnames class com.path.to.your.SerializableArg
+-keepnames class com.path.to.your.EnumArg
 
 -dontwarn org.bouncycastle.jsse.BCSSLParameters
 -dontwarn org.bouncycastle.jsse.BCSSLSocket
