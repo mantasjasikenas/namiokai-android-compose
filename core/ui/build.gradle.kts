@@ -22,4 +22,7 @@ dependencies {
     implementation(libs.material)
     implementation(libs.bundles.compose)
     implementation(libs.kotlinx.datetime.jvm)
+
+    implementation(libs.vico.compose)
+    implementation(libs.vico.compose.m3)
 }

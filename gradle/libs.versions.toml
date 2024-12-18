@@ -50,6 +50,7 @@ appcompat = "1.7.0"
 ui-graphics-android = "1.6.4"
 androidx-ui-graphics-android = "1.7.6"
 dependency-analysis = "1.31.0"
+vico = "2.0.0-beta.3"
 
 [libraries]
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "android-gradle" }
@@ -110,6 +111,8 @@ firebase-config = { module = "com.google.firebase:firebase-config" }
 androidx-lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycle" }
 appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 ui-graphics-android = { group = "androidx.compose.ui", name = "ui-graphics-android", version.ref = "androidx-ui-graphics-android" }
+vico-compose = { group = "com.patrykandpatrick.vico", name = "compose", version.ref = "vico" }
+vico-compose-m3 = { group = "com.patrykandpatrick.vico", name = "compose-m3", version.ref = "vico" }
 
 [bundles]
 compose = ["compose-ui",

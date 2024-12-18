@@ -46,6 +46,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.takeOrElse
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
@@ -67,6 +68,7 @@ import com.github.mantasjasikenas.core.ui.common.TextRow
 import com.github.mantasjasikenas.core.ui.common.VerticalDivider
 import com.github.mantasjasikenas.core.ui.component.NoResultsFound
 import com.github.mantasjasikenas.core.ui.component.ProgressGraph
+import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
@@ -81,7 +83,7 @@ fun FlatScreen(
     onNavigateToCreateBill: (BillFormRoute) -> Unit,
 ) {
     val flatUiState by flatViewModel.flatUiState.collectAsStateWithLifecycle()
-    val flatBills = flatUiState.flatBills.reversed()
+    val flatBills = flatUiState.flatBills
 
     if (flatUiState.isLoading()) {
         NamiokaiCircularProgressIndicator()
@@ -153,19 +155,18 @@ fun FlatScreenContent(
         item(span = {
             GridItemSpan(maxLineSpan)
         }) {
-            FlatStatisticsContainer(
+            FlatBillsChartContainer(
                 flatBills = flatBills,
-                title = "Total rent and taxes",
+                chartModelProducer = flatViewModel.flatBillsChartModelProducer
             )
         }
 
         item(span = {
             GridItemSpan(maxLineSpan)
         }) {
-            ElectricityStatisticsContainer(
-                electricity = flatUiState.electricitySummary?.electricityDifference
-                    ?: return@item,
-                title = "Electricity consumption",
+            ElectricityChartContainer(
+                electricity = flatUiState.electricitySummary?.electricityDifference ?: return@item,
+                chartModelProducer = flatViewModel.electricityChartModelProducer
             )
         }
 
@@ -355,7 +356,7 @@ fun ElectricitySummaryContainer(
                                 .padding(vertical = 8.dp)
                         )
 
-                        electricitySummary.electricityDifference.reversed().forEach {
+                        electricitySummary.electricityDifference.forEach {
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth(),
@@ -415,7 +416,7 @@ fun FlatBillSummary(
     flatViewModel: FlatViewModel,
     onNavigateToCreateBill: (BillFormRoute) -> Unit
 ) {
-    val visibleBills = bills.take(3)
+    val visibleBills = bills.takeLast(3).reversed()
 
     ElevatedCardContainer(
         modifier = modifier,
@@ -713,6 +714,37 @@ internal fun ElectricityStatisticsContainer(
     }
 }
 
+@Composable
+private fun FlatBillsChartContainer(
+    flatBills: List<FlatBill>,
+    chartModelProducer: CartesianChartModelProducer
+) {
+    ElevatedCardContainer(
+        title = "Flat bills chart",
+    ) {
+        FlatBillsChart(
+            modifier = Modifier.fillMaxWidth(), flatBills = flatBills,
+            chartModelProducer = chartModelProducer
+        )
+    }
+}
+
+@Composable
+private fun ElectricityChartContainer(
+    electricity: List<BillDifference>,
+    chartModelProducer: CartesianChartModelProducer,
+) {
+    ElevatedCardContainer(
+        title = "Electricity consumption",
+    ) {
+        ElectricityChart(
+            modifier = Modifier.fillMaxWidth(),
+            chartModelProducer = chartModelProducer,
+            electricity = electricity,
+        )
+    }
+}
+
 
 @Composable
 internal fun ElevatedCardContainer(
@@ -763,10 +795,10 @@ internal fun ElevatedCardContainer(
 fun <T> TextLabelWithDivider(
     data: List<Pair<String, T>>,
     dividerVisible: Boolean = true,
-    textStyle: androidx.compose.ui.text.TextStyle = MaterialTheme.typography.bodyLarge.copy(
+    textStyle: TextStyle = MaterialTheme.typography.bodyLarge.copy(
         fontWeight = FontWeight.Bold
     ),
-    labelStyle: androidx.compose.ui.text.TextStyle = MaterialTheme.typography.labelMedium,
+    labelStyle: TextStyle = MaterialTheme.typography.labelMedium,
     horizontalArrangement: Arrangement.Horizontal = Arrangement.SpaceEvenly,
     space: Dp = 16.dp
 ) {
@@ -807,10 +839,10 @@ fun TextWithLabel(
     label: String,
     text: String,
     horizontalAlignment: Alignment.Horizontal = Alignment.CenterHorizontally,
-    textStyle: androidx.compose.ui.text.TextStyle = MaterialTheme.typography.bodyLarge.copy(
+    textStyle: TextStyle = MaterialTheme.typography.bodyLarge.copy(
         fontWeight = FontWeight.Bold,
     ),
-    labelStyle: androidx.compose.ui.text.TextStyle = MaterialTheme.typography.labelMedium,
+    labelStyle: TextStyle = MaterialTheme.typography.labelMedium,
 ) {
     val textColor = textStyle.color.takeOrElse {
         MaterialTheme.colorScheme.primary

@@ -6,6 +6,8 @@ import com.github.mantasjasikenas.core.domain.model.Filter
 import com.github.mantasjasikenas.core.domain.model.bills.FlatBill
 import com.github.mantasjasikenas.core.domain.model.filter
 import com.github.mantasjasikenas.core.domain.repository.FlatBillsRepository
+import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
+import com.patrykandpatrick.vico.core.cartesian.data.lineSeries
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,6 +24,9 @@ class FlatViewModel @Inject constructor(private val flatBillsRepository: FlatBil
 
     private val _flatUiState = MutableStateFlow(FlatUiState())
     val flatUiState = _flatUiState.asStateFlow()
+
+    val flatBillsChartModelProducer = CartesianChartModelProducer()
+    val electricityChartModelProducer = CartesianChartModelProducer()
 
     init {
         getFlatBills()
@@ -42,12 +47,42 @@ class FlatViewModel @Inject constructor(private val flatBillsRepository: FlatBil
             withContext(Dispatchers.IO) {
                 flatBillsRepository.getFlatBills()
                     .collect { flatBills ->
+                        val electricitySummary = calculateElectricityStats(flatBills)
+
+                        flatBillsChartModelProducer.runTransaction {
+                            if (flatBills.isNotEmpty()) {
+                                lineSeries {
+                                    series(
+                                        List(flatBills.size) {
+                                            flatBills[it].total
+                                        }
+                                    )
+
+                                    series(
+                                        List(flatBills.size) {
+                                            flatBills[it].taxesTotal
+                                        }
+                                    )
+                                }
+                            }
+                        }
+
+                        electricityChartModelProducer.runTransaction {
+                            if (electricitySummary.electricityDifference.isNotEmpty()) {
+                                lineSeries {
+                                    series(
+                                        electricitySummary.electricityDifference.map { it.difference }
+                                    )
+                                }
+                            }
+                        }
+
                         _flatUiState.update {
                             val filters = it.filters
                             it.copy(
                                 flatBills = flatBills,
                                 filteredFlatBills = flatBills.filter(filters),
-                                electricitySummary = calculateElectricityStats(flatBills)
+                                electricitySummary = electricitySummary
                             )
                         }
                     }
@@ -64,8 +99,6 @@ class FlatViewModel @Inject constructor(private val flatBillsRepository: FlatBil
     }
 
     private fun calculateElectricityStats(bills: List<FlatBill>): ElectricitySummary {
-        val bills = bills.reversed()
-
         val electricityDifference = bills.zipWithNext { previous, current ->
             if (current.taxes == null || previous.taxes == null) {
                 return@zipWithNext null

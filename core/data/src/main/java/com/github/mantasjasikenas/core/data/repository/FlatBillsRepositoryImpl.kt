@@ -26,7 +26,7 @@ class FlatBillsRepositoryImpl @Inject constructor(
         db.collection(FLAT_BILLS_COLLECTION)
             .orderBy(
                 ORDER_BY_FIELD,
-                Query.Direction.DESCENDING
+                Query.Direction.ASCENDING
             )
             .snapshots()
             .map {
@@ -39,7 +39,7 @@ class FlatBillsRepositoryImpl @Inject constructor(
         db.collection(FLAT_BILLS_COLLECTION)
             .orderBy(
                 ORDER_BY_FIELD,
-                Query.Direction.DESCENDING
+                Query.Direction.ASCENDING
             )
             .whereGreaterThanOrEqualTo(
                 ORDER_BY_FIELD,

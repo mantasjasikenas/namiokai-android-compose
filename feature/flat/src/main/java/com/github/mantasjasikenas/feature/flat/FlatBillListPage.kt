@@ -1,6 +1,7 @@
 package com.github.mantasjasikenas.feature.flat
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
@@ -87,7 +88,7 @@ fun FlatBillScreenContent(
     currentUser: User,
     usersMap: UsersMap
 ) {
-    val state = rememberLazyListState()
+    val state = rememberLazyListState((flatUiState.filteredFlatBills.size - 1).coerceAtLeast(0))
 
     Column {
         FlatBillFiltersRow(
@@ -101,7 +102,9 @@ fun FlatBillScreenContent(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize(),
-            state = state
+            state = state,
+            reverseLayout = true,
+            verticalArrangement = Arrangement.Top
         ) {
             if (flatUiState.filteredFlatBills.isEmpty()) {
                 item {
@@ -111,6 +114,8 @@ fun FlatBillScreenContent(
                     )
                 }
             } else {
+                item { NamiokaiSpacer(height = 120) }
+
                 items(items = flatUiState.filteredFlatBills,
                     key = { it.documentId }
                 ) { flatBill ->
@@ -132,8 +137,6 @@ fun FlatBillScreenContent(
                     )
                 }
             }
-
-            item { NamiokaiSpacer(height = 120) }
         }
     }
 }
