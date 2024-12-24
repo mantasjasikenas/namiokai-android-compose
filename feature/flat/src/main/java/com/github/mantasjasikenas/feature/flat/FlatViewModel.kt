@@ -8,6 +8,7 @@ import com.github.mantasjasikenas.core.domain.model.filter
 import com.github.mantasjasikenas.core.domain.repository.FlatBillsRepository
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
 import com.patrykandpatrick.vico.core.cartesian.data.lineSeries
+import com.patrykandpatrick.vico.core.common.data.ExtraStore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,6 +28,11 @@ class FlatViewModel @Inject constructor(private val flatBillsRepository: FlatBil
 
     val flatBillsChartModelProducer = CartesianChartModelProducer()
     val electricityChartModelProducer = CartesianChartModelProducer()
+
+    companion object {
+        val FLAT_EXTRA_STORE = ExtraStore.Key<FlatChartExtraStore>()
+        val ELECTRICITY_EXTRA_STORE = ExtraStore.Key<ElectricityChartExtraStore>()
+    }
 
     init {
         getFlatBills()
@@ -50,31 +56,37 @@ class FlatViewModel @Inject constructor(private val flatBillsRepository: FlatBil
                         val electricitySummary = calculateElectricityStats(flatBills)
 
                         flatBillsChartModelProducer.runTransaction {
-                            if (flatBills.isNotEmpty()) {
-                                lineSeries {
-                                    series(
-                                        List(flatBills.size) {
-                                            flatBills[it].total
-                                        }
-                                    )
+                            if (flatBills.isEmpty()) {
+                                return@runTransaction
+                            }
 
-                                    series(
-                                        List(flatBills.size) {
-                                            flatBills[it].taxesTotal
-                                        }
-                                    )
-                                }
+                            val flatChartExtraStore = calculateFlatChartExtraStore(flatBills)
+
+                            lineSeries {
+                                series(flatBills.map { it.splitPricePerUser() })
+                            }
+
+                            extras {
+                                it[FLAT_EXTRA_STORE] = flatChartExtraStore
                             }
                         }
 
                         electricityChartModelProducer.runTransaction {
-                            if (electricitySummary.electricityDifference.isNotEmpty()) {
-                                lineSeries {
-                                    series(
-                                        electricitySummary.electricityDifference.map { it.difference }
-                                    )
-                                }
+                            if (electricitySummary.electricityDifference.isEmpty()) {
+                                return@runTransaction
                             }
+
+                            val electricityChartExtraStore =
+                                calculateElectricityChartExtraStore(electricitySummary)
+
+                            lineSeries {
+                                series(electricitySummary.electricityDifference.map { it.difference })
+                            }
+
+                            extras {
+                                it[ELECTRICITY_EXTRA_STORE] = electricityChartExtraStore
+                            }
+
                         }
 
                         _flatUiState.update {
@@ -96,6 +108,61 @@ class FlatViewModel @Inject constructor(private val flatBillsRepository: FlatBil
                 flatBillsRepository.deleteFlatBill(flatBill)
             }
         }
+    }
+
+    private fun calculateElectricityChartExtraStore(
+        electricitySummary: ElectricitySummary
+    ): ElectricityChartExtraStore {
+        val (sumDifference, minDifference, maxDifference) = electricitySummary.electricityDifference.fold(
+            Triple(0.0, Double.MAX_VALUE, Double.MIN_VALUE)
+        ) { acc, difference ->
+            Triple(
+                acc.first + difference.difference,
+                minOf(acc.second, difference.difference),
+                maxOf(acc.third, difference.difference)
+            )
+        }
+
+        val avgElectricityDifference =
+            sumDifference / electricitySummary.electricityDifference.size
+
+        return ElectricityChartExtraStore(
+            averageDifference = avgElectricityDifference,
+            minDifference = minDifference,
+            maxDifference = maxDifference
+        )
+    }
+
+    private fun calculateFlatChartExtraStore(flatBills: List<FlatBill>): FlatChartExtraStore {
+        var sumTotal = 0.0
+
+        var maxTotal = Double.MIN_VALUE
+        var minTotal = Double.MAX_VALUE
+
+        var maxTotalIndex = -1
+        var minTotalIndex = -1
+
+        for ((index, bill) in flatBills.withIndex()) {
+            sumTotal += bill.splitPricePerUser()
+
+            if (bill.splitPricePerUser() > maxTotal) {
+                maxTotal = bill.splitPricePerUser()
+                maxTotalIndex = index
+            }
+
+            if (bill.splitPricePerUser() < minTotal) {
+                minTotal = bill.splitPricePerUser()
+                minTotalIndex = index
+            }
+        }
+
+        val avgTotal = sumTotal / flatBills.size
+
+        return FlatChartExtraStore(
+            maxTotalIndex = maxTotalIndex.toDouble(),
+            minTotalIndex = minTotalIndex.toDouble(),
+            avgTotal = avgTotal
+        )
     }
 
     private fun calculateElectricityStats(bills: List<FlatBill>): ElectricitySummary {
@@ -167,4 +234,16 @@ data class BillDifference(
     val firstBillDate: String,
     val secondBillDate: String,
     val difference: Double
+)
+
+data class FlatChartExtraStore(
+    val maxTotalIndex: Double,
+    val minTotalIndex: Double,
+    val avgTotal: Double,
+)
+
+data class ElectricityChartExtraStore(
+    val averageDifference: Double,
+    val minDifference: Double,
+    val maxDifference: Double,
 )

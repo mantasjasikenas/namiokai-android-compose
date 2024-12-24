@@ -38,11 +38,13 @@ import com.patrykandpatrick.vico.core.cartesian.axis.HorizontalAxis
 import com.patrykandpatrick.vico.core.cartesian.axis.VerticalAxis
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianValueFormatter
+import com.patrykandpatrick.vico.core.cartesian.decoration.Decoration
 import com.patrykandpatrick.vico.core.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.core.cartesian.marker.CartesianMarker
 import com.patrykandpatrick.vico.core.cartesian.marker.CartesianMarkerVisibilityListener
 import com.patrykandpatrick.vico.core.common.Legend
 import com.patrykandpatrick.vico.core.common.LegendItem
+import com.patrykandpatrick.vico.core.common.data.ExtraStore
 import com.patrykandpatrick.vico.core.common.shape.CorneredShape
 
 @Composable
@@ -53,12 +55,14 @@ fun <T> GenericChart(
     xAxisValueFormatter: (x: Double) -> String,
     yAxisValueFormatter: (y: Double) -> String,
     fieldsProvider: (T?) -> List<Triple<String, String?, String?>>,
-    legendItems: List<String>? = null,
-    lineColors: List<Color>? = null
+    legendItems: @Composable ((List<Color>) -> List<Pair<String, Color>>)? = null,
+    lineColors: List<Color>? = null,
+    decorations: List<Decoration> = emptyList(),
+    persistentMarkers: (ExtraStore) -> List<Pair<CartesianMarker?, Double>> = { emptyList() }
 ) {
-    val selectedXIndex = remember { mutableStateOf<Int?>(items.size - 1) }
+    val selectedXIndex = remember { mutableStateOf<Double?>((items.size - 1).toDouble()) }
     val selectedItem = remember(selectedXIndex.value) {
-        items.getOrNull(selectedXIndex.value ?: -1)
+        items.getOrNull((selectedXIndex.value ?: -1).toInt())
     }
 
     val fields = remember(selectedItem) {
@@ -104,13 +108,16 @@ fun <T> GenericChart(
             legend = if (legendItems == null) {
                 null
             } else {
-                rememberLegend(legendItems.mapIndexed { index, legendItem ->
-                    legendItem to lineColors[index % lineColors.size]
-                })
+                rememberLegend(
+                    labelsWithColors = legendItems(lineColors).mapIndexed { index, legendItem ->
+                        legendItem.first to lineColors[index % lineColors.size]
+                    })
             },
             onMarkerSelected = { selectedXIndex.value = it },
             selectedMarkerX = selectedXIndex.value,
-            lineColors = lineColors
+            lineColors = lineColors,
+            decorations = decorations,
+            persistentMarkers = persistentMarkers
         )
     }
 }
@@ -122,10 +129,12 @@ fun ComposeChart(
     xAxisValueFormatter: CartesianValueFormatter = remember { CartesianValueFormatter.decimal() },
     yAxisValueFormatter: CartesianValueFormatter = remember { CartesianValueFormatter.decimal() },
     legend: Legend<CartesianMeasuringContext, CartesianDrawingContext>? = null,
-    onMarkerSelected: (Int?) -> Unit = {},
-    selectedMarkerX: Int? = null,
+    onMarkerSelected: (Double?) -> Unit = {},
+    selectedMarkerX: Double? = null,
     marker: CartesianMarker = rememberMarker(),
-    lineColors: List<Color> = vicoTheme.lineCartesianLayerColors
+    lineColors: List<Color> = vicoTheme.lineCartesianLayerColors,
+    decorations: List<Decoration> = emptyList(),
+    persistentMarkers: (ExtraStore) -> List<Pair<CartesianMarker?, Double>> = { emptyList() }
 ) {
     CartesianChartHost(
         modifier = modifier,
@@ -164,7 +173,7 @@ fun ComposeChart(
                 valueFormatter = xAxisValueFormatter,
                 itemPlacer = remember {
                     HorizontalAxis.ItemPlacer.aligned(
-                        spacing = 4, addExtremeLabelPadding = false
+                        spacing = { 4 }, addExtremeLabelPadding = false
                     )
                 },
                 label = rememberAxisLabelComponent(
@@ -173,6 +182,7 @@ fun ComposeChart(
                 guideline = null
             ),
             marker = marker,
+            decorations = decorations,
             legend = legend,
             markerVisibilityListener = object : CartesianMarkerVisibilityListener {
                 override fun onShown(
@@ -181,7 +191,7 @@ fun ComposeChart(
                 ) {
                     super.onShown(marker, targets)
 
-                    val targetX = targets.firstOrNull()?.x?.toInt()
+                    val targetX = targets.firstOrNull()?.x
                     onMarkerSelected(targetX)
                 }
 
@@ -191,14 +201,27 @@ fun ComposeChart(
                 ) {
                     super.onUpdated(marker, targets)
 
-                    val targetX = targets.firstOrNull()?.x?.toInt()
+                    val targetX = targets.firstOrNull()?.x
                     onMarkerSelected(targetX)
                 }
             },
             persistentMarkers = rememberExtraLambda(
                 marker,
-                selectedMarkerX
+                selectedMarkerX,
+                persistentMarkers
             ) {
+                persistentMarkers(it).forEach { (localMarker, x) ->
+                    if (selectedMarkerX == x) {
+                        return@forEach
+                    }
+
+                    if (localMarker != null) {
+                        localMarker at x
+                    } else {
+                        marker at x
+                    }
+                }
+
                 if (selectedMarkerX != null) {
                     marker at selectedMarkerX
                 }

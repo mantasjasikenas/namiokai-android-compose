@@ -2,7 +2,10 @@ package com.github.mantasjasikenas.core.ui.common.chart
 
 import android.text.Layout
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.ColorUtils
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberAxisGuidelineComponent
@@ -29,8 +32,8 @@ import com.patrykandpatrick.vico.core.common.component.TextComponent
 import com.patrykandpatrick.vico.core.common.shape.Corner
 import com.patrykandpatrick.vico.core.common.shape.CorneredShape
 
-@androidx.compose.runtime.Composable
-internal fun rememberMarker(
+@Composable
+fun rememberMarker(
     labelPosition: LabelPosition = LabelPosition.Top,
     showIndicator: Boolean = true,
 ): CartesianMarker {
@@ -122,6 +125,57 @@ internal fun rememberMarker(
         }
     }
 }
+
+@Composable
+fun rememberIndicatorMarker(
+    sizeFraction: Float = 1f,
+    indicatorInnerColor: Color = MaterialTheme.colorScheme.surface,
+    indicatorColor: Color? = null,
+    showShadow: Boolean = false,
+): CartesianMarker {
+    // Inner circle (mostly black)
+    val indicatorFrontComponent = rememberShapeComponent(
+        fill = fill(
+            color = indicatorInnerColor
+        ), shape = CorneredShape.Companion.Pill
+    )
+
+    return remember(
+        sizeFraction, indicatorColor, showShadow
+    ) {
+        object : IndicatorCartesianMarker(
+            indicator = { color ->
+                val color = indicatorColor?.toArgb() ?: color
+
+                LayeredComponent(
+                    // Shadow circle
+                    rear = ShapeComponent(
+                        fill = Fill(
+                            ColorUtils.setAlphaComponent(
+                                color, if (showShadow) 38 else 0
+                            )
+                        ), shape = CorneredShape.Pill
+                    ),
+                    // Second circle
+                    front = LayeredComponent(
+                        rear = ShapeComponent(
+                            fill = Fill(color),
+                            shape = CorneredShape.Pill,
+                            shadow = if (showShadow) Shadow(
+                                radiusDp = 12f * sizeFraction, color = color
+                            ) else null,
+                        ),
+                        front = indicatorFrontComponent,
+                        padding = dimensions(5.dp * sizeFraction),
+                    ),
+                    padding = dimensions(10.dp * sizeFraction),
+                )
+            },
+            indicatorSizeDp = 36f * sizeFraction,
+        ) {}
+    }
+}
+
 
 private const val LABEL_BACKGROUND_SHADOW_RADIUS_DP = 4f
 private const val LABEL_BACKGROUND_SHADOW_DY_DP = 2f

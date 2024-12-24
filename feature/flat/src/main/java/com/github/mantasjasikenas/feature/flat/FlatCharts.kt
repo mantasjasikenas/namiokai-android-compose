@@ -1,10 +1,14 @@
 package com.github.mantasjasikenas.feature.flat
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import com.github.mantasjasikenas.core.common.util.format
 import com.github.mantasjasikenas.core.domain.model.bills.FlatBill
 import com.github.mantasjasikenas.core.ui.common.chart.GenericChart
+import com.github.mantasjasikenas.core.ui.common.chart.rememberHorizontalLine
+import com.github.mantasjasikenas.core.ui.common.chart.rememberIndicatorMarker
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
 import kotlinx.datetime.Month
 import java.time.format.TextStyle
@@ -16,6 +20,11 @@ internal fun FlatBillsChart(
     chartModelProducer: CartesianChartModelProducer,
     flatBills: List<FlatBill>
 ) {
+    val indicatorMarker = rememberIndicatorMarker(
+        sizeFraction = 0.5f,
+        indicatorColor = MaterialTheme.colorScheme.outline,
+    )
+
     GenericChart(
         modifier = modifier,
         chartModelProducer = chartModelProducer,
@@ -30,7 +39,28 @@ internal fun FlatBillsChart(
                 Triple("Total split", selectedBill?.splitPricePerUser()?.format(2), "€")
             )
         },
-        legendItems = listOf("Total", "Taxes"),
+        legendItems = { colors ->
+            listOf(
+                ("Total split" to colors.first()),
+                ("Avg split" to MaterialTheme.colorScheme.secondary)
+            )
+        },
+
+        decorations = listOf(
+            rememberHorizontalLine(
+                lineColor = MaterialTheme.colorScheme.secondary,
+                lineThickness = 1.dp,
+                y = {
+                    it[FlatViewModel.FLAT_EXTRA_STORE].avgTotal
+                },
+            ),
+        ),
+        persistentMarkers = { extraStore ->
+            listOf(
+                indicatorMarker to extraStore[FlatViewModel.FLAT_EXTRA_STORE].maxTotalIndex,
+                indicatorMarker to extraStore[FlatViewModel.FLAT_EXTRA_STORE].minTotalIndex,
+            )
+        }
     )
 }
 
@@ -58,7 +88,7 @@ internal fun ElectricityChart(
                 Triple("Amount", selected?.difference?.format(2), "kWh"),
             )
         },
-        legendItems = listOf("Electricity consumption"),
+        legendItems = { colors -> listOf("Electricity").zip(colors) },
     )
 }
 
