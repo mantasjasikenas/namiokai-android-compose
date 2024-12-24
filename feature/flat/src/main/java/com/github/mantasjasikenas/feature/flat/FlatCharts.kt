@@ -2,6 +2,7 @@ package com.github.mantasjasikenas.feature.flat
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.github.mantasjasikenas.core.common.util.format
@@ -10,6 +11,7 @@ import com.github.mantasjasikenas.core.ui.common.chart.GenericChart
 import com.github.mantasjasikenas.core.ui.common.chart.rememberHorizontalLine
 import com.github.mantasjasikenas.core.ui.common.chart.rememberIndicatorMarker
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
+import com.patrykandpatrick.vico.core.cartesian.data.CartesianLayerRangeProvider
 import kotlinx.datetime.Month
 import java.time.format.TextStyle
 import java.util.Locale
@@ -20,10 +22,8 @@ internal fun FlatBillsChart(
     chartModelProducer: CartesianChartModelProducer,
     flatBills: List<FlatBill>
 ) {
-    val indicatorMarker = rememberIndicatorMarker(
-        sizeFraction = 0.5f,
-        indicatorColor = MaterialTheme.colorScheme.outline,
-    )
+    val indicatorMarker = rememberSmallIndicatorMarker()
+    val avgLineColor = avgLineColor()
 
     GenericChart(
         modifier = modifier,
@@ -42,13 +42,12 @@ internal fun FlatBillsChart(
         legendItems = { colors ->
             listOf(
                 ("Total split" to colors.first()),
-                ("Avg split" to MaterialTheme.colorScheme.secondary)
+                ("Avg split" to avgLineColor)
             )
         },
-
         decorations = listOf(
             rememberHorizontalLine(
-                lineColor = MaterialTheme.colorScheme.secondary,
+                lineColor = avgLineColor,
                 lineThickness = 1.dp,
                 y = {
                     it[FlatViewModel.FLAT_EXTRA_STORE].avgTotal
@@ -60,6 +59,11 @@ internal fun FlatBillsChart(
                 indicatorMarker to extraStore[FlatViewModel.FLAT_EXTRA_STORE].maxTotalIndex,
                 indicatorMarker to extraStore[FlatViewModel.FLAT_EXTRA_STORE].minTotalIndex,
             )
+        },
+        rangeProvider = remember(flatBills) {
+            CartesianLayerRangeProvider.fixed(
+                minY = flatBills.minOf { it.splitPricePerUser() },
+            )
         }
     )
 }
@@ -70,6 +74,9 @@ internal fun ElectricityChart(
     chartModelProducer: CartesianChartModelProducer,
     electricity: List<BillDifference>
 ) {
+    val indicatorMarker = rememberSmallIndicatorMarker()
+    val avgLineColor = avgLineColor()
+
     GenericChart(
         modifier = modifier,
         chartModelProducer = chartModelProducer,
@@ -88,9 +95,43 @@ internal fun ElectricityChart(
                 Triple("Amount", selected?.difference?.format(2), "kWh"),
             )
         },
-        legendItems = { colors -> listOf("Electricity").zip(colors) },
+        legendItems = { colors ->
+            listOf(
+                ("Electricity" to colors.first()),
+                ("Avg" to avgLineColor)
+            )
+        },
+        rangeProvider = remember(electricity) {
+            CartesianLayerRangeProvider.fixed(
+                minY = electricity.minOf { it.difference }
+            )
+        },
+        decorations = listOf(
+            rememberHorizontalLine(
+                lineColor = avgLineColor,
+                lineThickness = 1.dp,
+                y = {
+                    it[FlatViewModel.ELECTRICITY_EXTRA_STORE].averageDifference
+                },
+            ),
+        ),
+        persistentMarkers = { extraStore ->
+            listOf(
+                indicatorMarker to extraStore[FlatViewModel.ELECTRICITY_EXTRA_STORE].maxDifferenceIndex,
+                indicatorMarker to extraStore[FlatViewModel.ELECTRICITY_EXTRA_STORE].minDifferenceIndex,
+            )
+        },
     )
 }
+
+@Composable
+private fun avgLineColor() = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+
+@Composable
+private fun rememberSmallIndicatorMarker() = rememberIndicatorMarker(
+    sizeFraction = 0.5f,
+    indicatorColor = MaterialTheme.colorScheme.outline,
+)
 
 private fun formatFlatBillXAxisValue(date: String): String {
     val date = date.split("T").firstOrNull() ?: return ""

@@ -113,23 +113,30 @@ class FlatViewModel @Inject constructor(private val flatBillsRepository: FlatBil
     private fun calculateElectricityChartExtraStore(
         electricitySummary: ElectricitySummary
     ): ElectricityChartExtraStore {
-        val (sumDifference, minDifference, maxDifference) = electricitySummary.electricityDifference.fold(
-            Triple(0.0, Double.MAX_VALUE, Double.MIN_VALUE)
-        ) { acc, difference ->
-            Triple(
-                acc.first + difference.difference,
-                minOf(acc.second, difference.difference),
-                maxOf(acc.third, difference.difference)
-            )
+        var sumDifference = 0.0
+        var minDifference = Double.MAX_VALUE
+        var maxDifference = Double.MIN_VALUE
+        var minDifferenceIndex = -1
+        var maxDifferenceIndex = -1
+
+        for ((index, difference) in electricitySummary.electricityDifference.withIndex()) {
+            sumDifference += difference.difference
+            if (difference.difference < minDifference) {
+                minDifference = difference.difference
+                minDifferenceIndex = index
+            }
+            if (difference.difference > maxDifference) {
+                maxDifference = difference.difference
+                maxDifferenceIndex = index
+            }
         }
 
-        val avgElectricityDifference =
-            sumDifference / electricitySummary.electricityDifference.size
+        val avgElectricityDifference = sumDifference / electricitySummary.electricityDifference.size
 
         return ElectricityChartExtraStore(
             averageDifference = avgElectricityDifference,
-            minDifference = minDifference,
-            maxDifference = maxDifference
+            minDifferenceIndex = minDifferenceIndex.toDouble(),
+            maxDifferenceIndex = maxDifferenceIndex.toDouble()
         )
     }
 
@@ -244,6 +251,6 @@ data class FlatChartExtraStore(
 
 data class ElectricityChartExtraStore(
     val averageDifference: Double,
-    val minDifference: Double,
-    val maxDifference: Double,
+    val minDifferenceIndex: Double,
+    val maxDifferenceIndex: Double,
 )

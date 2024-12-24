@@ -37,6 +37,7 @@ import com.patrykandpatrick.vico.core.cartesian.Scroll
 import com.patrykandpatrick.vico.core.cartesian.axis.HorizontalAxis
 import com.patrykandpatrick.vico.core.cartesian.axis.VerticalAxis
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
+import com.patrykandpatrick.vico.core.cartesian.data.CartesianLayerRangeProvider
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianValueFormatter
 import com.patrykandpatrick.vico.core.cartesian.decoration.Decoration
 import com.patrykandpatrick.vico.core.cartesian.layer.LineCartesianLayer
@@ -58,7 +59,8 @@ fun <T> GenericChart(
     legendItems: @Composable ((List<Color>) -> List<Pair<String, Color>>)? = null,
     lineColors: List<Color>? = null,
     decorations: List<Decoration> = emptyList(),
-    persistentMarkers: (ExtraStore) -> List<Pair<CartesianMarker?, Double>> = { emptyList() }
+    persistentMarkers: (ExtraStore) -> List<Pair<CartesianMarker?, Double>> = { emptyList() },
+    rangeProvider: CartesianLayerRangeProvider = remember { CartesianLayerRangeProvider.auto() }
 ) {
     val selectedXIndex = remember { mutableStateOf<Double?>((items.size - 1).toDouble()) }
     val selectedItem = remember(selectedXIndex.value) {
@@ -70,8 +72,7 @@ fun <T> GenericChart(
     }
 
     fields.forEach { (label, value, endContent) ->
-        TextRow(
-            label = label,
+        TextRow(label = label,
             value = value ?: "-",
             labelTextStyle = MaterialTheme.typography.labelMedium,
             valueTextStyle = MaterialTheme.typography.labelMedium,
@@ -84,14 +85,12 @@ fun <T> GenericChart(
                         fontWeight = FontWeight.Bold
                     )
                 }
-            }
-        )
+            })
     }
 
     ProvideVicoTheme(
         theme = rememberM3VicoTheme(
-            lineColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f),
-            textColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
+            lineColor = chartLineColor(), textColor = chartTextColor()
         )
     ) {
         val lineColors = lineColors ?: vicoTheme.lineCartesianLayerColors
@@ -108,16 +107,16 @@ fun <T> GenericChart(
             legend = if (legendItems == null) {
                 null
             } else {
-                rememberLegend(
-                    labelsWithColors = legendItems(lineColors).mapIndexed { index, legendItem ->
-                        legendItem.first to lineColors[index % lineColors.size]
-                    })
+                rememberLegend(labelsWithColors = legendItems(lineColors).mapIndexed { index, (legendItem, color) ->
+                    legendItem to color
+                })
             },
             onMarkerSelected = { selectedXIndex.value = it },
             selectedMarkerX = selectedXIndex.value,
             lineColors = lineColors,
             decorations = decorations,
-            persistentMarkers = persistentMarkers
+            persistentMarkers = persistentMarkers,
+            rangeProvider = rangeProvider
         )
     }
 }
@@ -134,7 +133,8 @@ fun ComposeChart(
     marker: CartesianMarker = rememberMarker(),
     lineColors: List<Color> = vicoTheme.lineCartesianLayerColors,
     decorations: List<Decoration> = emptyList(),
-    persistentMarkers: (ExtraStore) -> List<Pair<CartesianMarker?, Double>> = { emptyList() }
+    persistentMarkers: (ExtraStore) -> List<Pair<CartesianMarker?, Double>> = { emptyList() },
+    rangeProvider: CartesianLayerRangeProvider = remember { CartesianLayerRangeProvider.auto() }
 ) {
     CartesianChartHost(
         modifier = modifier,
@@ -143,22 +143,20 @@ fun ComposeChart(
         scrollState = rememberVicoScrollState(initialScroll = Scroll.Absolute.End),
         chart = rememberCartesianChart(
             rememberLineCartesianLayer(
-                lineProvider = LineCartesianLayer.LineProvider.series(
-                    lines = lineColors.map { color ->
-                        LineCartesianLayer.rememberLine(
-                            fill = LineCartesianLayer.LineFill.single(
-                                fill(
-                                    color = color
-                                )
-                            ),
-                            pointConnector = remember {
-                                LineCartesianLayer.PointConnector.cubic(
-                                    curvature = 0f
-                                )
-                            },
-                        )
-                    }),
-                pointSpacing = 16.dp
+                lineProvider = LineCartesianLayer.LineProvider.series(lines = lineColors.map { color ->
+                    LineCartesianLayer.rememberLine(
+                        fill = LineCartesianLayer.LineFill.single(
+                            fill(
+                                color = color
+                            )
+                        ),
+                        pointConnector = remember {
+                            LineCartesianLayer.PointConnector.cubic(
+                                curvature = 0f
+                            )
+                        },
+                    )
+                }), pointSpacing = 16.dp, rangeProvider = rangeProvider
             ),
             startAxis = VerticalAxis.rememberStart(
                 guideline = null,
@@ -170,24 +168,20 @@ fun ComposeChart(
                 guideline = rememberAxisLineComponent(), label = null, tick = null
             ),
             bottomAxis = HorizontalAxis.rememberBottom(
-                valueFormatter = xAxisValueFormatter,
-                itemPlacer = remember {
+                valueFormatter = xAxisValueFormatter, itemPlacer = remember {
                     HorizontalAxis.ItemPlacer.aligned(
                         spacing = { 4 }, addExtremeLabelPadding = false
                     )
-                },
-                label = rememberAxisLabelComponent(
+                }, label = rememberAxisLabelComponent(
                     textSize = 10.sp
-                ),
-                guideline = null
+                ), guideline = null
             ),
             marker = marker,
             decorations = decorations,
             legend = legend,
             markerVisibilityListener = object : CartesianMarkerVisibilityListener {
                 override fun onShown(
-                    marker: CartesianMarker,
-                    targets: List<CartesianMarker.Target>
+                    marker: CartesianMarker, targets: List<CartesianMarker.Target>
                 ) {
                     super.onShown(marker, targets)
 
@@ -196,8 +190,7 @@ fun ComposeChart(
                 }
 
                 override fun onUpdated(
-                    marker: CartesianMarker,
-                    targets: List<CartesianMarker.Target>
+                    marker: CartesianMarker, targets: List<CartesianMarker.Target>
                 ) {
                     super.onUpdated(marker, targets)
 
@@ -206,9 +199,7 @@ fun ComposeChart(
                 }
             },
             persistentMarkers = rememberExtraLambda(
-                marker,
-                selectedMarkerX,
-                persistentMarkers
+                marker, selectedMarkerX, persistentMarkers
             ) {
                 persistentMarkers(it).forEach { (localMarker, x) ->
                     if (selectedMarkerX == x) {
@@ -251,3 +242,9 @@ private fun rememberLegend(
         padding = dimensions(top = 8.dp),
     )
 }
+
+@Composable
+fun chartLineColor(): Color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)
+
+@Composable
+fun chartTextColor(): Color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
