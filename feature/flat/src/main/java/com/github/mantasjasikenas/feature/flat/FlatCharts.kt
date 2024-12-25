@@ -12,15 +12,14 @@ import com.github.mantasjasikenas.core.ui.common.chart.rememberHorizontalLine
 import com.github.mantasjasikenas.core.ui.common.chart.rememberIndicatorMarker
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianLayerRangeProvider
+import com.patrykandpatrick.vico.core.common.data.ExtraStore
 import kotlinx.datetime.Month
 import java.time.format.TextStyle
 import java.util.Locale
 
 @Composable
 internal fun FlatBillsChart(
-    modifier: Modifier,
-    chartModelProducer: CartesianChartModelProducer,
-    flatBills: List<FlatBill>
+    modifier: Modifier, chartModelProducer: CartesianChartModelProducer, flatBills: List<FlatBill>
 ) {
     val indicatorMarker = rememberSmallIndicatorMarker()
     val avgLineColor = avgLineColor()
@@ -41,8 +40,7 @@ internal fun FlatBillsChart(
         },
         legendItems = { colors ->
             listOf(
-                ("Total split" to colors.first()),
-                ("Avg split" to avgLineColor)
+                ("Total split" to colors.first()), ("Avg split" to avgLineColor)
             )
         },
         decorations = listOf(
@@ -60,11 +58,7 @@ internal fun FlatBillsChart(
                 indicatorMarker to extraStore[FlatViewModel.FLAT_EXTRA_STORE].minTotalIndex,
             )
         },
-        rangeProvider = remember(flatBills) {
-            CartesianLayerRangeProvider.fixed(
-                minY = flatBills.minOf { it.splitPricePerUser() },
-            )
-        }
+        rangeProvider = rememberCartesianLayerRangeProvider()
     )
 }
 
@@ -84,8 +78,7 @@ internal fun ElectricityChart(
         xAxisValueFormatter = { x ->
             val bill = electricity[x.toInt()]
 
-            bill.firstBillDate.split("T")
-                .firstOrNull() ?: "-"
+            bill.firstBillDate.split("T").firstOrNull() ?: "-"
         },
         yAxisValueFormatter = { y -> "${y.toInt()}kWh" },
         fieldsProvider = { selected ->
@@ -97,13 +90,7 @@ internal fun ElectricityChart(
         },
         legendItems = { colors ->
             listOf(
-                ("Electricity" to colors.first()),
-                ("Avg" to avgLineColor)
-            )
-        },
-        rangeProvider = remember(electricity) {
-            CartesianLayerRangeProvider.fixed(
-                minY = electricity.minOf { it.difference }
+                ("Electricity" to colors.first()), ("Avg" to avgLineColor)
             )
         },
         decorations = listOf(
@@ -121,7 +108,21 @@ internal fun ElectricityChart(
                 indicatorMarker to extraStore[FlatViewModel.ELECTRICITY_EXTRA_STORE].minDifferenceIndex,
             )
         },
+        rangeProvider = rememberCartesianLayerRangeProvider()
     )
+}
+
+@Composable
+private fun rememberCartesianLayerRangeProvider() = remember {
+    object : CartesianLayerRangeProvider {
+        override fun getMinY(minY: Double, maxY: Double, extraStore: ExtraStore): Double {
+            return minY
+        }
+
+        override fun getMaxY(minX: Double, maxX: Double, extraStore: ExtraStore): Double {
+            return maxX
+        }
+    }
 }
 
 @Composable
