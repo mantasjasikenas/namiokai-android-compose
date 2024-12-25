@@ -80,6 +80,11 @@ import com.github.skydoves.colorpicker.compose.drawColorIndicator
 import com.github.skydoves.colorpicker.compose.rememberColorPickerController
 
 @Composable
+fun SettingsRoute() {
+    SettingsScreen()
+}
+
+@Composable
 fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel()
 ) {

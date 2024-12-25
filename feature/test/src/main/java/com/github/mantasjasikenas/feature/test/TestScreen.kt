@@ -10,6 +10,11 @@ import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 
 @Composable
+fun TestRoute() {
+    TestScreen()
+}
+
+@Composable
 fun TestScreen(
     viewModel: TestViewModel = hiltViewModel()
 ) {

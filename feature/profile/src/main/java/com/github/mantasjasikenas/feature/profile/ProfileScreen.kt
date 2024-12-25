@@ -28,6 +28,11 @@ import com.github.mantasjasikenas.core.ui.common.NamiokaiCircularProgressIndicat
 import com.github.mantasjasikenas.core.ui.common.NamiokaiSpacer
 
 @Composable
+fun ProfileRoute() {
+    ProfileScreen()
+}
+
+@Composable
 fun ProfileScreen(
     profileViewModel: ProfileViewModel = hiltViewModel()
 ) {

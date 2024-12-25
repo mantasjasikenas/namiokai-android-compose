@@ -38,7 +38,7 @@ import com.github.mantasjasikenas.core.domain.model.Filter
 import com.github.mantasjasikenas.core.domain.model.SharedState
 import com.github.mantasjasikenas.core.domain.model.User
 import com.github.mantasjasikenas.core.domain.model.UsersMap
-import com.github.mantasjasikenas.core.domain.model.bills.BillFormRoute
+import com.github.mantasjasikenas.core.domain.model.bills.BillFormArgs
 import com.github.mantasjasikenas.core.domain.model.bills.BillType
 import com.github.mantasjasikenas.core.domain.model.bills.FlatBill
 import com.github.mantasjasikenas.core.ui.common.NamiokaiCircularProgressIndicator
@@ -53,11 +53,22 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 
 @Composable
+fun FlatBillListRoute(
+    sharedState: SharedState,
+    onNavigateToCreateBill: (BillFormArgs) -> Unit,
+) {
+    FlatBillListPage(
+        sharedState = sharedState,
+        onNavigateToCreateBill = onNavigateToCreateBill
+    )
+}
+
+@Composable
 @OptIn(ExperimentalFoundationApi::class)
 fun FlatBillListPage(
     sharedState: SharedState,
     flatViewModel: FlatViewModel = hiltViewModel(),
-    onNavigateToCreateBill: (BillFormRoute) -> Unit,
+    onNavigateToCreateBill: (BillFormArgs) -> Unit,
 ) {
     val flatUiState by flatViewModel.flatUiState.collectAsStateWithLifecycle()
 
@@ -84,7 +95,7 @@ fun FlatBillListPage(
 fun FlatBillScreenContent(
     flatUiState: FlatUiState,
     flatViewModel: FlatViewModel,
-    onNavigateToCreateBill: (BillFormRoute) -> Unit,
+    onNavigateToCreateBill: (BillFormArgs) -> Unit,
     currentUser: User,
     usersMap: UsersMap
 ) {
@@ -128,7 +139,7 @@ fun FlatBillScreenContent(
                         currentUser = currentUser,
                         onEdit = {
                             onNavigateToCreateBill(
-                                BillFormRoute(
+                                BillFormArgs(
                                     billId = flatBill.documentId,
                                     billType = BillType.Flat
                                 )

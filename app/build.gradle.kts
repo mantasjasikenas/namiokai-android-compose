@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.namiokai.android.application)
     alias(libs.plugins.namiokai.compose.application)
     alias(libs.plugins.compose)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 
@@ -98,7 +99,6 @@ dependencies {
     implementation(libs.credentials.play.services.auth)
     implementation(libs.googleid)
 
-//    implementation(platform(libs.compose.bom))
     implementation(libs.bundles.compose)
 
     implementation(platform(libs.firebase.bom))
@@ -131,6 +131,8 @@ dependencies {
 
     implementation(libs.coil.compose)
     implementation(libs.play.services.auth)
+
+    implementation(libs.kotlinx.serialization.json)
 
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.compose.ui.test.junit4)

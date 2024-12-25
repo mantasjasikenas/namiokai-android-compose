@@ -7,9 +7,9 @@ import androidx.navigation.toRoute
 import com.github.mantasjasikenas.core.common.util.Constants.DATE_TIME_FORMAT
 import com.github.mantasjasikenas.core.domain.model.Destination
 import com.github.mantasjasikenas.core.domain.model.bills.Bill
-import com.github.mantasjasikenas.core.domain.model.bills.BillFormRoute
 import com.github.mantasjasikenas.core.domain.repository.BillsRepository
 import com.github.mantasjasikenas.core.domain.repository.TripBillsRepository
+import com.github.mantasjasikenas.feature.bills.navigation.BillFormRoute
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import dagger.hilt.android.lifecycle.HiltViewModel

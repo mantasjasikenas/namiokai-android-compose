@@ -33,7 +33,7 @@ import com.github.mantasjasikenas.core.domain.model.PeriodState
 import com.github.mantasjasikenas.core.domain.model.SharedState
 import com.github.mantasjasikenas.core.domain.model.User
 import com.github.mantasjasikenas.core.domain.model.UsersMap
-import com.github.mantasjasikenas.core.domain.model.bills.BillFormRoute
+import com.github.mantasjasikenas.core.domain.model.bills.BillFormArgs
 import com.github.mantasjasikenas.core.domain.model.bills.BillType
 import com.github.mantasjasikenas.core.domain.model.bills.TripBill
 import com.github.mantasjasikenas.core.domain.model.contains
@@ -51,11 +51,22 @@ import kotlin.collections.component1
 import kotlin.collections.component2
 
 @Composable
+fun TripBillRoute(
+    sharedState: SharedState,
+    onNavigateToCreateBill: (BillFormArgs) -> Unit,
+) {
+    TripBillScreen(
+        sharedState = sharedState,
+        onNavigateToCreateBill = onNavigateToCreateBill
+    )
+}
+
+@Composable
 fun TripBillScreen(
     modifier: Modifier = Modifier,
     viewModel: FuelViewModel = hiltViewModel(),
     sharedState: SharedState,
-    onNavigateToCreateBill: (BillFormRoute) -> Unit,
+    onNavigateToCreateBill: (BillFormArgs) -> Unit,
 ) {
     val fuelUiState by viewModel.uiState.collectAsStateWithLifecycle()
     val groupedTrips by viewModel.groupedTrips.collectAsStateWithLifecycle()
@@ -90,7 +101,7 @@ fun TripBillScreenContent(
     periodState: PeriodState,
     usersMap: UsersMap,
     currentUser: User,
-    onNavigateToCreateBill: (BillFormRoute) -> Unit,
+    onNavigateToCreateBill: (BillFormArgs) -> Unit,
     groupedTrips: Map<Pair<String, String>, List<TripBill>>
 ) {
     val state = rememberLazyListState()
@@ -140,7 +151,6 @@ fun TripBillScreenContent(
                         key = { it.documentId }
                     ) { fuel ->
                         FuelCard(
-                            // FIXME: Removed animation due to bug
 //                                modifier = Modifier.animateItemPlacement(),
                             tripBill = fuel,
                             isAllowedModification = (currentUser.admin || fuel.createdByUid == currentUser.uid),
@@ -149,7 +159,7 @@ fun TripBillScreenContent(
                             currentUser = currentUser,
                             onEdit = {
                                 onNavigateToCreateBill(
-                                    BillFormRoute(
+                                    BillFormArgs(
                                         billId = fuel.documentId,
                                         billType = BillType.Trip
                                     )

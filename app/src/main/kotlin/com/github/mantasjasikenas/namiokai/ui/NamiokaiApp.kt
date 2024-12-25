@@ -1,8 +1,7 @@
-package com.github.mantasjasikenas.namiokai
+package com.github.mantasjasikenas.namiokai.ui
 
 import android.annotation.SuppressLint
 import android.content.Intent
-import android.content.res.Configuration
 import android.net.Uri
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
@@ -49,13 +48,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
@@ -63,32 +60,37 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavDestination
-import androidx.navigation.NavDestination.Companion.hierarchy
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
 import com.github.mantasjasikenas.core.common.util.Constants.GITHUB_URL
 import com.github.mantasjasikenas.core.domain.model.SharedState
-import com.github.mantasjasikenas.core.domain.model.bills.BillFormRoute
+import com.github.mantasjasikenas.core.domain.model.bills.BillType
 import com.github.mantasjasikenas.core.domain.model.isNotLoggedIn
 import com.github.mantasjasikenas.core.ui.common.NamiokaiCircularProgressIndicator
 import com.github.mantasjasikenas.core.ui.common.rememberState
 import com.github.mantasjasikenas.core.ui.component.ReportBugDialog
-import com.github.mantasjasikenas.namiokai.navigation.NavGraph
-import com.github.mantasjasikenas.namiokai.navigation.Screen
-import com.github.mantasjasikenas.namiokai.navigation.Screen.Companion.bottomBarScreens
+import com.github.mantasjasikenas.feature.admin.navigation.AdminPanelRoute
+import com.github.mantasjasikenas.feature.bills.navigation.BillFormRoute
+import com.github.mantasjasikenas.feature.home.navigation.HomeRoute
+import com.github.mantasjasikenas.feature.notifications.navigation.NotificationsRoute
+import com.github.mantasjasikenas.feature.profile.navigation.ProfileRoute
+import com.github.mantasjasikenas.feature.settings.navigation.SettingsRoute
+import com.github.mantasjasikenas.feature.test.navigation.TestRoute
+import com.github.mantasjasikenas.namiokai.MainActivityViewModel
+import com.github.mantasjasikenas.namiokai.R
+import com.github.mantasjasikenas.namiokai.SharedUiState
+import com.github.mantasjasikenas.namiokai.navigation.Route
+import com.github.mantasjasikenas.namiokai.navigation.TopLevelRoute
 import com.github.mantasjasikenas.namiokai.navigation.authNavGraph
 import com.github.mantasjasikenas.namiokai.navigation.namiokaiNavGraph
 
 
 @Composable
 fun NamiokaiApp(mainActivityViewModel: MainActivityViewModel = hiltViewModel()) {
-
     val rootNavController = rememberNavController()
     val sharedUiState by mainActivityViewModel.sharedUiState.collectAsStateWithLifecycle()
 
@@ -97,20 +99,13 @@ fun NamiokaiApp(mainActivityViewModel: MainActivityViewModel = hiltViewModel()) 
         return
     }
 
-    /*val startDestination = if (sharedState.currentUser.isNotLoggedIn()) {
-        NavGraph.Auth.route
-    }
-    else {
-        NavGraph.Home.route
-    }*/
-
     val sharedState = (sharedUiState as SharedUiState.Success).sharedState
-    val startDestination = NavGraph.Home.route
+    val startDestination = Route.AppGraph
 
     NavHost(
         modifier = Modifier.fillMaxSize(),
         navController = rootNavController,
-        route = NavGraph.Root.route,
+        route = Route.RootGraph::class,
         startDestination = startDestination,
         enterTransition = {
             fadeIn(animationSpec = tween(500))
@@ -121,19 +116,19 @@ fun NamiokaiApp(mainActivityViewModel: MainActivityViewModel = hiltViewModel()) 
     ) {
         authNavGraph(
             onSuccessfulLogin = {
-                rootNavController.navigate(NavGraph.Home.route) {
-                    popUpTo(NavGraph.Root.route) {
+                rootNavController.navigate(Route.AppGraph) {
+                    popUpTo(Route.RootGraph) {
                         inclusive = false
                     }
                 }
             }
         )
 
-        composable(route = NavGraph.Home.route) {
+        composable<Route.AppGraph> {
             LaunchedEffect(key1 = sharedState.currentUser) {
                 if (sharedState.currentUser.isNotLoggedIn()) {
-                    rootNavController.navigate(NavGraph.Auth.route) {
-                        popUpTo(NavGraph.Root.route) {
+                    rootNavController.navigate(Route.AuthGraph) {
+                        popUpTo(Route.RootGraph) {
                             inclusive = false
                         }
 
@@ -142,78 +137,59 @@ fun NamiokaiApp(mainActivityViewModel: MainActivityViewModel = hiltViewModel()) 
             }
 
             NamiokaiScreen(
-                navigateToAuth = {
-                    rootNavController.navigate(NavGraph.Auth.route) {
-                        popUpTo(NavGraph.Root.route) {
-                            inclusive = false
-                        }
-                    }
-                },
                 sharedState = sharedState,
             )
 
         }
     }
-
-
 }
 
 
-@SuppressLint("RestrictedApi")
 @Composable
 fun NamiokaiScreen(
     modifier: Modifier = Modifier,
-    sharedState: SharedState,
-    navigateToAuth: () -> Unit,
-    mainActivityViewModel: MainActivityViewModel = hiltViewModel()
+    sharedState: SharedState
 ) {
-    val navController: NavHostController = rememberNavController()
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentDestination = navBackStackEntry?.destination
-    val currentScreen = Screen.fromRoute(navBackStackEntry?.destination?.route)
-    val bottomBarState = rememberSaveable { (mutableStateOf(true)) }
-    val topBarState = rememberSaveable { (mutableStateOf(true)) }
+    val appState = rememberNamiokaiAppState()
 
-    val currentUser = sharedState.currentUser
-
-    val configuration = LocalConfiguration.current
-    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
-
-    bottomBarState.value = !isLandscape && Screen.isBottomBarVisible(currentDestination)
-    topBarState.value = !isLandscape && Screen.isTopBarVisible(currentDestination)
+    val topLevelRoute = appState.currentTopLevelRoute
 
     Scaffold(
         topBar = {
             NamiokaiAppTopBar(
-                navController = navController,
-                topBarState = topBarState.value,
-                currentScreen = currentScreen,
-                canNavigateBack = navController.previousBackStackEntry != null && !bottomBarScreens.contains(
-                    currentScreen
-                ),
-                navigateUp = { navController.navigateUp() },
-                adminModeEnabled = currentUser.admin,
-                photoUrl = currentUser.photoUrl
+                navController = appState.navController,
+                topBarState = appState.showTopBar,
+                title = topLevelRoute?.titleResourceId?.let { stringResource(it) },
+                canNavigateBack = appState.navController.previousBackStackEntry != null && !appState.isTopLevelRoute,
+                navigateUp = { appState.navController.navigateUp() },
+                adminModeEnabled = sharedState.currentUser.admin,
+                photoUrl = sharedState.currentUser.photoUrl
             )
         },
         bottomBar = {
             NamiokaiAppNavigationBar(
-                navController = navController,
-                currentDestination = currentDestination,
-                bottomBarState = bottomBarState.value
+                currentDestination = appState.currentDestination,
+                bottomBarState = appState.showBottomBar,
+                onNavigate = { topLevelRoute ->
+                    appState.navigateToTopLevelRoute(topLevelRoute)
+                }
             )
         },
         floatingActionButton = {
             AnimatedVisibility(
-                visible = bottomBarState.value,
+                visible = appState.showBottomBar,
                 enter = EnterTransition.None,
                 exit = ExitTransition.None,
             ) {
                 FloatingActionButton(
                     onClick = {
-                        navController.navigate(
+                        appState.navController.navigate(
                             BillFormRoute(
-                                navigatedFrom = currentScreen?.route,
+                                billType = when (topLevelRoute) {
+                                    TopLevelRoute.Trips -> BillType.Trip
+                                    TopLevelRoute.Flat -> BillType.Flat
+                                    else -> BillType.Purchase
+                                }
                             )
                         ) {
                             launchSingleTop = true
@@ -229,9 +205,9 @@ fun NamiokaiScreen(
         },
     ) { innerPadding ->
         NavHost(
-            navController = navController,
-            route = NavGraph.Home.route,
-            startDestination = Screen.initialScreen.route,
+            navController = appState.navController,
+            route = Route.AppGraph::class,
+            startDestination = HomeRoute,
             modifier = modifier.padding(innerPadding),
             enterTransition = {
                 fadeIn(animationSpec = tween(500))
@@ -242,17 +218,18 @@ fun NamiokaiScreen(
         ) {
             namiokaiNavGraph(
                 sharedState = sharedState,
-                navController = navController
+                navController = appState.navController
             )
         }
     }
 }
 
+@SuppressLint("RestrictedApi")
 @Composable
 fun NamiokaiAppNavigationBar(
-    navController: NavHostController,
     currentDestination: NavDestination?,
-    bottomBarState: Boolean
+    bottomBarState: Boolean,
+    onNavigate: (TopLevelRoute) -> Unit
 ) {
     AnimatedVisibility(
         visible = bottomBarState,
@@ -262,25 +239,18 @@ fun NamiokaiAppNavigationBar(
         NavigationBar(
             windowInsets = NavigationBarDefaults.windowInsets.exclude(WindowInsets(bottom = 12.dp))
         ) {
-            Screen.bottomBarScreens.forEach { screen ->
+            TopLevelRoute.routes.forEach { screen ->
                 NavigationBarItem(
                     icon = {
                         Icon(
-                            screen.imageVector,
+                            imageVector = screen.imageVector,
                             contentDescription = null
                         )
                     },
                     label = { Text(stringResource(screen.titleResourceId)) },
-                    selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true,
-                    onClick = {
-                        navController.navigate(screen.route) {
-                            popUpTo(navController.graph.findStartDestination().id) {
-                                saveState = true
-                            }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                    })
+                    selected = currentDestination?.isRouteInHierarchy(screen.route::class) == true,
+                    onClick = { onNavigate(screen) }
+                )
             }
         }
     }
@@ -296,7 +266,7 @@ fun NamiokaiAppTopBar(
     navController: NavHostController,
     topBarState: Boolean,
     adminModeEnabled: Boolean,
-    currentScreen: Screen?,
+    title: String? = null,
     canNavigateBack: Boolean,
     photoUrl: String,
     navigateUp: () -> Unit
@@ -313,10 +283,12 @@ fun NamiokaiAppTopBar(
                         containerColor = Color.Transparent,
                     ),
                 title = {
-                    Text(
-                        text = if (currentScreen != null) stringResource(currentScreen.titleResourceId) else "",
-                        style = MaterialTheme.typography.titleLarge,
-                    )
+                    title?.let {
+                        Text(
+                            text = title,
+                            style = MaterialTheme.typography.titleLarge,
+                        )
+                    }
                 },
                 modifier = modifier,
                 navigationIcon = {
@@ -331,8 +303,8 @@ fun NamiokaiAppTopBar(
                 },
                 actions = {
                     TopBarDropdownMenu(
-                        navigateScreen = { screen ->
-                            navController.navigate(screen.route) {
+                        navigateScreen = { route ->
+                            navController.navigate(route) {
                                 launchSingleTop = true
                             }
                         },
@@ -347,7 +319,7 @@ fun NamiokaiAppTopBar(
 
 @Composable
 fun TopBarDropdownMenu(
-    navigateScreen: (Screen) -> Unit,
+    navigateScreen: (Any) -> Unit,
     adminModeEnabled: Boolean = false,
     photoUrl: String = ""
 ) {
@@ -389,7 +361,7 @@ fun TopBarDropdownMenu(
 
         DropdownMenuItem(text = { Text(stringResource(R.string.settings_menu_label)) },
             onClick = {
-                navigateScreen(Screen.Settings)
+                navigateScreen(SettingsRoute)
                 expanded = false
             },
             leadingIcon = {
@@ -400,7 +372,7 @@ fun TopBarDropdownMenu(
             })
         DropdownMenuItem(text = { Text(stringResource(R.string.profile_label)) },
             onClick = {
-                navigateScreen(Screen.Profile)
+                navigateScreen(ProfileRoute)
                 expanded = false
             },
             leadingIcon = {
@@ -411,7 +383,7 @@ fun TopBarDropdownMenu(
             })
         DropdownMenuItem(text = { Text(stringResource(R.string.notifications_menu_label)) },
             onClick = {
-                navigateScreen(Screen.Notifications)
+                navigateScreen(NotificationsRoute)
                 expanded = false
             },
             leadingIcon = {
@@ -432,15 +404,12 @@ fun TopBarDropdownMenu(
                 )
             })
 
-
-
-
         AnimatedVisibility(visible = adminModeEnabled) {
             Column {
                 HorizontalDivider()
                 DropdownMenuItem(text = { Text(stringResource(R.string.admin_panel_menu_label)) },
                     onClick = {
-                        navigateScreen(Screen.AdminPanel)
+                        navigateScreen(AdminPanelRoute)
                         expanded = false
                     },
                     leadingIcon = {
@@ -463,7 +432,7 @@ fun TopBarDropdownMenu(
                     })
                 DropdownMenuItem(text = { Text(stringResource(R.string.debug_menu_label)) },
                     onClick = {
-                        navigateScreen(Screen.Test)
+                        navigateScreen(TestRoute)
                         expanded = false
                     },
                     leadingIcon = {
@@ -482,6 +451,7 @@ fun TopBarDropdownMenu(
 
 
 }
+
 
 /*
 @Composable

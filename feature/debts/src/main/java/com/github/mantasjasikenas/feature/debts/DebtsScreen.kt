@@ -95,6 +95,15 @@ import com.github.mantasjasikenas.core.ui.component.NamiokaiOutlinedCard
 import com.github.mantasjasikenas.core.ui.component.NoResultsFound
 import com.github.mantasjasikenas.core.ui.component.SwipePeriod
 
+@Composable
+fun DebtsRoute(
+    modifier: Modifier = Modifier,
+    viewModel: DebtsViewModel = hiltViewModel()
+) {
+    DebtsScreen(
+        debtsViewModel = viewModel
+    )
+}
 
 @Composable
 fun DebtsScreen(

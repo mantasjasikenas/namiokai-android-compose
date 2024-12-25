@@ -38,6 +38,11 @@ import java.time.format.TextStyle
 import java.util.Locale
 
 @Composable
+fun NotificationsRoute() {
+    NotificationsScreen()
+}
+
+@Composable
 fun NotificationsScreen(
     notificationsViewModel: NotificationsViewModel = hiltViewModel(),
 ) {

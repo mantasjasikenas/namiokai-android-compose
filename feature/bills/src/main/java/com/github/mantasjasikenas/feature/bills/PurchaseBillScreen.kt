@@ -33,7 +33,7 @@ import com.github.mantasjasikenas.core.domain.model.PeriodState
 import com.github.mantasjasikenas.core.domain.model.SharedState
 import com.github.mantasjasikenas.core.domain.model.User
 import com.github.mantasjasikenas.core.domain.model.UsersMap
-import com.github.mantasjasikenas.core.domain.model.bills.BillFormRoute
+import com.github.mantasjasikenas.core.domain.model.bills.BillFormArgs
 import com.github.mantasjasikenas.core.domain.model.bills.BillType
 import com.github.mantasjasikenas.core.domain.model.bills.PurchaseBill
 import com.github.mantasjasikenas.core.domain.model.contains
@@ -50,12 +50,26 @@ import kotlinx.datetime.toLocalDateTime
 import kotlin.collections.component1
 import kotlin.collections.component2
 
+@Composable
+fun PurchaseBillRoute(
+    modifier: Modifier = Modifier,
+    sharedState: SharedState,
+    onNavigateToCreateBill: (BillFormArgs) -> Unit,
+    viewModel: PurchaseBillViewModel = hiltViewModel(),
+) {
+    PurchaseBillScreen(
+        modifier = modifier,
+        sharedState = sharedState,
+        onNavigateToCreateBill = onNavigateToCreateBill,
+        viewModel = viewModel
+    )
+}
 
 @Composable
 fun PurchaseBillScreen(
     modifier: Modifier = Modifier,
     sharedState: SharedState,
-    onNavigateToCreateBill: (BillFormRoute) -> Unit,
+    onNavigateToCreateBill: (BillFormArgs) -> Unit,
     viewModel: PurchaseBillViewModel = hiltViewModel(),
 ) {
     val billUiState by viewModel.billUiState.collectAsStateWithLifecycle()
@@ -92,7 +106,7 @@ fun PurchaseBillScreenContent(
     usersMap: UsersMap,
     currentUser: User,
     viewModel: PurchaseBillViewModel,
-    onNavigateToCreateBill: (BillFormRoute) -> Unit,
+    onNavigateToCreateBill: (BillFormArgs) -> Unit,
 ) {
     val state = rememberLazyListState()
 
@@ -140,7 +154,6 @@ fun PurchaseBillScreenContent(
                         key = { it.documentId }
                     ) { bill ->
                         PurchaseBillCard(
-                            // FIXME: Removed animation due to bug
 //                                modifier = Modifier.animateItemPlacement(),
                             purchaseBill = bill,
                             isAllowedModification = (currentUser.admin || bill.createdByUid == currentUser.uid),
@@ -149,7 +162,7 @@ fun PurchaseBillScreenContent(
                             currentUser = currentUser,
                             onEdit = {
                                 onNavigateToCreateBill(
-                                    BillFormRoute(
+                                    BillFormArgs(
                                         billId = bill.documentId,
                                         billType = BillType.Purchase
                                     )

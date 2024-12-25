@@ -40,6 +40,17 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.github.mantasjasikenas.core.common.util.Constants
 
 @Composable
+fun LoginRoute(
+    viewModel: LoginViewModel = hiltViewModel(),
+    onSuccessfulLogin: () -> Unit
+) {
+    LoginScreen(
+        viewModel = viewModel,
+        onSuccessfulLogin = onSuccessfulLogin
+    )
+}
+
+@Composable
 fun LoginScreen(
     viewModel: LoginViewModel = hiltViewModel(),
     onSuccessfulLogin: () -> Unit

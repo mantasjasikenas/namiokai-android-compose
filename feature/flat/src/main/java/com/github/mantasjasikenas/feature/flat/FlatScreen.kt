@@ -58,7 +58,7 @@ import com.github.mantasjasikenas.core.common.util.tryParse
 import com.github.mantasjasikenas.core.domain.model.SharedState
 import com.github.mantasjasikenas.core.domain.model.User
 import com.github.mantasjasikenas.core.domain.model.UsersMap
-import com.github.mantasjasikenas.core.domain.model.bills.BillFormRoute
+import com.github.mantasjasikenas.core.domain.model.bills.BillFormArgs
 import com.github.mantasjasikenas.core.domain.model.bills.BillType
 import com.github.mantasjasikenas.core.domain.model.bills.FlatBill
 import com.github.mantasjasikenas.core.ui.common.BillCard
@@ -76,11 +76,27 @@ import kotlinx.datetime.toLocalDateTime
 import kotlin.math.absoluteValue
 
 @Composable
+fun FlatRoute(
+    flatViewModel: FlatViewModel = hiltViewModel(),
+    sharedState: SharedState,
+    onNavigateToFlatBill: () -> Unit,
+    onNavigateToCreateBill: (BillFormArgs) -> Unit,
+) {
+    FlatScreen(
+        flatViewModel = flatViewModel,
+        sharedState = sharedState,
+        onNavigateToFlatBill = onNavigateToFlatBill,
+        onNavigateToCreateBill = onNavigateToCreateBill
+    )
+}
+
+
+@Composable
 fun FlatScreen(
     flatViewModel: FlatViewModel = hiltViewModel(),
     sharedState: SharedState,
     onNavigateToFlatBill: () -> Unit,
-    onNavigateToCreateBill: (BillFormRoute) -> Unit,
+    onNavigateToCreateBill: (BillFormArgs) -> Unit,
 ) {
     val flatUiState by flatViewModel.flatUiState.collectAsStateWithLifecycle()
     val flatBills = flatUiState.flatBills
@@ -114,7 +130,7 @@ fun FlatScreenContent(
     currentUser: User,
     usersMap: UsersMap,
     onNavigateToFlatBill: () -> Unit,
-    onNavigateToCreateBill: (BillFormRoute) -> Unit,
+    onNavigateToCreateBill: (BillFormArgs) -> Unit,
 ) {
     LazyVerticalGrid(
         modifier = Modifier
@@ -414,7 +430,7 @@ fun FlatBillSummary(
     usersMap: UsersMap,
     currentUser: User,
     flatViewModel: FlatViewModel,
-    onNavigateToCreateBill: (BillFormRoute) -> Unit
+    onNavigateToCreateBill: (BillFormArgs) -> Unit
 ) {
     val visibleBills = bills.takeLast(3).reversed()
 
@@ -432,7 +448,7 @@ fun FlatBillSummary(
                     currentUser = currentUser,
                     onEdit = {
                         onNavigateToCreateBill(
-                            BillFormRoute(
+                            BillFormArgs(
                                 billId = flatBill.documentId,
                                 billType = BillType.Flat
                             )

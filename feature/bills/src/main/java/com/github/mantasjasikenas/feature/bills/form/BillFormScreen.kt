@@ -62,6 +62,18 @@ import com.github.mantasjasikenas.core.ui.common.UsersPicker
 import com.github.mantasjasikenas.core.ui.component.NamiokaiNumberField
 import com.github.mantasjasikenas.core.ui.component.NamiokaiTextField
 import com.github.mantasjasikenas.feature.bills.R
+import com.github.mantasjasikenas.feature.bills.navigation.BillFormRoute
+
+@Composable
+fun BillFormRoute(
+    sharedState: SharedState,
+    onNavigateUp: () -> Unit
+) {
+    BillFormScreen(
+        sharedState = sharedState,
+        onNavigateUp = onNavigateUp
+    )
+}
 
 @Composable
 fun BillFormScreen(
@@ -78,15 +90,13 @@ fun BillFormScreen(
         }
 
         is BillFormUiState.Success -> {
-            println("BillForm: ${(uiState as BillFormUiState.Success).initialBill}")
-
             BillFormContent(
                 modifier = modifier,
                 uiState = uiState as BillFormUiState.Success,
                 usersMap = sharedState.usersMap,
                 billFormViewModel = billFormViewModel,
+                billFormRoute = billFormViewModel.billFormRoute,
                 onNavigateUp = onNavigateUp,
-                navigatedFrom = billFormViewModel.billFormRoute.navigatedFrom
             )
         }
     }
@@ -99,8 +109,8 @@ fun BillFormContent(
     uiState: BillFormUiState.Success,
     usersMap: UsersMap,
     billFormViewModel: BillFormViewModel,
+    billFormRoute: BillFormRoute,
     onNavigateUp: () -> Unit,
-    navigatedFrom: String?
 ) {
     val initialBill = uiState.initialBill
 
@@ -109,11 +119,7 @@ fun BillFormContent(
         is TripBill -> BillType.Trip
         is FlatBill -> BillType.Flat
         else -> {
-            when (navigatedFrom) {
-                "trips" -> BillType.Trip
-                "flat" -> BillType.Flat
-                else -> BillType.Purchase
-            }
+            billFormRoute.billType ?: BillType.Purchase
         }
     }
 

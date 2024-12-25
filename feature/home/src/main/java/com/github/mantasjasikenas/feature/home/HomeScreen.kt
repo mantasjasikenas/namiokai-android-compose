@@ -42,6 +42,11 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 
 @Composable
+fun HomeRoute() {
+    HomeScreen()
+}
+
+@Composable
 fun HomeScreen(
     homeViewModel: HomeViewModel = hiltViewModel(),
 ) {

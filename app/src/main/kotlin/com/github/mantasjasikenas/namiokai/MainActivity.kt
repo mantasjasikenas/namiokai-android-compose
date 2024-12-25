@@ -18,6 +18,7 @@ import com.github.mantasjasikenas.core.ui.common.PermissionsHandler
 import com.github.mantasjasikenas.core.ui.theme.NamiokaiTheme
 import com.github.mantasjasikenas.namiokai.services.AnalyticsLogger
 import com.github.mantasjasikenas.namiokai.services.AnalyticsLoggerImpl
+import com.github.mantasjasikenas.namiokai.ui.NamiokaiApp
 import com.google.android.play.core.appupdate.AppUpdateManager
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.google.android.play.core.appupdate.AppUpdateOptions

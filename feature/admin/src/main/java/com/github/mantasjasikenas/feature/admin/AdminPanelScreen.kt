@@ -17,6 +17,16 @@ import com.github.mantasjasikenas.core.ui.component.SettingsEntryGroupText
 import com.github.mantasjasikenas.core.ui.component.SettingsGroupSpacer
 import com.github.mantasjasikenas.core.ui.component.SwitchSettingEntry
 
+@Composable
+fun AdminPanelRoute(
+    modifier: Modifier = Modifier,
+    viewModel: AdminPanelViewModel = hiltViewModel()
+) {
+    AdminPanelScreen(
+        modifier = modifier,
+        viewModel = viewModel,
+    )
+}
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
