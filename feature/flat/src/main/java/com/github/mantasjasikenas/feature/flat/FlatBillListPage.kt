@@ -216,7 +216,7 @@ private fun FlatCard(
             )
     }
 
-    var openBottomSheet = rememberSaveable { mutableStateOf(false) }
+    val openBottomSheet = rememberSaveable { mutableStateOf(false) }
 
     SwipeBillCard(
         modifier = modifier,

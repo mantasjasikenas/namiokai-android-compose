@@ -37,7 +37,7 @@ internal fun BottomBar(
                 NavigationBarItem(
                     icon = {
                         Icon(
-                            imageVector = screen.imageVector,
+                            imageVector = screen.unselectedIcon,
                             contentDescription = null
                         )
                     },

@@ -19,7 +19,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.outlined.Close
@@ -405,25 +407,27 @@ fun NamiokaiBottomSheet(
     bottomSheetState: SheetState,
     content: @Composable () -> Unit
 ) {
-
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = bottomSheetState,
         contentWindowInsets = { BottomAppBarDefaults.windowInsets },
-        modifier = Modifier.padding(
-            start = 10.dp,
-            top = 0.dp,
-            end = 10.dp,
-            bottom = 10.dp
-        )
+        modifier = Modifier
+            .padding(
+                start = 10.dp,
+                top = 0.dp,
+                end = 10.dp,
+                bottom = 10.dp
+            ),
     ) {
         Column(
-            modifier = Modifier.padding(
-                start = 25.dp,
-                top = 0.dp,
-                end = 25.dp,
-                bottom = 25.dp
-            )
+            modifier = Modifier
+                .padding(
+                    start = 25.dp,
+                    top = 0.dp,
+                    end = 25.dp,
+                    bottom = 25.dp
+                )
+                .verticalScroll(rememberScrollState())
         ) {
             Row(
                 modifier = Modifier

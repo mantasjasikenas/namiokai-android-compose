@@ -215,28 +215,33 @@ private fun PersonalDebtsPage(
             .fillMaxSize()
             .padding(20.dp),
     ) {
-        NamiokaiElevatedOutlinedCard {
-            Text(
-                text = "Your debts",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
-            )
-            SwipePeriod(
-                periods = periodState.periods,
-                selectedPeriod = periodState.userSelectedPeriod,
-                appPeriod = periodState.currentPeriod,
-                onPeriodReset = onPeriodReset,
-                onPeriodUpdate = onPeriodUpdate,
-            )
-        }
+        Column(
+            modifier = Modifier
+                .verticalScroll(rememberScrollState())
+        ) {
+            NamiokaiElevatedOutlinedCard {
+                Text(
+                    text = "Your debts",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold
+                )
+                SwipePeriod(
+                    periods = periodState.periods,
+                    selectedPeriod = periodState.userSelectedPeriod,
+                    appPeriod = periodState.currentPeriod,
+                    onPeriodReset = onPeriodReset,
+                    onPeriodUpdate = onPeriodUpdate,
+                )
+            }
 
-        if (currentUserDebts.isNullOrEmpty()) {
-            NoDebtsFound()
-        } else {
-            PersonalDebts(
-                currentUserDebts = currentUserDebts,
-                usersMap = usersMap
-            )
+            if (currentUserDebts.isNullOrEmpty()) {
+                NoDebtsFound()
+            } else {
+                PersonalDebts(
+                    currentUserDebts = currentUserDebts,
+                    usersMap = usersMap
+                )
+            }
         }
     }
 }
@@ -273,11 +278,14 @@ private fun DebtsPage(
 
         if (usersDebts.isEmpty()) {
             Column(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.Center
             ) {
                 NoDebtsFound()
             }
+
             return@Column
         } else {
             NamiokaiSpacer(height = 20)
@@ -301,7 +309,10 @@ private fun DebtsPage(
                 ) { (user, debts) ->
                     if (!(debts.isEmpty() || usersMap[user] == null)) {
                         DebtorCard(
-                            modifier = Modifier.animateItem(fadeInSpec = null, fadeOutSpec = null),
+                            modifier = Modifier.animateItem(
+                                fadeInSpec = null,
+                                fadeOutSpec = null
+                            ),
                             debtorUser = usersMap[user]!!,
                             userDebts = debts,
                             usersMap = usersMap
@@ -472,10 +483,7 @@ private fun DebtorBottomSheet(
         onDismiss = { expandedState.value = false },
         bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     ) {
-        Column(
-            modifier = Modifier
-                .verticalScroll(rememberScrollState())
-        ) {
+        Column {
             if (userDebts.isEmpty()) {
                 Text(
                     text = "No debts",

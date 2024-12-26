@@ -64,6 +64,7 @@ fun SwipeBillCard(
     onEndToStartSwipe: () -> Unit = {},
     enableDismissFromEndToStart: Boolean = false,
     enableDismissFromStartToEnd: Boolean = true,
+    elevated: Boolean = true,
 ) {
     SwipeBillCardCommon(
         modifier = modifier,
@@ -80,6 +81,7 @@ fun SwipeBillCard(
                 currentUser = currentUser,
                 usersMap = usersMap,
                 onClick = onClick,
+                elevated = elevated
             )
         }
     )
@@ -96,6 +98,7 @@ fun SwipeBillCard(
     onEndToStartSwipe: () -> Unit = {},
     enableDismissFromEndToStart: Boolean = false,
     enableDismissFromStartToEnd: Boolean = true,
+    elevated: Boolean = true,
     content: @Composable ColumnScope.() -> Unit
 ) {
     SwipeBillCardCommon(
@@ -110,6 +113,7 @@ fun SwipeBillCard(
             billCreationDateTime = billCreationDateTime,
             currentUserUid = currentUser.uid,
             onClick = onClick,
+            elevated = elevated,
             content = content
         )
     }
@@ -181,6 +185,7 @@ private fun SwipeBillCardCommon(
 
 @Composable
 fun BillCard(
+    modifier: Modifier = Modifier,
     subtext: String,
     subtextIcon: ImageVector,
     bill: Bill,
@@ -193,7 +198,7 @@ fun BillCard(
         vertical = 5.dp
     ),
     columnPadding: PaddingValues = PaddingValues(15.dp),
-    modifier: Modifier = Modifier,
+    elevated: Boolean = true,
 ) {
     BillCard(
         bill = bill,
@@ -202,7 +207,8 @@ fun BillCard(
         elevatedCardPadding = elevatedCardPadding,
         columnPadding = columnPadding,
         onClick = onClick,
-        modifier = modifier
+        modifier = modifier,
+        elevated = elevated
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             SubcomposeAsyncImage(
@@ -263,6 +269,7 @@ fun BillCard(
         vertical = 5.dp
     ),
     columnPadding: PaddingValues = PaddingValues(15.dp),
+    elevated: Boolean = true,
     content: @Composable ColumnScope.() -> Unit
 ) {
     ElevatedCard(
@@ -271,7 +278,8 @@ fun BillCard(
                 elevatedCardPadding
             )
             .fillMaxSize(),
-        onClick = onClick
+        onClick = onClick,
+        elevation = if (elevated) CardDefaults.elevatedCardElevation() else CardDefaults.cardElevation()
     ) {
         Column(
             modifier = Modifier

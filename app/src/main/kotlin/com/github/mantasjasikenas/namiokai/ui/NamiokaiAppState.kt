@@ -77,12 +77,10 @@ class NamiokaiAppState(
 
     val showBottomBar: Boolean
         @Composable get() {
-            val configuration = LocalConfiguration.current
-            val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
             val isTopLevelRoute = isTopLevelRoute
 
-            return remember(isLandscape, isTopLevelRoute) {
-                !isLandscape && isTopLevelRoute
+            return remember(isTopLevelRoute) {
+               isTopLevelRoute
             }
         }
 
@@ -107,6 +105,8 @@ class NamiokaiAppState(
 
         navController.navigate(topLevelRoute.route, topLevelNavOptions)
     }
+
+    val topLevelDestinations: List<TopLevelRoute> = TopLevelRoute.routes
 }
 
 @Composable

@@ -290,7 +290,7 @@ inline fun <T> ValueSelectorDialog(
                                         )
                                 ) {
                                     drawCircle(
-                                        color = com.github.mantasjasikenas.core.ui.theme.md_theme_dark_primary,
+                                        color = com.github.mantasjasikenas.core.ui.theme.primaryDark,
                                         radius = 4.dp.toPx(),
                                         center = size.center,
                                     )

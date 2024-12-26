@@ -7,6 +7,11 @@ import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.LocalGasStation
 import androidx.compose.material.icons.outlined.Payments
 import androidx.compose.material.icons.outlined.ShoppingBag
+import androidx.compose.material.icons.rounded.Cottage
+import androidx.compose.material.icons.rounded.Home
+import androidx.compose.material.icons.rounded.LocalGasStation
+import androidx.compose.material.icons.rounded.Payments
+import androidx.compose.material.icons.rounded.ShoppingBag
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.github.mantasjasikenas.feature.bills.navigation.PurchaseBillRoute
 import com.github.mantasjasikenas.feature.debts.navigation.DebtsRoute
@@ -48,36 +53,42 @@ sealed interface Route {
 sealed class TopLevelRoute(
     val route: Any,
     @StringRes val titleResourceId: Int,
-    val imageVector: ImageVector
+    val unselectedIcon: ImageVector,
+    val selectedIcon: ImageVector = unselectedIcon
 ) {
     data object Home : TopLevelRoute(
         HomeRoute,
         R.string.home_menu_label,
-        Icons.Outlined.Home
+        Icons.Outlined.Home,
+        Icons.Rounded.Home
     )
 
     data object Debts : TopLevelRoute(
         DebtsRoute,
         R.string.debts_name,
-        Icons.Outlined.Payments
+        Icons.Outlined.Payments,
+        Icons.Rounded.Payments
     )
 
     data object Bills : TopLevelRoute(
         PurchaseBillRoute,
         R.string.bill_name,
-        Icons.Outlined.ShoppingBag
+        Icons.Outlined.ShoppingBag,
+        Icons.Rounded.ShoppingBag
     )
 
     data object Trips : TopLevelRoute(
         TripBillRoute,
         R.string.trips_name,
-        Icons.Outlined.LocalGasStation
+        Icons.Outlined.LocalGasStation,
+        Icons.Rounded.LocalGasStation
     )
 
     data object Flat : TopLevelRoute(
         FlatRoute,
         R.string.flat_label,
-        Icons.Outlined.Cottage
+        Icons.Outlined.Cottage,
+        Icons.Rounded.Cottage
     )
 
     companion object {

@@ -63,6 +63,7 @@ import com.github.mantasjasikenas.core.domain.model.User
 import com.github.mantasjasikenas.core.domain.model.theme.Theme
 import com.github.mantasjasikenas.core.domain.model.theme.ThemePreferences
 import com.github.mantasjasikenas.core.domain.model.theme.ThemeType
+import com.github.mantasjasikenas.core.ui.common.NamiokaiCircularProgressIndicator
 import com.github.mantasjasikenas.core.ui.common.NamiokaiSpacer
 import com.github.mantasjasikenas.core.ui.common.conditional
 import com.github.mantasjasikenas.core.ui.common.noRippleClickable
@@ -90,26 +91,32 @@ fun SettingsScreen(
 ) {
     val settingsUiState by viewModel.settingsUiState.collectAsStateWithLifecycle()
 
-    SettingsScreen(
-        settingsUiState = settingsUiState,
-        onAccentColorPin = viewModel::updateAccentColorPinStatus,
-        onClearAccentColorsClick = viewModel::clearUnpinnedAccentColors,
-        onSaveAccentColor = viewModel::insertAccentColor,
-        onUpdateThemePreferences = viewModel::updateThemePreferences,
-        onImageAddToStorage = viewModel::addImageToStorage,
-        onUpdateDisplayName = viewModel::updateDisplayName,
-        validateNewDisplayName = viewModel::validateDisplayName,
-        onLogoutClick = {
-            viewModel.logout()
-        },
-    )
+    when (settingsUiState) {
+        SettingsUiState.Loading -> {
+            NamiokaiCircularProgressIndicator()
+        }
 
+        is SettingsUiState.Success -> {
+            SettingsScreen(
+                uiState = settingsUiState as SettingsUiState.Success,
+                onAccentColorPin = viewModel::updateAccentColorPinStatus,
+                onClearAccentColorsClick = viewModel::clearUnpinnedAccentColors,
+                onSaveAccentColor = viewModel::insertAccentColor,
+                onUpdateThemePreferences = viewModel::updateThemePreferences,
+                onImageAddToStorage = viewModel::addImageToStorage,
+                onUpdateDisplayName = viewModel::updateDisplayName,
+                validateNewDisplayName = viewModel::validateDisplayName,
+                onLogoutClick = {
+                    viewModel.logout()
+                },
+            )
+        }
+    }
 }
 
-
 @Composable
-fun SettingsScreen(
-    settingsUiState: SettingsUiState,
+private fun SettingsScreen(
+    uiState: SettingsUiState.Success,
     onAccentColorPin: (Int, Boolean) -> Unit,
     onClearAccentColorsClick: () -> Unit,
     onSaveAccentColor: (AccentColor) -> Unit,
@@ -118,8 +125,7 @@ fun SettingsScreen(
     onUpdateDisplayName: (String) -> Unit,
     validateNewDisplayName: (String) -> Boolean,
     onLogoutClick: () -> Unit,
-
-    ) {
+) {
 
     Column(
         modifier = Modifier
@@ -127,19 +133,11 @@ fun SettingsScreen(
             .verticalScroll(rememberScrollState())
             .padding()
     ) {
-        val uiState = when (settingsUiState) {
-            is SettingsUiState.Success -> settingsUiState
-            else -> {
-//                Text(text = "Loading...")
-                return
-            }
-        }
-
         SettingsGroupSpacer()
 
         AppearanceSettingsGroup(
             themePreferences = uiState.userData.themePreferences,
-            accentColors = settingsUiState.accentColors,
+            accentColors = uiState.accentColors,
             onUpdateThemePreferences = onUpdateThemePreferences,
             onSaveAccentColor = onSaveAccentColor,
             onClearAccentColorsClick = onClearAccentColorsClick,
@@ -175,19 +173,22 @@ private fun ProfileSettingsGroup(
     AnimatedVisibility(visible = currentUser.uid.isNotEmpty()) {
         Column {
             SettingsEntryGroupText(title = "Profile")
-            SettingsEntry(title = "Change profile picture",
+            SettingsEntry(
+                title = "Change profile picture",
                 text = "Update your profile picture",
                 onClick = {
                     galleryLauncher.launch(Constants.IMAGES_TYPE)
                 })
-            SettingsEntry(title = "Change display name",
+            SettingsEntry(
+                title = "Change display name",
                 text = "Update display name",
                 onClick = {
                     setUpdateNameDialogState(true)
                 })
             SettingsGroupSpacer()
             SettingsEntryGroupText(title = "Account")
-            SettingsEntry(title = "Email",
+            SettingsEntry(
+                title = "Email",
                 text = currentUser.email.ifEmpty { "Not logged in" },
                 onClick = { })
             SettingsEntry(
@@ -199,20 +200,18 @@ private fun ProfileSettingsGroup(
     }
 
     if (updateDisplayNameDialogState) {
-        ChangeDisplayNameDialog(onSaveClick = {
-            val name = it.trim()
-            val isValid = validateNewDisplayName(name)
-//            settingsViewModel.validateDisplayName(
-//                mainUiState,
-//                name
-//            )
-            if (!isValid) {
-                return@ChangeDisplayNameDialog
-            }
+        ChangeDisplayNameDialog(
+            onSaveClick = {
+                val name = it.trim()
+                val isValid = validateNewDisplayName(name)
 
-            onUpdateDisplayName(name)
-            setUpdateNameDialogState(false)
-        },
+                if (!isValid) {
+                    return@ChangeDisplayNameDialog
+                }
+
+                onUpdateDisplayName(name)
+                setUpdateNameDialogState(false)
+            },
             onDismiss = { setUpdateNameDialogState(false) })
     }
 }
@@ -292,7 +291,6 @@ private fun ColumnScope.AppearanceSettingsGroup(
         )
     }
 
-
     AnimatedVisibility(
         visible = themePreferences.themeType != ThemeType.AUTOMATIC,
     ) {
@@ -331,7 +329,8 @@ private fun ColumnScope.AppearanceSettingsGroup(
                         )
                     )
 
-                    Column(verticalArrangement = Arrangement.Center,
+                    Column(
+                        verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier
                             .padding(8.dp)
@@ -376,8 +375,6 @@ private fun ColumnScope.AppearanceSettingsGroup(
         }
     }
 
-
-
     SettingsGroupSpacer()
 
     if (colorDialogState) {
@@ -417,7 +414,6 @@ private fun ColorPickerDialog(
         themePreferences.accentColor
     }
 
-
     NamiokaiDialog(
         title = "Pick a color",
         selectedValue = selectedColor.value,
@@ -440,6 +436,7 @@ private fun ColorPickerDialog(
             },
             initialColor = initialColor.value
         )
+
         /*BrightnessSlider(
             modifier = Modifier
                 .fillMaxWidth()
@@ -448,6 +445,7 @@ private fun ColorPickerDialog(
             controller = controller,
             initialColor = initialColor.value
         )*/
+
         Column(
             modifier = Modifier.noRippleClickable {
                 clipboardManager.setText(AnnotatedString(controller.selectedColor.value.toHex()))
@@ -534,7 +532,6 @@ private fun ColorPickerDialog(
                         }
                     }
                 }
-
 
                 LazyRow(
                     modifier = Modifier
@@ -624,10 +621,11 @@ private fun ChangeDisplayNameDialog(
         onSaveClick = onSaveClick,
         onDismiss = onDismiss
     ) {
-        NamiokaiTextField(modifier = Modifier.padding(
-            vertical = 10.dp,
-            horizontal = 30.dp
-        ),
+        NamiokaiTextField(
+            modifier = Modifier.padding(
+                vertical = 10.dp,
+                horizontal = 30.dp
+            ),
             label = "Display name",
             onValueChange = { newDisplayName.value = it })
     }

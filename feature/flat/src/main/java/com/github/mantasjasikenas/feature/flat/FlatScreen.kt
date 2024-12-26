@@ -490,7 +490,7 @@ private fun CompactFlatCard(
             TimeZone.currentSystemDefault()
         )
 
-    var openBottomSheet = rememberSaveable { mutableStateOf(false) }
+    val openBottomSheet = rememberSaveable { mutableStateOf(false) }
 
     BillCard(
         modifier = modifier.padding(0.dp),
@@ -502,6 +502,7 @@ private fun CompactFlatCard(
         },
         elevatedCardPadding = PaddingValues(0.dp),
         columnPadding = PaddingValues(vertical = 6.dp),
+        elevated = false
     ) {
         FlatBillCardContent(flatBill = flatBill)
     }

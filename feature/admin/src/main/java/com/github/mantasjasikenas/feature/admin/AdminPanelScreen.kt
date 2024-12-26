@@ -43,86 +43,127 @@ fun AdminPanelScreen(
             .verticalScroll(rememberScrollState())
             .padding()
     ) {
+        GenericSettingsGroup(
+            advancedMode = advancedMode,
+            setAdvancedMode = setAdvancedMode
+        )
 
-        // GROUP GENERIC
-        SettingsGroupSpacer()
-        SettingsEntryGroupText(title = "Generic")
-        SwitchSettingEntry(title = "Advanced mode",
-            text = "Toggles advanced mode",
-            isChecked = advancedMode,
-            onCheckedChange = { setAdvancedMode(!advancedMode) })
-
-
-        // GROUP DATABASE
-        SettingsGroupSpacer()
-        SettingsEntryGroupText(title = "Database")
-        SettingsEntry(
-            title = "Backup database",
-            text = "Backup database to Firebase storage",
-            confirmClick = true,
-            onClick = { viewModel.backupDatabase() })
-        SettingsEntry(
-            title = "Clear bills",
-            text = "Clear purchase, trip and flat bills from database",
-            confirmClick = true,
-            onClick = { viewModel.clearBills() })
+        DatabaseSettingsGroup(viewModel = viewModel)
 
         AnimatedVisibility(visible = advancedMode) {
             Column {
-                SettingsEntry(
-                    title = "Clear bills",
-                    text = "Clear all bills from database",
-                    confirmClick = true,
-                    onClick = { viewModel.clearPurchaseBills() })
-                SettingsEntry(
-                    title = "Clear fuel",
-                    text = "Clear all fuel from database",
-                    confirmClick = true,
-                    onClick = { viewModel.clearFuel() })
-                SettingsEntry(
-                    title = "Clear flat bills",
-                    text = "Clear all flat bills from database",
-                    confirmClick = true,
-                    onClick = { viewModel.clearFlatBills() })
-                SettingsEntry(
-                    title = "Clear users",
-                    text = "Clear all users from database",
-                    confirmClick = true,
-                    onClick = { viewModel.clearUsers() })
-                // GROUP IMPORT
-                SettingsGroupSpacer()
-                SettingsEntryGroupText(title = "Import")
-                SettingsEntry(
-                    title = "Import bills",
-                    text = "Import bills from Firebase storage",
-                    confirmClick = true,
-                    onClick = { viewModel.importBills() })
-                SettingsEntry(
-                    title = "Import fuel",
-                    text = "Import fuel from Firebase storage",
-                    confirmClick = true,
-                    onClick = { viewModel.importFuel() })
-                SettingsEntry(
-                    title = "Import users",
-                    text = "Import users from Firebase storage",
-                    confirmClick = true,
-                    onClick = { viewModel.importUsers() })
+                ClearDatabaseSettingsGroup(viewModel = viewModel)
 
-                // GROUP USERS
-                SettingsGroupSpacer()
-                SettingsEntryGroupText(title = "Users")
-                SettingsEntry(
-                    title = "Add user",
-                    text = "Add empty user to database",
-                    confirmClick = true,
-                    onClick = {
-                        viewModel.addUser()
-                    })
+                ImportSettingsGroup(viewModel = viewModel)
+
+                UsersSettingsGroup(viewModel = viewModel)
             }
         }
     }
-
-
 }
 
+@Composable
+private fun GenericSettingsGroup(
+    advancedMode: Boolean,
+    setAdvancedMode: (Boolean) -> Unit
+) {
+    SettingsGroupSpacer()
 
+    SettingsEntryGroupText(title = "Generic")
+
+    SwitchSettingEntry(
+        title = "Advanced mode",
+        text = "Toggles advanced mode",
+        isChecked = advancedMode,
+        onCheckedChange = { setAdvancedMode(!advancedMode) })
+}
+
+@Composable
+private fun DatabaseSettingsGroup(viewModel: AdminPanelViewModel) {
+    SettingsGroupSpacer()
+
+    SettingsEntryGroupText(title = "Database")
+
+    SettingsEntry(
+        title = "Backup database",
+        text = "Backup database to Firebase storage",
+        confirmClick = true,
+        onClick = { viewModel.backupDatabase() })
+}
+
+@Composable
+private fun ClearDatabaseSettingsGroup(viewModel: AdminPanelViewModel) {
+    SettingsGroupSpacer()
+
+    SettingsEntryGroupText(title = "Clear database")
+
+    SettingsEntry(
+        title = "Clear bills",
+        text = "Clear purchase, trip and flat bills from database",
+        confirmClick = true,
+        onClick = { viewModel.clearBills() })
+
+    SettingsEntry(
+        title = "Clear purchase bills",
+        text = "Clear all bills from database",
+        confirmClick = true,
+        onClick = { viewModel.clearPurchaseBills() })
+
+    SettingsEntry(
+        title = "Clear fuel",
+        text = "Clear all fuel from database",
+        confirmClick = true,
+        onClick = { viewModel.clearFuel() })
+
+    SettingsEntry(
+        title = "Clear flat bills",
+        text = "Clear all flat bills from database",
+        confirmClick = true,
+        onClick = { viewModel.clearFlatBills() })
+
+    SettingsEntry(
+        title = "Clear users",
+        text = "Clear all users from database",
+        confirmClick = true,
+        onClick = { viewModel.clearUsers() })
+}
+
+@Composable
+private fun UsersSettingsGroup(viewModel: AdminPanelViewModel) {
+    SettingsGroupSpacer()
+
+    SettingsEntryGroupText(title = "Users")
+
+    SettingsEntry(
+        title = "Add user",
+        text = "Add empty user to database",
+        confirmClick = true,
+        onClick = {
+            viewModel.addUser()
+        })
+}
+
+@Composable
+private fun ImportSettingsGroup(viewModel: AdminPanelViewModel) {
+    SettingsGroupSpacer()
+
+    SettingsEntryGroupText(title = "Import")
+
+    SettingsEntry(
+        title = "Import bills",
+        text = "Import bills from Firebase storage",
+        confirmClick = true,
+        onClick = { viewModel.importBills() })
+
+    SettingsEntry(
+        title = "Import fuel",
+        text = "Import fuel from Firebase storage",
+        confirmClick = true,
+        onClick = { viewModel.importFuel() })
+
+    SettingsEntry(
+        title = "Import users",
+        text = "Import users from Firebase storage",
+        confirmClick = true,
+        onClick = { viewModel.importUsers() })
+}

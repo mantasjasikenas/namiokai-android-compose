@@ -1,6 +1,5 @@
 package com.github.mantasjasikenas.feature.home
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,20 +10,18 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.EuroSymbol
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -34,9 +31,9 @@ import com.github.mantasjasikenas.core.domain.model.Period
 import com.github.mantasjasikenas.core.domain.model.User
 import com.github.mantasjasikenas.core.domain.model.debts.DebtsMap
 import com.github.mantasjasikenas.core.ui.common.NamiokaiCircularProgressIndicator
-import com.github.mantasjasikenas.core.ui.common.PagesFlowRow
+import com.github.mantasjasikenas.core.ui.common.NamiokaiSpacer
 import com.github.mantasjasikenas.core.ui.common.noRippleClickable
-import kotlinx.coroutines.launch
+import com.github.mantasjasikenas.core.ui.component.NamiokaiElevatedCard
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -73,7 +70,6 @@ fun HomeScreen(
 }
 
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun HomeScreen(
     @Suppress("UNUSED_PARAMETER")
@@ -82,50 +78,12 @@ fun HomeScreen(
     usersDebts: DebtsMap,
     currentPeriod: Period
 ) {
-    val coroutineScope = rememberCoroutineScope()
-
-    val pages = listOf(
-        "Widgets",
-    )
-    val pageCount = pages.size
-    val pagerState = rememberPagerState(
-        initialPage = 0,
-        pageCount = {
-            pageCount
-        }
-    )
-
     Column(modifier = Modifier.fillMaxSize()) {
-        Row(
-            Modifier
-                .padding(horizontal = 20.dp)
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center
-        ) {
-            PagesFlowRow(
-                pages = pages,
-                currentPage = pagerState.currentPage,
-                onPageClick = {
-                    coroutineScope.launch {
-                        pagerState.animateScrollToPage(it)
-                    }
-                }
-            )
-        }
-
-        HorizontalPager(
-            state = pagerState
-        ) { pageIndex ->
-            when (pageIndex) {
-                0 -> {
-                    WidgetsPage(
-                        currentUser = currentUser,
-                        usersDebts = usersDebts,
-                        period = currentPeriod
-                    )
-                }
-            }
-        }
+        WidgetsPage(
+            currentUser = currentUser,
+            usersDebts = usersDebts,
+            period = currentPeriod
+        )
     }
 }
 
@@ -159,9 +117,22 @@ private fun Widgets(
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        item(span = {
-            GridItemSpan(maxLineSpan)
-        }) {
+        item(
+            key = "welcome",
+            span = {
+                GridItemSpan(maxLineSpan)
+            }
+        ) {
+            WelcomeCard(
+                displayName = currentUser.displayName
+            )
+        }
+
+        item(
+            key = "period",
+            span = {
+                GridItemSpan(maxLineSpan)
+            }) {
             WidgetCard(
                 label = "Period",
             ) {
@@ -172,31 +143,53 @@ private fun Widgets(
                 )
             }
         }
-        item {
+
+        item(
+            key = "remainingDays",
+        ) {
+            WidgetCard(
+                label = "Remaining days",
+            ) {
+                val daysUntilNextPeriod = period.daysUntilEnd()
+
+                IconText(
+                    text = daysUntilNextPeriod.toString(),
+                    icon = Icons.Outlined.CalendarMonth,
+                )
+            }
+        }
+
+        item(
+            key = "owedToYou",
+        ) {
             WidgetCard(
                 label = "Owed to you",
             ) {
                 val owedToYou = usersDebts.getTotalOwedToYou(currentUser.uid)
 
                 EuroIconText(
-                    value = owedToYou.format(2),
-                    size = 24
+                    text = owedToYou.format(2),
                 )
             }
         }
-        item {
+
+        item(
+            key = "youOwe",
+        ) {
             WidgetCard(
                 label = "You owe",
             ) {
                 val value = usersDebts.getTotalDebt(currentUser.uid).format(2)
 
                 EuroIconText(
-                    value = value,
-                    size = 24
+                    text = value,
                 )
             }
         }
-        item {
+
+        item(
+            key = "totalDebts",
+        ) {
             WidgetCard(
                 label = "Total debts",
             ) {
@@ -215,21 +208,34 @@ private fun Widgets(
 
 @Composable
 private fun EuroIconText(
-    value: String,
-    size: Int = 18
+    text: String,
+    size: Int = 24
+) {
+    IconText(
+        text = text,
+        icon = Icons.Outlined.EuroSymbol,
+        size = size
+    )
+}
+
+@Composable
+private fun IconText(
+    text: String,
+    icon: ImageVector,
+    size: Int = 24
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
     ) {
         Icon(
-            imageVector = Icons.Outlined.EuroSymbol,
+            imageVector = icon,
             contentDescription = null,
             modifier = Modifier.size((size - 1).dp),
             tint = MaterialTheme.colorScheme.primary
         )
         Text(
-            text = value,
+            text = text,
             color = MaterialTheme.colorScheme.onSurface,
             fontWeight = FontWeight.Bold,
             style = MaterialTheme.typography.headlineSmall.copy(
@@ -247,7 +253,7 @@ private fun WidgetCard(
     onClick: () -> Unit = {},
     content: @Composable () -> Unit
 ) {
-    com.github.mantasjasikenas.core.ui.component.NamiokaiElevatedCard(
+    NamiokaiElevatedCard(
         modifier = modifier.noRippleClickable { onClick() }
     ) {
         Column(
@@ -260,7 +266,8 @@ private fun WidgetCard(
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.primary
             )
-            com.github.mantasjasikenas.core.ui.common.NamiokaiSpacer(height = 3)
+            NamiokaiSpacer(height = 3)
+
             content()
         }
     }
@@ -301,15 +308,25 @@ private fun WelcomeCard(
         else -> "Hello"
     }
 
-    com.github.mantasjasikenas.core.ui.component.NamiokaiElevatedOutlinedCard {
-        Text(
-            text = greeting,
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold
-        )
+    WidgetCard(
+        label = greeting
+    ) {
         Text(
             text = displayName,
-            textAlign = TextAlign.End,
+            fontWeight = FontWeight.Bold,
+            style = MaterialTheme.typography.headlineSmall
         )
     }
+
+//    NamiokaiElevatedOutlinedCard {
+//        Text(
+//            text = greeting,
+//            style = MaterialTheme.typography.titleLarge,
+//            fontWeight = FontWeight.Bold
+//        )
+//        Text(
+//            text = displayName,
+//            textAlign = TextAlign.End,
+//        )
+//    }
 }

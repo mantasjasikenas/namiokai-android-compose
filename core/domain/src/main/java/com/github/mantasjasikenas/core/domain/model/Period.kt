@@ -5,6 +5,7 @@ import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.daysUntil
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 import kotlinx.datetime.toLocalDateTime
@@ -25,6 +26,15 @@ data class Period(
 
     override fun toString(): String {
         return "$start - $end"
+    }
+
+    fun daysUntilEnd(): Int {
+        val currentDate = Clock.System.now()
+            .toLocalDateTime(
+                TimeZone.currentSystemDefault()
+            ).date
+
+        return currentDate.daysUntil(end)
     }
 }
 
