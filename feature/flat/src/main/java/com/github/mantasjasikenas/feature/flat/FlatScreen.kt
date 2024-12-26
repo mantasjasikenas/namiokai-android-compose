@@ -739,7 +739,8 @@ private fun FlatBillsChartContainer(
         title = "Flat bills chart",
     ) {
         FlatBillsChart(
-            modifier = Modifier.fillMaxWidth(), flatBills = flatBills,
+            modifier = Modifier.fillMaxWidth(),
+            flatBills = flatBills,
             chartModelProducer = chartModelProducer
         )
     }

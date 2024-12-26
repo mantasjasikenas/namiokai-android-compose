@@ -25,7 +25,7 @@ sealed interface Route {
     data object AuthGraph : Route
 
     @Serializable
-    data object AppGraph : Route
+    data object HomeGraph : Route
 
     /*    companion object {
             val routes = listOf(
@@ -83,5 +83,4 @@ sealed class TopLevelRoute(
     companion object {
         val routes = listOf(Home, Debts, Bills, Trips, Flat)
     }
-
 }

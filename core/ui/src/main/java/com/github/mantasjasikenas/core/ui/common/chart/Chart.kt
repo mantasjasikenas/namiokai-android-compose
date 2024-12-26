@@ -31,6 +31,7 @@ import com.patrykandpatrick.vico.compose.common.fill
 import com.patrykandpatrick.vico.compose.common.rememberHorizontalLegend
 import com.patrykandpatrick.vico.compose.common.vicoTheme
 import com.patrykandpatrick.vico.compose.m3.common.rememberM3VicoTheme
+import com.patrykandpatrick.vico.core.cartesian.AutoScrollCondition
 import com.patrykandpatrick.vico.core.cartesian.CartesianDrawingContext
 import com.patrykandpatrick.vico.core.cartesian.CartesianMeasuringContext
 import com.patrykandpatrick.vico.core.cartesian.Scroll
@@ -72,7 +73,8 @@ fun <T> GenericChart(
     }
 
     fields.forEach { (label, value, endContent) ->
-        TextRow(label = label,
+        TextRow(
+            label = label,
             value = value ?: "-",
             labelTextStyle = MaterialTheme.typography.labelMedium,
             valueTextStyle = MaterialTheme.typography.labelMedium,
@@ -93,21 +95,22 @@ fun <T> GenericChart(
             lineColor = chartLineColor(), textColor = chartTextColor()
         )
     ) {
+        @Suppress("NAME_SHADOWING")
         val lineColors = lineColors ?: vicoTheme.lineCartesianLayerColors
 
         ComposeChart(
             modelProducer = chartModelProducer,
             modifier = modifier,
-            xAxisValueFormatter = CartesianValueFormatter { _, x, _ ->
+            xAxisValueFormatter = { _, x, _ ->
                 xAxisValueFormatter(x)
             },
-            yAxisValueFormatter = CartesianValueFormatter { _, y, _ ->
+            yAxisValueFormatter = { _, y, _ ->
                 yAxisValueFormatter(y)
             },
             legend = if (legendItems == null) {
                 null
             } else {
-                rememberLegend(labelsWithColors = legendItems(lineColors).mapIndexed { index, (legendItem, color) ->
+                rememberLegend(labelsWithColors = legendItems(lineColors).map { (legendItem, color) ->
                     legendItem to color
                 })
             },
@@ -140,7 +143,10 @@ fun ComposeChart(
         modifier = modifier,
         modelProducer = modelProducer,
         zoomState = rememberVicoZoomState(zoomEnabled = false),
-        scrollState = rememberVicoScrollState(initialScroll = Scroll.Absolute.End),
+        scrollState = rememberVicoScrollState(
+            initialScroll = Scroll.Absolute.End,
+            autoScrollCondition = AutoScrollCondition.OnModelSizeIncreased
+        ),
         chart = rememberCartesianChart(
             rememberLineCartesianLayer(
                 lineProvider = LineCartesianLayer.LineProvider.series(lines = lineColors.map { color ->
@@ -229,7 +235,7 @@ private fun rememberLegend(
 
     return rememberHorizontalLegend(
         items = rememberExtraLambda {
-            labelsWithColors.forEachIndexed { index, (label, color) ->
+            labelsWithColors.forEach { (label, color) ->
                 add(
                     LegendItem(
                         icon = shapeComponent(fill(color), CorneredShape.Pill),

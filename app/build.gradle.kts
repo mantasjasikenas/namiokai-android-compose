@@ -134,6 +134,11 @@ dependencies {
 
     implementation(libs.kotlinx.serialization.json)
 
+    implementation(libs.androidx.adaptive)
+    implementation (libs.androidx.adaptive.layout)
+    implementation (libs.androidx.adaptive.navigation)
+    implementation(libs.androidx.material3.adaptive.navigation.suite)
+
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.compose.ui.test.junit4)
 }

@@ -3,6 +3,7 @@ package com.github.mantasjasikenas.namiokai.navigation
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import com.github.mantasjasikenas.core.domain.model.SharedState
+import com.github.mantasjasikenas.core.domain.model.bills.BillFormArgs
 import com.github.mantasjasikenas.feature.admin.navigation.adminPanelScreen
 import com.github.mantasjasikenas.feature.bills.navigation.BillFormRoute
 import com.github.mantasjasikenas.feature.bills.navigation.billFormScreen
@@ -19,7 +20,7 @@ import com.github.mantasjasikenas.feature.test.navigation.testScreen
 import com.github.mantasjasikenas.feature.trips.navigation.tripBillScreen
 
 
-fun NavGraphBuilder.namiokaiNavGraph(
+fun NavGraphBuilder.homeNavGraph(
     sharedState: SharedState,
     navController: NavController
 ) {
@@ -29,30 +30,12 @@ fun NavGraphBuilder.namiokaiNavGraph(
 
     purchaseBillScreen(
         sharedState = sharedState,
-        onNavigateToCreateBill = { billFormRouteArgs ->
-            navController.navigate(
-                BillFormRoute(
-                    billType = billFormRouteArgs.billType,
-                    billId = billFormRouteArgs.billId
-                )
-            ) {
-                launchSingleTop = true
-            }
-        }
+        onNavigateToCreateBill = { navController.navigateToBillFormRoute(it) }
     )
 
     tripBillScreen(
         sharedState = sharedState,
-        onNavigateToCreateBill = { billFormRouteArgs ->
-            navController.navigate(
-                BillFormRoute(
-                    billType = billFormRouteArgs.billType,
-                    billId = billFormRouteArgs.billId
-                )
-            ) {
-                launchSingleTop = true
-            }
-        }
+        onNavigateToCreateBill = { navController.navigateToBillFormRoute(it) }
     )
 
     billFormScreen(
@@ -69,29 +52,13 @@ fun NavGraphBuilder.namiokaiNavGraph(
                 launchSingleTop = true
             }
         },
-        onNavigateToCreateBill = { billFormRouteArgs ->
-            navController.navigate(
-                BillFormRoute(
-                    billType = billFormRouteArgs.billType,
-                    billId = billFormRouteArgs.billId
-                )
-            ) {
-                launchSingleTop = true
-            }
-        }
+        onNavigateToCreateBill = { navController.navigateToBillFormRoute(it) }
     )
 
-    flatBillListScreen(sharedState = sharedState,
-        onNavigateToCreateBill = { billFormRouteArgs ->
-            navController.navigate(
-                BillFormRoute(
-                    billType = billFormRouteArgs.billType,
-                    billId = billFormRouteArgs.billId
-                )
-            ) {
-                launchSingleTop = true
-            }
-        })
+    flatBillListScreen(
+        sharedState = sharedState,
+        onNavigateToCreateBill = { navController.navigateToBillFormRoute(it) }
+    )
 
     notificationsScreen()
 
@@ -103,3 +70,27 @@ fun NavGraphBuilder.namiokaiNavGraph(
 
     profileScreen()
 }
+
+private fun NavController.navigateToBillFormRoute(
+    billFormArgs: BillFormArgs
+) {
+    this.navigate(
+        BillFormRoute(
+            billType = billFormArgs.billType,
+            billId = billFormArgs.billId
+        )
+    ) {
+        launchSingleTop = true
+    }
+}
+
+/*@Composable
+inline fun <reified T : ViewModel> NavBackStackEntry.sharedViewModel(navController: NavHostController): T {
+    val navGraphRoute = destination.parent?.route ?: return hiltViewModel()
+
+    val parentEntry = remember(this) {
+        navController.getBackStackEntry(navGraphRoute)
+    }
+
+    return hiltViewModel(parentEntry)
+}*/

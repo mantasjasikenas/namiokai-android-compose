@@ -3,6 +3,7 @@ package com.github.mantasjasikenas.namiokai.ui
 import android.annotation.SuppressLint
 import android.content.res.Configuration
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
@@ -15,15 +16,24 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navOptions
+import com.github.mantasjasikenas.core.domain.model.SharedState
+import com.github.mantasjasikenas.core.domain.model.isNotLoggedIn
 import com.github.mantasjasikenas.namiokai.navigation.TopLevelRoute
 import kotlinx.coroutines.CoroutineScope
 import kotlin.reflect.KClass
 
 @Composable
 fun rememberNamiokaiAppState(
+    sharedState: SharedState,
+    onNavigateToAuthGraph: () -> Unit,
     coroutineScope: CoroutineScope = rememberCoroutineScope(),
     navController: NavHostController = rememberNavController(),
 ): NamiokaiAppState {
+    UserLoginLaunchedEffect(
+        sharedState = sharedState,
+        onNavigateToAuthGraph = onNavigateToAuthGraph
+    )
+
     return remember(
         navController,
         coroutineScope,
@@ -96,6 +106,15 @@ class NamiokaiAppState(
         }
 
         navController.navigate(topLevelRoute.route, topLevelNavOptions)
+    }
+}
+
+@Composable
+private fun UserLoginLaunchedEffect(sharedState: SharedState, onNavigateToAuthGraph: () -> Unit) {
+    LaunchedEffect(key1 = sharedState.currentUser) {
+        if (sharedState.currentUser.isNotLoggedIn()) {
+            onNavigateToAuthGraph()
+        }
     }
 }
 
