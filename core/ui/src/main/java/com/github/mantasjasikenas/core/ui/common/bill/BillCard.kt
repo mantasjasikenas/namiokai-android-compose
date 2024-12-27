@@ -1,4 +1,4 @@
-package com.github.mantasjasikenas.core.ui.common
+package com.github.mantasjasikenas.core.ui.common.bill
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
@@ -28,6 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -42,11 +43,18 @@ import androidx.compose.ui.unit.sp
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
 import com.github.mantasjasikenas.core.common.util.UserUid
+import com.github.mantasjasikenas.core.common.util.tryParse
 import com.github.mantasjasikenas.core.domain.model.User
 import com.github.mantasjasikenas.core.domain.model.bills.Bill
 import com.github.mantasjasikenas.core.domain.model.bills.resolveBillCost
 import com.github.mantasjasikenas.core.ui.R
+import com.github.mantasjasikenas.core.ui.common.DateTimeCardColumn
+import com.github.mantasjasikenas.core.ui.common.NamiokaiSpacer
+import com.github.mantasjasikenas.core.ui.common.VerticalDivider
+import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import java.time.format.TextStyle
 import java.util.Locale
 
@@ -55,7 +63,6 @@ fun SwipeBillCard(
     subtext: String,
     subtextIcon: ImageVector,
     bill: Bill,
-    billCreationDateTime: LocalDateTime,
     currentUser: User,
     usersMap: Map<String, User>,
     onClick: () -> Unit,
@@ -77,7 +84,6 @@ fun SwipeBillCard(
                 subtext = subtext,
                 subtextIcon = subtextIcon,
                 bill = bill,
-                billCreationDateTime = billCreationDateTime,
                 currentUser = currentUser,
                 usersMap = usersMap,
                 onClick = onClick,
@@ -90,7 +96,6 @@ fun SwipeBillCard(
 @Composable
 fun SwipeBillCard(
     bill: Bill,
-    billCreationDateTime: LocalDateTime,
     currentUser: User,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -110,7 +115,6 @@ fun SwipeBillCard(
     ) {
         BillCard(
             bill = bill,
-            billCreationDateTime = billCreationDateTime,
             currentUserUid = currentUser.uid,
             onClick = onClick,
             elevated = elevated,
@@ -189,7 +193,6 @@ fun BillCard(
     subtext: String,
     subtextIcon: ImageVector,
     bill: Bill,
-    billCreationDateTime: LocalDateTime,
     currentUser: User,
     usersMap: Map<String, User>,
     onClick: () -> Unit,
@@ -202,7 +205,6 @@ fun BillCard(
 ) {
     BillCard(
         bill = bill,
-        billCreationDateTime = billCreationDateTime,
         currentUserUid = currentUser.uid,
         elevatedCardPadding = elevatedCardPadding,
         columnPadding = columnPadding,
@@ -260,7 +262,6 @@ fun BillCard(
 @Composable
 fun BillCard(
     bill: Bill,
-    billCreationDateTime: LocalDateTime,
     currentUserUid: UserUid,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -272,6 +273,13 @@ fun BillCard(
     elevated: Boolean = true,
     content: @Composable ColumnScope.() -> Unit
 ) {
+    val billCreationDateTime = remember(bill.date) {
+        LocalDateTime.tryParse(bill.date) ?: Clock.System.now()
+            .toLocalDateTime(
+                TimeZone.currentSystemDefault()
+            )
+    }
+
     ElevatedCard(
         modifier = modifier
             .padding(

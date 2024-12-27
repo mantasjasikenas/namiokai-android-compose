@@ -1,9 +1,7 @@
 package com.github.mantasjasikenas.feature.flat
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -14,7 +12,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Flood
 import androidx.compose.material.icons.outlined.WaterDrop
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -33,7 +30,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.github.mantasjasikenas.core.common.util.format
-import com.github.mantasjasikenas.core.common.util.tryParse
 import com.github.mantasjasikenas.core.domain.model.Filter
 import com.github.mantasjasikenas.core.domain.model.SharedState
 import com.github.mantasjasikenas.core.domain.model.User
@@ -43,14 +39,10 @@ import com.github.mantasjasikenas.core.domain.model.bills.BillType
 import com.github.mantasjasikenas.core.domain.model.bills.FlatBill
 import com.github.mantasjasikenas.core.ui.common.NamiokaiCircularProgressIndicator
 import com.github.mantasjasikenas.core.ui.common.NamiokaiSpacer
-import com.github.mantasjasikenas.core.ui.common.SwipeBillCard
+import com.github.mantasjasikenas.core.ui.common.bill.SwipeBillCard
 import com.github.mantasjasikenas.core.ui.common.rememberState
 import com.github.mantasjasikenas.core.ui.component.FiltersRow
 import com.github.mantasjasikenas.core.ui.component.NoResultsFound
-import kotlinx.datetime.Clock
-import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
 
 @Composable
 fun FlatBillListRoute(
@@ -64,7 +56,6 @@ fun FlatBillListRoute(
 }
 
 @Composable
-@OptIn(ExperimentalFoundationApi::class)
 fun FlatBillListPage(
     sharedState: SharedState,
     flatViewModel: FlatViewModel = hiltViewModel(),
@@ -101,6 +92,18 @@ fun FlatBillScreenContent(
 ) {
     val state = rememberLazyListState((flatUiState.filteredFlatBills.size - 1).coerceAtLeast(0))
 
+    var selectedFlatBill by rememberSaveable {
+        mutableStateOf<FlatBill?>(null)
+    }
+    val onBillEdit: (FlatBill) -> Unit = { flatBill ->
+        onNavigateToCreateBill(
+            BillFormArgs(
+                billId = flatBill.documentId,
+                billType = BillType.Flat
+            )
+        )
+    }
+
     Column {
         FlatBillFiltersRow(
             usersMap = usersMap,
@@ -127,27 +130,41 @@ fun FlatBillScreenContent(
             } else {
                 item { NamiokaiSpacer(height = 120) }
 
-                items(items = flatUiState.filteredFlatBills,
+                items(
+                    items = flatUiState.filteredFlatBills,
                     key = { it.documentId }
                 ) { flatBill ->
-                    FlatCard(
-                        modifier = Modifier.animateItem(fadeInSpec = null, fadeOutSpec = null),
+                    FlatBillCard(
+                        modifier = Modifier.animateItem(),
                         flatBill = flatBill,
                         isAllowedModification = (currentUser.admin || flatBill.createdByUid == currentUser.uid),
                         usersMap = usersMap,
-                        viewModel = flatViewModel,
                         currentUser = currentUser,
                         onEdit = {
-                            onNavigateToCreateBill(
-                                BillFormArgs(
-                                    billId = flatBill.documentId,
-                                    billType = BillType.Flat
-                                )
-                            )
+                            onBillEdit(flatBill)
+                        },
+                        onSelect = {
+                            selectedFlatBill = flatBill
                         }
                     )
                 }
             }
+        }
+
+        selectedFlatBill?.let { flatBill ->
+            FlatBillBottomSheet(
+                flatBill = flatBill,
+                usersMap = usersMap,
+                isAllowedModification = (currentUser.admin || flatBill.createdByUid == currentUser.uid),
+                onEdit = { onBillEdit(flatBill) },
+                onDismiss = {
+                    selectedFlatBill = null
+                },
+                onDelete = {
+                    flatViewModel.deleteFlatBill(flatBill)
+                    selectedFlatBill = null
+                }
+            )
         }
     }
 }
@@ -158,8 +175,10 @@ private fun FlatBillFiltersRow(
     flatUiState: FlatUiState,
     onFiltersChanged: (List<Filter<FlatBill, Any>>) -> Unit
 ) {
-    val users = usersMap.map { (_, user) ->
-        user.displayName
+    val usersDisplayNames = remember(usersMap) {
+        usersMap.map { (_, user) ->
+            user.displayName
+        }
     }
     val getUserUid = { displayName: String ->
         usersMap.values.firstOrNull { user ->
@@ -173,13 +192,13 @@ private fun FlatBillFiltersRow(
                 Filter(
                     displayLabel = "Paymaster",
                     filterName = "paymaster",
-                    values = users,
+                    values = usersDisplayNames,
                     predicate = { bill, value -> bill.paymasterUid == getUserUid(value as String) }
                 ),
                 Filter(
                     displayLabel = "Splitter",
                     filterName = "splitter",
-                    values = users,
+                    values = usersDisplayNames,
                     predicate = { bill, value -> bill.splitUsersUid.contains(getUserUid(value as String)) }
                 ),
             )
@@ -195,54 +214,28 @@ private fun FlatBillFiltersRow(
     )
 }
 
-@OptIn(
-    ExperimentalMaterial3Api::class,
-    ExperimentalLayoutApi::class
-)
 @Composable
-private fun FlatCard(
+private fun FlatBillCard(
+    modifier: Modifier = Modifier,
     flatBill: FlatBill,
     isAllowedModification: Boolean,
     usersMap: UsersMap,
-    viewModel: FlatViewModel,
     currentUser: User,
-    modifier: Modifier = Modifier,
     onEdit: () -> Unit,
+    onSelect: () -> Unit
 ) {
-    val billDateTime = remember {
-        LocalDateTime.tryParse(flatBill.date) ?: Clock.System.now()
-            .toLocalDateTime(
-                TimeZone.currentSystemDefault()
-            )
-    }
-
-    val openBottomSheet = rememberSaveable { mutableStateOf(false) }
-
     SwipeBillCard(
         modifier = modifier,
         bill = flatBill,
-        billCreationDateTime = billDateTime,
         currentUser = currentUser,
         onClick = {
-            openBottomSheet.value = true
+            onSelect()
         },
         onStartToEndSwipe = {
-            openBottomSheet.value = true
+            onSelect()
         }
     ) {
         FlatBillCardContent(flatBill = flatBill)
-    }
-
-    if (openBottomSheet.value) {
-        FlatBillBottomSheet(
-            flatBill = flatBill,
-            usersMap = usersMap,
-            viewModel = viewModel,
-            onEdit = onEdit,
-            openBottomSheet = openBottomSheet,
-            isAllowedModification = isAllowedModification,
-            dateTime = billDateTime
-        )
     }
 }
 

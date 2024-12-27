@@ -15,11 +15,15 @@ class DebtsRepositoryImpl : DebtsRepository {
             processBill(bill, debtsMap)
         }
 
-        debtsMap.keys.forEach { fromUser ->
-            debtsMap.getUserDebts(fromUser).keys.forEach { toUser ->
-                balanceDebts(fromUser, toUser, debtsMap)
+        debtsMap.keys
+            .toList() // to avoid concurrent modification exception
+            .forEach { fromUser ->
+                val userDebtsKeys = debtsMap.getUserDebts(fromUser).keys
+
+                userDebtsKeys.forEach { toUser ->
+                    balanceDebts(fromUser, toUser, debtsMap)
+                }
             }
-        }
 
         return debtsMap
     }

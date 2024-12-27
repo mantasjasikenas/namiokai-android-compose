@@ -41,3 +41,7 @@ fun Bill.isUserAssociated(currentUser: User): Boolean {
     return this.paymasterUid == currentUser.uid ||
             this.splitUsersUid.any { it == currentUser.uid }
 }
+
+fun Bill.formatDateTime(): String {
+    return this.date.replace("T", " ")
+}

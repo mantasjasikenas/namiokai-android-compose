@@ -81,7 +81,6 @@ import com.github.mantasjasikenas.core.domain.model.bills.FlatBill
 import com.github.mantasjasikenas.core.domain.model.bills.PurchaseBill
 import com.github.mantasjasikenas.core.domain.model.bills.TripBill
 import com.github.mantasjasikenas.core.domain.model.debts.DebtBill
-import com.github.mantasjasikenas.core.domain.model.debts.DebtsMap
 import com.github.mantasjasikenas.core.ui.common.EuroIconTextRow
 import com.github.mantasjasikenas.core.ui.common.NamiokaiBottomSheet
 import com.github.mantasjasikenas.core.ui.common.NamiokaiCircularProgressIndicator
@@ -132,11 +131,9 @@ fun DebtsScreenContent(
     onPeriodReset: () -> Unit,
     onPeriodUpdate: (Period) -> Unit,
 ) {
-    val periodState = debtsUiState.periodState
-    val currentUser = debtsUiState.currentUser
-    val usersMap = debtsUiState.users.associateBy { it.uid }
-    val usersDebts = debtsUiState.debts
-    val currentUserDebts = usersDebts.getUserDebts(currentUser.uid)
+    val usersMap = remember(debtsUiState.users) {
+        debtsUiState.users.associateBy { it.uid }
+    }
 
     val pages = listOf(
         "Personal",
@@ -145,6 +142,7 @@ fun DebtsScreenContent(
     var currentPage by rememberState {
         0
     }
+
     Column(modifier = Modifier.fillMaxSize()) {
         Row(
             Modifier
@@ -179,8 +177,8 @@ fun DebtsScreenContent(
             when (it) {
                 0 -> {
                     PersonalDebtsPage(
-                        periodState = periodState,
-                        currentUserDebts = currentUserDebts,
+                        periodState = debtsUiState.periodState,
+                        currentUserDebts = debtsUiState.currentUserDebts,
                         onPeriodReset = onPeriodReset,
                         onPeriodUpdate = onPeriodUpdate,
                         usersMap = usersMap
@@ -189,8 +187,8 @@ fun DebtsScreenContent(
 
                 1 -> {
                     DebtsPage(
-                        periodState = periodState,
-                        usersDebts = usersDebts,
+                        periodState = debtsUiState.periodState,
+                        usersDebts = debtsUiState.debts,
                         usersMap = usersMap,
                         onPeriodReset = onPeriodReset,
                         onPeriodUpdate = onPeriodUpdate,
@@ -249,7 +247,7 @@ private fun PersonalDebtsPage(
 @Composable
 private fun DebtsPage(
     periodState: PeriodState,
-    usersDebts: DebtsMap,
+    usersDebts: List<Pair<String, Map<String, List<DebtBill>>>>,
     usersMap: UsersMap,
     onPeriodReset: () -> Unit,
     onPeriodUpdate: (Period) -> Unit,
@@ -287,40 +285,39 @@ private fun DebtsPage(
             }
 
             return@Column
-        } else {
-            NamiokaiSpacer(height = 20)
+        }
 
-            LazyVerticalStaggeredGrid(
-                columns = StaggeredGridCells.Fixed(2),
-                verticalItemSpacing = 8.dp,
-                horizontalArrangement = Arrangement.spacedBy(
-                    8.dp,
-                    Alignment.Start
-                ),
-                modifier = Modifier
-                    .fillMaxSize()
-            ) {
-                items(
-                    items = usersDebts
-                        .getAllDebts()
-                        .toList()
-                        .filter { it.second.isNotEmpty() },
-                    key = { it.first }
-                ) { (user, debts) ->
-                    if (!(debts.isEmpty() || usersMap[user] == null)) {
-                        DebtorCard(
-                            modifier = Modifier.animateItem(
-                                fadeInSpec = null,
-                                fadeOutSpec = null
-                            ),
-                            debtorUser = usersMap[user]!!,
-                            userDebts = debts,
-                            usersMap = usersMap
-                        )
-                    }
+        NamiokaiSpacer(height = 20)
+
+        LazyVerticalStaggeredGrid(
+            columns = StaggeredGridCells.Fixed(2),
+            verticalItemSpacing = 8.dp,
+            horizontalArrangement = Arrangement.spacedBy(
+                8.dp,
+                Alignment.Start
+            ),
+            modifier = Modifier
+                .fillMaxSize()
+        ) {
+            items(
+                items = usersDebts,
+                key = { it.first }
+            ) { (user, debts) ->
+                if (debts.isNotEmpty() && usersMap[user] != null) {
+                    DebtorCard(
+                        modifier = Modifier.animateItem(),
+                        debtorUser = usersMap[user]!!,
+                        userDebts = debts,
+                        usersMap = usersMap
+                    )
+                } else {
+                    Text(
+                        text = "IF YOU SEE THIS, SOMETHING WENT WRONG",
+                    )
                 }
             }
         }
+
     }
 }
 
@@ -501,25 +498,23 @@ private fun DebtorBottomSheet(
                 onCollapseAll = { expandAll.value = false }
             )
 
-            var totalDebt = 0.0
-
-            (userDebts).forEach { (key, debtBills) ->
-                val value = debtBills.sumOf { it.amount }
-
-                totalDebt += value
-
+            userDebts.forEach { (key, debtBills) ->
                 ExpandableDebtDetailsRow(
                     expandAll = expandAll,
                     usersMap = usersMap,
                     userUid = key,
-                    value = value,
+                    value = remember(debtBills) {
+                        debtBills.sumOf { it.amount }
+                    },
                     debtBills = debtBills
                 )
             }
 
             if (userDebts.size > 1) {
                 DebtsDetailsFooter(
-                    totalDebt = totalDebt
+                    totalDebt = remember(userDebts) {
+                        userDebts.values.flatten().sumOf { it.amount }
+                    }
                 )
             }
 

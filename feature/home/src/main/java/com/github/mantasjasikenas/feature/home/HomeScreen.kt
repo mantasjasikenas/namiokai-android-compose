@@ -18,6 +18,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -29,7 +30,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.github.mantasjasikenas.core.common.util.format
 import com.github.mantasjasikenas.core.domain.model.Period
 import com.github.mantasjasikenas.core.domain.model.User
-import com.github.mantasjasikenas.core.domain.model.debts.DebtsMap
 import com.github.mantasjasikenas.core.ui.common.NamiokaiCircularProgressIndicator
 import com.github.mantasjasikenas.core.ui.common.NamiokaiSpacer
 import com.github.mantasjasikenas.core.ui.common.noRippleClickable
@@ -58,30 +58,24 @@ fun HomeScreen(
             val uiState = homeUiState as HomeUiState.Success
 
             HomeScreen(
-                homeViewModel = homeViewModel,
+                homeUiState = uiState,
                 currentUser = uiState.currentUser,
-                usersDebts = uiState.debts,
                 currentPeriod = uiState.currentPeriod
             )
         }
     }
-
-
 }
-
 
 @Composable
 fun HomeScreen(
-    @Suppress("UNUSED_PARAMETER")
-    homeViewModel: HomeViewModel = hiltViewModel(),
+    homeUiState: HomeUiState.Success,
     currentUser: User,
-    usersDebts: DebtsMap,
     currentPeriod: Period
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
         WidgetsPage(
             currentUser = currentUser,
-            usersDebts = usersDebts,
+            homeUiState = homeUiState,
             period = currentPeriod
         )
     }
@@ -90,7 +84,7 @@ fun HomeScreen(
 @Composable
 private fun WidgetsPage(
     currentUser: User,
-    usersDebts: DebtsMap,
+    homeUiState: HomeUiState.Success,
     period: Period
 ) {
     Column(
@@ -99,7 +93,7 @@ private fun WidgetsPage(
             .padding(20.dp),
     ) {
         Widgets(
-            usersDebts = usersDebts,
+            homeUiState = homeUiState,
             currentUser = currentUser,
             period = period
         )
@@ -108,7 +102,7 @@ private fun WidgetsPage(
 
 @Composable
 private fun Widgets(
-    usersDebts: DebtsMap,
+    homeUiState: HomeUiState.Success,
     currentUser: User,
     period: Period
 ) {
@@ -150,10 +144,12 @@ private fun Widgets(
             WidgetCard(
                 label = "Remaining days",
             ) {
-                val daysUntilNextPeriod = period.daysUntilEnd()
+                val daysUntilNextPeriod = remember(period) {
+                    period.daysUntilEnd().toString()
+                }
 
                 IconText(
-                    text = daysUntilNextPeriod.toString(),
+                    text = daysUntilNextPeriod,
                     icon = Icons.Outlined.CalendarMonth,
                 )
             }
@@ -165,10 +161,8 @@ private fun Widgets(
             WidgetCard(
                 label = "Owed to you",
             ) {
-                val owedToYou = usersDebts.getTotalOwedToYou(currentUser.uid)
-
                 EuroIconText(
-                    text = owedToYou.format(2),
+                    text = homeUiState.owedToYou.format(2),
                 )
             }
         }
@@ -179,10 +173,8 @@ private fun Widgets(
             WidgetCard(
                 label = "You owe",
             ) {
-                val value = usersDebts.getTotalDebt(currentUser.uid).format(2)
-
                 EuroIconText(
-                    text = value,
+                    text = homeUiState.totalDebt.format(2),
                 )
             }
         }
@@ -193,10 +185,8 @@ private fun Widgets(
             WidgetCard(
                 label = "Total debts",
             ) {
-                val value = usersDebts.getTotalDebtsCount(currentUser.uid).toString()
-
                 Text(
-                    text = value,
+                    text = homeUiState.totalDebtsCount.toString(),
                     fontWeight = FontWeight.Bold,
                     style = MaterialTheme.typography.headlineSmall
                 )

@@ -27,14 +27,15 @@ class PurchaseBillViewModel @Inject constructor(private val purchaseBillsReposit
     val billUiState = _billUiState.asStateFlow()
 
     val groupedBills = billUiState.map { state ->
-        state.filteredPurchaseBills.groupBy {
-            it.date.toYearMonthPair()
-        }
+        state.filteredPurchaseBills
+            .groupBy {
+                it.date.toYearMonthPair()
+            }
     }
         .stateIn(
-            viewModelScope,
-            SharingStarted.WhileSubscribed(),
-            emptyMap()
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = emptyMap()
         )
 
     init {

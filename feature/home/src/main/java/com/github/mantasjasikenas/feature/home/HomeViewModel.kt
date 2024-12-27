@@ -5,8 +5,6 @@ import androidx.lifecycle.viewModelScope
 import com.github.mantasjasikenas.core.data.repository.debts.DebtsService
 import com.github.mantasjasikenas.core.domain.model.Period
 import com.github.mantasjasikenas.core.domain.model.User
-import com.github.mantasjasikenas.core.domain.model.debts.DebtsMap
-import com.github.mantasjasikenas.core.domain.model.debts.MutableDebtsMap
 import com.github.mantasjasikenas.core.domain.repository.PeriodRepository
 import com.github.mantasjasikenas.core.domain.repository.UsersRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -36,14 +34,20 @@ class HomeViewModel @Inject constructor(
                     currentPeriod = period
                 )
             }
-            .combine(debtsService.getCurrentPeriodDebts()) { uiState, debts ->
-                uiState.copy(
-                    debts = debts
-                )
-            }
             .combine(usersRepository.currentUser) { uiState, user ->
                 uiState.copy(
                     currentUser = user
+                )
+            }
+            .combine(debtsService.getCurrentPeriodDebts()) { uiState, debts ->
+                val uid = uiState.currentUser.uid
+
+                uiState.copy(
+                    owedToYou = debts.getTotalOwedToYou(uid),
+                    totalDebt = debts.getTotalDebt(uid),
+                    totalDebtsCount = debts.getTotalDebtsCount(uid),
+                    lastUpdated = Clock.System.now()
+                        .toLocalDateTime(TimeZone.currentSystemDefault())
                 )
             }
             .stateIn(
@@ -57,7 +61,9 @@ class HomeViewModel @Inject constructor(
 sealed interface HomeUiState {
     data object Loading : HomeUiState
     data class Success(
-        val debts: DebtsMap = MutableDebtsMap(),
+        val owedToYou: Double = 0.0,
+        val totalDebt: Double = 0.0,
+        val totalDebtsCount: Int = 0,
         val currentPeriod: Period = Period(),
         val currentUser: User = User(),
         val lastUpdated: LocalDateTime = Clock.System.now()

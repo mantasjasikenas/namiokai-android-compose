@@ -119,8 +119,8 @@ private fun rememberCartesianLayerRangeProvider() = remember {
             return minY
         }
 
-        override fun getMaxY(minX: Double, maxX: Double, extraStore: ExtraStore): Double {
-            return maxX
+        override fun getMaxY(minY: Double, maxY: Double, extraStore: ExtraStore): Double {
+            return maxY
         }
     }
 }
@@ -135,7 +135,8 @@ private fun rememberSmallIndicatorMarker() = rememberIndicatorMarker(
 )
 
 private fun formatFlatBillXAxisValue(date: String): String {
-    val date = date.split("T").firstOrNull() ?: return ""
+    @Suppress("NAME_SHADOWING")
+    val date = date.split("T").firstOrNull() ?: return " "
     val values = date.split("-")
 
     val yearLastTwoDigits = values[0].takeLast(2).toInt()

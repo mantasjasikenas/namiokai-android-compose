@@ -54,25 +54,21 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.github.mantasjasikenas.core.common.util.format
-import com.github.mantasjasikenas.core.common.util.tryParse
 import com.github.mantasjasikenas.core.domain.model.SharedState
 import com.github.mantasjasikenas.core.domain.model.User
 import com.github.mantasjasikenas.core.domain.model.UsersMap
 import com.github.mantasjasikenas.core.domain.model.bills.BillFormArgs
 import com.github.mantasjasikenas.core.domain.model.bills.BillType
 import com.github.mantasjasikenas.core.domain.model.bills.FlatBill
-import com.github.mantasjasikenas.core.ui.common.BillCard
 import com.github.mantasjasikenas.core.ui.common.NamiokaiCircularProgressIndicator
 import com.github.mantasjasikenas.core.ui.common.NamiokaiSpacer
 import com.github.mantasjasikenas.core.ui.common.TextRow
 import com.github.mantasjasikenas.core.ui.common.VerticalDivider
+import com.github.mantasjasikenas.core.ui.common.bill.BillCard
 import com.github.mantasjasikenas.core.ui.component.NoResultsFound
 import com.github.mantasjasikenas.core.ui.component.ProgressGraph
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
-import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
 import kotlin.math.absoluteValue
 
 @Composable
@@ -335,7 +331,7 @@ fun ElectricitySummaryContainer(
         "Maximum" to electricitySummary.maxDifference
     )
 
-    var expanded = remember { mutableStateOf(false) }
+    val expanded = remember { mutableStateOf(false) }
 
     ElevatedCardContainer(
         modifier = modifier,
@@ -432,7 +428,21 @@ fun FlatBillSummary(
     flatViewModel: FlatViewModel,
     onNavigateToCreateBill: (BillFormArgs) -> Unit
 ) {
-    val visibleBills = bills.takeLast(3).reversed()
+    val visibleBills = remember(bills) {
+        bills.takeLast(3).reversed()
+    }
+    var selectedFlatBill by rememberSaveable {
+        mutableStateOf<FlatBill?>(null)
+    }
+
+    val onEdit: (flatBill: FlatBill) -> Unit = { flatBill ->
+        onNavigateToCreateBill(
+            BillFormArgs(
+                billId = flatBill.documentId,
+                billType = BillType.Flat
+            )
+        )
+    }
 
     ElevatedCardContainer(
         modifier = modifier,
@@ -444,15 +454,12 @@ fun FlatBillSummary(
                     flatBill = flatBill,
                     isAllowedModification = (currentUser.admin || flatBill.createdByUid == currentUser.uid),
                     usersMap = usersMap,
-                    viewModel = flatViewModel,
                     currentUser = currentUser,
                     onEdit = {
-                        onNavigateToCreateBill(
-                            BillFormArgs(
-                                billId = flatBill.documentId,
-                                billType = BillType.Flat
-                            )
-                        )
+                        onEdit(flatBill)
+                    },
+                    onSelect = {
+                        selectedFlatBill = flatBill
                     }
                 )
             }
@@ -467,56 +474,49 @@ fun FlatBillSummary(
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.primary
         )
+
+        selectedFlatBill?.let { flatBill ->
+            FlatBillBottomSheet(
+                flatBill = flatBill,
+                usersMap = usersMap,
+                isAllowedModification = (currentUser.admin || flatBill.createdByUid == currentUser.uid),
+                onEdit = {
+                    onEdit(flatBill)
+                },
+                onDismiss = {
+                    selectedFlatBill = null
+                },
+                onDelete = {
+                    flatViewModel.deleteFlatBill(flatBill)
+                    selectedFlatBill = null
+                }
+            )
+        }
     }
 }
 
-
-@OptIn(
-    ExperimentalMaterial3Api::class,
-    ExperimentalLayoutApi::class
-)
 @Composable
 private fun CompactFlatCard(
+    modifier: Modifier = Modifier,
     flatBill: FlatBill,
     isAllowedModification: Boolean,
     usersMap: UsersMap,
-    viewModel: FlatViewModel,
     currentUser: User,
-    modifier: Modifier = Modifier,
     onEdit: () -> Unit,
+    onSelect: () -> Unit,
 ) {
-    val billDateTime = LocalDateTime.tryParse(flatBill.date) ?: Clock.System.now()
-        .toLocalDateTime(
-            TimeZone.currentSystemDefault()
-        )
-
-    val openBottomSheet = rememberSaveable { mutableStateOf(false) }
-
     BillCard(
         modifier = modifier.padding(0.dp),
         bill = flatBill,
-        billCreationDateTime = billDateTime,
         currentUserUid = currentUser.uid,
         onClick = {
-            openBottomSheet.value = true
+            onSelect()
         },
         elevatedCardPadding = PaddingValues(0.dp),
         columnPadding = PaddingValues(vertical = 6.dp),
         elevated = false
     ) {
         FlatBillCardContent(flatBill = flatBill)
-    }
-
-    if (openBottomSheet.value) {
-        FlatBillBottomSheet(
-            flatBill = flatBill,
-            usersMap = usersMap,
-            viewModel = viewModel,
-            onEdit = onEdit,
-            openBottomSheet = openBottomSheet,
-            isAllowedModification = isAllowedModification,
-            dateTime = billDateTime
-        )
     }
 }
 
@@ -528,7 +528,8 @@ internal fun FlatStatisticsContainer(
     xAxisLabels: List<String> = emptyList(),
     selectedInitial: FlatBill? = flatBills.lastOrNull(),
 ) {
-    val xAxisLabels = if (xAxisLabels.isEmpty()) {
+    @Suppress("NAME_SHADOWING")
+    val xAxisLabels = xAxisLabels.ifEmpty {
         flatBills
             .let { dates ->
                 if (dates.size >= 3) {
@@ -545,8 +546,6 @@ internal fun FlatStatisticsContainer(
                 it.date.split("T")
                     .firstOrNull()
             }
-    } else {
-        xAxisLabels
     }
 
     var selectedRecord by remember {
@@ -647,7 +646,7 @@ internal fun ElectricityStatisticsContainer(
     xAxisLabels: List<String> = emptyList(),
     selectedInitial: BillDifference? = electricity.lastOrNull(),
 ) {
-    val xLabels = if (xAxisLabels.isEmpty()) {
+    val xLabels = xAxisLabels.ifEmpty {
         electricity
             .let { dates ->
                 if (dates.size >= 3) {
@@ -664,15 +663,13 @@ internal fun ElectricityStatisticsContainer(
                 it.firstBillDate.split("T")
                     .firstOrNull()
             }
-    } else {
-        xAxisLabels
     }
 
     var selectedRecord by remember {
         mutableStateOf(selectedInitial)
     }
 
-    var data by remember {
+    val data by remember {
         mutableStateOf(
             electricity.map { it.difference }
                 .ifEmpty {

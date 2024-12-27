@@ -24,6 +24,10 @@ class MutableDebtsMap : DebtsMap {
 
     fun removeDebt(fromUser: String, toUser: String) {
         debts[fromUser]?.remove(toUser)
+
+        if (debts[fromUser]?.isEmpty() == true) {
+            debts.remove(fromUser)
+        }
     }
 
     val keys: Set<String>

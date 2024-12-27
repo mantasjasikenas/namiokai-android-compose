@@ -33,9 +33,9 @@ class FuelViewModel @Inject constructor(private val tripBillsRepository: TripBil
         }
     }
         .stateIn(
-            viewModelScope,
-            SharingStarted.WhileSubscribed(),
-            emptyMap()
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = emptyMap()
         )
 
     init {

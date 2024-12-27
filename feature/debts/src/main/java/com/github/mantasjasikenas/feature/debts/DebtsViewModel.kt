@@ -6,8 +6,7 @@ import com.github.mantasjasikenas.core.data.repository.debts.DebtsService
 import com.github.mantasjasikenas.core.domain.model.Period
 import com.github.mantasjasikenas.core.domain.model.PeriodState
 import com.github.mantasjasikenas.core.domain.model.User
-import com.github.mantasjasikenas.core.domain.model.debts.DebtsMap
-import com.github.mantasjasikenas.core.domain.model.debts.MutableDebtsMap
+import com.github.mantasjasikenas.core.domain.model.debts.DebtBill
 import com.github.mantasjasikenas.core.domain.repository.PeriodRepository
 import com.github.mantasjasikenas.core.domain.repository.UsersRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -38,8 +37,16 @@ class DebtsViewModel @Inject constructor(
             .combine(periodRepository.getPeriodState()) { uiState, periodState ->
                 uiState.copy(periodState = periodState)
             }
-            .combine(debtsService.getUserSelectedPeriodDebts()) { uiState, debts ->
-                uiState.copy(debts = debts)
+            .combine(debtsService.getUserSelectedPeriodDebts()) { uiState, debtsMap ->
+                val debts = debtsMap
+                    .getAllDebts()
+                    .toList()
+                val currentUserDebts = debtsMap.getUserDebts(uiState.currentUser.uid)
+
+                uiState.copy(
+                    debts = debts,
+                    currentUserDebts = currentUserDebts
+                )
             }
             .stateIn(
                 scope = viewModelScope,
@@ -65,7 +72,8 @@ sealed interface DebtsUiState {
     data class Success(
         val currentUser: User = User(),
         val users: List<User> = emptyList(),
-        val debts: DebtsMap = MutableDebtsMap(),
+        val debts: List<Pair<String, Map<String, List<DebtBill>>>> = emptyList(),
+        val currentUserDebts: Map<String, List<DebtBill>> = emptyMap(),
         val periodState: PeriodState = PeriodState()
     ) : DebtsUiState
 }

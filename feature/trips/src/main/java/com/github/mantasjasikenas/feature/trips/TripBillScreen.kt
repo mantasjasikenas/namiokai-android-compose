@@ -1,7 +1,6 @@
 package com.github.mantasjasikenas.feature.trips
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -9,7 +8,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.TripOrigin
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -26,7 +24,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.github.mantasjasikenas.core.common.util.tryParse
 import com.github.mantasjasikenas.core.domain.model.Filter
 import com.github.mantasjasikenas.core.domain.model.Period
 import com.github.mantasjasikenas.core.domain.model.PeriodState
@@ -39,14 +36,10 @@ import com.github.mantasjasikenas.core.domain.model.bills.TripBill
 import com.github.mantasjasikenas.core.domain.model.contains
 import com.github.mantasjasikenas.core.ui.common.NamiokaiCircularProgressIndicator
 import com.github.mantasjasikenas.core.ui.common.NamiokaiSpacer
-import com.github.mantasjasikenas.core.ui.common.SwipeBillCard
+import com.github.mantasjasikenas.core.ui.common.bill.SwipeBillCard
 import com.github.mantasjasikenas.core.ui.common.rememberState
 import com.github.mantasjasikenas.core.ui.component.FiltersRow
 import com.github.mantasjasikenas.core.ui.component.NoResultsFound
-import kotlinx.datetime.Clock
-import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
 import kotlin.collections.component1
 import kotlin.collections.component2
 
@@ -106,6 +99,18 @@ fun TripBillScreenContent(
 ) {
     val state = rememberLazyListState()
 
+    var selectedTripBill by rememberSaveable {
+        mutableStateOf<TripBill?>(null)
+    }
+    val onBillEdit: (bill: TripBill) -> Unit = { bill ->
+        onNavigateToCreateBill(
+            BillFormArgs(
+                billId = bill.documentId,
+                billType = BillType.Trip
+            )
+        )
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -147,23 +152,19 @@ fun TripBillScreenContent(
                         )
                     }
 
-                    items(items = trips,
+                    items(
+                        items = trips,
                         key = { it.documentId }
-                    ) { fuel ->
-                        FuelCard(
-//                                modifier = Modifier.animateItemPlacement(),
-                            tripBill = fuel,
-                            isAllowedModification = (currentUser.admin || fuel.createdByUid == currentUser.uid),
+                    ) { trip ->
+                        TripBillCard(
+                            modifier = Modifier.animateItem(),
+                            tripBill = trip,
+                            isAllowedModification = (currentUser.admin || trip.createdByUid == currentUser.uid),
                             usersMap = usersMap,
-                            viewModel = viewModel,
                             currentUser = currentUser,
-                            onEdit = {
-                                onNavigateToCreateBill(
-                                    BillFormArgs(
-                                        billId = fuel.documentId,
-                                        billType = BillType.Trip
-                                    )
-                                )
+                            onEdit = { onBillEdit(trip) },
+                            onSelect = {
+                                selectedTripBill = trip
                             }
                         )
                     }
@@ -172,7 +173,49 @@ fun TripBillScreenContent(
 
             item { NamiokaiSpacer(height = 120) }
         }
+
+        selectedTripBill?.let { tripBill ->
+            TripBillBottomSheet(
+                tripBill = tripBill,
+                usersMap = usersMap,
+                isAllowedModification = (currentUser.admin || tripBill.createdByUid == currentUser.uid),
+                onEdit = { onBillEdit(tripBill) },
+                onDismiss = {
+                    selectedTripBill = null
+                },
+                onDelete = {
+                    viewModel.deleteFuel(tripBill)
+                    selectedTripBill = null
+                },
+            )
+        }
     }
+}
+
+@Composable
+private fun TripBillCard(
+    modifier: Modifier = Modifier,
+    tripBill: TripBill,
+    isAllowedModification: Boolean,
+    usersMap: UsersMap,
+    currentUser: User,
+    onEdit: () -> Unit,
+    onSelect: () -> Unit
+) {
+    SwipeBillCard(
+        modifier = modifier,
+        subtext = tripBill.tripDestination,
+        subtextIcon = Icons.Outlined.TripOrigin,
+        bill = tripBill,
+        currentUser = currentUser,
+        usersMap = usersMap,
+        onClick = {
+            onSelect()
+        },
+        onStartToEndSwipe = {
+            onSelect()
+        }
+    )
 }
 
 @Composable
@@ -182,8 +225,10 @@ private fun TripBillFiltersRow(
     usersMap: UsersMap,
     onFiltersChanged: (List<Filter<TripBill, Any>>) -> Unit
 ) {
-    val users = usersMap.map { (_, user) ->
-        user.displayName
+    val usersDisplayNames = remember(usersMap) {
+        usersMap.map { (_, user) ->
+            user.displayName
+        }
     }
     val getUserUid = { displayName: String ->
         usersMap.values.firstOrNull { user ->
@@ -197,13 +242,13 @@ private fun TripBillFiltersRow(
                 Filter(
                     displayLabel = "Driver",
                     filterName = "driver",
-                    values = users,
+                    values = usersDisplayNames,
                     predicate = { bill, value -> bill.paymasterUid == getUserUid(value as String) }
                 ),
                 Filter(
                     displayLabel = "Passengers",
                     filterName = "passengers",
-                    values = users,
+                    values = usersDisplayNames,
                     predicate = { bill, value -> bill.splitUsersUid.contains(getUserUid(value as String)) }
                 ),
                 Filter(
@@ -212,7 +257,8 @@ private fun TripBillFiltersRow(
                     values = fuelUiState.destinations.map { it.name },
                     predicate = { bill, value -> bill.tripDestination == value }
                 ),
-                Filter(displayLabel = "Period",
+                Filter(
+                    displayLabel = "Period",
                     filterName = "period",
                     values = periodState.periods.sortedByDescending { it.start },
                     //selectedValue = periodUiState.currentPeriod,
@@ -228,57 +274,4 @@ private fun TripBillFiltersRow(
             onFiltersChanged(filters)
         },
     )
-}
-
-
-@OptIn(
-    ExperimentalMaterial3Api::class,
-    ExperimentalLayoutApi::class
-)
-@Composable
-private fun FuelCard(
-    tripBill: TripBill,
-    isAllowedModification: Boolean,
-    usersMap: UsersMap,
-    viewModel: FuelViewModel,
-    currentUser: User,
-    modifier: Modifier = Modifier,
-    onEdit: () -> Unit,
-) {
-    val billDateTime = remember {
-        LocalDateTime.tryParse(tripBill.date) ?: Clock.System.now()
-            .toLocalDateTime(
-                TimeZone.currentSystemDefault()
-            )
-    }
-
-    var openBottomSheet = rememberSaveable { mutableStateOf(false) }
-
-    SwipeBillCard(
-        modifier = modifier,
-        subtext = tripBill.tripDestination,
-        subtextIcon = Icons.Outlined.TripOrigin,
-        bill = tripBill,
-        billCreationDateTime = billDateTime,
-        currentUser = currentUser,
-        usersMap = usersMap,
-        onClick = {
-            openBottomSheet.value = true
-        },
-        onStartToEndSwipe = {
-            openBottomSheet.value = true
-        }
-    )
-
-    if (openBottomSheet.value) {
-        TripBillBottomSheet(
-            tripBill = tripBill,
-            usersMap = usersMap,
-            dateTime = billDateTime,
-            isAllowedModification = isAllowedModification,
-            onEdit = onEdit,
-            viewModel = viewModel,
-            openBottomSheet = openBottomSheet,
-        )
-    }
 }
