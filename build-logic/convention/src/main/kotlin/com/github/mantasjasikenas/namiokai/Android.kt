@@ -38,20 +38,9 @@ fun Project.configureAndroid() {
     }
 
     dependencies {
-        add(
-            "implementation",
-            libs.findLibrary("kotlinx-serialization-json").get()
-        )
-
-        add(
-            "implementation",
-            libs.findLibrary("androidx-navigation-compose").get()
-        )
-
-        add(
-            "implementation",
-            libs.findLibrary("androidx-hilt-navigation-compose").get()
-        )
+        "implementation"(libs.findLibrary("kotlinx-serialization-json").get())
+        "implementation"(libs.findLibrary("androidx-navigation-compose").get())
+        "implementation"(libs.findLibrary("androidx-hilt-navigation-compose").get())
     }
 }
 

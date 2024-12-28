@@ -13,6 +13,9 @@ plugins {
     alias(libs.plugins.compose) apply false
 
     alias(libs.plugins.dependency.analysis) apply false
+    alias(libs.plugins.android.test) apply false
+
+    alias(libs.plugins.baselineprofile) apply false
 }
 
 buildscript {

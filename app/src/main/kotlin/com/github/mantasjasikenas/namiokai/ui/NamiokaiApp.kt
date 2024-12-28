@@ -21,6 +21,7 @@ import androidx.compose.material3.adaptive.WindowAdaptiveInfo
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -29,6 +30,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.github.mantasjasikenas.core.domain.model.SharedState
+import com.github.mantasjasikenas.core.domain.model.isNotLoggedIn
 import com.github.mantasjasikenas.core.ui.common.NamiokaiCircularProgressIndicator
 import com.github.mantasjasikenas.feature.bills.navigation.BillFormRoute
 import com.github.mantasjasikenas.feature.home.navigation.HomeRoute
@@ -53,7 +55,13 @@ fun NamiokaiApp(mainActivityViewModel: MainActivityViewModel = hiltViewModel()) 
     }
 
     val sharedState = (sharedUiState as SharedUiState.Success).sharedState
-    val startDestination = Route.HomeGraph
+    val startDestination = remember {
+        if (sharedState.currentUser.isNotLoggedIn()) {
+            Route.AuthGraph
+        } else {
+            Route.HomeGraph
+        }
+    }
 
     NavHost(
         modifier = Modifier.fillMaxSize(),

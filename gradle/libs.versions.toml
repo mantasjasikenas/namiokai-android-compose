@@ -5,7 +5,7 @@ versionName = "0.3.9"
 jvm = "21"
 compileSdk = "35"
 minSdk = "29"
-targetSdk = "34"
+targetSdk = "35"
 
 accompanist = "0.32.0"
 app-update = "2.1.0"
@@ -50,6 +50,15 @@ androidx-ui-graphics-android = "1.7.6"
 dependency-analysis = "1.31.0"
 vico = "2.0.0-beta.4"
 
+androidxEspresso = "3.6.1"
+androidxMacroBenchmark = "1.3.3"
+androidxProfileinstaller = "1.4.1"
+androidxTestCore = "1.6.1"
+androidxTestExt = "1.2.1"
+androidxTestRules = "1.6.1"
+androidxTestRunner = "1.6.2"
+androidxUiAutomator = "2.3.0"
+
 [libraries]
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "android-gradle" }
 androidx-adaptive-layout = { module = "androidx.compose.material3.adaptive:adaptive-layout", version.ref = "adaptive" }
@@ -64,9 +73,7 @@ googleid = { module = "com.google.android.libraries.identity.googleid:googleid",
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanist" }
 activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activity-compose" }
 androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "core-splashscreen" }
-androidx-espresso-core = { module = "androidx.test.espresso:espresso-core", version.ref = "espresso-core" }
 androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hilt-navigation-compose" }
-androidx-junit = { module = "androidx.test.ext:junit", version.ref = "androidx-junit" }
 androidx-lifecycle-livedata-ktx = { module = "androidx.lifecycle:lifecycle-livedata-ktx", version.ref = "lifecycle" }
 androidx-lifecycle-viewmodel-savedstate = { module = "androidx.lifecycle:lifecycle-viewmodel-savedstate", version.ref = "lifecycle" }
 androidx-lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycle" }
@@ -86,7 +93,6 @@ hilt-android-gradle-plugin = { module = "com.google.dagger:hilt-android-gradle-p
 hilt-android-testing = { module = "com.google.dagger:hilt-android-testing", version.ref = "hilt" }
 hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hilt" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
-junit = { module = "junit:junit", version.ref = "junit" }
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin-reflect" }
 kotlinx-datetime-jvm = { module = "org.jetbrains.kotlinx:kotlinx-datetime-jvm", version.ref = "kotlinx-datetime-jvm" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization-json" }
@@ -116,6 +122,16 @@ ui-graphics-android = { group = "androidx.compose.ui", name = "ui-graphics-andro
 vico-compose = { group = "com.patrykandpatrick.vico", name = "compose", version.ref = "vico" }
 vico-compose-m3 = { group = "com.patrykandpatrick.vico", name = "compose-m3", version.ref = "vico" }
 
+# Benchmarking and profiling libraries
+androidx-junit = { module = "androidx.test.ext:junit", version.ref = "androidx-junit" }
+androidx-benchmark-macro = { group = "androidx.benchmark", name = "benchmark-macro-junit4", version.ref = "androidxMacroBenchmark" }
+androidx-test-core = { group = "androidx.test", name = "core", version.ref = "androidxTestCore" }
+androidx-test-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "androidxEspresso" }
+androidx-test-ext = { group = "androidx.test.ext", name = "junit-ktx", version.ref = "androidxTestExt" }
+androidx-test-rules = { group = "androidx.test", name = "rules", version.ref = "androidxTestRules" }
+androidx-test-runner = { group = "androidx.test", name = "runner", version.ref = "androidxTestRunner" }
+androidx-test-uiautomator = { group = "androidx.test.uiautomator", name = "uiautomator", version.ref = "androidxUiAutomator" }
+
 [bundles]
 compose = ["compose-ui",
     "compose-ui-graphics",
@@ -132,10 +148,6 @@ firebase = ["firebase-auth",
     "firebase-config"]
 
 [plugins]
-namiokai-android-application = { id = "app.namiokai.android.application", version = "unspecified" }
-namiokai-android-library = { id = "app.namiokai.android.library", version = "unspecified" }
-namiokai-compose-application = { id = "app.namiokai.compose.application", version = "unspecified" }
-namiokai-compose-library = { id = "app.namiokai.compose.library", version = "unspecified" }
 android-application = { id = "com.android.application", version.ref = "android-gradle" }
 androidLibrary = { id = "com.android.library", version.ref = "android-gradle" }
 google-gms-services = { id = "com.google.gms.google-services" }
@@ -149,3 +161,13 @@ kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", versi
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 dependency-analysis = { id = "com.autonomousapps.dependency-analysis", version.ref = "dependency-analysis" }
+android-test = { id = "com.android.test", version.ref = "android-gradle" }
+baselineprofile = { id = "androidx.baselineprofile", version.ref = "androidxMacroBenchmark" }
+
+# Plugins defined by this project
+namiokai-android-application = { id = "app.namiokai.android.application", version = "unspecified" }
+namiokai-android-library = { id = "app.namiokai.android.library", version = "unspecified" }
+namiokai-compose-application = { id = "app.namiokai.compose.application", version = "unspecified" }
+namiokai-compose-library = { id = "app.namiokai.compose.library", version = "unspecified" }
+namiokai-android-application-flavors = { id = "app.namiokai.android.application.flavors" }
+namiokai-android-test = { id = "app.namiokai.android.test" }

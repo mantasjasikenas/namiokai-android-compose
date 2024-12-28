@@ -1,8 +1,12 @@
+import com.github.mantasjasikenas.namiokai.NamBuildType
+
 plugins {
     alias(libs.plugins.namiokai.android.application)
     alias(libs.plugins.namiokai.compose.application)
+    alias(libs.plugins.namiokai.android.application.flavors)
     alias(libs.plugins.compose)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.baselineprofile)
 }
 
 
@@ -12,10 +16,12 @@ android {
     defaultConfig {
         applicationId = "com.namiokai"
 
-        versionCode = libs.versions.versionCode.get()
-            .toInt()
+        versionCode = libs.versions.versionCode.get().toInt()
         versionName = libs.versions.versionName.get()
+    }
 
+    buildFeatures {
+        buildConfig = true
     }
 
     signingConfigs {
@@ -25,6 +31,7 @@ android {
             keyAlias = "namiokai-debug"
             keyPassword = "namiokai-debug"
         }
+
         create("namiokai-release") {
             storeFile = rootProject.file("namiokai-release.jks")
             storePassword = "namiokai123"
@@ -34,39 +41,40 @@ android {
     }
 
     buildTypes {
-        getByName("debug") {
-            manifestPlaceholders += mapOf("appName" to "Namiokai Debug")
-            applicationIdSuffix = ".debug"
+        debug {
+            applicationIdSuffix = NamBuildType.DEBUG.applicationIdSuffix
             signingConfig = signingConfigs.getByName("namiokai-debug")
         }
 
-        getByName("release") {
-            manifestPlaceholders += mapOf("appName" to "Namiokai")
+        release {
+            applicationIdSuffix = NamBuildType.RELEASE.applicationIdSuffix
+            signingConfig = signingConfigs.getByName("namiokai-release")
+
             isMinifyEnabled = true
             isShrinkResources = true
             isDebuggable = false
+
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            signingConfig = signingConfigs.getByName("namiokai-release")
+
+            baselineProfile.automaticGenerationDuringBuild = true
         }
 
+        create("benchmark") {
+            initWith(buildTypes.getByName("release"))
+            matchingFallbacks += listOf("release")
+            manifestPlaceholders += mapOf("appName" to "Namiokai Benchmark")
+        }
     }
 
     compileOptions {
         sourceCompatibility = JavaVersion.toVersion(libs.versions.jvm.get())
         targetCompatibility = JavaVersion.toVersion(libs.versions.jvm.get())
     }
-    kotlinOptions { jvmTarget = libs.versions.jvm.get() }
 
-    packaging {
-        resources {
-//            excludes.add("/META-INF/{AL2.0,LGPL2.1}")
-//            excludes.add("META-INF/*")
-//            excludes.add("META-INF/*.version")
-        }
-    }
+    kotlinOptions { jvmTarget = libs.versions.jvm.get() }
 }
 
 androidComponents {
@@ -74,6 +82,7 @@ androidComponents {
         it.packaging.resources.excludes.add("META-INF/**")
     }
 }
+
 
 dependencies {
     implementation(projects.core.database)
@@ -135,10 +144,17 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
 
     implementation(libs.androidx.adaptive)
-    implementation (libs.androidx.adaptive.layout)
-    implementation (libs.androidx.adaptive.navigation)
+    implementation(libs.androidx.adaptive.layout)
+    implementation(libs.androidx.adaptive.navigation)
     implementation(libs.androidx.material3.adaptive.navigation.suite)
 
-    androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(libs.androidx.test.espresso.core)
     androidTestImplementation(libs.compose.ui.test.junit4)
+
+    baselineProfile(projects.benchmark)
+}
+
+baselineProfile {
+    automaticGenerationDuringBuild = false
+    dexLayoutOptimization = true
 }

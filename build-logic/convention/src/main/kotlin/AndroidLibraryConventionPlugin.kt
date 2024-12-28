@@ -1,6 +1,9 @@
+import com.android.build.gradle.LibraryExtension
 import com.github.mantasjasikenas.namiokai.configureAndroid
+import com.github.mantasjasikenas.namiokai.configureFlavors
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.kotlin.dsl.configure
 
 class AndroidLibraryConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
@@ -13,6 +16,10 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
             }
 
             configureAndroid()
+
+            extensions.configure<LibraryExtension> {
+                configureFlavors(this)
+            }
         }
     }
 }

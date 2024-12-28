@@ -45,21 +45,21 @@ jobs:
         run: |
           mkdir -p ./app/src/release
           mkdir -p ./app/src/debug
-          echo $GOOGLE_SERVICES_JSON | base64 -di > ./app/src/release/google-services.json
-          echo $GOOGLE_SERVICES_JSON_DEBUG | base64 -di > ./app/src/debug/google-services.json
+          echo $GOOGLE_SERVICES_JSON | base64 -di > ./app/src/prod/google-services.json
+          echo $GOOGLE_SERVICES_JSON_DEBUG | base64 -di > ./app/src/demo/google-services.json
 
       - name: Build Project
         run: ./gradlew build
 
       - name: Build Release AAB
-        run: ./gradlew bundleRelease
+        run: ./gradlew bundleProdRelease
 
       - name: Deploy to Play Store
         uses: r0adkll/upload-google-play@v1
         with:
           serviceAccountJsonPlainText: ${{secrets.SERVICE_ACCOUNT}}
           packageName: com.namiokai
-          releaseFiles: app/build/outputs/bundle/release/app-release.aab
+          releaseFiles: app/build/outputs/bundle/prodRelease/app-prod-release.aab
           whatsNewDirectory: distribution/whatsnew
           track: internal
           status: completed

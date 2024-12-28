@@ -80,7 +80,7 @@ class NamiokaiAppState(
             val isTopLevelRoute = isTopLevelRoute
 
             return remember(isTopLevelRoute) {
-               isTopLevelRoute
+                isTopLevelRoute
             }
         }
 
