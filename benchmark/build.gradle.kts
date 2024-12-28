@@ -25,9 +25,6 @@ android {
         buildConfig = true
     }
 
-    // Use the same flavor dimensions as the application to allow generating Baseline Profiles on prod,
-    // which is more close to what will be shipped to users (no fake data), but has ability to run the
-    // benchmarks on demo, so we benchmark on stable data.
     configureFlavors(this) { flavor ->
         buildConfigField(
             "String",
@@ -35,19 +32,6 @@ android {
             "\"${flavor.applicationIdSuffix ?: ""}\""
         )
     }
-
-    buildTypes {
-        // This benchmark buildType is used for benchmarking, and should function like your
-        // release build (for example, with minification on). It"s signed with a debug key
-        // for easy local/CI testing.
-        create("benchmark") {
-            isDebuggable = true
-            signingConfig = getByName("debug").signingConfig
-            matchingFallbacks += listOf("release")
-        }
-    }
-
-    targetProjectPath = ":app"
 
     testOptions.managedDevices.devices {
         create<com.android.build.api.dsl.ManagedVirtualDevice>("pixel7Api33") {
@@ -57,6 +41,7 @@ android {
         }
     }
 
+    targetProjectPath = ":app"
     experimentalProperties["android.experimental.self-instrumenting"] = true
 
     compileOptions {
@@ -78,16 +63,8 @@ dependencies {
 }
 
 baselineProfile {
-    // This specifies the managed devices to use that you run the tests on.
     managedDevices.clear()
     managedDevices += "pixel7Api33"
 
-    // Don't use a connected device but rely on a GMD for consistency between local and CI builds.
     useConnectedDevices = false
-}
-
-androidComponents {
-    beforeVariants(selector().all()) {
-        it.enable = it.buildType == "benchmark"
-    }
 }

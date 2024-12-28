@@ -9,7 +9,6 @@ plugins {
     alias(libs.plugins.baselineprofile)
 }
 
-
 android {
     namespace = "com.github.mantasjasikenas.namiokai"
 
@@ -60,12 +59,6 @@ android {
             )
 
             baselineProfile.automaticGenerationDuringBuild = true
-        }
-
-        create("benchmark") {
-            initWith(buildTypes.getByName("release"))
-            matchingFallbacks += listOf("release")
-            manifestPlaceholders += mapOf("appName" to "Namiokai Benchmark")
         }
     }
 
