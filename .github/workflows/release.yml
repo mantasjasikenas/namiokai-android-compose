@@ -55,11 +55,8 @@ jobs:
           echo $GOOGLE_SERVICES_JSON | base64 -di > ./app/src/prod/google-services.json
           echo $GOOGLE_SERVICES_JSON_DEBUG | base64 -di > ./app/src/demo/google-services.json
 
-      - name: Build Project
-        run: ./gradlew build
-
       - name: Build Release AAB
-        run: ./gradlew bundleProdRelease
+        run: ./gradlew app:bundleProdRelease
 
       - name: Deploy to Play Store
         uses: r0adkll/upload-google-play@v1
