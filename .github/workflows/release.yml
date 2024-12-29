@@ -31,13 +31,20 @@ jobs:
       - name: Change wrapper permissions
         run: chmod +x ./gradlew
 
+      - name: Create keystore.properties
+        env:
+          KEYSTORE_PROPERTIES: ${{ secrets.KEYSTORE_PROPERTIES }}
+        run: |
+          echo $KEYSTORE_PROPERTIES | base64 -di > ./keystore.properties
+
       - name: Create Keystore files
         env:
           SIGN_KEY: ${{ secrets.SIGN_KEY }}
           SIGN_KEY_DEBUG: ${{ secrets.SIGN_KEY_DEBUG }}
         run: |
-          echo $SIGN_KEY | base64 -di > ./namiokai-release.jks
-          echo $SIGN_KEY_DEBUG | base64 -di > ./namiokai-debug.jks
+          echo $SIGN_KEY | base64 -di > ./namiokai-prod.jks
+          echo $SIGN_KEY_DEBUG | base64 -di > ./namiokai-demo.jks
+
       - name: Create Google Services JSON File
         env:
           GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}

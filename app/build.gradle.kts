@@ -1,4 +1,17 @@
+@file:Suppress("UnstableApiUsage")
+
 import com.github.mantasjasikenas.namiokai.NamBuildType
+import com.github.mantasjasikenas.namiokai.NamFlavor
+import com.github.mantasjasikenas.namiokai.NamSigningConfig
+import java.io.FileInputStream
+import java.util.Properties
+
+
+val keystorePropertiesFile = rootProject.file("keystore.properties")
+val keystoreProperties = Properties()
+
+keystoreProperties.load(FileInputStream(keystorePropertiesFile))
+
 
 plugins {
     alias(libs.plugins.namiokai.android.application)
@@ -24,30 +37,28 @@ android {
     }
 
     signingConfigs {
-        create("namiokai-debug") {
-            storeFile = rootProject.file("namiokai-debug.jks")
-            storePassword = "namiokai-debug"
-            keyAlias = "namiokai-debug"
-            keyPassword = "namiokai-debug"
+        create(NamSigningConfig.demo.name) {
+            storeFile = rootProject.file(keystoreProperties["demoStoreFile"] as String)
+            storePassword = keystoreProperties["demoStorePassword"] as String
+            keyAlias = keystoreProperties["demoKeyAlias"] as String
+            keyPassword = keystoreProperties["demoKeyPassword"] as String
         }
 
-        create("namiokai-release") {
-            storeFile = rootProject.file("namiokai-release.jks")
-            storePassword = "namiokai123"
-            keyAlias = "debug_key"
-            keyPassword = "namiokai123"
+        create(NamSigningConfig.prod.name) {
+            storeFile = rootProject.file(keystoreProperties["prodStoreFile"] as String)
+            storePassword = keystoreProperties["prodStorePassword"] as String
+            keyAlias = keystoreProperties["prodKeyAlias"] as String
+            keyPassword = keystoreProperties["prodKeyPassword"] as String
         }
     }
 
     buildTypes {
         debug {
             applicationIdSuffix = NamBuildType.DEBUG.applicationIdSuffix
-            signingConfig = signingConfigs.getByName("namiokai-debug")
         }
 
         release {
             applicationIdSuffix = NamBuildType.RELEASE.applicationIdSuffix
-            signingConfig = signingConfigs.getByName("namiokai-release")
 
             isMinifyEnabled = true
             isShrinkResources = true
@@ -71,6 +82,15 @@ android {
 }
 
 androidComponents {
+    onVariants { variant ->
+        variant.flavorName ?: return@onVariants
+
+        NamFlavor.valueOf(variant.flavorName!!).let { flavor ->
+            val signingConfig = android.signingConfigs.getByName(flavor.signingConfig.name)
+            variant.signingConfig.setConfig(signingConfig)
+        }
+    }
+
     onVariants(selector().withBuildType("release")) {
         it.packaging.resources.excludes.add("META-INF/**")
     }

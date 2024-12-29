@@ -6,6 +6,12 @@ import com.android.build.api.dsl.CommonExtension
 import com.android.build.api.dsl.ProductFlavor
 
 @Suppress("EnumEntryName")
+enum class NamSigningConfig {
+    demo,
+    prod
+}
+
+@Suppress("EnumEntryName")
 enum class FlavorDimension {
     contentType
 }
@@ -16,15 +22,20 @@ enum class FlavorDimension {
 @Suppress("EnumEntryName")
 enum class NamFlavor(
     val dimension: FlavorDimension,
+    val signingConfig: NamSigningConfig,
     val applicationIdSuffix: String? = null,
     val applicationNameSuffix: String? = null
 ) {
     demo(
-        FlavorDimension.contentType,
+        dimension = FlavorDimension.contentType,
+        signingConfig = NamSigningConfig.demo,
         applicationIdSuffix = ".demo",
         applicationNameSuffix = " Demo"
     ),
-    prod(FlavorDimension.contentType),
+    prod(
+        dimension = FlavorDimension.contentType,
+        signingConfig = NamSigningConfig.prod,
+    ),
 }
 
 fun configureFlavors(
@@ -43,7 +54,7 @@ fun configureFlavors(
                     flavorConfigurationBlock(this, namFlavor)
 
                     manifestPlaceholders["appName"] =
-                        "Namiokai${namFlavor.applicationNameSuffix ?: ""}"
+                        "Namiokai" + (namFlavor.applicationNameSuffix ?: "")
 
                     if (this@apply is ApplicationExtension && this is ApplicationProductFlavor) {
                         if (namFlavor.applicationIdSuffix != null) {
