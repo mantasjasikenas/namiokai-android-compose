@@ -9,6 +9,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.github.mantasjasikenas.core.domain.model.bills.BillType
+import com.github.mantasjasikenas.feature.bills.navigation.BillFormRoute
+import com.github.mantasjasikenas.feature.space.navigation.SpaceFormRoute
 import com.github.mantasjasikenas.namiokai.navigation.TopLevelRoute
 
 @Composable
@@ -16,7 +18,7 @@ fun FloatingActionButton(
     modifier: Modifier = Modifier,
     showActionButton: Boolean,
     currentTopLevelRoute: TopLevelRoute?,
-    onNavigate: (BillType) -> Unit,
+    onNavigateToRoute: (Any) -> Unit,
 ) {
     AnimatedVisibility(
         visible = showActionButton,
@@ -24,13 +26,25 @@ fun FloatingActionButton(
         exit = ExitTransition.None,
     ) {
         androidx.compose.material3.FloatingActionButton(
-            onClick = {
-                onNavigate(
-                    when (currentTopLevelRoute) {
-                        TopLevelRoute.Trips -> BillType.Trip
-                        TopLevelRoute.Flat -> BillType.Flat
-                        else -> BillType.Purchase
-                    }
+            onClick = click@{
+                if (currentTopLevelRoute == null) return@click
+
+                if (currentTopLevelRoute == TopLevelRoute.Space) {
+                    onNavigateToRoute(SpaceFormRoute())
+
+                    return@click
+                }
+
+                val billType = when (currentTopLevelRoute) {
+                    TopLevelRoute.Trips -> BillType.Trip
+                    TopLevelRoute.Flat -> BillType.Flat
+                    else -> BillType.Purchase
+                }
+
+                onNavigateToRoute(
+                    BillFormRoute(
+                        billType = billType
+                    )
                 )
             }
         ) {

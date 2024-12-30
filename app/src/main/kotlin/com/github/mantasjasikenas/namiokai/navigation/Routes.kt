@@ -7,16 +7,19 @@ import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.LocalGasStation
 import androidx.compose.material.icons.outlined.Payments
 import androidx.compose.material.icons.outlined.ShoppingBag
+import androidx.compose.material.icons.outlined.Workspaces
 import androidx.compose.material.icons.rounded.Cottage
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.LocalGasStation
 import androidx.compose.material.icons.rounded.Payments
 import androidx.compose.material.icons.rounded.ShoppingBag
+import androidx.compose.material.icons.rounded.Workspaces
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.github.mantasjasikenas.feature.bills.navigation.PurchaseBillRoute
 import com.github.mantasjasikenas.feature.debts.navigation.DebtsRoute
 import com.github.mantasjasikenas.feature.flat.navigation.FlatRoute
 import com.github.mantasjasikenas.feature.home.navigation.HomeRoute
+import com.github.mantasjasikenas.feature.space.navigation.SpaceRoute
 import com.github.mantasjasikenas.feature.trips.navigation.TripBillRoute
 import com.github.mantasjasikenas.namiokai.R
 import kotlinx.serialization.Serializable
@@ -91,7 +94,14 @@ sealed class TopLevelRoute(
         Icons.Rounded.Cottage
     )
 
+    data object Space : TopLevelRoute(
+        SpaceRoute,
+        R.string.space_label,
+        Icons.Outlined.Workspaces,
+        Icons.Rounded.Workspaces
+    )
+
     companion object {
-        val routes = listOf(Home, Debts, Bills, Trips, Flat)
+        val routes = listOf(Home, Debts, Bills, Trips, Flat, Space)
     }
 }

@@ -4,8 +4,10 @@ import android.content.Context
 import com.github.mantasjasikenas.core.data.repository.BaseFirebaseRepositoryImpl
 import com.github.mantasjasikenas.core.data.repository.BillsRepositoryImpl
 import com.github.mantasjasikenas.core.data.repository.FlatBillsRepositoryImpl
+import com.github.mantasjasikenas.core.data.repository.InvitationRepositoryImpl
 import com.github.mantasjasikenas.core.data.repository.PeriodRepositoryImpl
 import com.github.mantasjasikenas.core.data.repository.PurchaseBillsRepositoryImpl
+import com.github.mantasjasikenas.core.data.repository.SpaceRepositoryImpl
 import com.github.mantasjasikenas.core.data.repository.TripBillsRepositoryImpl
 import com.github.mantasjasikenas.core.data.repository.UserDataRepositoryImpl
 import com.github.mantasjasikenas.core.data.repository.UsersRepositoryImpl
@@ -15,8 +17,10 @@ import com.github.mantasjasikenas.core.domain.repository.BaseFirebaseRepository
 import com.github.mantasjasikenas.core.domain.repository.BillsRepository
 import com.github.mantasjasikenas.core.domain.repository.DebtsRepository
 import com.github.mantasjasikenas.core.domain.repository.FlatBillsRepository
+import com.github.mantasjasikenas.core.domain.repository.InvitationRepository
 import com.github.mantasjasikenas.core.domain.repository.PeriodRepository
 import com.github.mantasjasikenas.core.domain.repository.PurchaseBillsRepository
+import com.github.mantasjasikenas.core.domain.repository.SpaceRepository
 import com.github.mantasjasikenas.core.domain.repository.TripBillsRepository
 import com.github.mantasjasikenas.core.domain.repository.UserDataRepository
 import com.github.mantasjasikenas.core.domain.repository.UsersRepository
@@ -136,4 +140,24 @@ object RepositoryModule {
     fun provideDebtsRepository(): DebtsRepository {
         return DebtsRepositoryImpl()
     }
+
+    @Provides
+    @Singleton
+    fun provideSpaceRepository(
+        db: FirebaseFirestore
+    ): SpaceRepository =
+        SpaceRepositoryImpl(
+            db = db
+        )
+
+    @Provides
+    @Singleton
+    fun provideInvitationRepository(
+        db: FirebaseFirestore,
+        spaceRepository: SpaceRepository
+    ): InvitationRepository =
+        InvitationRepositoryImpl(
+            db = db,
+            spaceRepository = spaceRepository
+        )
 }

@@ -116,6 +116,7 @@ dependencies {
     implementation(projects.feature.bills)
     implementation(projects.feature.trips)
     implementation(projects.feature.flat)
+    implementation(projects.feature.space)
 
     implementation(libs.credentials)
     implementation(libs.credentials.play.services.auth)

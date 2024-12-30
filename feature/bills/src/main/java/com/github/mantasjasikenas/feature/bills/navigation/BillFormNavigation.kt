@@ -16,9 +16,16 @@ data class BillFormRoute(
 )
 
 fun NavController.navigateToBillForm(
+    billType: BillType? = null,
+    billId: String? = null,
     navOptions: NavOptions? = null,
 ) {
-    navigate(route = BillFormRoute, navOptions)
+    navigate(
+        route = BillFormRoute(
+            billType = billType,
+            billId = billId
+        ), navOptions
+    )
 }
 
 fun NavGraphBuilder.billFormScreen(

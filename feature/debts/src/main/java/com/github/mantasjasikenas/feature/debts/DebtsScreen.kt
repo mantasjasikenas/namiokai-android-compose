@@ -344,15 +344,12 @@ private fun PersonalDebts(
 
     NamiokaiSpacer(height = 20)
 
-    NamiokaiOutlinedCard(
-        modifier = Modifier.verticalScroll(rememberScrollState())
-    ) {
-        var total = 0.0
+    NamiokaiOutlinedCard {
 
         currentUserDebts.forEach { (uid, debtBills) ->
-            val value = debtBills.sumOf { it.amount }
-
-            total += value
+            val value = remember(uid, debtBills) {
+                debtBills.sumOf { it.amount }
+            }
 
             EuroIconTextRow(
                 label = usersMap[uid]!!.displayName,
@@ -365,6 +362,10 @@ private fun PersonalDebts(
         }
 
         if ((currentUserDebts.size) > 1) {
+            val total = remember(currentUserDebts) {
+                currentUserDebts.values.flatten().sumOf { it.amount }
+            }
+
             HorizontalDivider(
                 modifier = Modifier.padding(vertical = 3.dp),
                 thickness = 2.dp
@@ -467,6 +468,7 @@ private fun DebtorCard(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun DebtorBottomSheet(
     debtorUser: User,

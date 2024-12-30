@@ -6,6 +6,7 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
@@ -32,6 +33,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DateRangePicker
 import androidx.compose.material3.DividerDefaults
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
@@ -533,6 +535,57 @@ fun NamiokaiCircularProgressIndicator(
             trackColor = MaterialTheme.colorScheme.surfaceContainer,
             strokeWidth = 5.dp
         )
+    }
+}
+
+@Composable
+fun ElevatedCardContainer(
+    modifier: Modifier = Modifier,
+    title: String,
+    subtitle: String? = null,
+    titleColor: Color = Color.Unspecified,
+    subtitleColor: Color = MaterialTheme.colorScheme.onSurfaceVariant,
+    onClick: (() -> Unit)? = null,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    ElevatedCard(
+        modifier = modifier,
+        onClick = onClick ?: {},
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.Start,
+        ) {
+            if (subtitle != null) {
+                Text(
+                    modifier = Modifier.padding(bottom = 6.dp),
+                    text = title,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = titleColor
+                )
+
+                Text(
+                    modifier = Modifier.padding(bottom = 16.dp),
+                    text = subtitle,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = subtitleColor,
+                    fontWeight = FontWeight.Light
+                )
+            } else {
+                Text(
+                    modifier = Modifier.padding(bottom = 16.dp),
+                    text = title,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = if (titleColor != Color.Unspecified) titleColor else subtitleColor,
+                )
+            }
+
+            content()
+        }
     }
 }
 

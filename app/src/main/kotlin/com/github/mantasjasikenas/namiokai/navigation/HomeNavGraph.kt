@@ -16,6 +16,9 @@ import com.github.mantasjasikenas.feature.home.navigation.homeScreen
 import com.github.mantasjasikenas.feature.notifications.navigation.notificationsScreen
 import com.github.mantasjasikenas.feature.profile.navigation.profileScreen
 import com.github.mantasjasikenas.feature.settings.navigation.settingsScreen
+import com.github.mantasjasikenas.feature.space.navigation.SpaceFormRoute
+import com.github.mantasjasikenas.feature.space.navigation.spaceFormScreen
+import com.github.mantasjasikenas.feature.space.navigation.spaceScreen
 import com.github.mantasjasikenas.feature.test.navigation.testScreen
 import com.github.mantasjasikenas.feature.trips.navigation.tripBillScreen
 
@@ -58,6 +61,26 @@ fun NavGraphBuilder.homeNavGraph(
     flatBillListScreen(
         sharedState = sharedState,
         onNavigateToCreateBill = { navController.navigateToBillFormRoute(it) }
+    )
+
+    spaceScreen(
+        sharedState = sharedState,
+        onNavigateToCreateSpace = {
+            navController.navigate(
+                SpaceFormRoute(
+                    spaceId = it.spaceId
+                )
+            ) {
+                launchSingleTop = true
+            }
+        }
+    )
+
+    spaceFormScreen(
+        sharedState = sharedState,
+        onNavigateUp = {
+            navController.navigateUp()
+        }
     )
 
     notificationsScreen()

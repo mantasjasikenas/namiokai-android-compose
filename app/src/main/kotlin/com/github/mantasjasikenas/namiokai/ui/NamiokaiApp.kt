@@ -32,7 +32,6 @@ import androidx.navigation.compose.rememberNavController
 import com.github.mantasjasikenas.core.domain.model.SharedState
 import com.github.mantasjasikenas.core.domain.model.isNotLoggedIn
 import com.github.mantasjasikenas.core.ui.common.NamiokaiCircularProgressIndicator
-import com.github.mantasjasikenas.feature.bills.navigation.BillFormRoute
 import com.github.mantasjasikenas.feature.home.navigation.HomeRoute
 import com.github.mantasjasikenas.namiokai.MainActivityViewModel
 import com.github.mantasjasikenas.namiokai.SharedUiState
@@ -174,11 +173,9 @@ fun NamiokaiScreen(
                 FloatingActionButton(
                     showActionButton = appState.showBottomBar,
                     currentTopLevelRoute = topLevelRoute,
-                    onNavigate = { billType ->
+                    onNavigateToRoute = { route ->
                         appState.navController.navigate(
-                            BillFormRoute(
-                                billType = billType
-                            )
+                           route
                         ) {
                             launchSingleTop = true
                         }

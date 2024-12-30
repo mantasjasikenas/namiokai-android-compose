@@ -27,7 +27,6 @@ import androidx.compose.material.icons.outlined.CalendarToday
 import androidx.compose.material.icons.outlined.ElectricalServices
 import androidx.compose.material.icons.outlined.Flood
 import androidx.compose.material.icons.outlined.WaterDrop
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -60,6 +59,7 @@ import com.github.mantasjasikenas.core.domain.model.UsersMap
 import com.github.mantasjasikenas.core.domain.model.bills.BillFormArgs
 import com.github.mantasjasikenas.core.domain.model.bills.BillType
 import com.github.mantasjasikenas.core.domain.model.bills.FlatBill
+import com.github.mantasjasikenas.core.ui.common.ElevatedCardContainer
 import com.github.mantasjasikenas.core.ui.common.NamiokaiCircularProgressIndicator
 import com.github.mantasjasikenas.core.ui.common.NamiokaiSpacer
 import com.github.mantasjasikenas.core.ui.common.TextRow
@@ -757,51 +757,6 @@ private fun ElectricityChartContainer(
             chartModelProducer = chartModelProducer,
             electricity = electricity,
         )
-    }
-}
-
-
-@Composable
-internal fun ElevatedCardContainer(
-    modifier: Modifier = Modifier,
-    title: String,
-    subtitle: String? = null,
-    content: @Composable () -> Unit,
-) {
-    ElevatedCard(modifier = modifier) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.Top,
-            horizontalAlignment = Alignment.Start,
-        ) {
-            if (subtitle != null) {
-                Text(
-                    modifier = Modifier.padding(bottom = 6.dp),
-                    text = title,
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.ExtraBold,
-                )
-
-                Text(
-                    modifier = Modifier.padding(bottom = 16.dp),
-                    text = subtitle,
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    fontWeight = FontWeight.Light
-                )
-            } else {
-                Text(
-                    modifier = Modifier.padding(bottom = 16.dp),
-                    text = title,
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-
-            content()
-        }
     }
 }
 
