@@ -15,15 +15,17 @@ import javax.inject.Inject
 private const val FLAT_BILLS_COLLECTION = "flatBills"
 private const val BACKUP_FLAT_BILLS_PATH = "backup/flatBills"
 private const val ORDER_BY_FIELD = "date"
+private const val SPACE_ID_FIELD = "spaceId"
 
 class FlatBillsRepositoryImpl @Inject constructor(
     private val db: FirebaseFirestore,
     private val baseFirebaseRepository: BaseFirebaseRepository
-) :
-    FlatBillsRepository {
+) : FlatBillsRepository {
 
-    override suspend fun getFlatBills(): Flow<List<FlatBill>> =
-        db.collection(FLAT_BILLS_COLLECTION)
+    private val flatBillsCollection = db.collection(FLAT_BILLS_COLLECTION)
+
+    override fun getFlatBills(): Flow<List<FlatBill>> =
+        flatBillsCollection
             .orderBy(
                 ORDER_BY_FIELD,
                 Query.Direction.ASCENDING
@@ -35,8 +37,23 @@ class FlatBillsRepositoryImpl @Inject constructor(
                 }
             }
 
-    override suspend fun getFlatBills(period: Period): Flow<List<FlatBill>> =
-        db.collection(FLAT_BILLS_COLLECTION)
+    override fun getFlatBills(spaceIds: List<String>): Flow<List<FlatBill>> =
+        flatBillsCollection
+            .whereIn(SPACE_ID_FIELD, spaceIds)
+            .orderBy(
+                ORDER_BY_FIELD,
+                Query.Direction.DESCENDING
+            )
+            .snapshots()
+            .map {
+                it.documents.map { document ->
+                    document.toObject<FlatBill>()!!
+                }
+            }
+
+
+    override fun getFlatBills(period: Period): Flow<List<FlatBill>> =
+        flatBillsCollection
             .orderBy(
                 ORDER_BY_FIELD,
                 Query.Direction.ASCENDING
@@ -56,8 +73,8 @@ class FlatBillsRepositoryImpl @Inject constructor(
                 }
             }
 
-    override suspend fun getFlatBill(id: String): Flow<FlatBill> =
-        db.collection(FLAT_BILLS_COLLECTION)
+    override fun getFlatBill(id: String): Flow<FlatBill> =
+        flatBillsCollection
             .document(id)
             .snapshots()
             .map {
@@ -65,14 +82,14 @@ class FlatBillsRepositoryImpl @Inject constructor(
             }
 
     override suspend fun insertFlatBill(flatBill: FlatBill) {
-        db.collection(FLAT_BILLS_COLLECTION)
+        flatBillsCollection
             .add(flatBill)
     }
 
 
     override suspend fun updateFlatBill(flatBill: FlatBill) {
         if (flatBill.documentId.isNotEmpty()) {
-            db.collection(FLAT_BILLS_COLLECTION)
+            flatBillsCollection
                 .document(flatBill.documentId)
                 .set(flatBill)
         }
@@ -81,18 +98,18 @@ class FlatBillsRepositoryImpl @Inject constructor(
 
     override suspend fun deleteFlatBill(flatBill: FlatBill) {
         if (flatBill.documentId.isNotEmpty()) {
-            db.collection(FLAT_BILLS_COLLECTION)
+            flatBillsCollection
                 .document(flatBill.documentId)
                 .delete()
         }
     }
 
     override suspend fun clearFlatBills() {
-        db.collection(FLAT_BILLS_COLLECTION)
+        flatBillsCollection
             .get()
             .addOnSuccessListener { documents ->
                 for (document in documents) {
-                    db.collection(FLAT_BILLS_COLLECTION)
+                    flatBillsCollection
                         .document(document.id)
                         .delete()
                 }

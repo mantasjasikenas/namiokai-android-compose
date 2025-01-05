@@ -97,7 +97,7 @@ fun FlatScreen(
     val flatUiState by flatViewModel.flatUiState.collectAsStateWithLifecycle()
     val flatBills = flatUiState.flatBills
 
-    if (flatUiState.isLoading()) {
+    if (flatUiState.isLoading) {
         NamiokaiCircularProgressIndicator()
         return
     }
@@ -164,30 +164,33 @@ fun FlatScreenContent(
             )
         }
 
-        item(span = {
-            GridItemSpan(maxLineSpan)
-        }) {
-            FlatBillsChartContainer(
-                flatBills = flatBills,
-                chartModelProducer = flatViewModel.flatBillsChartModelProducer
-            )
-        }
+        if (flatBills.size > 1) {
+            item(span = {
+                GridItemSpan(maxLineSpan)
+            }) {
+                FlatBillsChartContainer(
+                    flatBills = flatBills,
+                    chartModelProducer = flatViewModel.flatBillsChartModelProducer
+                )
+            }
 
-        item(span = {
-            GridItemSpan(maxLineSpan)
-        }) {
-            ElectricityChartContainer(
-                electricity = flatUiState.electricitySummary?.electricityDifference ?: return@item,
-                chartModelProducer = flatViewModel.electricityChartModelProducer
-            )
-        }
+            item(span = {
+                GridItemSpan(maxLineSpan)
+            }) {
+                ElectricityChartContainer(
+                    electricity = flatUiState.electricitySummary?.electricityDifference
+                        ?: return@item,
+                    chartModelProducer = flatViewModel.electricityChartModelProducer
+                )
+            }
 
-        item(span = {
-            GridItemSpan(maxLineSpan)
-        }) {
-            ElectricitySummaryContainer(
-                electricitySummary = flatUiState.electricitySummary ?: return@item,
-            )
+            item(span = {
+                GridItemSpan(maxLineSpan)
+            }) {
+                ElectricitySummaryContainer(
+                    electricitySummary = flatUiState.electricitySummary ?: return@item,
+                )
+            }
         }
     }
 }
@@ -733,6 +736,10 @@ private fun FlatBillsChartContainer(
     flatBills: List<FlatBill>,
     chartModelProducer: CartesianChartModelProducer
 ) {
+    if (flatBills.size < 2) {
+        return
+    }
+
     ElevatedCardContainer(
         title = "Flat bills chart",
     ) {
@@ -749,6 +756,10 @@ private fun ElectricityChartContainer(
     electricity: List<BillDifference>,
     chartModelProducer: CartesianChartModelProducer,
 ) {
+    if (electricity.size < 2) {
+        return
+    }
+
     ElevatedCardContainer(
         title = "Electricity consumption",
     ) {

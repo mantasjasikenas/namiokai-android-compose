@@ -68,7 +68,7 @@ fun PurchaseBillScreen(
     val billUiState by viewModel.billUiState.collectAsStateWithLifecycle()
     val groupedBills by viewModel.groupedBills.collectAsStateWithLifecycle()
 
-    if (billUiState.isLoading()) {
+    if (billUiState.isLoading) {
         NamiokaiCircularProgressIndicator()
         return
     }

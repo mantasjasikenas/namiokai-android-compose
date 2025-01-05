@@ -15,21 +15,23 @@ import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
 
-private const val FUEL_COLLECTION = "fuel"
+private const val TRIP_BILL_COLLECTION = "fuel"
 private const val BACKUP_FUEL_PATH = "backup/fuel"
 private const val DESTINATIONS_COLLECTION = "destinations"
 private const val ORDER_BY_FIELD = "date"
+private const val SPACE_ID_FIELD = "spaceId"
 
 const val FUEL_IMPORT_FILE_NAME = "fuel.json"
 
 class TripBillsRepositoryImpl @Inject constructor(
     private val baseFirebaseRepository: BaseFirebaseRepository,
     private val db: FirebaseFirestore,
-) :
-    TripBillsRepository {
+) : TripBillsRepository {
 
-    override suspend fun getTripBills(): Flow<List<TripBill>> =
-        db.collection(FUEL_COLLECTION)
+    private val tripBillCollection = db.collection(TRIP_BILL_COLLECTION)
+
+    override fun getTripBills(): Flow<List<TripBill>> =
+        tripBillCollection
             .orderBy(
                 ORDER_BY_FIELD,
                 Query.Direction.DESCENDING
@@ -41,8 +43,23 @@ class TripBillsRepositoryImpl @Inject constructor(
                 }
             }
 
-    override suspend fun getTripBills(period: Period): Flow<List<TripBill>> =
-        db.collection(FUEL_COLLECTION)
+    override fun getTripBills(spaceIds: List<String>): Flow<List<TripBill>> =
+        tripBillCollection
+            .whereIn(SPACE_ID_FIELD, spaceIds)
+            .orderBy(
+                ORDER_BY_FIELD,
+                Query.Direction.DESCENDING
+            )
+            .snapshots()
+            .map {
+                it.documents.map { document ->
+                    document.toObject<TripBill>()!!
+                }
+            }
+
+
+    override fun getTripBills(period: Period): Flow<List<TripBill>> =
+        tripBillCollection
             .orderBy(
                 ORDER_BY_FIELD,
                 Query.Direction.DESCENDING
@@ -62,8 +79,8 @@ class TripBillsRepositoryImpl @Inject constructor(
                 }
             }
 
-    override suspend fun getTripBill(id: String): Flow<TripBill> =
-        db.collection(FUEL_COLLECTION)
+    override fun getTripBill(id: String): Flow<TripBill> =
+        tripBillCollection
             .document(id)
             .snapshots()
             .map {
@@ -71,13 +88,13 @@ class TripBillsRepositoryImpl @Inject constructor(
             }
 
     override suspend fun insertTripBill(tripBill: TripBill) {
-        db.collection(FUEL_COLLECTION)
+        tripBillCollection
             .add(tripBill)
     }
 
     override suspend fun updateTripBill(tripBill: TripBill) {
         if (tripBill.documentId.isNotEmpty()) {
-            db.collection(FUEL_COLLECTION)
+            tripBillCollection
                 .document(tripBill.documentId)
                 .set(tripBill)
         }
@@ -85,18 +102,18 @@ class TripBillsRepositoryImpl @Inject constructor(
 
     override suspend fun deleteTripBill(tripBill: TripBill) {
         if (tripBill.documentId.isNotEmpty()) {
-            db.collection(FUEL_COLLECTION)
+            tripBillCollection
                 .document(tripBill.documentId)
                 .delete()
         }
     }
 
     override suspend fun clearTripBills() {
-        db.collection(FUEL_COLLECTION)
+        tripBillCollection
             .get()
             .addOnSuccessListener { documents ->
                 for (document in documents) {
-                    db.collection(FUEL_COLLECTION)
+                    tripBillCollection
                         .document(document.id)
                         .delete()
                 }
@@ -127,7 +144,7 @@ class TripBillsRepositoryImpl @Inject constructor(
 
     override suspend fun backupCollection(fileName: String) {
         baseFirebaseRepository.backupCollection(
-            FUEL_COLLECTION,
+            TRIP_BILL_COLLECTION,
             BACKUP_FUEL_PATH,
             fileName
         )

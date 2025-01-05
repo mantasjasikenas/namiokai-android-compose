@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalCoroutinesApi::class, ExperimentalCoroutinesApi::class)
+
 package com.github.mantasjasikenas.feature.flat
 
 import androidx.lifecycle.ViewModel
@@ -6,13 +8,19 @@ import com.github.mantasjasikenas.core.domain.model.Filter
 import com.github.mantasjasikenas.core.domain.model.bills.FlatBill
 import com.github.mantasjasikenas.core.domain.model.filter
 import com.github.mantasjasikenas.core.domain.repository.FlatBillsRepository
+import com.github.mantasjasikenas.core.domain.repository.SpaceRepository
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
 import com.patrykandpatrick.vico.core.cartesian.data.lineSeries
 import com.patrykandpatrick.vico.core.common.data.ExtraStore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -20,8 +28,10 @@ import javax.inject.Inject
 import kotlin.math.absoluteValue
 
 @HiltViewModel
-class FlatViewModel @Inject constructor(private val flatBillsRepository: FlatBillsRepository) :
-    ViewModel() {
+class FlatViewModel @Inject constructor(
+    private val flatBillsRepository: FlatBillsRepository,
+    private val spaceRepository: SpaceRepository
+) : ViewModel() {
 
     private val _flatUiState = MutableStateFlow(FlatUiState())
     val flatUiState = _flatUiState.asStateFlow()
@@ -35,69 +45,78 @@ class FlatViewModel @Inject constructor(private val flatBillsRepository: FlatBil
     }
 
     init {
-        getFlatBills()
+        observeFlatBills()
     }
 
-    fun onFiltersChanged(filters: List<Filter<FlatBill, Any>>) {
-        _flatUiState.update {
-            it.copy(
-                filters = filters,
-                filteredFlatBills = it.flatBills.filter(filters)
-            )
-        }
-
-    }
-
-    private fun getFlatBills() {
+    private fun observeFlatBills() {
         viewModelScope.launch {
-            withContext(Dispatchers.IO) {
-                flatBillsRepository.getFlatBills()
-                    .collect { flatBills ->
-                        val electricitySummary = calculateElectricityStats(flatBills)
+            _flatUiState.update { it.copy(isLoading = true) }
 
-                        flatBillsChartModelProducer.runTransaction {
-                            if (flatBills.isEmpty()) {
-                                return@runTransaction
-                            }
-
-                            val flatChartExtraStore = calculateFlatChartExtraStore(flatBills)
-
-                            lineSeries {
-                                series(flatBills.map { it.splitPricePerUser() })
-                            }
-
-                            extras {
-                                it[FLAT_EXTRA_STORE] = flatChartExtraStore
-                            }
+            spaceRepository.getCurrentUserSpaces()
+                .map { spaces -> spaces.map { it.spaceId } }
+                .flatMapLatest { spaceIds ->
+                    flatBillsRepository.getFlatBills(spaceIds = spaceIds)
+                        .catch {
+                            _flatUiState.update { it.copy(isLoading = false) }
+                            emit(emptyList())
                         }
+                }
+                .collect { flatBills ->
+                    val electricitySummary = calculateElectricityStats(flatBills)
 
-                        electricityChartModelProducer.runTransaction {
-                            if (electricitySummary.electricityDifference.isEmpty()) {
-                                return@runTransaction
-                            }
+                    val flatBillsChartJob = async { buildFlatBillsChart(flatBills = flatBills) }
+                    val electricityChartJob =
+                        async { buildElectricityChart(electricitySummary = electricitySummary) }
 
-                            val electricityChartExtraStore =
-                                calculateElectricityChartExtraStore(electricitySummary)
+                    flatBillsChartJob.await()
+                    electricityChartJob.await()
 
-                            lineSeries {
-                                series(electricitySummary.electricityDifference.map { it.difference })
-                            }
-
-                            extras {
-                                it[ELECTRICITY_EXTRA_STORE] = electricityChartExtraStore
-                            }
-
-                        }
-
-                        _flatUiState.update {
-                            val filters = it.filters
-                            it.copy(
-                                flatBills = flatBills,
-                                filteredFlatBills = flatBills.filter(filters),
-                                electricitySummary = electricitySummary
-                            )
-                        }
+                    _flatUiState.update { state ->
+                        state.copy(
+                            flatBills = flatBills,
+                            filteredFlatBills = flatBills.filter(state.filters),
+                            electricitySummary = electricitySummary,
+                            isLoading = false
+                        )
                     }
+                }
+        }
+    }
+
+    private suspend fun buildElectricityChart(electricitySummary: ElectricitySummary) {
+        electricityChartModelProducer.runTransaction {
+            if (electricitySummary.electricityDifference.isEmpty()) {
+                return@runTransaction
+            }
+
+            val electricityChartExtraStore =
+                calculateElectricityChartExtraStore(electricitySummary)
+
+            lineSeries {
+                series(electricitySummary.electricityDifference.map { it.difference })
+            }
+
+            extras {
+                it[ELECTRICITY_EXTRA_STORE] = electricityChartExtraStore
+            }
+
+        }
+    }
+
+    private suspend fun buildFlatBillsChart(flatBills: List<FlatBill>) {
+        flatBillsChartModelProducer.runTransaction {
+            if (flatBills.isEmpty()) {
+                return@runTransaction
+            }
+
+            val flatChartExtraStore = calculateFlatChartExtraStore(flatBills)
+
+            lineSeries {
+                series(flatBills.map { it.splitPricePerUser() })
+            }
+
+            extras {
+                it[FLAT_EXTRA_STORE] = flatChartExtraStore
             }
         }
     }
@@ -209,7 +228,6 @@ class FlatViewModel @Inject constructor(private val flatBillsRepository: FlatBil
             Triple(sum / electricityDifference.size, min, max)
         }
 
-
         return ElectricitySummary(
             averageDifference = averageDifference,
             minDifference = minDifference,
@@ -217,18 +235,24 @@ class FlatViewModel @Inject constructor(private val flatBillsRepository: FlatBil
             electricityDifference = electricityDifference
         )
     }
+
+    fun onFiltersChanged(filters: List<Filter<FlatBill, Any>>) {
+        _flatUiState.update {
+            it.copy(
+                filters = filters,
+                filteredFlatBills = it.flatBills.filter(filters)
+            )
+        }
+    }
 }
 
 data class FlatUiState(
+    val isLoading: Boolean = true,
     val flatBills: List<FlatBill> = emptyList(),
     val filteredFlatBills: List<FlatBill> = emptyList(),
     val filters: List<Filter<FlatBill, Any>> = emptyList(),
     val electricitySummary: ElectricitySummary? = null
-) {
-    fun isLoading(): Boolean {
-        return flatBills.isEmpty()
-    }
-}
+)
 
 data class ElectricitySummary(
     val averageDifference: Double,

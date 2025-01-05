@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.github.mantasjasikenas.feature.trips
 
 import androidx.lifecycle.ViewModel
@@ -7,12 +9,17 @@ import com.github.mantasjasikenas.core.domain.model.Destination
 import com.github.mantasjasikenas.core.domain.model.Filter
 import com.github.mantasjasikenas.core.domain.model.bills.TripBill
 import com.github.mantasjasikenas.core.domain.model.filter
+import com.github.mantasjasikenas.core.domain.repository.SpaceRepository
 import com.github.mantasjasikenas.core.domain.repository.TripBillsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -21,8 +28,10 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
-class FuelViewModel @Inject constructor(private val tripBillsRepository: TripBillsRepository) :
-    ViewModel() {
+class FuelViewModel @Inject constructor(
+    private val tripBillsRepository: TripBillsRepository,
+    private val spaceRepository: SpaceRepository
+) : ViewModel() {
 
     private val _fuelUiState = MutableStateFlow(FuelUiState())
     val uiState = _fuelUiState.asStateFlow()
@@ -39,8 +48,7 @@ class FuelViewModel @Inject constructor(private val tripBillsRepository: TripBil
         )
 
     init {
-        getFuel()
-        getDestinations()
+        observeTripBills()
     }
 
     fun onFiltersChanged(filters: List<Filter<TripBill, Any>>) {
@@ -53,31 +61,34 @@ class FuelViewModel @Inject constructor(private val tripBillsRepository: TripBil
 
     }
 
-    private fun getFuel() {
+    private fun observeTripBills() {
         viewModelScope.launch {
-            withContext(Dispatchers.IO) {
-                tripBillsRepository.getTripBills()
-                    .collect { fuels ->
-                        _fuelUiState.update {
-                            val filters = it.filters
-                            it.copy(
-                                tripBills = fuels,
-                                filteredTripBills = fuels.filter(filters)
-                            )
-                        }
-                    }
-            }
-        }
-    }
+            _fuelUiState.update { it.copy(isLoading = true) }
 
-    private fun getDestinations() {
-        viewModelScope.launch {
-            withContext(Dispatchers.IO) {
-                tripBillsRepository.getDestinations()
-                    .collect { destinations ->
-                        _fuelUiState.update { it.copy(destinations = destinations) }
+            spaceRepository.getCurrentUserSpaces()
+                .map { spaces -> spaces.map { it.spaceId } }
+                .flatMapLatest { spaceIds ->
+                    tripBillsRepository.getTripBills(spaceIds = spaceIds)
+                        .catch {
+
+                            println("Error: $it")
+                            _fuelUiState.update { it.copy(isLoading = false) }
+                            emit(emptyList())
+                        }
+                }
+                .combine(tripBillsRepository.getDestinations()) { bills, destinations ->
+                    bills to destinations
+                }
+                .collect { (bills, destinations) ->
+                    _fuelUiState.update { state ->
+                        state.copy(
+                            tripBills = bills,
+                            filteredTripBills = bills.filter(state.filters),
+                            destinations = destinations,
+                            isLoading = false
+                        )
                     }
-            }
+                }
         }
     }
 
@@ -92,12 +103,9 @@ class FuelViewModel @Inject constructor(private val tripBillsRepository: TripBil
 }
 
 data class FuelUiState(
+    val isLoading: Boolean = true,
     val tripBills: List<TripBill> = emptyList(),
     val destinations: List<Destination> = emptyList(),
     val filteredTripBills: List<TripBill> = emptyList(),
     val filters: List<Filter<TripBill, Any>> = emptyList(),
-) {
-    fun isLoading(): Boolean {
-        return tripBills.isEmpty() && filteredTripBills.isEmpty() && filters.isEmpty() && destinations.isEmpty()
-    }
-}
+)

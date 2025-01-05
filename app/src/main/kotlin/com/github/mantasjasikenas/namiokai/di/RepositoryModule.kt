@@ -144,10 +144,12 @@ object RepositoryModule {
     @Provides
     @Singleton
     fun provideSpaceRepository(
-        db: FirebaseFirestore
+        db: FirebaseFirestore,
+        auth: FirebaseAuth
     ): SpaceRepository =
         SpaceRepositoryImpl(
-            db = db
+            db = db,
+            auth = auth
         )
 
     @Provides

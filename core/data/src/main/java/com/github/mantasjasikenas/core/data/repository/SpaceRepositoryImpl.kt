@@ -2,6 +2,7 @@ package com.github.mantasjasikenas.core.data.repository
 
 import com.github.mantasjasikenas.core.domain.model.Space
 import com.github.mantasjasikenas.core.domain.repository.SpaceRepository
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.snapshots
 import com.google.firebase.firestore.toObject
@@ -15,6 +16,7 @@ internal const val SPACE_MEMBERS_FIELD = "memberIds"
 
 class SpaceRepositoryImpl @Inject constructor(
     private val db: FirebaseFirestore,
+    private val auth: FirebaseAuth
 ) : SpaceRepository {
     private val spacesCollection = db.collection(SPACE_COLLECTION)
 
@@ -24,7 +26,7 @@ class SpaceRepositoryImpl @Inject constructor(
         spacesCollection.add(space)
     }
 
-    override suspend fun getSpace(spaceId: String): Flow<Space?> {
+    override fun getSpace(spaceId: String): Flow<Space?> {
         return getSpaceDocumentReference(spaceId)
             .snapshots()
             .map {
@@ -32,7 +34,10 @@ class SpaceRepositoryImpl @Inject constructor(
             }
     }
 
-    override suspend fun getSpacesByUser(userId: String): Flow<List<Space>> =
+    override fun getCurrentUserSpaces(): Flow<List<Space>> =
+        getSpacesByUser(auth.currentUser!!.uid)
+
+    override fun getSpacesByUser(userId: String): Flow<List<Space>> =
         spacesCollection.whereArrayContains(SPACE_MEMBERS_FIELD, userId).snapshots()
             .map { snapshot ->
                 snapshot.documents.map { it.toObject<Space>()!! }

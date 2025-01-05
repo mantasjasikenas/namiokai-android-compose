@@ -7,11 +7,12 @@ import com.github.mantasjasikenas.core.domain.model.bills.TripBill
 import kotlinx.coroutines.flow.Flow
 
 interface TripBillsRepository {
-    suspend fun getTripBills(): Flow<List<TripBill>>
-    suspend fun getTripBills(period: Period): Flow<List<TripBill>>
-    suspend fun getTripBill(id: String): Flow<TripBill>
-    suspend fun clearTripBills()
+    fun getTripBills(): Flow<List<TripBill>>
+    fun getTripBills(spaceIds: List<String>): Flow<List<TripBill>>
+    fun getTripBills(period: Period): Flow<List<TripBill>>
+    fun getTripBill(id: String): Flow<TripBill>
     fun getDestinations(): Flow<List<Destination>>
+    suspend fun clearTripBills()
     suspend fun insertTripBill(tripBill: TripBill)
     suspend fun updateTripBill(tripBill: TripBill)
     suspend fun deleteTripBill(tripBill: TripBill)

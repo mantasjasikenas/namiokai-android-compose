@@ -63,7 +63,7 @@ fun FlatBillListPage(
 ) {
     val flatUiState by flatViewModel.flatUiState.collectAsStateWithLifecycle()
 
-    if (flatUiState.isLoading()) {
+    if (flatUiState.isLoading) {
         NamiokaiCircularProgressIndicator()
         return
     }

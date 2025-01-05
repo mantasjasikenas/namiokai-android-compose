@@ -64,7 +64,7 @@ fun TripBillScreen(
     val fuelUiState by viewModel.uiState.collectAsStateWithLifecycle()
     val groupedTrips by viewModel.groupedTrips.collectAsStateWithLifecycle()
 
-    if (fuelUiState.isLoading()) {
+    if (fuelUiState.isLoading) {
         NamiokaiCircularProgressIndicator()
         return
     }

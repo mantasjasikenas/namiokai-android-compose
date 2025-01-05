@@ -17,17 +17,20 @@ import javax.inject.Inject
 private const val BILLS_COLLECTION = "bills"
 private const val BACKUP_BILLS_PATH = "backup/bills"
 private const val ORDER_BY_FIELD = "date"
+private const val SPACE_ID_FIELD = "spaceId"
 
 const val BILL_IMPORT_FILE_NAME = "bills.json"
 
 class PurchaseBillsRepositoryImpl @Inject constructor(
     private val baseFirebaseRepository: BaseFirebaseRepository,
-    private val db: FirebaseFirestore
+    db: FirebaseFirestore
 ) :
     PurchaseBillsRepository {
 
-    override suspend fun getPurchaseBills(): Flow<List<PurchaseBill>> =
-        db.collection(BILLS_COLLECTION)
+    private val billsCollection = db.collection(BILLS_COLLECTION)
+
+    override fun getPurchaseBills(): Flow<List<PurchaseBill>> =
+        billsCollection
             .orderBy(
                 ORDER_BY_FIELD,
                 Query.Direction.DESCENDING
@@ -39,8 +42,22 @@ class PurchaseBillsRepositoryImpl @Inject constructor(
                 }
             }
 
-    override suspend fun getPurchaseBills(period: Period): Flow<List<PurchaseBill>> =
-        db.collection(BILLS_COLLECTION)
+    override fun getPurchaseBills(spaceIds: List<String>): Flow<List<PurchaseBill>> =
+        billsCollection
+            .whereIn(SPACE_ID_FIELD, spaceIds)
+            .orderBy(
+                ORDER_BY_FIELD,
+                Query.Direction.DESCENDING
+            )
+            .snapshots()
+            .map {
+                it.documents.map { document ->
+                    document.toObject<PurchaseBill>()!!
+                }
+            }
+
+    override fun getPurchaseBills(period: Period): Flow<List<PurchaseBill>> =
+        billsCollection
             .orderBy(
                 ORDER_BY_FIELD,
                 Query.Direction.DESCENDING
@@ -60,8 +77,8 @@ class PurchaseBillsRepositoryImpl @Inject constructor(
                 }
             }
 
-    override suspend fun getPurchaseBill(id: String): Flow<PurchaseBill> =
-        db.collection(BILLS_COLLECTION)
+    override fun getPurchaseBill(id: String): Flow<PurchaseBill> =
+        billsCollection
             .document(id)
             .snapshots()
             .map {
@@ -69,13 +86,13 @@ class PurchaseBillsRepositoryImpl @Inject constructor(
             }
 
     override suspend fun insertPurchaseBill(purchaseBill: PurchaseBill) {
-        db.collection(BILLS_COLLECTION)
+        billsCollection
             .add(purchaseBill)
     }
 
     override suspend fun updatePurchaseBill(purchaseBill: PurchaseBill) {
         if (purchaseBill.documentId.isNotEmpty()) {
-            db.collection(BILLS_COLLECTION)
+            billsCollection
                 .document(purchaseBill.documentId)
                 .set(purchaseBill)
         }
@@ -83,18 +100,18 @@ class PurchaseBillsRepositoryImpl @Inject constructor(
 
     override suspend fun deletePurchaseBill(purchaseBill: PurchaseBill) {
         if (purchaseBill.documentId.isNotEmpty()) {
-            db.collection(BILLS_COLLECTION)
+            billsCollection
                 .document(purchaseBill.documentId)
                 .delete()
         }
     }
 
     override suspend fun clearPurchaseBills() {
-        db.collection(BILLS_COLLECTION)
+        billsCollection
             .get()
             .addOnSuccessListener { documents ->
                 for (document in documents) {
-                    db.collection(BILLS_COLLECTION)
+                    billsCollection
                         .document(document.id)
                         .delete()
                 }

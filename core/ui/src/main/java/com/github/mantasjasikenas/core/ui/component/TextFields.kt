@@ -4,12 +4,19 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -18,6 +25,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -25,24 +33,28 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.github.keelar.exprk.Expressions
 import com.github.mantasjasikenas.core.common.util.format
+import com.github.mantasjasikenas.core.ui.common.rememberState
 
 @Composable
 fun NamiokaiTextField(
     modifier: Modifier = Modifier,
     label: String,
     initialTextFieldValue: String = "",
-    onValueChange: (String) -> Unit,
+    onValueChange: (String) -> Unit = {},
     keyboardType: KeyboardType = KeyboardType.Text,
     singleLine: Boolean = true,
+    readOnly: Boolean = false,
+    validateInput: (String) -> Boolean = { true },
     leadingIcon: @Composable (() -> Unit)? = null,
     trailingIcon: @Composable (() -> Unit)? = null,
 ) {
-    var text by remember { mutableStateOf(TextFieldValue(initialTextFieldValue)) }
+    var text by remember(initialTextFieldValue) { mutableStateOf(initialTextFieldValue) }
     val focusManager = LocalFocusManager.current
 
     TextField(
         value = text,
         label = { Text(text = label) },
+        readOnly = readOnly,
         keyboardOptions = KeyboardOptions(
             imeAction = ImeAction.Next,
             keyboardType = keyboardType
@@ -54,8 +66,12 @@ fun NamiokaiTextField(
             }
         }),
         onValueChange = {
+            if (!validateInput(it)) {
+                return@TextField
+            }
+
             text = it
-            onValueChange(it.text)
+            onValueChange(it)
         },
         singleLine = singleLine,
         modifier = modifier,
@@ -68,8 +84,61 @@ fun NamiokaiTextField(
         ),
         leadingIcon = leadingIcon,
         trailingIcon = trailingIcon,
+    )
+}
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun <T> NamiokaiDropdownMenu(
+    modifier: Modifier = Modifier,
+    items: List<T>,
+    initialSelectedItem: T? = null,
+    onItemSelected: (T) -> Unit,
+    itemLabel: (T) -> String,
+    leadingIconVector: ImageVector? = null,
+    expandedState: MutableState<Boolean> = rememberState { false },
+    selectedState: MutableState<T?> = remember { mutableStateOf(initialSelectedItem) },
+) {
+    var expanded by expandedState
+    val selected by selectedState
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = {
+            expanded = !expanded
+        }
+    ) {
+        NamiokaiTextField(
+            modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable),
+            label = "Duration unit",
+            initialTextFieldValue = selected?.let { itemLabel(it) } ?: "",
+            readOnly = true,
+            leadingIcon = {
+                leadingIconVector?.let {
+                    Icon(
+                        imageVector = it,
+                        contentDescription = null
+                    )
+                }
+            },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
         )
+
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            items.forEach { item ->
+                DropdownMenuItem(
+                    text = { Text(text = itemLabel(item)) },
+                    onClick = {
+                        selectedState.value = item
+                        expanded = false
+                    }
+                )
+            }
+        }
+    }
 }
 
 @Composable

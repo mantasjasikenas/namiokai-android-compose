@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Groups
 import androidx.compose.material3.Icon
@@ -87,10 +86,8 @@ fun SpaceScreenContent(
     onNavigateToCreateSpace: (SpaceFormArgs) -> Unit,
 ) {
     if (uiState.spaces.isEmpty()) {
-        NoResultsFound(label = "No spaces found.")
+        NoResultsFound(label = "No spaces found. Create a new space.")
     }
-
-    val state = rememberLazyListState()
 
     var selectedSpace by remember {
         mutableStateOf<Space?>(null)
@@ -127,29 +124,6 @@ fun SpaceScreenContent(
             }
         }
     )
-
-//    LazyColumn(
-//        modifier = modifier
-//            .fillMaxSize()
-//            .padding(top = 5.dp),
-//        state = state
-//    ) {
-//        items(
-//            items = uiState.spaces,
-//            key = { it.spaceId }
-//        ) { space ->
-//            SpaceCard(
-//                modifier = Modifier.animateItem(),
-//                space = space,
-//                onClick = {
-//                    selectedSpace = space
-//                }
-//            )
-//        }
-//
-//        item { NamiokaiSpacer(height = 120) }
-//    }
-
 
     selectedSpace?.let { space ->
         SpaceBottomSheet(

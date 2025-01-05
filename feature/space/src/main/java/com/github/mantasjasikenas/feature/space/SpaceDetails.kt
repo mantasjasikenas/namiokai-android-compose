@@ -17,6 +17,7 @@ import com.github.mantasjasikenas.core.domain.model.UsersMap
 import com.github.mantasjasikenas.core.ui.common.CardText
 import com.github.mantasjasikenas.core.ui.common.NamiokaiSpacer
 import com.github.mantasjasikenas.core.ui.common.bill.BillDetailsBottomSheetWrapper
+import java.util.Locale
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -43,6 +44,17 @@ fun SpaceBottomSheet(
         CardText(
             label = "Created by",
             value = usersMap[space.createdBy]?.displayName ?: "-"
+        )
+
+        CardText(
+            label = "Start period",
+            value = space.startPeriod.toString()
+        )
+
+        CardText(
+            label = "Duration",
+            value = "${space.duration} ${space.durationUnitType.title.lowercase(Locale.ROOT)}" +
+                    if (space.duration > 1) "s" else ""
         )
 
         Text(

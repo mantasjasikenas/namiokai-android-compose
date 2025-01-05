@@ -6,9 +6,10 @@ import kotlinx.coroutines.flow.Flow
 
 interface SpaceRepository {
     fun getSpaceDocumentReference(spaceId: String): DocumentReference
+    fun getSpace(spaceId: String): Flow<Space?>
+    fun getSpacesByUser(userId: String): Flow<List<Space>>
+    fun getCurrentUserSpaces(): Flow<List<Space>>
     suspend fun createSpace(space: Space)
-    suspend fun getSpace(spaceId: String): Flow<Space?>
-    suspend fun getSpacesByUser(userId: String): Flow<List<Space>>
     suspend fun addUserToSpace(spaceId: String, userId: String)
     suspend fun removeUserFromSpace(spaceId: String, userId: String)
     suspend fun deleteSpace(spaceId: String)
