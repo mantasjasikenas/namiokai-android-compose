@@ -52,7 +52,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisallowComposableCalls
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -70,6 +69,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
 import com.github.mantasjasikenas.core.common.util.Uid
+import com.github.mantasjasikenas.core.common.util.toMutableStateMap
 import com.github.mantasjasikenas.core.domain.model.UsersMap
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
@@ -319,26 +319,33 @@ fun TextRow(
 @Composable
 fun UsersPicker(
     usersMap: UsersMap,
-    usersPickup: SnapshotStateMap<Uid, Boolean>,
+    onUsersSelected: (List<Uid>) -> Unit,
+    initialSelectedUsers: List<Uid> = emptyList(),
     isMultipleSelectEnabled: Boolean = true
 ) {
+    val usersStateMap = remember(usersMap, initialSelectedUsers) {
+        usersMap.mapValues { (uid, _) -> initialSelectedUsers.contains(uid) }
+            .toMutableStateMap()
+    }
+
     FlowRow(
         modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.Center,
         horizontalArrangement = Arrangement.spacedBy(
             7.dp,
             Alignment.CenterHorizontally
         ),
-        verticalArrangement = Arrangement.Center
     ) {
-        usersPickup.forEach { (uid, selected) ->
+        usersStateMap.forEach { (uid, selected) ->
             FlowRowItemCard(
-                usersMap[uid]?.displayName ?: "Missing display name",
-                selected,
+                text = usersMap[uid]?.displayName ?: "-",
+                selectedStatus = selected,
                 onItemSelected = { status ->
                     if (!isMultipleSelectEnabled) {
-                        usersPickup.forEach { (uid, _) -> usersPickup[uid] = false }
+                        usersStateMap.forEach { (uid, _) -> usersStateMap[uid] = false }
                     }
-                    usersPickup[uid] = status.not()
+                    usersStateMap[uid] = status.not()
+                    onUsersSelected(usersStateMap.filterValues { it }.keys.toList())
                 })
         }
     }

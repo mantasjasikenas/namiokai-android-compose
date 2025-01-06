@@ -25,7 +25,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -36,7 +35,6 @@ import androidx.core.text.isDigitsOnly
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.github.mantasjasikenas.core.common.util.Uid
-import com.github.mantasjasikenas.core.common.util.toMutableStateMap
 import com.github.mantasjasikenas.core.domain.model.DurationUnit
 import com.github.mantasjasikenas.core.domain.model.SharedState
 import com.github.mantasjasikenas.core.domain.model.Space
@@ -133,14 +131,7 @@ private fun SpaceContent(
         mutableStateOf(initialSpace ?: Space(createdBy = currentUser.uid))
     }
 
-    val membersMap = remember {
-        usersMap.mapValues { (_, user) -> space.isValid() && user.uid in space.memberIds }
-            .toMutableStateMap()
-    }
-
     val onSpaceSave = spaceSave@{
-        space.memberIds = membersMap.filter { it.value }.keys.map { it }
-
         if (space.createdBy !in space.memberIds) {
             Toast.makeText(
                 context,
@@ -202,6 +193,7 @@ private fun SpaceContent(
     )
 
     NamiokaiDropdownMenu(
+        label = "Duration unit",
         items = DurationUnit.entries.toList(),
         initialSelectedItem = space.durationUnitType,
         onItemSelected = { space.durationUnitType = it },
@@ -265,11 +257,13 @@ private fun SpaceContent(
 
     Spacer(modifier = Modifier.height(20.dp))
 
+    // TODO: migrate to bottom sheet because of the long list and add search functionality
     UserPickerContainer(
         title = "Members",
         usersMap = usersMap,
-        usersSnapshotMap = membersMap,
-        isMultipleSelectEnabled = true
+        isMultipleSelectEnabled = true,
+        initialSelectedUsers = space.memberIds,
+        onUsersSelected = { space.memberIds = it }
     )
 
     Spacer(modifier = Modifier.height(32.dp))
@@ -300,8 +294,9 @@ fun SpaceFormContainerWrapper(
 private fun UserPickerContainer(
     title: String,
     usersMap: UsersMap,
-    usersSnapshotMap: SnapshotStateMap<Uid, Boolean>,
-    isMultipleSelectEnabled: Boolean
+    isMultipleSelectEnabled: Boolean,
+    initialSelectedUsers: List<Uid>,
+    onUsersSelected: (List<Uid>) -> Unit
 ) {
     Text(
         text = title,
@@ -312,7 +307,8 @@ private fun UserPickerContainer(
 
     UsersPicker(
         usersMap = usersMap,
-        usersPickup = usersSnapshotMap,
-        isMultipleSelectEnabled = isMultipleSelectEnabled
+        isMultipleSelectEnabled = isMultipleSelectEnabled,
+        initialSelectedUsers = initialSelectedUsers,
+        onUsersSelected = onUsersSelected
     )
 }

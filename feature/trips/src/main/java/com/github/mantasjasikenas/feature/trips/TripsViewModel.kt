@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.github.mantasjasikenas.core.common.util.toYearMonthPair
 import com.github.mantasjasikenas.core.domain.model.Destination
 import com.github.mantasjasikenas.core.domain.model.Filter
+import com.github.mantasjasikenas.core.domain.model.Space
 import com.github.mantasjasikenas.core.domain.model.bills.TripBill
 import com.github.mantasjasikenas.core.domain.model.filter
 import com.github.mantasjasikenas.core.domain.repository.SpaceRepository
@@ -66,12 +67,13 @@ class FuelViewModel @Inject constructor(
             _fuelUiState.update { it.copy(isLoading = true) }
 
             spaceRepository.getCurrentUserSpaces()
-                .map { spaces -> spaces.map { it.spaceId } }
+                .map { spaces ->
+                    _fuelUiState.update { it.copy(spaces = spaces) }
+                    spaces.map { it.spaceId }
+                }
                 .flatMapLatest { spaceIds ->
                     tripBillsRepository.getTripBills(spaceIds = spaceIds)
                         .catch {
-
-                            println("Error: $it")
                             _fuelUiState.update { it.copy(isLoading = false) }
                             emit(emptyList())
                         }
@@ -108,4 +110,5 @@ data class FuelUiState(
     val destinations: List<Destination> = emptyList(),
     val filteredTripBills: List<TripBill> = emptyList(),
     val filters: List<Filter<TripBill, Any>> = emptyList(),
+    val spaces: List<Space> = emptyList()
 )

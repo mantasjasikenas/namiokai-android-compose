@@ -13,6 +13,7 @@ data class FlatBill(
     override var splitUsersUid: List<String> = emptyList(),
     override var createdByUid: String = "",
     override var date: String = "",
+    override var spaceId: String = "",
     var taxesTotal: Double = 0.0,
     var rentTotal: Double = 0.0,
     var taxes: Taxes? = null,
@@ -28,7 +29,7 @@ data class FlatBill(
 
     @Exclude
     override fun isValid(): Boolean {
-        return paymasterUid.isNotEmpty() && total > 0.0 && splitUsersUid.isNotEmpty() && (taxes == null || taxes!!.isValid())
+        return paymasterUid.isNotEmpty() && total > 0.0 && spaceId.isNotEmpty() && splitUsersUid.isNotEmpty() && (taxes == null || taxes!!.isValid())
     }
 
 }

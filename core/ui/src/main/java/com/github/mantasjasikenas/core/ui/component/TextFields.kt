@@ -12,6 +12,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.ShapeDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -44,6 +45,8 @@ fun NamiokaiTextField(
     keyboardType: KeyboardType = KeyboardType.Text,
     singleLine: Boolean = true,
     readOnly: Boolean = false,
+    isError: Boolean = false,
+    supportingText: String? = null,
     validateInput: (String) -> Boolean = { true },
     leadingIcon: @Composable (() -> Unit)? = null,
     trailingIcon: @Composable (() -> Unit)? = null,
@@ -54,6 +57,8 @@ fun NamiokaiTextField(
     TextField(
         value = text,
         label = { Text(text = label) },
+        supportingText = supportingText?.let { { Text(text = it) } },
+        isError = isError,
         readOnly = readOnly,
         keyboardOptions = KeyboardOptions(
             imeAction = ImeAction.Next,
@@ -78,9 +83,13 @@ fun NamiokaiTextField(
         shape = CircleShape,
         colors = TextFieldDefaults.colors(
             unfocusedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+            errorContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+            errorLeadingIconColor = MaterialTheme.colorScheme.error,
+            errorTrailingIconColor = MaterialTheme.colorScheme.error,
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,
-            disabledIndicatorColor = Color.Transparent
+            disabledIndicatorColor = Color.Transparent,
+            errorIndicatorColor = Color.Transparent
         ),
         leadingIcon = leadingIcon,
         trailingIcon = trailingIcon,
@@ -91,6 +100,7 @@ fun NamiokaiTextField(
 @Composable
 fun <T> NamiokaiDropdownMenu(
     modifier: Modifier = Modifier,
+    label: String,
     items: List<T>,
     initialSelectedItem: T? = null,
     onItemSelected: (T) -> Unit,
@@ -110,7 +120,7 @@ fun <T> NamiokaiDropdownMenu(
     ) {
         NamiokaiTextField(
             modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable),
-            label = "Duration unit",
+            label = label,
             initialTextFieldValue = selected?.let { itemLabel(it) } ?: "",
             readOnly = true,
             leadingIcon = {
@@ -126,13 +136,15 @@ fun <T> NamiokaiDropdownMenu(
 
         ExposedDropdownMenu(
             expanded = expanded,
-            onDismissRequest = { expanded = false }
+            onDismissRequest = { expanded = false },
+            shape = ShapeDefaults.Medium
         ) {
             items.forEach { item ->
                 DropdownMenuItem(
                     text = { Text(text = itemLabel(item)) },
                     onClick = {
                         selectedState.value = item
+                        onItemSelected(item)
                         expanded = false
                     }
                 )
@@ -203,9 +215,13 @@ fun NamiokaiNumberField(
         shape = CircleShape,
         colors = TextFieldDefaults.colors(
             unfocusedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+            errorContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+            errorLeadingIconColor = MaterialTheme.colorScheme.error,
+            errorTrailingIconColor = MaterialTheme.colorScheme.error,
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,
-            disabledIndicatorColor = Color.Transparent
+            disabledIndicatorColor = Color.Transparent,
+            errorIndicatorColor = Color.Transparent
         ),
         leadingIcon = leadingIcon,
         trailingIcon = trailingIcon,

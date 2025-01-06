@@ -14,6 +14,7 @@ data class PurchaseBill(
     override var total: Double = 0.0,
     override var splitUsersUid: List<String> = emptyList(),
     override var createdByUid: String = "",
+    override var spaceId: String = "",
     var shoppingList: String = "",
 ) : Bill {
 
@@ -23,9 +24,8 @@ data class PurchaseBill(
 
     @Exclude
     override fun isValid(): Boolean {
-        return paymasterUid.isNotEmpty() && shoppingList.isNotEmpty() && total > 0.0 && splitUsersUid.isNotEmpty()
+        return paymasterUid.isNotEmpty() && spaceId.isNotEmpty() && shoppingList.isNotEmpty() && total > 0.0 && splitUsersUid.isNotEmpty()
     }
-
 }
 
 

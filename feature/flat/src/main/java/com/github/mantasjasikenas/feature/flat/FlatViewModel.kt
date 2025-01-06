@@ -5,6 +5,7 @@ package com.github.mantasjasikenas.feature.flat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.mantasjasikenas.core.domain.model.Filter
+import com.github.mantasjasikenas.core.domain.model.Space
 import com.github.mantasjasikenas.core.domain.model.bills.FlatBill
 import com.github.mantasjasikenas.core.domain.model.filter
 import com.github.mantasjasikenas.core.domain.repository.FlatBillsRepository
@@ -53,7 +54,10 @@ class FlatViewModel @Inject constructor(
             _flatUiState.update { it.copy(isLoading = true) }
 
             spaceRepository.getCurrentUserSpaces()
-                .map { spaces -> spaces.map { it.spaceId } }
+                .map { spaces ->
+                    _flatUiState.update { it.copy(spaces = spaces) }
+                    spaces.map { it.spaceId }
+                }
                 .flatMapLatest { spaceIds ->
                     flatBillsRepository.getFlatBills(spaceIds = spaceIds)
                         .catch {
@@ -251,7 +255,8 @@ data class FlatUiState(
     val flatBills: List<FlatBill> = emptyList(),
     val filteredFlatBills: List<FlatBill> = emptyList(),
     val filters: List<Filter<FlatBill, Any>> = emptyList(),
-    val electricitySummary: ElectricitySummary? = null
+    val electricitySummary: ElectricitySummary? = null,
+    val spaces: List<Space> = emptyList()
 )
 
 data class ElectricitySummary(

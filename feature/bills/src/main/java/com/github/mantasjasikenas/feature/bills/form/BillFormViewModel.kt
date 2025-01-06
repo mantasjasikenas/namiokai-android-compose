@@ -6,8 +6,10 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.github.mantasjasikenas.core.common.util.Constants.DATE_TIME_FORMAT
 import com.github.mantasjasikenas.core.domain.model.Destination
+import com.github.mantasjasikenas.core.domain.model.Space
 import com.github.mantasjasikenas.core.domain.model.bills.Bill
 import com.github.mantasjasikenas.core.domain.repository.BillsRepository
+import com.github.mantasjasikenas.core.domain.repository.SpaceRepository
 import com.github.mantasjasikenas.core.domain.repository.TripBillsRepository
 import com.github.mantasjasikenas.feature.bills.navigation.BillFormRoute
 import com.google.firebase.auth.ktx.auth
@@ -19,7 +21,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -31,27 +32,28 @@ import javax.inject.Inject
 class BillFormViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     tripBillsRepository: TripBillsRepository,
+    spaceRepository: SpaceRepository,
     private val billsRepository: BillsRepository
 ) :
     ViewModel() {
 
     val billFormRoute = savedStateHandle.toRoute<BillFormRoute>()
 
-    val billFormUiState: StateFlow<BillFormUiState> =
-        tripBillsRepository.getDestinations()
-            .map { destinations ->
-                BillFormUiState.Success(destinations = destinations)
-            }
-            .combine(billFlow()) { uiState, bill ->
-                uiState.copy(
-                    initialBill = bill
-                )
-            }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5_000),
-                initialValue = BillFormUiState.Loading
-            )
+    val billFormUiState: StateFlow<BillFormUiState> = combine(
+        tripBillsRepository.getDestinations(),
+        spaceRepository.getCurrentUserSpaces(),
+        billFlow()
+    ) { destinations, spaces, bill ->
+        BillFormUiState.Success(
+            destinations = destinations,
+            spaces = spaces,
+            initialBill = bill
+        )
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = BillFormUiState.Loading
+    )
 
     private fun billFlow() = flow {
         if (billFormRoute.billId == null || billFormRoute.billType == null) {
@@ -61,7 +63,7 @@ class BillFormViewModel @Inject constructor(
         }
 
         val billFlow = billsRepository
-            .getBill(billFormRoute.billId!!, billFormRoute.billType!!)
+            .getBill(billFormRoute.billId, billFormRoute.billType)
 
         emitAll(billFlow)
     }
@@ -97,6 +99,7 @@ sealed interface BillFormUiState {
     data object Loading : BillFormUiState
     data class Success(
         val destinations: List<Destination> = emptyList(),
+        val spaces: List<Space> = emptyList(),
         val initialBill: Bill? = null
     ) : BillFormUiState
 }

@@ -3,6 +3,7 @@
 package com.github.mantasjasikenas.feature.bills.form
 
 import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -19,6 +20,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.EuroSymbol
 import androidx.compose.material.icons.outlined.ShoppingBag
+import androidx.compose.material.icons.outlined.Workspaces
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -36,8 +38,6 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshots.SnapshotStateMap
-import androidx.compose.runtime.toMutableStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -50,6 +50,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.github.mantasjasikenas.core.common.util.Uid
 import com.github.mantasjasikenas.core.domain.model.Destination
 import com.github.mantasjasikenas.core.domain.model.SharedState
+import com.github.mantasjasikenas.core.domain.model.Space
 import com.github.mantasjasikenas.core.domain.model.UsersMap
 import com.github.mantasjasikenas.core.domain.model.bills.Bill
 import com.github.mantasjasikenas.core.domain.model.bills.BillType
@@ -59,6 +60,7 @@ import com.github.mantasjasikenas.core.domain.model.bills.Taxes
 import com.github.mantasjasikenas.core.domain.model.bills.TripBill
 import com.github.mantasjasikenas.core.ui.common.NamiokaiCircularProgressIndicator
 import com.github.mantasjasikenas.core.ui.common.UsersPicker
+import com.github.mantasjasikenas.core.ui.component.NamiokaiDropdownMenu
 import com.github.mantasjasikenas.core.ui.component.NamiokaiNumberField
 import com.github.mantasjasikenas.core.ui.component.NamiokaiTextField
 import com.github.mantasjasikenas.feature.bills.R
@@ -181,7 +183,8 @@ fun BillFormContent(
                                 onSaveBill(it)
                                 onNavigateUp()
                             },
-                            usersMap = usersMap
+                            usersMap = usersMap,
+                            spaces = uiState.spaces
                         )
                     }
 
@@ -193,7 +196,8 @@ fun BillFormContent(
                                 onNavigateUp()
                             },
                             usersMap = usersMap,
-                            destinations = uiState.destinations
+                            destinations = uiState.destinations,
+                            spaces = uiState.spaces
                         )
                     }
 
@@ -205,6 +209,7 @@ fun BillFormContent(
                                 onNavigateUp()
                             },
                             usersMap = usersMap,
+                            spaces = uiState.spaces
                         )
                     }
                 }
@@ -230,31 +235,11 @@ fun BillContainerWrapper(
 }
 
 @Composable
-private fun UserPickerContainer(
-    title: String,
-    usersMap: UsersMap,
-    usersSnapshotMap: SnapshotStateMap<Uid, Boolean>,
-    isMultipleSelectEnabled: Boolean
-) {
-    Text(
-        text = title,
-        style = MaterialTheme.typography.titleSmall,
-        textAlign = TextAlign.Center,
-        modifier = Modifier.padding(bottom = 5.dp)
-    )
-
-    UsersPicker(
-        usersMap = usersMap,
-        usersPickup = usersSnapshotMap,
-        isMultipleSelectEnabled = isMultipleSelectEnabled
-    )
-}
-
-@Composable
 fun PurchaseBillContent(
     initialPurchaseBill: PurchaseBill? = null,
     onSaveClick: (PurchaseBill) -> Unit,
-    usersMap: UsersMap
+    usersMap: UsersMap,
+    spaces: List<Space>
 ) {
     val context = LocalContext.current
 
@@ -262,44 +247,26 @@ fun PurchaseBillContent(
         mutableStateOf(initialPurchaseBill ?: PurchaseBill())
     }
 
-    val splitBillHashMap = remember {
-        usersMap.map { it.value.uid to false }
-            .toMutableStateMap()
-    }
-    val paymasterHashMap = remember {
-        usersMap.map { it.value.uid to false }
-            .toMutableStateMap()
-    }
-
-    LaunchedEffect(Unit) {
-        if (bill.isValid()) {
-            bill.splitUsersUid.forEach { uid ->
-                splitBillHashMap[uid] = true
-            }
-
-            bill.paymasterUid.let { uid ->
-                paymasterHashMap[uid] = true
-            }
+    SpaceContainer(
+        initialSpaceId = bill.spaceId,
+        paymasterUid = bill.paymasterUid,
+        splitUsersUids = bill.splitUsersUid,
+        spaces = spaces,
+        usersMap = usersMap,
+        paymasterTitle = stringResource(R.string.paymaster),
+        splitUsersTitle = stringResource(R.string.split_bill_with),
+        onSpaceSelected = { space ->
+            bill.spaceId = space.spaceId
+            bill.paymasterUid = ""
+            bill.splitUsersUid = emptyList()
+        },
+        onPaymasterSelected = {
+            bill.paymasterUid = it
+        },
+        onSplitUsersSelected = {
+            bill.splitUsersUid = it
         }
-    }
-
-    UserPickerContainer(
-        title = stringResource(R.string.paymaster),
-        usersMap = usersMap,
-        usersSnapshotMap = paymasterHashMap,
-        isMultipleSelectEnabled = false
     )
-
-    Spacer(modifier = Modifier.height(20.dp))
-
-    UserPickerContainer(
-        title = stringResource(R.string.split_bill_with),
-        usersMap = usersMap,
-        usersSnapshotMap = splitBillHashMap,
-        isMultipleSelectEnabled = true
-    )
-
-    Spacer(modifier = Modifier.height(20.dp))
 
     NamiokaiTextField(
         label = stringResource(R.string.shopping_list),
@@ -336,10 +303,6 @@ fun PurchaseBillContent(
     Spacer(modifier = Modifier.height(32.dp))
 
     Button(onClick = {
-        bill.splitUsersUid = splitBillHashMap.filter { it.value }.keys.map { it }
-        bill.paymasterUid = paymasterHashMap.filter { it.value }.keys.map { it }
-            .firstOrNull() ?: ""
-
         if (!bill.isValid()) {
             Toast.makeText(
                 context,
@@ -364,11 +327,12 @@ fun PurchaseBillContent(
 }
 
 @Composable
-fun TripBillContent(
+private fun TripBillContent(
     initialTripBill: TripBill? = null,
     onSaveClick: (TripBill) -> Unit,
     usersMap: UsersMap,
-    destinations: List<Destination>
+    destinations: List<Destination>,
+    spaces: List<Space>
 ) {
     val context = LocalContext.current
 
@@ -376,47 +340,34 @@ fun TripBillContent(
         mutableStateOf(initialTripBill ?: TripBill())
     }
 
-    // OPTIMIZE: This is a mess, refactor OK?
-    val splitFuelHashMap = remember {
-        usersMap.map { it.value.uid to false }
-            .toMutableStateMap()
-    }
-    val driverSelectHashMap = remember {
-        usersMap.map { it.value.uid to false }
-            .toMutableStateMap()
-    }
-
     val (selectedOption, onOptionSelected) = remember { mutableStateOf(destinations[0]) }
 
     LaunchedEffect(Unit) {
         if (trip.isValid()) {
-            trip.splitUsersUid.forEach { uid ->
-                splitFuelHashMap[uid] = true
-            }
-
-            driverSelectHashMap[trip.paymasterUid] = true
             onOptionSelected(destinations.first { it.name == trip.tripDestination })
         }
-
     }
 
-    UserPickerContainer(
-        title = stringResource(R.string.driver),
+    SpaceContainer(
+        initialSpaceId = trip.spaceId,
+        paymasterUid = trip.paymasterUid,
+        splitUsersUids = trip.splitUsersUid,
+        spaces = spaces,
         usersMap = usersMap,
-        usersSnapshotMap = driverSelectHashMap,
-        isMultipleSelectEnabled = false
+        paymasterTitle = stringResource(R.string.driver),
+        splitUsersTitle = stringResource(R.string.passengers),
+        onSpaceSelected = { space ->
+            trip.spaceId = space.spaceId
+            trip.paymasterUid = ""
+            trip.splitUsersUid = emptyList()
+        },
+        onPaymasterSelected = {
+            trip.paymasterUid = it
+        },
+        onSplitUsersSelected = {
+            trip.splitUsersUid = it
+        }
     )
-
-    Spacer(modifier = Modifier.height(20.dp))
-
-    UserPickerContainer(
-        title = stringResource(R.string.passengers),
-        usersMap = usersMap,
-        usersSnapshotMap = splitFuelHashMap,
-        isMultipleSelectEnabled = true
-    )
-
-    Spacer(modifier = Modifier.height(20.dp))
 
     Text(
         text = stringResource(R.string.destination),
@@ -454,12 +405,6 @@ fun TripBillContent(
     Spacer(modifier = Modifier.height(32.dp))
 
     Button(onClick = {
-        trip.paymasterUid =
-            driverSelectHashMap.filter { it.value }.keys.map { it }
-                .firstOrNull() ?: ""
-        trip.splitUsersUid = splitFuelHashMap.filter { it.value }.keys.map { it }
-
-
         trip.tripDestination = selectedOption.name
         trip.tripPricePerUser = when (trip.splitUsersUid.count()) {
             1 -> selectedOption.tripPriceAlone
@@ -490,10 +435,11 @@ fun TripBillContent(
 }
 
 @Composable
-fun FlatBillContent(
+private fun FlatBillContent(
     initialFlatBill: FlatBill? = null,
     onSaveClick: (FlatBill) -> Unit,
-    usersMap: UsersMap
+    usersMap: UsersMap,
+    spaces: List<Space>
 ) {
     val context = LocalContext.current
 
@@ -502,39 +448,26 @@ fun FlatBillContent(
     }
     val (includeTaxes, onIncludeTaxesChange) = remember { mutableStateOf(false) }
 
-    val paymasterHashMap = remember {
-        usersMap.map { it.value.uid to false }
-            .toMutableStateMap()
-    }
-    val splitBillHashMap = remember {
-        usersMap.map { it.value.uid to false }
-            .toMutableStateMap()
-    }
-
-    LaunchedEffect(Unit) {
-        if (flatBill.isValid()) {
-            paymasterHashMap[flatBill.paymasterUid] = true
-            flatBill.splitUsersUid.forEach { splitBillHashMap[it] = true }
+    SpaceContainer(
+        initialSpaceId = flatBill.spaceId,
+        paymasterUid = flatBill.paymasterUid,
+        splitUsersUids = flatBill.splitUsersUid,
+        spaces = spaces,
+        usersMap = usersMap,
+        paymasterTitle = stringResource(R.string.paymaster),
+        splitUsersTitle = stringResource(R.string.split_bill_with),
+        onSpaceSelected = { space ->
+            flatBill.spaceId = space.spaceId
+            flatBill.paymasterUid = ""
+            flatBill.splitUsersUid = emptyList()
+        },
+        onPaymasterSelected = {
+            flatBill.paymasterUid = it
+        },
+        onSplitUsersSelected = {
+            flatBill.splitUsersUid = it
         }
-    }
-
-    UserPickerContainer(
-        title = stringResource(R.string.paymaster),
-        usersMap = usersMap,
-        usersSnapshotMap = paymasterHashMap,
-        isMultipleSelectEnabled = false
     )
-
-    Spacer(modifier = Modifier.height(20.dp))
-
-    UserPickerContainer(
-        title = stringResource(R.string.split_bill_with),
-        usersMap = usersMap,
-        usersSnapshotMap = splitBillHashMap,
-        isMultipleSelectEnabled = true
-    )
-
-    Spacer(modifier = Modifier.height(20.dp))
 
     NamiokaiNumberField(
         label = "Rent",
@@ -621,9 +554,9 @@ fun FlatBillContent(
     Spacer(modifier = Modifier.height(32.dp))
 
     Button(onClick = {
-        flatBill.splitUsersUid = splitBillHashMap.filter { it.value }.keys.map { it }
-        flatBill.paymasterUid = paymasterHashMap.filter { it.value }.keys.map { it }
-            .firstOrNull() ?: ""
+//        flatBill.splitUsersUid = splitBillHashMap.filter { it.value }.keys.map { it }
+//        flatBill.paymasterUid = paymasterHashMap.filter { it.value }.keys.map { it }
+//            .firstOrNull() ?: ""
 
         if (!flatBill.isValid()) {
             Toast.makeText(
@@ -646,4 +579,107 @@ fun FlatBillContent(
     }) {
         Text(text = if (initialFlatBill == null) "Save" else "Update")
     }
+}
+
+@Composable
+private fun SpaceContainer(
+    initialSpaceId: String? = null,
+    paymasterUid: String,
+    splitUsersUids: List<String>,
+    spaces: List<Space>,
+    usersMap: UsersMap,
+    paymasterTitle: String = stringResource(R.string.paymaster),
+    splitUsersTitle: String = stringResource(R.string.split_bill_with),
+    onSpaceSelected: (Space) -> Unit,
+    onPaymasterSelected: (Uid) -> Unit,
+    onSplitUsersSelected: (List<Uid>) -> Unit
+) {
+    val selectedSpace = remember {
+        mutableStateOf(spaces.firstOrNull { it.spaceId == initialSpaceId } ?: spaces.firstOrNull())
+    }
+
+    val spacesMembers = remember(selectedSpace.value) {
+        selectedSpace.value?.memberIds?.let { memberIds ->
+            usersMap.filterKeys { memberIds.contains(it) }
+        } ?: emptyMap()
+    }
+
+    Text(
+        text = "Space",
+        style = MaterialTheme.typography.titleSmall,
+        textAlign = TextAlign.Center,
+        modifier = Modifier.padding(bottom = 7.dp)
+    )
+
+    NamiokaiDropdownMenu(
+        label = "Space",
+        items = spaces,
+        initialSelectedItem = spaces.firstOrNull { it.spaceId == initialSpaceId }
+            ?: selectedSpace.value,
+        onItemSelected = {
+            onSpaceSelected(it)
+            selectedSpace.value = it
+        },
+        leadingIconVector = Icons.Outlined.Workspaces,
+        itemLabel = { it.spaceName },
+    )
+
+    Spacer(modifier = Modifier.height(20.dp))
+
+    AnimatedVisibility(
+        modifier = Modifier.fillMaxWidth(),
+        visible = selectedSpace.value != null
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            UserPickerContainer(
+                title = paymasterTitle,
+                usersMap = spacesMembers,
+                isMultipleSelectEnabled = false,
+                onUsersSelected = { selectedUsers ->
+                    selectedUsers.firstOrNull()?.let { onPaymasterSelected(it) }
+                },
+                initialSelectedUsers = listOf(paymasterUid)
+            )
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            UserPickerContainer(
+                title = splitUsersTitle,
+                usersMap = spacesMembers,
+                isMultipleSelectEnabled = true,
+                initialSelectedUsers = splitUsersUids,
+                onUsersSelected = { selectedUsers ->
+                    onSplitUsersSelected(selectedUsers)
+                },
+            )
+
+            Spacer(modifier = Modifier.height(20.dp))
+        }
+    }
+}
+
+@Composable
+private fun UserPickerContainer(
+    title: String,
+    usersMap: UsersMap,
+    isMultipleSelectEnabled: Boolean,
+    onUsersSelected: (List<Uid>) -> Unit,
+    initialSelectedUsers: List<Uid> = emptyList()
+) {
+    Text(
+        text = title,
+        style = MaterialTheme.typography.titleSmall,
+        textAlign = TextAlign.Center,
+        modifier = Modifier.padding(bottom = 5.dp)
+    )
+
+    UsersPicker(
+        usersMap = usersMap,
+        isMultipleSelectEnabled = isMultipleSelectEnabled,
+        onUsersSelected = onUsersSelected,
+        initialSelectedUsers = initialSelectedUsers
+    )
 }

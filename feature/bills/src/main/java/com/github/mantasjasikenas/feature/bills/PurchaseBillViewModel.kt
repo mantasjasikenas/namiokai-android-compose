@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.mantasjasikenas.core.common.util.toYearMonthPair
 import com.github.mantasjasikenas.core.domain.model.Filter
+import com.github.mantasjasikenas.core.domain.model.Space
 import com.github.mantasjasikenas.core.domain.model.bills.PurchaseBill
 import com.github.mantasjasikenas.core.domain.model.filter
 import com.github.mantasjasikenas.core.domain.repository.PurchaseBillsRepository
@@ -55,7 +56,10 @@ class PurchaseBillViewModel @Inject constructor(
             _billUiState.update { it.copy(isLoading = true) }
 
             spaceRepository.getCurrentUserSpaces()
-                .map { spaces -> spaces.map { it.spaceId } }
+                .map { spaces ->
+                    _billUiState.update { it.copy(spaces = spaces) }
+                    spaces.map { it.spaceId }
+                }
                 .flatMapLatest { spaceIds ->
                     purchaseBillsRepository.getPurchaseBills(spaceIds = spaceIds)
                         .catch {
@@ -98,4 +102,5 @@ data class BillUiState(
     val purchaseBills: List<PurchaseBill> = emptyList(),
     val filteredPurchaseBills: List<PurchaseBill> = emptyList(),
     val filters: List<Filter<PurchaseBill, Any>> = emptyList(),
+    val spaces: List<Space> = emptyList()
 )

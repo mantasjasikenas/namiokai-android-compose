@@ -17,6 +17,7 @@ data class TripBill(
     @get:PropertyName("passengersUid")
     @set:PropertyName("passengersUid")
     override var splitUsersUid: List<String> = emptyList(),
+    override var spaceId: String = "",
     var tripDestination: String = "",
     var tripPricePerUser: Double = 0.0,
 ) : Bill {
@@ -31,7 +32,7 @@ data class TripBill(
 
     @Exclude
     override fun isValid(): Boolean {
-        return splitUsersUid.isNotEmpty() && tripDestination.isNotEmpty() && paymasterUid.isNotEmpty()
+        return splitUsersUid.isNotEmpty() && spaceId.isNotEmpty() && tripDestination.isNotEmpty() && paymasterUid.isNotEmpty()
     }
 }
 
