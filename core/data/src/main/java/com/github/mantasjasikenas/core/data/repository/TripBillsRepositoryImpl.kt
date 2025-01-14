@@ -1,6 +1,5 @@
 package com.github.mantasjasikenas.core.data.repository
 
-import com.github.mantasjasikenas.core.domain.model.Destination
 import com.github.mantasjasikenas.core.domain.model.Period
 import com.github.mantasjasikenas.core.domain.model.Response
 import com.github.mantasjasikenas.core.domain.model.bills.TripBill
@@ -25,7 +24,7 @@ const val FUEL_IMPORT_FILE_NAME = "fuel.json"
 
 class TripBillsRepositoryImpl @Inject constructor(
     private val baseFirebaseRepository: BaseFirebaseRepository,
-    private val db: FirebaseFirestore,
+    db: FirebaseFirestore,
 ) : TripBillsRepository {
 
     private val tripBillCollection = db.collection(TRIP_BILL_COLLECTION)
@@ -119,16 +118,6 @@ class TripBillsRepositoryImpl @Inject constructor(
                 }
             }
     }
-
-
-    override fun getDestinations(): Flow<List<Destination>> =
-        db.collection(DESTINATIONS_COLLECTION)
-            .snapshots()
-            .map {
-                it.documents.map { document ->
-                    document.toObject<Destination>()!!
-                }
-            }
 
     override suspend fun loadTripsFromStorage(fileName: String): Response<Boolean> {
         return try {

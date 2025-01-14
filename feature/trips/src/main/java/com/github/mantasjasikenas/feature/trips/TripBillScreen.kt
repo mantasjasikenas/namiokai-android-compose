@@ -252,12 +252,6 @@ private fun TripBillFiltersRow(
                     predicate = { bill, value -> bill.splitUsersUid.contains(getUserUid(value as String)) }
                 ),
                 Filter(
-                    displayLabel = "Destination",
-                    filterName = "destination",
-                    values = fuelUiState.destinations.map { it.name },
-                    predicate = { bill, value -> bill.tripDestination == value }
-                ),
-                Filter(
                     displayLabel = "Period",
                     filterName = "period",
                     values = periodState.periods.sortedByDescending { it.start },

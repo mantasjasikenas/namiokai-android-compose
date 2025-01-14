@@ -5,7 +5,6 @@ package com.github.mantasjasikenas.feature.trips
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.mantasjasikenas.core.common.util.toYearMonthPair
-import com.github.mantasjasikenas.core.domain.model.Destination
 import com.github.mantasjasikenas.core.domain.model.Filter
 import com.github.mantasjasikenas.core.domain.model.Space
 import com.github.mantasjasikenas.core.domain.model.bills.TripBill
@@ -19,7 +18,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -78,15 +76,11 @@ class FuelViewModel @Inject constructor(
                             emit(emptyList())
                         }
                 }
-                .combine(tripBillsRepository.getDestinations()) { bills, destinations ->
-                    bills to destinations
-                }
-                .collect { (bills, destinations) ->
+                .collect { bills ->
                     _fuelUiState.update { state ->
                         state.copy(
                             tripBills = bills,
                             filteredTripBills = bills.filter(state.filters),
-                            destinations = destinations,
                             isLoading = false
                         )
                     }
@@ -107,7 +101,6 @@ class FuelViewModel @Inject constructor(
 data class FuelUiState(
     val isLoading: Boolean = true,
     val tripBills: List<TripBill> = emptyList(),
-    val destinations: List<Destination> = emptyList(),
     val filteredTripBills: List<TripBill> = emptyList(),
     val filters: List<Filter<TripBill, Any>> = emptyList(),
     val spaces: List<Space> = emptyList()

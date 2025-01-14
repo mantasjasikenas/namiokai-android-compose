@@ -1,6 +1,5 @@
 package com.github.mantasjasikenas.core.domain.repository
 
-import com.github.mantasjasikenas.core.domain.model.Destination
 import com.github.mantasjasikenas.core.domain.model.Period
 import com.github.mantasjasikenas.core.domain.model.Response
 import com.github.mantasjasikenas.core.domain.model.bills.TripBill
@@ -11,7 +10,6 @@ interface TripBillsRepository {
     fun getTripBills(spaceIds: List<String>): Flow<List<TripBill>>
     fun getTripBills(period: Period): Flow<List<TripBill>>
     fun getTripBill(id: String): Flow<TripBill>
-    fun getDestinations(): Flow<List<Destination>>
     suspend fun clearTripBills()
     suspend fun insertTripBill(tripBill: TripBill)
     suspend fun updateTripBill(tripBill: TripBill)

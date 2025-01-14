@@ -1,4 +1,4 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
+@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 
 package com.github.mantasjasikenas.feature.bills.form
 
@@ -7,6 +7,8 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -32,7 +34,6 @@ import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -42,13 +43,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.github.mantasjasikenas.core.common.util.Uid
-import com.github.mantasjasikenas.core.domain.model.Destination
 import com.github.mantasjasikenas.core.domain.model.SharedState
 import com.github.mantasjasikenas.core.domain.model.Space
 import com.github.mantasjasikenas.core.domain.model.UsersMap
@@ -68,12 +70,10 @@ import com.github.mantasjasikenas.feature.bills.navigation.BillFormRoute
 
 @Composable
 fun BillFormRoute(
-    sharedState: SharedState,
-    onNavigateUp: () -> Unit
+    sharedState: SharedState, onNavigateUp: () -> Unit
 ) {
     BillFormScreen(
-        sharedState = sharedState,
-        onNavigateUp = onNavigateUp
+        sharedState = sharedState, onNavigateUp = onNavigateUp
     )
 }
 
@@ -104,7 +104,6 @@ fun BillFormScreen(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BillFormContent(
     modifier: Modifier = Modifier,
@@ -178,13 +177,10 @@ fun BillFormContent(
                 when (BillType.entries[it]) {
                     BillType.Purchase -> {
                         PurchaseBillContent(
-                            initialPurchaseBill = initialBill as? PurchaseBill,
-                            onSaveClick = {
+                            initialPurchaseBill = initialBill as? PurchaseBill, onSaveClick = {
                                 onSaveBill(it)
                                 onNavigateUp()
-                            },
-                            usersMap = usersMap,
-                            spaces = uiState.spaces
+                            }, usersMap = usersMap, spaces = uiState.spaces
                         )
                     }
 
@@ -196,20 +192,16 @@ fun BillFormContent(
                                 onNavigateUp()
                             },
                             usersMap = usersMap,
-                            destinations = uiState.destinations,
                             spaces = uiState.spaces
                         )
                     }
 
                     BillType.Flat -> {
                         FlatBillContent(
-                            initialFlatBill = initialBill as? FlatBill,
-                            onSaveClick = {
+                            initialFlatBill = initialBill as? FlatBill, onSaveClick = {
                                 onSaveBill(it)
                                 onNavigateUp()
-                            },
-                            usersMap = usersMap,
-                            spaces = uiState.spaces
+                            }, usersMap = usersMap, spaces = uiState.spaces
                         )
                     }
                 }
@@ -220,8 +212,7 @@ fun BillFormContent(
 
 @Composable
 fun BillContainerWrapper(
-    modifier: Modifier = Modifier,
-    content: @Composable () -> Unit
+    modifier: Modifier = Modifier, content: @Composable () -> Unit
 ) {
     Column(
         modifier = modifier
@@ -247,8 +238,12 @@ fun PurchaseBillContent(
         mutableStateOf(initialPurchaseBill ?: PurchaseBill())
     }
 
+    val selectedSpace = remember {
+        mutableStateOf(spaces.firstOrNull { it.spaceId == bill.spaceId } ?: spaces.firstOrNull())
+    }
+
     SpaceContainer(
-        initialSpaceId = bill.spaceId,
+        selectedSpace = selectedSpace.value,
         paymasterUid = bill.paymasterUid,
         splitUsersUids = bill.splitUsersUid,
         spaces = spaces,
@@ -256,6 +251,7 @@ fun PurchaseBillContent(
         paymasterTitle = stringResource(R.string.paymaster),
         splitUsersTitle = stringResource(R.string.split_bill_with),
         onSpaceSelected = { space ->
+            selectedSpace.value = space
             bill.spaceId = space.spaceId
             bill.paymasterUid = ""
             bill.splitUsersUid = emptyList()
@@ -265,8 +261,7 @@ fun PurchaseBillContent(
         },
         onSplitUsersSelected = {
             bill.splitUsersUid = it
-        }
-    )
+        })
 
     NamiokaiTextField(
         label = stringResource(R.string.shopping_list),
@@ -279,8 +274,7 @@ fun PurchaseBillContent(
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary
             )
-        }
-    )
+        })
 
     Spacer(modifier = Modifier.height(20.dp))
 
@@ -297,30 +291,23 @@ fun PurchaseBillContent(
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary
             )
-        }
-    )
+        })
 
     Spacer(modifier = Modifier.height(32.dp))
 
     Button(onClick = {
         if (!bill.isValid()) {
             Toast.makeText(
-                context,
-                R.string.please_fill_all_fields,
-                Toast.LENGTH_SHORT
-            )
-                .show()
+                context, R.string.please_fill_all_fields, Toast.LENGTH_SHORT
+            ).show()
             return@Button
         }
 
         onSaveClick(bill)
 
         Toast.makeText(
-            context,
-            R.string.bill_saved,
-            Toast.LENGTH_SHORT
-        )
-            .show()
+            context, R.string.bill_saved, Toast.LENGTH_SHORT
+        ).show()
     }) {
         Text(text = if (initialPurchaseBill == null) "Save" else "Update")
     }
@@ -331,25 +318,23 @@ private fun TripBillContent(
     initialTripBill: TripBill? = null,
     onSaveClick: (TripBill) -> Unit,
     usersMap: UsersMap,
-    destinations: List<Destination>,
     spaces: List<Space>
 ) {
     val context = LocalContext.current
 
-    val trip by remember(initialTripBill) {
-        mutableStateOf(initialTripBill ?: TripBill())
+    val trip by remember(initialTripBill) { mutableStateOf(initialTripBill ?: TripBill()) }
+
+    var selectedSpace by remember {
+        mutableStateOf(spaces.firstOrNull { it.spaceId == trip.spaceId } ?: spaces.firstOrNull())
     }
 
-    val (selectedOption, onOptionSelected) = remember { mutableStateOf(destinations[0]) }
-
-    LaunchedEffect(Unit) {
-        if (trip.isValid()) {
-            onOptionSelected(destinations.first { it.name == trip.tripDestination })
-        }
+    val (selectedDestination, onSelectedDestination) = remember(selectedSpace) {
+        mutableStateOf(selectedSpace?.destinations?.firstOrNull { it.name == trip.tripDestination }
+            ?: selectedSpace?.destinations?.firstOrNull())
     }
 
     SpaceContainer(
-        initialSpaceId = trip.spaceId,
+        selectedSpace = selectedSpace,
         paymasterUid = trip.paymasterUid,
         splitUsersUids = trip.splitUsersUid,
         spaces = spaces,
@@ -357,17 +342,20 @@ private fun TripBillContent(
         paymasterTitle = stringResource(R.string.driver),
         splitUsersTitle = stringResource(R.string.passengers),
         onSpaceSelected = { space ->
+            selectedSpace = space
+
             trip.spaceId = space.spaceId
             trip.paymasterUid = ""
             trip.splitUsersUid = emptyList()
+            trip.tripDestination = ""
+            trip.tripPricePerUser = 0.0
         },
         onPaymasterSelected = {
             trip.paymasterUid = it
         },
         onSplitUsersSelected = {
             trip.splitUsersUid = it
-        }
-    )
+        })
 
     Text(
         text = stringResource(R.string.destination),
@@ -376,28 +364,53 @@ private fun TripBillContent(
     )
 
     Column {
-        destinations.forEach { dest ->
-            Row(
-                Modifier
-                    .selectable(
-                        selected = (dest == selectedOption),
-                        onClick = {
-                            onOptionSelected(dest)
-                        }
-                    )
-                    .padding(vertical = 2.5.dp),
-                horizontalArrangement = Arrangement.Start,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                RadioButton(
-                    selected = (dest == selectedOption),
-                    onClick = { onOptionSelected(dest) }
-                )
+        if (selectedSpace == null) {
+            Text(
+                text = "Please select space first",
+                style = MaterialTheme.typography.labelLarge,
+                textAlign = TextAlign.Center
+            )
+        } else {
+            selectedSpace?.destinations?.takeIf { it.isNotEmpty() } ?: run {
                 Text(
-                    text = dest.name,
+                    text = "No destinations found!",
+                    color = MaterialTheme.colorScheme.error,
                     style = MaterialTheme.typography.labelLarge,
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Center,
+                    fontWeight = FontWeight.Bold
                 )
+                return@Column
+            }
+
+            FlowRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 4.dp),
+                horizontalArrangement = Arrangement.spacedBy(24.dp, Alignment.CenterHorizontally),
+                verticalArrangement = Arrangement.Center
+            ) {
+                selectedSpace?.destinations?.forEach { dest ->
+                    Row(
+                        modifier = Modifier
+                            .selectable(
+                                selected = (dest == selectedDestination),
+                                onClick = { onSelectedDestination(dest) },
+                                role = Role.RadioButton
+                            ),
+                        horizontalArrangement = Arrangement.Start,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(
+                            selected = (dest == selectedDestination),
+                            onClick = null
+                        )
+                        Text(
+                            text = dest.name,
+                            style = MaterialTheme.typography.labelLarge,
+                            modifier = Modifier.padding(start = 10.dp)
+                        )
+                    }
+                }
             }
         }
     }
@@ -405,30 +418,32 @@ private fun TripBillContent(
     Spacer(modifier = Modifier.height(32.dp))
 
     Button(onClick = {
-        trip.tripDestination = selectedOption.name
+        if (selectedDestination == null) {
+            Toast.makeText(
+                context, "Please select destination first", Toast.LENGTH_SHORT
+            ).show()
+            return@Button
+        }
+
+        trip.spaceId = selectedSpace?.spaceId ?: ""
+        trip.tripDestination = selectedDestination.name
         trip.tripPricePerUser = when (trip.splitUsersUid.count()) {
-            1 -> selectedOption.tripPriceAlone
-            else -> selectedOption.tripPriceWithOthers
+            1 -> selectedDestination.tripPriceAlone
+            else -> selectedDestination.tripPriceWithOthers
         }
 
         if (!trip.isValid()) {
             Toast.makeText(
-                context,
-                R.string.please_fill_all_fields,
-                Toast.LENGTH_SHORT
-            )
-                .show()
+                context, R.string.please_fill_all_fields, Toast.LENGTH_SHORT
+            ).show()
             return@Button
         }
 
         onSaveClick(trip)
 
         Toast.makeText(
-            context,
-            R.string.fuel_saved,
-            Toast.LENGTH_SHORT
-        )
-            .show()
+            context, R.string.fuel_saved, Toast.LENGTH_SHORT
+        ).show()
     }) {
         Text(text = if (initialTripBill == null) "Save" else "Update")
     }
@@ -446,10 +461,14 @@ private fun FlatBillContent(
     var flatBill by remember(initialFlatBill) {
         mutableStateOf(initialFlatBill ?: FlatBill())
     }
+    val selectedSpace = remember {
+        mutableStateOf(spaces.firstOrNull { it.spaceId == flatBill.spaceId }
+            ?: spaces.firstOrNull())
+    }
     val (includeTaxes, onIncludeTaxesChange) = remember { mutableStateOf(false) }
 
     SpaceContainer(
-        initialSpaceId = flatBill.spaceId,
+        selectedSpace = selectedSpace.value,
         paymasterUid = flatBill.paymasterUid,
         splitUsersUids = flatBill.splitUsersUid,
         spaces = spaces,
@@ -457,6 +476,7 @@ private fun FlatBillContent(
         paymasterTitle = stringResource(R.string.paymaster),
         splitUsersTitle = stringResource(R.string.split_bill_with),
         onSpaceSelected = { space ->
+            selectedSpace.value = space
             flatBill.spaceId = space.spaceId
             flatBill.paymasterUid = ""
             flatBill.splitUsersUid = emptyList()
@@ -466,8 +486,7 @@ private fun FlatBillContent(
         },
         onSplitUsersSelected = {
             flatBill.splitUsersUid = it
-        }
-    )
+        })
 
     NamiokaiNumberField(
         label = "Rent",
@@ -481,8 +500,7 @@ private fun FlatBillContent(
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary
             )
-        }
-    )
+        })
 
     Spacer(modifier = Modifier.height(20.dp))
 
@@ -498,8 +516,7 @@ private fun FlatBillContent(
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary
             )
-        }
-    )
+        })
 
     Spacer(modifier = Modifier.height(20.dp))
 
@@ -547,35 +564,26 @@ private fun FlatBillContent(
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.primary
                 )
-            }
-        )
+            })
     }
 
     Spacer(modifier = Modifier.height(32.dp))
 
     Button(onClick = {
-//        flatBill.splitUsersUid = splitBillHashMap.filter { it.value }.keys.map { it }
-//        flatBill.paymasterUid = paymasterHashMap.filter { it.value }.keys.map { it }
-//            .firstOrNull() ?: ""
+        flatBill.spaceId = selectedSpace.value?.spaceId ?: ""
 
         if (!flatBill.isValid()) {
             Toast.makeText(
-                context,
-                R.string.please_fill_all_fields,
-                Toast.LENGTH_SHORT
-            )
-                .show()
+                context, R.string.please_fill_all_fields, Toast.LENGTH_SHORT
+            ).show()
             return@Button
         }
 
         onSaveClick(flatBill)
 
         Toast.makeText(
-            context,
-            R.string.bill_saved,
-            Toast.LENGTH_SHORT
-        )
-            .show()
+            context, R.string.bill_saved, Toast.LENGTH_SHORT
+        ).show()
     }) {
         Text(text = if (initialFlatBill == null) "Save" else "Update")
     }
@@ -583,7 +591,7 @@ private fun FlatBillContent(
 
 @Composable
 private fun SpaceContainer(
-    initialSpaceId: String? = null,
+    selectedSpace: Space?,
     paymasterUid: String,
     splitUsersUids: List<String>,
     spaces: List<Space>,
@@ -594,12 +602,8 @@ private fun SpaceContainer(
     onPaymasterSelected: (Uid) -> Unit,
     onSplitUsersSelected: (List<Uid>) -> Unit
 ) {
-    val selectedSpace = remember {
-        mutableStateOf(spaces.firstOrNull { it.spaceId == initialSpaceId } ?: spaces.firstOrNull())
-    }
-
-    val spacesMembers = remember(selectedSpace.value) {
-        selectedSpace.value?.memberIds?.let { memberIds ->
+    val spacesMembers = remember(selectedSpace) {
+        selectedSpace?.memberIds?.let { memberIds ->
             usersMap.filterKeys { memberIds.contains(it) }
         } ?: emptyMap()
     }
@@ -614,11 +618,11 @@ private fun SpaceContainer(
     NamiokaiDropdownMenu(
         label = "Space",
         items = spaces,
-        initialSelectedItem = spaces.firstOrNull { it.spaceId == initialSpaceId }
-            ?: selectedSpace.value,
+        initialSelectedItem = spaces.firstOrNull { it.spaceId == selectedSpace?.spaceId }
+            ?: selectedSpace,
         onItemSelected = {
             onSpaceSelected(it)
-            selectedSpace.value = it
+//            selectedSpace = it
         },
         leadingIconVector = Icons.Outlined.Workspaces,
         itemLabel = { it.spaceName },
@@ -627,12 +631,10 @@ private fun SpaceContainer(
     Spacer(modifier = Modifier.height(20.dp))
 
     AnimatedVisibility(
-        modifier = Modifier.fillMaxWidth(),
-        visible = selectedSpace.value != null
+        modifier = Modifier.fillMaxWidth(), visible = selectedSpace != null
     ) {
         Column(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally
         ) {
             UserPickerContainer(
                 title = paymasterTitle,

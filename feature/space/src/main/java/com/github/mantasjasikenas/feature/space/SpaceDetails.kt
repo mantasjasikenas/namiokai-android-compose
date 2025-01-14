@@ -57,29 +57,59 @@ fun SpaceBottomSheet(
                     if (space.duration > 1) "s" else ""
         )
 
+        OutlinedCardFlowRow(
+            title = "Destinations",
+            items = space.destinations.map { it.name }
+        )
+
+        NamiokaiSpacer(height = 10)
+
+        OutlinedCardFlowRow(
+            title = "Members",
+            items = usersMap.filter { space.memberIds.contains(it.key) }.values.map { it.displayName }
+        )
+    }
+}
+
+@Composable
+@OptIn(ExperimentalLayoutApi::class)
+private fun OutlinedCardFlowRow(
+    title: String,
+    items: List<String> = emptyList(),
+) {
+    Text(
+        text = title,
+        style = MaterialTheme.typography.labelMedium,
+        color = MaterialTheme.colorScheme.primary,
+        fontWeight = FontWeight.Bold
+    )
+
+    NamiokaiSpacer(height = 7)
+
+    if (items.isEmpty()) {
         Text(
-            text = "Members",
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.primary,
+            text = "Please add ${title.lowercase(Locale.ROOT)} to this space.",
+            color = MaterialTheme.colorScheme.error,
+            style = MaterialTheme.typography.labelLarge,
             fontWeight = FontWeight.Bold
         )
 
-        NamiokaiSpacer(height = 7)
+        return
+    }
 
-        FlowRow(
-            horizontalArrangement = Arrangement.spacedBy(7.dp),
-            verticalArrangement = Arrangement.spacedBy(7.dp),
-        ) {
-            usersMap.filter { space.memberIds.contains(it.key) }.values.forEach {
-                OutlinedCard(
-                    shape = RoundedCornerShape(25)
-                ) {
-                    Text(
-                        text = it.displayName,
-                        modifier = Modifier.padding(7.dp),
-                        style = MaterialTheme.typography.labelMedium
-                    )
-                }
+    FlowRow(
+        horizontalArrangement = Arrangement.spacedBy(7.dp),
+        verticalArrangement = Arrangement.spacedBy(7.dp),
+    ) {
+        items.forEach {
+            OutlinedCard(
+                shape = RoundedCornerShape(25)
+            ) {
+                Text(
+                    text = it,
+                    modifier = Modifier.padding(7.dp),
+                    style = MaterialTheme.typography.labelMedium
+                )
             }
         }
     }

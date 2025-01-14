@@ -11,6 +11,7 @@ data class Space(
     val spaceId: String = "",
     var spaceName: String = "",
     var memberIds: List<String> = emptyList(),
+    var destinations: List<Destination> = emptyList(),
     var createdBy: String = "",
     var startPeriod: Int = 1,
     var duration: Int = 1,
@@ -18,7 +19,7 @@ data class Space(
 ) {
     @Exclude
     fun isValid(): Boolean {
-        return memberIds.isNotEmpty() && spaceName.isNotBlank()
+        return memberIds.isNotEmpty() && spaceName.isNotBlank() && (destinations.isEmpty() || destinations.all { it.isValid() })
     }
 }
 

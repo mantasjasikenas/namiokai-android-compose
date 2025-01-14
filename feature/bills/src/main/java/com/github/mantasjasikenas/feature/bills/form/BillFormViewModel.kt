@@ -5,12 +5,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.github.mantasjasikenas.core.common.util.Constants.DATE_TIME_FORMAT
-import com.github.mantasjasikenas.core.domain.model.Destination
 import com.github.mantasjasikenas.core.domain.model.Space
 import com.github.mantasjasikenas.core.domain.model.bills.Bill
 import com.github.mantasjasikenas.core.domain.repository.BillsRepository
 import com.github.mantasjasikenas.core.domain.repository.SpaceRepository
-import com.github.mantasjasikenas.core.domain.repository.TripBillsRepository
 import com.github.mantasjasikenas.feature.bills.navigation.BillFormRoute
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
@@ -31,7 +29,6 @@ import javax.inject.Inject
 @HiltViewModel
 class BillFormViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    tripBillsRepository: TripBillsRepository,
     spaceRepository: SpaceRepository,
     private val billsRepository: BillsRepository
 ) :
@@ -40,12 +37,10 @@ class BillFormViewModel @Inject constructor(
     val billFormRoute = savedStateHandle.toRoute<BillFormRoute>()
 
     val billFormUiState: StateFlow<BillFormUiState> = combine(
-        tripBillsRepository.getDestinations(),
         spaceRepository.getCurrentUserSpaces(),
         billFlow()
-    ) { destinations, spaces, bill ->
+    ) { spaces, bill ->
         BillFormUiState.Success(
-            destinations = destinations,
             spaces = spaces,
             initialBill = bill
         )
@@ -98,7 +93,6 @@ class BillFormViewModel @Inject constructor(
 sealed interface BillFormUiState {
     data object Loading : BillFormUiState
     data class Success(
-        val destinations: List<Destination> = emptyList(),
         val spaces: List<Space> = emptyList(),
         val initialBill: Bill? = null
     ) : BillFormUiState
