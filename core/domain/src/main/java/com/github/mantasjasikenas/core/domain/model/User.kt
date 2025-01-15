@@ -4,6 +4,7 @@ import com.github.mantasjasikenas.core.common.util.DisplayName
 import com.github.mantasjasikenas.core.common.util.Uid
 import com.github.mantasjasikenas.core.common.util.UserUid
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.firestore.Exclude
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -13,7 +14,20 @@ data class User(
     val uid: String = "",
     val photoUrl: String = "",
     val admin: Boolean = false
-)
+) {
+    @Exclude
+    fun doesMatchSearchQuery(query: String): Boolean {
+        val matchingCombinations = listOf(
+            displayName,
+            email,
+            uid,
+        )
+
+        return matchingCombinations.any { combination ->
+            combination.contains(query, ignoreCase = true)
+        }
+    }
+}
 
 typealias UsersMap = Map<UserUid, User>
 

@@ -25,11 +25,18 @@ fun NavController.navigateToSpaceForm(
 }
 
 fun NavGraphBuilder.spaceFormScreen(
-    sharedState: SharedState, onNavigateUp: () -> Unit
+    sharedState: SharedState,
+    onNavigateUp: () -> Unit,
+    onNavigateToInviteUsers: () -> Unit
 ) {
-    composable<SpaceFormRoute> {
+    composable<SpaceFormRoute> { entry ->
+        val invitedUsers = entry.savedStateHandle.get<List<String>>("selectedUsers")
+
         SpaceFormRoute(
-            sharedState = sharedState, onNavigateUp = onNavigateUp
+            sharedState = sharedState,
+            onNavigateUp = onNavigateUp,
+            invitedUsers = invitedUsers,
+            onNavigateToInviteUsers = onNavigateToInviteUsers
         )
     }
 }

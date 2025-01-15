@@ -1,5 +1,8 @@
 @file:Suppress("UnstableApiUsage")
 
+include(":feature:search-users")
+
+
 include(":feature:space")
 
 

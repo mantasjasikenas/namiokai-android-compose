@@ -15,6 +15,8 @@ import com.github.mantasjasikenas.feature.flat.navigation.navigateToFlatBillList
 import com.github.mantasjasikenas.feature.home.navigation.homeScreen
 import com.github.mantasjasikenas.feature.notifications.navigation.notificationsScreen
 import com.github.mantasjasikenas.feature.profile.navigation.profileScreen
+import com.github.mantasjasikenas.feature.search_users.navigation.SearchUsersRoute
+import com.github.mantasjasikenas.feature.search_users.navigation.searchUsersScreen
 import com.github.mantasjasikenas.feature.settings.navigation.settingsScreen
 import com.github.mantasjasikenas.feature.space.navigation.SpaceFormRoute
 import com.github.mantasjasikenas.feature.space.navigation.spaceFormScreen
@@ -76,10 +78,25 @@ fun NavGraphBuilder.homeNavGraph(
         }
     )
 
+    searchUsersScreen(
+        onNavigateBack = { selectedUsers ->
+            navController.previousBackStackEntry?.savedStateHandle?.set(
+                key = "selectedUsers",
+                value = selectedUsers
+            )
+            navController.navigateUp()
+        }
+    )
+
     spaceFormScreen(
         sharedState = sharedState,
         onNavigateUp = {
             navController.navigateUp()
+        },
+        onNavigateToInviteUsers = {
+            navController.navigate(route = SearchUsersRoute) {
+                launchSingleTop = true
+            }
         }
     )
 

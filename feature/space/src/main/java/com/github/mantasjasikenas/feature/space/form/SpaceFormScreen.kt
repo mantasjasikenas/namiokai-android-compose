@@ -32,6 +32,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -65,20 +66,26 @@ import com.github.mantasjasikenas.feature.space.navigation.SpaceFormRoute
 
 @Composable
 fun SpaceFormRoute(
+    invitedUsers: List<String>?,
     sharedState: SharedState,
-    onNavigateUp: () -> Unit
+    onNavigateUp: () -> Unit,
+    onNavigateToInviteUsers: () -> Unit
 ) {
     SpaceFormScreen(
         sharedState = sharedState,
-        onNavigateUp = onNavigateUp
+        invitedUsers = invitedUsers,
+        onNavigateUp = onNavigateUp,
+        onNavigateToInviteUsers = onNavigateToInviteUsers
     )
 }
 
 @Composable
 fun SpaceFormScreen(
     modifier: Modifier = Modifier,
+    invitedUsers: List<String>?,
     sharedState: SharedState,
     onNavigateUp: () -> Unit,
+    onNavigateToInviteUsers: () -> Unit,
     spaceFormViewModel: SpaceFormViewModel = hiltViewModel(),
 ) {
     val uiState by spaceFormViewModel.spaceFormUiState.collectAsStateWithLifecycle()
@@ -92,11 +99,13 @@ fun SpaceFormScreen(
             SpaceFormContent(
                 modifier = modifier,
                 uiState = uiState as SpaceFormUiState.Success,
+                invitedUsers = invitedUsers,
                 usersMap = sharedState.usersMap,
                 currentUser = sharedState.currentUser,
                 spaceFormViewModel = spaceFormViewModel,
                 spaceFormRoute = spaceFormViewModel.spaceFormRoute,
                 onNavigateUp = onNavigateUp,
+                onNavigateToInviteUsers = onNavigateToInviteUsers
             )
         }
     }
@@ -107,10 +116,12 @@ fun SpaceFormContent(
     modifier: Modifier = Modifier,
     uiState: SpaceFormUiState.Success,
     usersMap: UsersMap,
+    invitedUsers: List<String>?,
     currentUser: User,
     spaceFormViewModel: SpaceFormViewModel,
     spaceFormRoute: SpaceFormRoute,
     onNavigateUp: () -> Unit,
+    onNavigateToInviteUsers: () -> Unit
 ) {
     val initialSpace = uiState.initialSpace
 
@@ -130,7 +141,9 @@ fun SpaceFormContent(
                 onNavigateUp()
             },
             usersMap = usersMap,
-            currentUser = currentUser
+            currentUser = currentUser,
+            invitedUsers = invitedUsers,
+            onNavigateToInviteUsers = onNavigateToInviteUsers
         )
     }
 }
@@ -140,12 +153,20 @@ private fun SpaceContent(
     initialSpace: Space? = null,
     onSaveClick: (Space) -> Unit,
     usersMap: UsersMap,
-    currentUser: User
+    currentUser: User,
+    invitedUsers: List<String>?,
+    onNavigateToInviteUsers: () -> Unit
 ) {
     val context = LocalContext.current
 
     var space by remember(initialSpace) {
         mutableStateOf(initialSpace ?: Space(createdBy = currentUser.uid))
+    }
+
+    LaunchedEffect(key1 = invitedUsers) {
+        if (invitedUsers != null) {
+            space = space.copy(memberIds = (space.memberIds + invitedUsers).distinct())
+        }
     }
 
     val showTripDestinationsBottomSheet = remember { mutableStateOf(false) }
@@ -317,12 +338,20 @@ private fun SpaceContent(
 
     // TODO: migrate to bottom sheet because of the long list and add search functionality
     UserPickerContainer(
-        title = "Members",
-        usersMap = usersMap,
+        title = "Current members",
+        usersMap = remember(space.memberIds) { usersMap.filter { it.value.uid in space.memberIds } },
         isMultipleSelectEnabled = true,
         initialSelectedUsers = space.memberIds,
         onUsersSelected = { space.memberIds = it }
     )
+
+    Spacer(modifier = Modifier.height(12.dp))
+
+    FilledTonalButton(
+        onClick = onNavigateToInviteUsers
+    ) {
+        Text(text = "Add new members") // TODO: replace with invite when invite is implemented
+    }
 
     Spacer(modifier = Modifier.height(32.dp))
 
