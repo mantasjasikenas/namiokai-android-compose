@@ -72,7 +72,7 @@ import coil.request.ImageRequest
 import com.github.mantasjasikenas.core.common.util.UserUid
 import com.github.mantasjasikenas.core.common.util.format
 import com.github.mantasjasikenas.core.common.util.parseLocalDateTime
-import com.github.mantasjasikenas.core.domain.model.Period
+import com.github.mantasjasikenas.core.domain.model.period.Period
 import com.github.mantasjasikenas.core.domain.model.PeriodState
 import com.github.mantasjasikenas.core.domain.model.User
 import com.github.mantasjasikenas.core.domain.model.UsersMap

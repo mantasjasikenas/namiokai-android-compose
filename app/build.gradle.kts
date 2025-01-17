@@ -157,6 +157,7 @@ dependencies {
     implementation(libs.play.services.auth)
 
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.kotlinx.datetime.jvm)
 
     implementation(libs.androidx.adaptive)
     implementation(libs.androidx.adaptive.layout)
@@ -166,7 +167,15 @@ dependencies {
     androidTestImplementation(libs.androidx.test.espresso.core)
     androidTestImplementation(libs.compose.ui.test.junit4)
 
+    testImplementation(libs.junit.jupiter.api)
+    testRuntimeOnly(libs.junit.jupiter.engine)
+    testImplementation(libs.junit.jupiter.params)
+
     baselineProfile(projects.benchmark)
+}
+
+tasks.withType<Test> {
+    useJUnitPlatform()
 }
 
 baselineProfile {

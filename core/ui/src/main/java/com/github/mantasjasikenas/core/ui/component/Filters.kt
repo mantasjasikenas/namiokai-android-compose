@@ -40,7 +40,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.github.mantasjasikenas.core.domain.model.Filter
-import com.github.mantasjasikenas.core.domain.model.Period
+import com.github.mantasjasikenas.core.domain.model.period.Period
 import com.github.mantasjasikenas.core.domain.model.bills.PurchaseBill
 import com.github.mantasjasikenas.core.domain.model.filter
 import com.github.mantasjasikenas.core.ui.common.NamiokaiBottomSheet

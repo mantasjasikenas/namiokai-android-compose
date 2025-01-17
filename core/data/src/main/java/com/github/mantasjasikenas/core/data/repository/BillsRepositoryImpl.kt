@@ -1,6 +1,6 @@
 package com.github.mantasjasikenas.core.data.repository
 
-import com.github.mantasjasikenas.core.domain.model.Period
+import com.github.mantasjasikenas.core.domain.model.period.Period
 import com.github.mantasjasikenas.core.domain.model.bills.Bill
 import com.github.mantasjasikenas.core.domain.model.bills.BillType
 import com.github.mantasjasikenas.core.domain.model.bills.FlatBill

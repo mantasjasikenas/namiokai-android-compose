@@ -47,14 +47,8 @@ fun SpaceBottomSheet(
         )
 
         CardText(
-            label = "Start period",
-            value = space.startPeriod.toString()
-        )
-
-        CardText(
-            label = "Duration",
-            value = "${space.duration} ${space.durationUnitType.title.lowercase(Locale.ROOT)}" +
-                    if (space.duration > 1) "s" else ""
+            label = "Recurrence start",
+            value = space.recurrenceStart.toString()
         )
 
         OutlinedCardFlowRow(

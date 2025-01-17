@@ -18,7 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.github.mantasjasikenas.core.domain.model.Period
+import com.github.mantasjasikenas.core.domain.model.period.Period
 import com.github.mantasjasikenas.core.ui.common.NamiokaiDateRangePicker
 import com.github.mantasjasikenas.core.ui.common.rememberState
 import kotlinx.coroutines.launch

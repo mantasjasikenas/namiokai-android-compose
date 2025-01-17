@@ -71,6 +71,7 @@ import androidx.compose.ui.window.DialogProperties
 import com.github.mantasjasikenas.core.common.util.Uid
 import com.github.mantasjasikenas.core.common.util.toMutableStateMap
 import com.github.mantasjasikenas.core.domain.model.UsersMap
+import com.github.mantasjasikenas.core.domain.model.period.Period
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -476,7 +477,7 @@ fun NamiokaiDateRangePicker(
     initialSelectedStartDateMillis: Long? = null,
     initialSelectedEndDateMillis: Long? = null,
     onDismissRequest: () -> Unit = {},
-    onSaveRequest: (com.github.mantasjasikenas.core.domain.model.Period) -> Unit = { _ -> },
+    onSaveRequest: (Period) -> Unit = { _ -> },
     onResetRequest: () -> Unit = {}
 ) {
 
@@ -502,7 +503,7 @@ fun NamiokaiDateRangePicker(
                 onClick = {
                     onDismissRequest()
                     onSaveRequest(
-                        com.github.mantasjasikenas.core.domain.model.Period(
+                        Period(
                             Instant.fromEpochMilliseconds(state.selectedStartDateMillis ?: 0)
                                 .toLocalDateTime(TimeZone.currentSystemDefault()).date,
 

@@ -3,8 +3,8 @@
 package com.github.mantasjasikenas.core.data.repository.debts
 
 import android.util.Log
-import com.github.mantasjasikenas.core.domain.model.Period
 import com.github.mantasjasikenas.core.domain.model.debts.DebtsMap
+import com.github.mantasjasikenas.core.domain.model.period.Period
 import com.github.mantasjasikenas.core.domain.repository.BillsRepository
 import com.github.mantasjasikenas.core.domain.repository.DebtsRepository
 import com.github.mantasjasikenas.core.domain.repository.PeriodRepository

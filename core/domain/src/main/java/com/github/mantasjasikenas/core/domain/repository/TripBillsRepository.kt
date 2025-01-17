@@ -1,6 +1,6 @@
 package com.github.mantasjasikenas.core.domain.repository
 
-import com.github.mantasjasikenas.core.domain.model.Period
+import com.github.mantasjasikenas.core.domain.model.period.Period
 import com.github.mantasjasikenas.core.domain.model.Response
 import com.github.mantasjasikenas.core.domain.model.bills.TripBill
 import kotlinx.coroutines.flow.Flow

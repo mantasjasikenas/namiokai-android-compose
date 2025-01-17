@@ -3,7 +3,7 @@ package com.github.mantasjasikenas.feature.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.mantasjasikenas.core.data.repository.debts.DebtsService
-import com.github.mantasjasikenas.core.domain.model.Period
+import com.github.mantasjasikenas.core.domain.model.period.Period
 import com.github.mantasjasikenas.core.domain.model.User
 import com.github.mantasjasikenas.core.domain.repository.PeriodRepository
 import com.github.mantasjasikenas.core.domain.repository.UsersRepository

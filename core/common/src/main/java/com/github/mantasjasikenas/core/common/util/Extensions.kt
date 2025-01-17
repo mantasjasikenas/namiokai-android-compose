@@ -54,6 +54,13 @@ fun <T> Collection<T>.filterAll(predicates: MutableCollection<(T) -> Boolean>): 
     }
 }
 
+inline fun <T> T.applyIf(predicate: T.() -> Boolean, block: T.() -> T): T =
+    if (predicate()) {
+        block(this)
+    } else {
+        this
+    }
+
 fun Color.toHex(): String {
     return String.format(
         "#%06X",

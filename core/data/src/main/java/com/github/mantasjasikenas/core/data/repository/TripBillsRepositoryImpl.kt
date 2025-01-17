@@ -1,8 +1,8 @@
 package com.github.mantasjasikenas.core.data.repository
 
-import com.github.mantasjasikenas.core.domain.model.Period
 import com.github.mantasjasikenas.core.domain.model.Response
 import com.github.mantasjasikenas.core.domain.model.bills.TripBill
+import com.github.mantasjasikenas.core.domain.model.period.Period
 import com.github.mantasjasikenas.core.domain.repository.BaseFirebaseRepository
 import com.github.mantasjasikenas.core.domain.repository.TripBillsRepository
 import com.google.firebase.firestore.FirebaseFirestore
@@ -16,7 +16,6 @@ import javax.inject.Inject
 
 private const val TRIP_BILL_COLLECTION = "fuel"
 private const val BACKUP_FUEL_PATH = "backup/fuel"
-private const val DESTINATIONS_COLLECTION = "destinations"
 private const val ORDER_BY_FIELD = "date"
 private const val SPACE_ID_FIELD = "spaceId"
 

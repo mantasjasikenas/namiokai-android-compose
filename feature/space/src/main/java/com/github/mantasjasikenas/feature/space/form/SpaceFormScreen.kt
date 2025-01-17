@@ -49,7 +49,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.github.mantasjasikenas.core.common.util.Uid
 import com.github.mantasjasikenas.core.domain.model.Destination
-import com.github.mantasjasikenas.core.domain.model.DurationUnit
+import com.github.mantasjasikenas.core.domain.model.RecurrenceUnit
 import com.github.mantasjasikenas.core.domain.model.SharedState
 import com.github.mantasjasikenas.core.domain.model.Space
 import com.github.mantasjasikenas.core.domain.model.User
@@ -226,17 +226,17 @@ private fun SpaceContent(
     Spacer(modifier = Modifier.height(20.dp))
 
     Text(
-        text = "Duration unit",
+        text = "Recurrence unit",
         style = MaterialTheme.typography.titleSmall,
         textAlign = TextAlign.Center,
         modifier = Modifier.padding(bottom = 7.dp)
     )
 
     NamiokaiDropdownMenu(
-        label = "Duration unit",
-        items = DurationUnit.entries.toList(),
-        initialSelectedItem = space.durationUnitType,
-        onItemSelected = { space.durationUnitType = it },
+        label = "Recurrence unit",
+        items = RecurrenceUnit.entries.toList(),
+        initialSelectedItem = space.recurrenceUnit,
+        onItemSelected = { space.recurrenceUnit = it },
         leadingIconVector = Icons.Outlined.DateRange,
         itemLabel = { it.title },
     )
@@ -244,46 +244,19 @@ private fun SpaceContent(
     Spacer(modifier = Modifier.height(20.dp))
 
     Text(
-        text = "Duration",
+        text = "Recurrence start",
         style = MaterialTheme.typography.titleSmall,
         textAlign = TextAlign.Center,
         modifier = Modifier.padding(bottom = 7.dp)
     )
 
     NamiokaiTextField(
-        label = "Duration",
-        initialTextFieldValue = space.duration.toString(),
+        label = "Recurrence start",
+        initialTextFieldValue = space.recurrenceStart.toString(),
         validateInput = { it.isDigitsOnly() },
         keyboardType = KeyboardType.Number,
         onValueChange = {
-            space.duration = it.toIntOrNull() ?: return@NamiokaiTextField
-        },
-        leadingIcon = {
-            Icon(
-                modifier = Modifier.size(21.dp),
-                imageVector = Icons.Outlined.Workspaces,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary
-            )
-        }
-    )
-
-    Spacer(modifier = Modifier.height(20.dp))
-
-    Text(
-        text = "Start period",
-        style = MaterialTheme.typography.titleSmall,
-        textAlign = TextAlign.Center,
-        modifier = Modifier.padding(bottom = 7.dp)
-    )
-
-    NamiokaiTextField(
-        label = "Start period",
-        initialTextFieldValue = space.startPeriod.toString(),
-        validateInput = { it.isDigitsOnly() },
-        keyboardType = KeyboardType.Number,
-        onValueChange = {
-            space.startPeriod = it.toIntOrNull() ?: return@NamiokaiTextField
+            space.recurrenceStart = it.toIntOrNull() ?: return@NamiokaiTextField
         },
         leadingIcon = {
             Icon(

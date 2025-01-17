@@ -1,7 +1,7 @@
 package com.github.mantasjasikenas.core.data.repository
 
-import com.github.mantasjasikenas.core.domain.model.Period
 import com.github.mantasjasikenas.core.domain.model.bills.FlatBill
+import com.github.mantasjasikenas.core.domain.model.period.Period
 import com.github.mantasjasikenas.core.domain.repository.BaseFirebaseRepository
 import com.github.mantasjasikenas.core.domain.repository.FlatBillsRepository
 import com.google.firebase.firestore.FirebaseFirestore
@@ -18,7 +18,7 @@ private const val ORDER_BY_FIELD = "date"
 private const val SPACE_ID_FIELD = "spaceId"
 
 class FlatBillsRepositoryImpl @Inject constructor(
-    private val db: FirebaseFirestore,
+    db: FirebaseFirestore,
     private val baseFirebaseRepository: BaseFirebaseRepository
 ) : FlatBillsRepository {
 

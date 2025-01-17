@@ -1,10 +1,10 @@
 package com.github.mantasjasikenas.core.data.repository
 
 import android.util.Log
-import com.github.mantasjasikenas.core.domain.model.Period
+import com.github.mantasjasikenas.core.domain.model.period.Period
 import com.github.mantasjasikenas.core.domain.model.PeriodState
-import com.github.mantasjasikenas.core.domain.model.getMonthlyPeriod
-import com.github.mantasjasikenas.core.domain.model.previousMonthly
+import com.github.mantasjasikenas.core.domain.model.period.getMonthlyPeriod
+import com.github.mantasjasikenas.core.domain.model.period.previousMonthlyDeprecated
 import com.github.mantasjasikenas.core.domain.repository.PeriodRepository
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.remoteconfig.ktx.remoteConfig
@@ -89,7 +89,7 @@ class PeriodRepositoryImpl @Inject constructor(
         val totalPeriodsCount = nextPeriodsCount + previousPeriodsCount + 1
 
         val periods = (0 until totalPeriodsCount).map {
-            currentPeriod.previousMonthly(previousPeriodsCount - it)
+            currentPeriod.previousMonthlyDeprecated(previousPeriodsCount - it)
         }
 
         return periods
