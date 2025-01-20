@@ -1,8 +1,8 @@
 package com.github.mantasjasikenas.core.data.repository
 
-import com.github.mantasjasikenas.core.domain.model.period.Period
 import com.github.mantasjasikenas.core.domain.model.Response
 import com.github.mantasjasikenas.core.domain.model.bills.PurchaseBill
+import com.github.mantasjasikenas.core.domain.model.period.Period
 import com.github.mantasjasikenas.core.domain.repository.BaseFirebaseRepository
 import com.github.mantasjasikenas.core.domain.repository.PurchaseBillsRepository
 import com.google.firebase.firestore.FirebaseFirestore
@@ -76,6 +76,55 @@ class PurchaseBillsRepositoryImpl @Inject constructor(
                     document.toObject<PurchaseBill>()!!
                 }
             }
+
+    override fun getPurchaseBills(period: Period, spaceId: String): Flow<List<PurchaseBill>> {
+        return billsCollection
+            .orderBy(
+                ORDER_BY_FIELD,
+                Query.Direction.DESCENDING
+            )
+            .whereEqualTo(SPACE_ID_FIELD, spaceId)
+            .whereGreaterThanOrEqualTo(
+                ORDER_BY_FIELD,
+                period.start.toString() + "T00:00:00"
+            )
+            .whereLessThanOrEqualTo(
+                ORDER_BY_FIELD,
+                period.end.toString() + "T23:59:59"
+            )
+            .snapshots()
+            .map {
+                it.documents.map { document ->
+                    document.toObject<PurchaseBill>()!!
+                }
+            }
+    }
+
+    override fun getPurchaseBills(
+        period: Period,
+        spaceIds: List<String>
+    ): Flow<List<PurchaseBill>> {
+        return billsCollection
+            .whereIn(SPACE_ID_FIELD, spaceIds)
+            .orderBy(
+                ORDER_BY_FIELD,
+                Query.Direction.DESCENDING
+            )
+            .whereGreaterThanOrEqualTo(
+                ORDER_BY_FIELD,
+                period.start.toString() + "T00:00:00"
+            )
+            .whereLessThanOrEqualTo(
+                ORDER_BY_FIELD,
+                period.end.toString() + "T23:59:59"
+            )
+            .snapshots()
+            .map {
+                it.documents.map { document ->
+                    document.toObject<PurchaseBill>()!!
+                }
+            }
+    }
 
     override fun getPurchaseBill(id: String): Flow<PurchaseBill> =
         billsCollection

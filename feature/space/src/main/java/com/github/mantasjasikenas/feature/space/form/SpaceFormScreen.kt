@@ -2,7 +2,11 @@
 
 package com.github.mantasjasikenas.feature.space.form
 
-import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -36,10 +40,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -47,6 +51,8 @@ import androidx.compose.ui.unit.dp
 import androidx.core.text.isDigitsOnly
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.github.mantasjasikenas.core.common.util.SnackbarController
+import com.github.mantasjasikenas.core.common.util.SnackbarEvent
 import com.github.mantasjasikenas.core.common.util.Uid
 import com.github.mantasjasikenas.core.domain.model.Destination
 import com.github.mantasjasikenas.core.domain.model.RecurrenceUnit
@@ -54,6 +60,7 @@ import com.github.mantasjasikenas.core.domain.model.SharedState
 import com.github.mantasjasikenas.core.domain.model.Space
 import com.github.mantasjasikenas.core.domain.model.User
 import com.github.mantasjasikenas.core.domain.model.UsersMap
+import com.github.mantasjasikenas.core.domain.model.allowedStartValues
 import com.github.mantasjasikenas.core.ui.common.NamiokaiBottomSheet
 import com.github.mantasjasikenas.core.ui.common.NamiokaiCircularProgressIndicator
 import com.github.mantasjasikenas.core.ui.common.NamiokaiSpacer
@@ -63,6 +70,7 @@ import com.github.mantasjasikenas.core.ui.component.NamiokaiDropdownMenu
 import com.github.mantasjasikenas.core.ui.component.NamiokaiNumberField
 import com.github.mantasjasikenas.core.ui.component.NamiokaiTextField
 import com.github.mantasjasikenas.feature.space.navigation.SpaceFormRoute
+import kotlinx.coroutines.launch
 
 @Composable
 fun SpaceFormRoute(
@@ -157,10 +165,15 @@ private fun SpaceContent(
     invitedUsers: List<String>?,
     onNavigateToInviteUsers: () -> Unit
 ) {
-    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
 
     var space by remember(initialSpace) {
-        mutableStateOf(initialSpace ?: Space(createdBy = currentUser.uid))
+        mutableStateOf(
+            initialSpace ?: Space(
+                createdBy = currentUser.uid,
+                memberIds = listOf(currentUser.uid)
+            )
+        )
     }
 
     LaunchedEffect(key1 = invitedUsers) {
@@ -173,33 +186,47 @@ private fun SpaceContent(
 
     val onSpaceSave = spaceSave@{
         if (space.createdBy !in space.memberIds) {
-            Toast.makeText(
-                context,
-                "Creator must be in members",
-                Toast.LENGTH_SHORT
-            )
-                .show()
+            scope.launch {
+                SnackbarController.sendEvent(
+                    event = SnackbarEvent(
+                        message = "Creator must be in members",
+                    )
+                )
+            }
             return@spaceSave
         }
 
         if (!space.isValid()) {
-            Toast.makeText(
-                context,
-                "Please fill all fields",
-                Toast.LENGTH_SHORT
-            )
-                .show()
+            scope.launch {
+                SnackbarController.sendEvent(
+                    event = SnackbarEvent(
+                        message = "Please fill in all fields",
+                    )
+                )
+            }
             return@spaceSave
         }
 
         onSaveClick(space)
 
-        Toast.makeText(
-            context,
-            "Space saved",
-            Toast.LENGTH_SHORT
-        )
-            .show()
+        scope.launch {
+            SnackbarController.sendEvent(
+                event = SnackbarEvent(
+                    message = "Space saved",
+                )
+            )
+        }
+    }
+
+    // rename to Period recurrence?
+    val recurrenceStartLabel = { unit: RecurrenceUnit ->
+        val range = unit.allowedStartValues().run { "[$first - $last]" }
+
+        when (unit) {
+            RecurrenceUnit.WEEKLY -> "Week day $range"
+            RecurrenceUnit.MONTHLY -> "Day of month $range"
+            else -> "Recurrence start"
+        }
     }
 
     Text(
@@ -226,49 +253,61 @@ private fun SpaceContent(
     Spacer(modifier = Modifier.height(20.dp))
 
     Text(
-        text = "Recurrence unit",
+        text = "Recurrence",
         style = MaterialTheme.typography.titleSmall,
         textAlign = TextAlign.Center,
         modifier = Modifier.padding(bottom = 7.dp)
     )
 
     NamiokaiDropdownMenu(
-        label = "Recurrence unit",
+        label = "Recurrence",
         items = RecurrenceUnit.entries.toList(),
         initialSelectedItem = space.recurrenceUnit,
-        onItemSelected = { space.recurrenceUnit = it },
+        onItemSelected = { space = space.copy(recurrenceUnit = it) },
         leadingIconVector = Icons.Outlined.DateRange,
         itemLabel = { it.title },
     )
 
     Spacer(modifier = Modifier.height(20.dp))
 
-    Text(
-        text = "Recurrence start",
-        style = MaterialTheme.typography.titleSmall,
-        textAlign = TextAlign.Center,
-        modifier = Modifier.padding(bottom = 7.dp)
-    )
-
-    NamiokaiTextField(
-        label = "Recurrence start",
-        initialTextFieldValue = space.recurrenceStart.toString(),
-        validateInput = { it.isDigitsOnly() },
-        keyboardType = KeyboardType.Number,
-        onValueChange = {
-            space.recurrenceStart = it.toIntOrNull() ?: return@NamiokaiTextField
-        },
-        leadingIcon = {
-            Icon(
-                modifier = Modifier.size(21.dp),
-                imageVector = Icons.Outlined.CalendarToday,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary
+    AnimatedVisibility(
+        modifier = Modifier.fillMaxWidth(),
+        visible = space.recurrenceUnit != RecurrenceUnit.DAILY,
+        enter = expandVertically() + fadeIn(),
+        exit = shrinkVertically() + fadeOut()
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "Recurrence start",
+                style = MaterialTheme.typography.titleSmall,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(bottom = 7.dp)
             )
-        }
-    )
 
-    Spacer(modifier = Modifier.height(20.dp))
+            NamiokaiTextField(
+                label = recurrenceStartLabel(space.recurrenceUnit),
+                initialTextFieldValue = space.recurrenceStart.toString(),
+                validateInput = { it.isDigitsOnly() },
+                keyboardType = KeyboardType.Number,
+                onValueChange = {
+                    space.recurrenceStart = it.toIntOrNull() ?: return@NamiokaiTextField
+                },
+                leadingIcon = {
+                    Icon(
+                        modifier = Modifier.size(21.dp),
+                        imageVector = Icons.Outlined.CalendarToday,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+            )
+
+            Spacer(modifier = Modifier.height(20.dp))
+        }
+    }
 
     Text(
         text = "Trip destinations",
@@ -476,17 +515,18 @@ fun AddDestinationDialog(
     onDismiss: () -> Unit,
     onDestinationSave: (Destination) -> Unit
 ) {
-    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     val destination = remember { mutableStateOf(Destination()) }
 
     val onSaveClick = onSaveClick@{
         if (!destination.value.isValid()) {
-            Toast.makeText(
-                context,
-                "Please fill in all fields",
-                Toast.LENGTH_SHORT
-            )
-                .show()
+            scope.launch {
+                SnackbarController.sendEvent(
+                    event = SnackbarEvent(
+                        message = "Please fill in all fields",
+                    )
+                )
+            }
 
             return@onSaveClick
         }

@@ -12,8 +12,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.github.mantasjasikenas.core.domain.model.RecurrenceUnit
 import com.github.mantasjasikenas.core.domain.model.Space
 import com.github.mantasjasikenas.core.domain.model.UsersMap
+import com.github.mantasjasikenas.core.domain.model.allowedStartValues
 import com.github.mantasjasikenas.core.ui.common.CardText
 import com.github.mantasjasikenas.core.ui.common.NamiokaiSpacer
 import com.github.mantasjasikenas.core.ui.common.bill.BillDetailsBottomSheetWrapper
@@ -29,6 +31,16 @@ fun SpaceBottomSheet(
     onDismiss: () -> Unit,
     onDelete: () -> Unit
 ) {
+    val recurrenceStartLabel = { unit: RecurrenceUnit ->
+        val range = unit.allowedStartValues().run { "[$first - $last]" }
+
+        when (unit) {
+            RecurrenceUnit.WEEKLY -> "(week day)"
+            RecurrenceUnit.MONTHLY -> "(day of month)"
+            else -> ""
+        }
+    }
+
     BillDetailsBottomSheetWrapper(
         title = "Space details",
         isAllowedModification = isAllowedModification,
@@ -47,7 +59,12 @@ fun SpaceBottomSheet(
         )
 
         CardText(
-            label = "Recurrence start",
+            label = "Recurrence unit",
+            value = space.recurrenceUnit.title
+        )
+
+        CardText(
+            label = "Recurrence start ${recurrenceStartLabel(space.recurrenceUnit)}",
             value = space.recurrenceStart.toString()
         )
 

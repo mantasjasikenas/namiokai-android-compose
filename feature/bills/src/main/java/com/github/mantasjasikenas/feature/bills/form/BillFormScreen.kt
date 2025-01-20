@@ -296,6 +296,8 @@ fun PurchaseBillContent(
     Spacer(modifier = Modifier.height(32.dp))
 
     Button(onClick = {
+        bill.spaceId = selectedSpace.value?.spaceId ?: ""
+
         if (!bill.isValid()) {
             Toast.makeText(
                 context, R.string.please_fill_all_fields, Toast.LENGTH_SHORT

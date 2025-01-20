@@ -1,13 +1,15 @@
 package com.github.mantasjasikenas.core.domain.repository
 
-import com.github.mantasjasikenas.core.domain.model.period.Period
 import com.github.mantasjasikenas.core.domain.model.Response
 import com.github.mantasjasikenas.core.domain.model.bills.PurchaseBill
+import com.github.mantasjasikenas.core.domain.model.period.Period
 import kotlinx.coroutines.flow.Flow
 
 interface PurchaseBillsRepository {
     fun getPurchaseBills(): Flow<List<PurchaseBill>>
     fun getPurchaseBills(period: Period): Flow<List<PurchaseBill>>
+    fun getPurchaseBills(period: Period, spaceId: String): Flow<List<PurchaseBill>>
+    fun getPurchaseBills(period: Period, spaceIds: List<String>): Flow<List<PurchaseBill>>
     fun getPurchaseBills(spaceIds: List<String>): Flow<List<PurchaseBill>>
     fun getPurchaseBill(id: String): Flow<PurchaseBill>
     suspend fun insertPurchaseBill(purchaseBill: PurchaseBill)

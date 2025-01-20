@@ -46,7 +46,6 @@ fun NamiokaiElevatedCard(
             ),
         onClick = onClick,
     ) {
-
         Column(
             modifier = Modifier
                 .fillMaxSize()

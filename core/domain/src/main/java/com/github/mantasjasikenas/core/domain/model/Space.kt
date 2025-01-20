@@ -20,7 +20,8 @@ data class Space(
 ) {
     @Exclude
     fun isValid(): Boolean {
-        return memberIds.isNotEmpty() && spaceName.isNotBlank() && (destinations.isEmpty() || destinations.all { it.isValid() })
+        return memberIds.isNotEmpty() && spaceName.isNotBlank() && (destinations.isEmpty() || destinations.all { it.isValid() }) &&
+                recurrenceStart in recurrenceUnit.allowedStartValues()
     }
 
     @Exclude
@@ -37,6 +38,15 @@ enum class RecurrenceUnit(val title: String, val unit: DateTimeUnit) {
     DAILY("Daily", DateTimeUnit.DAY),
     WEEKLY("Weekly", DateTimeUnit.WEEK),
     MONTHLY("Monthly", DateTimeUnit.MONTH),
+}
+
+fun RecurrenceUnit.allowedStartValues(): IntRange {
+    return when (this) {
+        RecurrenceUnit.DAILY -> 1..1
+        RecurrenceUnit.WEEKLY -> 1..7
+        RecurrenceUnit.MONTHLY -> 1..31
+    }
+
 }
 
 data class Invitation(

@@ -8,7 +8,11 @@ import com.github.mantasjasikenas.core.domain.model.debts.MutableDebtsMap
 import com.github.mantasjasikenas.core.domain.repository.DebtsRepository
 
 class DebtsRepositoryImpl : DebtsRepository {
-    override fun calculateDebts(bills: List<Bill>): DebtsMap {
+    override fun calculateDebts(bills: List<Bill>): DebtsMap? {
+        if (bills.isEmpty()) {
+            return null
+        }
+
         val debtsMap = MutableDebtsMap()
 
         bills.forEach { bill ->

@@ -40,6 +40,7 @@ import com.github.mantasjasikenas.namiokai.navigation.authNavGraph
 import com.github.mantasjasikenas.namiokai.navigation.homeNavGraph
 import com.github.mantasjasikenas.namiokai.ui.component.FloatingActionButton
 import com.github.mantasjasikenas.namiokai.ui.component.NamNavigationSuiteScaffold
+import com.github.mantasjasikenas.namiokai.ui.component.SnackbarHostContainer
 import com.github.mantasjasikenas.namiokai.ui.component.TopBar
 
 
@@ -153,6 +154,7 @@ fun NamiokaiScreen(
         windowAdaptiveInfo = windowAdaptiveInfo,
     ) {
         Scaffold(
+            snackbarHost = { SnackbarHostContainer(snackbarHostState = appState.snackbarHostState) },
             contentWindowInsets = WindowInsets(0, 0, 0, 0),
             topBar = {
                 TopBar(
@@ -175,7 +177,7 @@ fun NamiokaiScreen(
                     currentTopLevelRoute = topLevelRoute,
                     onNavigateToRoute = { route ->
                         appState.navController.navigate(
-                           route
+                            route
                         ) {
                             launchSingleTop = true
                         }

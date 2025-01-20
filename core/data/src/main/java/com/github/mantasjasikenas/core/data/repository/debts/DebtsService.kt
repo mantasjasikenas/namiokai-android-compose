@@ -1,18 +1,17 @@
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package com.github.mantasjasikenas.core.data.repository.debts
 
 import android.util.Log
+import com.github.mantasjasikenas.core.domain.model.Space
 import com.github.mantasjasikenas.core.domain.model.debts.DebtsMap
+import com.github.mantasjasikenas.core.domain.model.debts.SpaceDebts
 import com.github.mantasjasikenas.core.domain.model.period.Period
 import com.github.mantasjasikenas.core.domain.repository.BillsRepository
 import com.github.mantasjasikenas.core.domain.repository.DebtsRepository
 import com.github.mantasjasikenas.core.domain.repository.PeriodRepository
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
-import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.firstOrNull
 import javax.inject.Inject
 
 private const val TAG = "DebtsService"
@@ -22,13 +21,7 @@ class DebtsService @Inject constructor(
     private val periodRepository: PeriodRepository,
     private val debtsRepository: DebtsRepository
 ) {
-    fun getUserSelectedPeriodDebts(): Flow<DebtsMap> =
-        periodRepository.userSelectedPeriod
-            .flatMapLatest { period ->
-                getDebts(period)
-            }
-
-
+    @Deprecated("Use getSpacesDebts instead")
     fun getCurrentPeriodDebts(): Flow<DebtsMap> = channelFlow {
         periodRepository.currentPeriod
             .collect { period ->
@@ -36,7 +29,9 @@ class DebtsService @Inject constructor(
                     .collect { bills ->
                         val debts = debtsRepository.calculateDebts(bills)
 
-                        send(debts)
+                        if (debts != null) {
+                            send(debts)
+                        }
                     }
             }
 
@@ -45,16 +40,30 @@ class DebtsService @Inject constructor(
         }
     }
 
-    private fun getDebts(period: Period): Flow<DebtsMap> = channelFlow {
-        billsRepository.getBills(period)
-            .collect { bills ->
+    fun getSpaceDebts(
+        currentUserUid: String,
+        spacesToPeriods: Map<Space, Period>,
+    ): Flow<List<SpaceDebts>> = channelFlow {
+        val spaceDebts = spacesToPeriods
+            .map { (space, period) ->
+                val bills = billsRepository.getBills(period, space.spaceId)
+                    .firstOrNull() ?: emptyList()
                 val debts = debtsRepository.calculateDebts(bills)
-                send(debts)
+
+                SpaceDebts(
+                    space = space,
+                    period = period,
+                    debts = debts
+                        ?.getAllDebts()
+                        ?.toList() ?: emptyList(),
+                    currentUserDebts = debts?.getUserDebts(currentUserUid) ?: emptyMap()
+                )
             }
 
+        send(spaceDebts)
+
         awaitClose {
-            Log.d(TAG, "Closed getDebts channel flow")
+            Log.d(TAG, "Closed getSpaceDebts channel flow")
         }
     }
-
 }

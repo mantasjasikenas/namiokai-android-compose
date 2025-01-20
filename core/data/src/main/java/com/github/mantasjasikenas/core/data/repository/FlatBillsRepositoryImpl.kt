@@ -73,6 +73,52 @@ class FlatBillsRepositoryImpl @Inject constructor(
                 }
             }
 
+    override fun getFlatBills(period: Period, spaceId: String): Flow<List<FlatBill>> {
+        return flatBillsCollection
+            .whereEqualTo(SPACE_ID_FIELD, spaceId)
+            .orderBy(
+                ORDER_BY_FIELD,
+                Query.Direction.DESCENDING
+            )
+            .whereGreaterThanOrEqualTo(
+                ORDER_BY_FIELD,
+                period.start.toString() + "T00:00:00"
+            )
+            .whereLessThanOrEqualTo(
+                ORDER_BY_FIELD,
+                period.end.toString() + "T23:59:59"
+            )
+            .snapshots()
+            .map {
+                it.documents.map { document ->
+                    document.toObject<FlatBill>()!!
+                }
+            }
+    }
+
+    override fun getFlatBills(period: Period, spaceIds: List<String>): Flow<List<FlatBill>> {
+        return flatBillsCollection
+            .orderBy(
+                ORDER_BY_FIELD,
+                Query.Direction.DESCENDING
+            )
+            .whereIn(SPACE_ID_FIELD, spaceIds)
+            .whereGreaterThanOrEqualTo(
+                ORDER_BY_FIELD,
+                period.start.toString() + "T00:00:00"
+            )
+            .whereLessThanOrEqualTo(
+                ORDER_BY_FIELD,
+                period.end.toString() + "T23:59:59"
+            )
+            .snapshots()
+            .map {
+                it.documents.map { document ->
+                    document.toObject<FlatBill>()!!
+                }
+            }
+    }
+
     override fun getFlatBill(id: String): Flow<FlatBill> =
         flatBillsCollection
             .document(id)

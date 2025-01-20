@@ -1,11 +1,11 @@
 package com.github.mantasjasikenas.core.data.repository
 
-import com.github.mantasjasikenas.core.domain.model.period.Period
 import com.github.mantasjasikenas.core.domain.model.bills.Bill
 import com.github.mantasjasikenas.core.domain.model.bills.BillType
 import com.github.mantasjasikenas.core.domain.model.bills.FlatBill
 import com.github.mantasjasikenas.core.domain.model.bills.PurchaseBill
 import com.github.mantasjasikenas.core.domain.model.bills.TripBill
+import com.github.mantasjasikenas.core.domain.model.period.Period
 import com.github.mantasjasikenas.core.domain.repository.BillsRepository
 import com.github.mantasjasikenas.core.domain.repository.FlatBillsRepository
 import com.github.mantasjasikenas.core.domain.repository.PurchaseBillsRepository
@@ -22,7 +22,7 @@ class BillsRepositoryImpl @Inject constructor(
     private val flatBillsRepository: FlatBillsRepository
 ) : BillsRepository {
 
-    override suspend fun getBills(): Flow<List<Bill>> {
+    override fun getBills(): Flow<List<Bill>> {
         return combine(
             purchaseBillsRepository.getPurchaseBills(),
             tripBillsRepository.getTripBills(),
@@ -32,11 +32,31 @@ class BillsRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getBills(period: Period): Flow<List<Bill>> {
+    override fun getBills(period: Period): Flow<List<Bill>> {
         return combine(
             purchaseBillsRepository.getPurchaseBills(period),
             tripBillsRepository.getTripBills(period),
             flatBillsRepository.getFlatBills(period)
+        ) { purchaseBills, tripBills, flatBills ->
+            purchaseBills + tripBills + flatBills
+        }
+    }
+
+    override fun getBills(period: Period, spaceId: String): Flow<List<Bill>> {
+        return combine(
+            purchaseBillsRepository.getPurchaseBills(period, spaceId),
+            tripBillsRepository.getTripBills(period, spaceId),
+            flatBillsRepository.getFlatBills(period, spaceId)
+        ) { purchaseBills, tripBills, flatBills ->
+            purchaseBills + tripBills + flatBills
+        }
+    }
+
+    override fun getBills(period: Period, spaces: List<String>): Flow<List<Bill>> {
+        return combine(
+            purchaseBillsRepository.getPurchaseBills(period, spaces),
+            tripBillsRepository.getTripBills(period, spaces),
+            flatBillsRepository.getFlatBills(period, spaces)
         ) { purchaseBills, tripBills, flatBills ->
             purchaseBills + tripBills + flatBills
         }

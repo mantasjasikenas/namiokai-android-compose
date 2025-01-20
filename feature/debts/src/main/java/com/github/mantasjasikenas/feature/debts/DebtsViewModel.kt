@@ -1,18 +1,23 @@
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.github.mantasjasikenas.feature.debts
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.mantasjasikenas.core.data.repository.debts.DebtsService
-import com.github.mantasjasikenas.core.domain.model.period.Period
-import com.github.mantasjasikenas.core.domain.model.PeriodState
+import com.github.mantasjasikenas.core.domain.model.Space
 import com.github.mantasjasikenas.core.domain.model.User
-import com.github.mantasjasikenas.core.domain.model.debts.DebtBill
+import com.github.mantasjasikenas.core.domain.model.debts.SpaceDebts
+import com.github.mantasjasikenas.core.domain.model.period.Period
 import com.github.mantasjasikenas.core.domain.repository.PeriodRepository
+import com.github.mantasjasikenas.core.domain.repository.SpaceRepository
 import com.github.mantasjasikenas.core.domain.repository.UsersRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -23,36 +28,37 @@ import javax.inject.Inject
 class DebtsViewModel @Inject constructor(
     debtsService: DebtsService,
     usersRepository: UsersRepository,
+    spacesRepository: SpaceRepository,
     private val periodRepository: PeriodRepository
 ) : ViewModel() {
 
     val debtsUiState: StateFlow<DebtsUiState> =
-        usersRepository.getUsers()
-            .map { users ->
-                DebtsUiState.Success(users = users)
-            }
-            .combine(usersRepository.currentUser) { uiState, currentUser ->
-                uiState.copy(currentUser = currentUser)
-            }
-            .combine(periodRepository.getPeriodState()) { uiState, periodState ->
-                uiState.copy(periodState = periodState)
-            }
-            .combine(debtsService.getUserSelectedPeriodDebts()) { uiState, debtsMap ->
-                val debts = debtsMap
-                    .getAllDebts()
-                    .toList()
-                val currentUserDebts = debtsMap.getUserDebts(uiState.currentUser.uid)
-
+        combine(
+            usersRepository.getUsers(),
+            usersRepository.currentUser,
+            spacesRepository.getCurrentUserSpaces()
+        ) { users, currentUser, spaces ->
+            DebtsUiState.Success(
+                currentUser = currentUser,
+                users = users,
+                spacesToPeriod = spaces.associateWith { space ->
+                    space.currentPeriod()
+                }
+            )
+        }.flatMapLatest { uiState ->
+            debtsService.getSpaceDebts(
+                currentUserUid = uiState.currentUser.uid,
+                spacesToPeriods = uiState.spacesToPeriod
+            ).map { spaceDebts ->
                 uiState.copy(
-                    debts = debts,
-                    currentUserDebts = currentUserDebts
+                    spacesDebts = spaceDebts
                 )
             }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5_000),
-                initialValue = DebtsUiState.Loading
-            )
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = DebtsUiState.Loading
+        )
 
     fun onPeriodReset() {
         viewModelScope.launch {
@@ -72,8 +78,7 @@ sealed interface DebtsUiState {
     data class Success(
         val currentUser: User = User(),
         val users: List<User> = emptyList(),
-        val debts: List<Pair<String, Map<String, List<DebtBill>>>> = emptyList(),
-        val currentUserDebts: Map<String, List<DebtBill>> = emptyMap(),
-        val periodState: PeriodState = PeriodState()
+        val spacesToPeriod: Map<Space, Period> = emptyMap(),
+        val spacesDebts: List<SpaceDebts> = emptyList()
     ) : DebtsUiState
 }
