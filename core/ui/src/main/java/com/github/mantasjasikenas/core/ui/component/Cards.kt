@@ -6,6 +6,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -61,6 +62,7 @@ fun NamiokaiElevatedCard(
 @Composable
 fun NamiokaiElevatedOutlinedCard(
     modifier: Modifier = Modifier,
+    contentPadding: PaddingValues = PaddingValues(16.dp),
     onClick: () -> Unit = {},
     content: @Composable () -> Unit
 ) {
@@ -82,7 +84,7 @@ fun NamiokaiElevatedOutlinedCard(
 
         Column(
             modifier = Modifier
-                .padding(16.dp),
+                .padding(contentPadding),
             horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.Center
         ) {

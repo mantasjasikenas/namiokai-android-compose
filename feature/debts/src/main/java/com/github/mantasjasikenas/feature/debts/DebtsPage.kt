@@ -1,6 +1,15 @@
-package com.github.mantasjasikenas.feature.debts.pages
+package com.github.mantasjasikenas.feature.debts
 
+import android.annotation.SuppressLint
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,11 +22,18 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ArrowLeft
+import androidx.compose.material.icons.automirrored.outlined.ArrowRight
+import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Check
+import androidx.compose.material.icons.outlined.Remove
+import androidx.compose.material.icons.outlined.Restore
+import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
@@ -45,33 +61,161 @@ import com.github.mantasjasikenas.core.domain.model.UsersMap
 import com.github.mantasjasikenas.core.domain.model.debts.DebtBill
 import com.github.mantasjasikenas.core.domain.model.debts.SpaceDebts
 import com.github.mantasjasikenas.core.domain.model.period.Period
-import com.github.mantasjasikenas.feature.debts.DebtsDetailsSheet
-import com.github.mantasjasikenas.feature.debts.R
+import com.github.mantasjasikenas.core.ui.component.NoResultsFound
+import kotlin.math.absoluteValue
 
+@SuppressLint("UnusedContentLambdaTargetStateParameter")
 @Composable
 internal fun DebtsPage(
     spacesDebts: List<SpaceDebts>,
     usersMap: UsersMap,
+    periodOffset: Int,
     onPeriodReset: () -> Unit,
     onPeriodUpdate: (Period) -> Unit,
+    onPeriodOffsetUpdate: (Int) -> Unit,
 ) {
+    if (spacesDebts.isEmpty()) {
+        NoResultsFound(label = "No spaces found.\nPlease create a space first to add a bill.")
+        return
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(all = 20.dp)
             .verticalScroll(rememberScrollState()), // remove if lazy column is used
     ) {
-        spacesDebts.forEach { spaceDebt ->
-            val usersDebts = spaceDebt.debts
+        PeriodSelection(
+            modifier = Modifier.padding(bottom = 24.dp),
+            onPeriodOffsetUpdate = onPeriodOffsetUpdate,
+            periodOffset = periodOffset
+        )
 
-            SpaceDebtHeader(spaceDebt = spaceDebt)
+        AnimatedContent(
+            targetState = periodOffset,
+            transitionSpec = {
+                if (targetState > initialState) {
+                    (slideInHorizontally { height -> height } + fadeIn()).togetherWith(
+                        slideOutHorizontally { height -> -height } + fadeOut())
+                } else {
+                    (slideInHorizontally { height -> -height } + fadeIn()).togetherWith(
+                        slideOutHorizontally { height -> height } + fadeOut())
+                }.using(
+                    SizeTransform(clip = false)
+                )
+            },
+        ) {
+            Column {
+                spacesDebts.forEach { spaceDebt ->
+                    val usersDebts = spaceDebt.debts
 
-            if (usersDebts.isEmpty()) {
-                NoDebtsFound()
-                return@forEach
+                    SpaceDebtHeader(spaceDebt = spaceDebt)
+
+                    if (usersDebts.isEmpty()) {
+                        NoDebtsFound()
+                        return@forEach
+                    }
+
+                    SpaceDebtsContainer(usersDebts = usersDebts, usersMap = usersMap)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun PeriodSelection(
+    modifier: Modifier = Modifier,
+    onPeriodOffsetUpdate: (Int) -> Unit,
+    periodOffset: Int
+) {
+    Card(
+        modifier = modifier,
+        border = CardDefaults.outlinedCardBorder(),
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+        ) {
+            IconButton(
+                onClick = { onPeriodOffsetUpdate(-1) },
+            ) {
+                Icon(
+                    modifier = Modifier.size(48.dp),
+                    imageVector = Icons.AutoMirrored.Outlined.ArrowLeft,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary
+                )
             }
 
-            SpaceDebtsContainer(usersDebts = usersDebts, usersMap = usersMap)
+            Column(
+                modifier = Modifier.weight(1f),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "Selected period",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    if (periodOffset != 0) {
+                        Icon(
+                            imageVector = when {
+                                periodOffset > 0 -> Icons.Outlined.Add
+                                else -> Icons.Outlined.Remove
+                            },
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Text(
+                            text = "${periodOffset.absoluteValue} periods",
+                            color = MaterialTheme.colorScheme.primary,
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.Bold
+                        )
+                    } else {
+                        Text(
+                            text = "Current period",
+                            color = MaterialTheme.colorScheme.primary,
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+
+                Row(
+                    modifier = Modifier.clickable(
+                        enabled = periodOffset != 0,
+                    ) { onPeriodOffsetUpdate(periodOffset * -1) },
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Restore,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Text(
+                        text = "Restore",
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.Bold,
+                    )
+                }
+            }
+
+            IconButton(
+                onClick = { onPeriodOffsetUpdate(1) },
+            ) {
+                Icon(
+                    modifier = Modifier.size(48.dp),
+                    imageVector = Icons.AutoMirrored.Outlined.ArrowRight,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
         }
     }
 }

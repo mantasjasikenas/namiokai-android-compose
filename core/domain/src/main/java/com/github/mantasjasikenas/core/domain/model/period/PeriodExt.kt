@@ -148,6 +148,36 @@ fun Period.nextWeekly(): Period {
 }
 
 /**
+ * Generates the next period based on the current period, recurrence start value, and recurrence unit.
+ */
+fun Period.nextPeriod(
+    currentPeriod: Period,
+    recurrenceStartValue: Int,
+    recurrenceUnit: RecurrenceUnit,
+): Period {
+    return when (recurrenceUnit) {
+        RecurrenceUnit.DAILY -> currentPeriod.nextDaily()
+        RecurrenceUnit.WEEKLY -> currentPeriod.nextWeekly()
+        RecurrenceUnit.MONTHLY -> currentPeriod.nextMonthly(startDayOfMonth = recurrenceStartValue)
+    }
+}
+
+/**
+ * Generates the previous period based on the current period, recurrence start value, and recurrence unit.
+ */
+fun Period.previousPeriod(
+    currentPeriod: Period,
+    recurrenceStartValue: Int,
+    recurrenceUnit: RecurrenceUnit,
+): Period {
+    return when (recurrenceUnit) {
+        RecurrenceUnit.DAILY -> currentPeriod.previousDaily()
+        RecurrenceUnit.WEEKLY -> currentPeriod.previousWeekly()
+        RecurrenceUnit.MONTHLY -> currentPeriod.previousMonthly(startDayOfMonth = recurrenceStartValue)
+    }
+}
+
+/**
  * Generates the previous weekly period based on the current period.
  * It subtracts 1 week from the current period start and end dates.
  */

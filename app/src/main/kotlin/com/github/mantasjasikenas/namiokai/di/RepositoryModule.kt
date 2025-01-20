@@ -56,8 +56,10 @@ object RepositoryModule {
 
     @Provides
     @Singleton
-    fun providePeriodRepository(): PeriodRepository {
-        return PeriodRepositoryImpl()
+    fun providePeriodRepository(
+        spaceRepository: SpaceRepository
+    ): PeriodRepository {
+        return PeriodRepositoryImpl(spaceRepository = spaceRepository)
     }
 
 

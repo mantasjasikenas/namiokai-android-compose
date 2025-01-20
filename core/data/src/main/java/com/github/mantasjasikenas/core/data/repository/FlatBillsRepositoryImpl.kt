@@ -9,6 +9,7 @@ import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.snapshots
 import com.google.firebase.firestore.toObject
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
@@ -37,8 +38,12 @@ class FlatBillsRepositoryImpl @Inject constructor(
                 }
             }
 
-    override fun getFlatBills(spaceIds: List<String>): Flow<List<FlatBill>> =
-        flatBillsCollection
+    override fun getFlatBills(spaceIds: List<String>): Flow<List<FlatBill>> {
+        if (spaceIds.isEmpty()) {
+            return flowOf(emptyList())
+        }
+
+        return flatBillsCollection
             .whereIn(SPACE_ID_FIELD, spaceIds)
             .orderBy(
                 ORDER_BY_FIELD,
@@ -50,6 +55,7 @@ class FlatBillsRepositoryImpl @Inject constructor(
                     document.toObject<FlatBill>()!!
                 }
             }
+    }
 
 
     override fun getFlatBills(period: Period): Flow<List<FlatBill>> =
@@ -97,6 +103,10 @@ class FlatBillsRepositoryImpl @Inject constructor(
     }
 
     override fun getFlatBills(period: Period, spaceIds: List<String>): Flow<List<FlatBill>> {
+        if (spaceIds.isEmpty()) {
+            return flowOf(emptyList())
+        }
+
         return flatBillsCollection
             .orderBy(
                 ORDER_BY_FIELD,

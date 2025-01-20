@@ -11,14 +11,12 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.EuroSymbol
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -27,8 +25,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.github.mantasjasikenas.core.common.util.format
-import com.github.mantasjasikenas.core.domain.model.period.Period
 import com.github.mantasjasikenas.core.domain.model.User
 import com.github.mantasjasikenas.core.ui.common.NamiokaiCircularProgressIndicator
 import com.github.mantasjasikenas.core.ui.common.NamiokaiSpacer
@@ -44,7 +40,7 @@ fun HomeRoute() {
 }
 
 @Composable
-fun HomeScreen(
+private fun HomeScreen(
     homeViewModel: HomeViewModel = hiltViewModel(),
 ) {
     val homeUiState by homeViewModel.homeUiState.collectAsStateWithLifecycle()
@@ -57,35 +53,18 @@ fun HomeScreen(
         is HomeUiState.Success -> {
             val uiState = homeUiState as HomeUiState.Success
 
-            HomeScreen(
+            HomeScreenContent(
                 homeUiState = uiState,
                 currentUser = uiState.currentUser,
-                currentPeriod = uiState.currentPeriod
             )
         }
     }
 }
 
 @Composable
-fun HomeScreen(
+private fun HomeScreenContent(
     homeUiState: HomeUiState.Success,
     currentUser: User,
-    currentPeriod: Period
-) {
-    Column(modifier = Modifier.fillMaxSize()) {
-        WidgetsPage(
-            currentUser = currentUser,
-            homeUiState = homeUiState,
-            period = currentPeriod
-        )
-    }
-}
-
-@Composable
-private fun WidgetsPage(
-    currentUser: User,
-    homeUiState: HomeUiState.Success,
-    period: Period
 ) {
     Column(
         modifier = Modifier
@@ -95,7 +74,6 @@ private fun WidgetsPage(
         Widgets(
             homeUiState = homeUiState,
             currentUser = currentUser,
-            period = period
         )
     }
 }
@@ -104,7 +82,6 @@ private fun WidgetsPage(
 private fun Widgets(
     homeUiState: HomeUiState.Success,
     currentUser: User,
-    period: Period
 ) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
@@ -120,78 +97,6 @@ private fun Widgets(
             WelcomeCard(
                 displayName = currentUser.displayName
             )
-        }
-
-        item(
-            key = "period",
-            span = {
-                GridItemSpan(maxLineSpan)
-            }) {
-            WidgetCard(
-                label = "Period",
-            ) {
-                Text(
-                    text = period.toString(),
-                    fontWeight = FontWeight.Bold,
-                    style = MaterialTheme.typography.headlineSmall
-                )
-            }
-        }
-
-        item(
-            key = "remainingDays",
-        ) {
-            WidgetCard(
-                label = "Remaining days",
-            ) {
-                val daysUntilNextPeriod = remember(period) {
-                    period.daysUntilEnd().toString()
-                }
-
-                IconText(
-                    text = daysUntilNextPeriod,
-                    icon = Icons.Outlined.CalendarMonth,
-                )
-            }
-        }
-
-        item(
-            key = "owedToYou",
-        ) {
-            WidgetCard(
-                label = "Owed to you",
-            ) {
-                EuroIconText(
-                    text = homeUiState.owedToYou.format(2),
-                )
-            }
-        }
-
-        item(
-            key = "youOwe",
-        ) {
-            WidgetCard(
-                label = "You owe",
-            ) {
-                EuroIconText(
-                    text = homeUiState.totalDebt.format(2),
-                )
-            }
-        }
-
-        item(
-            key = "totalDebts",
-        ) {
-            WidgetCard(
-                label = "Total debts",
-            ) {
-                Text(
-                    text = homeUiState.totalDebtsCount.toString(),
-                    fontWeight = FontWeight.Bold,
-                    style = MaterialTheme.typography.headlineSmall
-                )
-
-            }
         }
     }
 }

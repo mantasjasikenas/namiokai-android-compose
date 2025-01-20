@@ -34,14 +34,18 @@ class SpaceRepositoryImpl @Inject constructor(
             }
     }
 
-    override fun getCurrentUserSpaces(): Flow<List<Space>> =
-        getSpacesByUser(auth.currentUser!!.uid)
+    override fun getCurrentUserSpaces(): Flow<List<Space>> {
+        return getSpacesByUser(auth.currentUser!!.uid)
+    }
 
-    override fun getSpacesByUser(userId: String): Flow<List<Space>> =
-        spacesCollection.whereArrayContains(SPACE_MEMBERS_FIELD, userId).snapshots()
+    override fun getSpacesByUser(userId: String): Flow<List<Space>> {
+        return spacesCollection
+            .whereArrayContains(SPACE_MEMBERS_FIELD, userId)
+            .snapshots()
             .map { snapshot ->
                 snapshot.documents.map { it.toObject<Space>()!! }
             }
+    }
 
     override suspend fun addUserToSpace(spaceId: String, userId: String) {
         val spaceRef = spacesCollection.document(spaceId)

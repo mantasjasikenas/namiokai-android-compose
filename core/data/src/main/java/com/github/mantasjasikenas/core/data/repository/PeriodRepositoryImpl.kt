@@ -6,6 +6,7 @@ import com.github.mantasjasikenas.core.domain.model.PeriodState
 import com.github.mantasjasikenas.core.domain.model.period.getMonthlyPeriod
 import com.github.mantasjasikenas.core.domain.model.period.previousMonthlyDeprecated
 import com.github.mantasjasikenas.core.domain.repository.PeriodRepository
+import com.github.mantasjasikenas.core.domain.repository.SpaceRepository
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.remoteconfig.ktx.remoteConfig
 import kotlinx.coroutines.flow.Flow
@@ -20,15 +21,19 @@ import javax.inject.Inject
 private const val TAG = "PeriodRepository"
 
 class PeriodRepositoryImpl @Inject constructor(
-
+    spaceRepository: SpaceRepository
 ) : PeriodRepository {
     override val currentPeriod: Flow<Period> = flowOf(getCurrentPeriod())
 
     private val _userSelectedPeriod = MutableStateFlow(getCurrentPeriod())
+    override val userSelectedPeriod: Flow<Period> = _userSelectedPeriod.asStateFlow()
 
-    override val userSelectedPeriod: Flow<Period> =
-        _userSelectedPeriod.asStateFlow()
 
+    /*
+    spacesToPeriod = spaces.associateWith { space ->
+                    space.currentPeriod()
+                }
+    * */
 
     override fun getPeriods(): Flow<List<Period>> {
         return currentPeriod.map { currentPeriod ->

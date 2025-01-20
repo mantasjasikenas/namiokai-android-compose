@@ -1,39 +1,16 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
-
 package com.github.mantasjasikenas.feature.debts
 
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.SizeTransform
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.github.mantasjasikenas.core.domain.model.period.Period
 import com.github.mantasjasikenas.core.ui.common.NamiokaiCircularProgressIndicator
-import com.github.mantasjasikenas.core.ui.common.PagesFlowRow
-import com.github.mantasjasikenas.core.ui.common.rememberState
-import com.github.mantasjasikenas.feature.debts.pages.DebtsPage
 
 @Composable
 fun DebtsRoute(
-    modifier: Modifier = Modifier,
-    viewModel: DebtsViewModel = hiltViewModel()
+    modifier: Modifier = Modifier, viewModel: DebtsViewModel = hiltViewModel()
 ) {
     DebtsScreen(
         debtsViewModel = viewModel
@@ -45,6 +22,7 @@ fun DebtsScreen(
     debtsViewModel: DebtsViewModel = hiltViewModel(),
 ) {
     val debtsUiState by debtsViewModel.debtsUiState.collectAsStateWithLifecycle()
+    val periodOffset by debtsViewModel.periodOffset.collectAsStateWithLifecycle()
 
     when (debtsUiState) {
         is DebtsUiState.Loading -> {
@@ -54,8 +32,10 @@ fun DebtsScreen(
         is DebtsUiState.Success -> {
             DebtsScreenContent(
                 debtsUiState = debtsUiState as DebtsUiState.Success,
+                periodOffset = periodOffset,
                 onPeriodReset = debtsViewModel::onPeriodReset,
                 onPeriodUpdate = debtsViewModel::onPeriodUpdate,
+                onPeriodOffsetUpdate = debtsViewModel::onPeriodOffsetUpdate,
             )
         }
     }
@@ -64,75 +44,19 @@ fun DebtsScreen(
 @Composable
 fun DebtsScreenContent(
     debtsUiState: DebtsUiState.Success,
+    periodOffset: Int,
     onPeriodReset: () -> Unit,
     onPeriodUpdate: (Period) -> Unit,
+    onPeriodOffsetUpdate: (Int) -> Unit,
 ) {
-    val usersMap = remember(debtsUiState.users) {
-        debtsUiState.users.associateBy { it.uid }
-    }
-
-    val pages = listOf(
-        "Personal",
-        "All"
+    DebtsPage(
+        spacesDebts = debtsUiState.spacesDebts,
+        usersMap = debtsUiState.usersMap,
+        periodOffset = periodOffset,
+        onPeriodReset = onPeriodReset,
+        onPeriodUpdate = onPeriodUpdate,
+        onPeriodOffsetUpdate = onPeriodOffsetUpdate
     )
-    var currentPage by rememberState {
-        1
-    }
-
-    Column(modifier = Modifier.fillMaxSize()) {
-        Row(
-            Modifier
-                .padding(horizontal = 20.dp)
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center
-        ) {
-            PagesFlowRow(
-                pages = pages,
-                currentPage = currentPage,
-                onPageClick = {
-                    currentPage = it
-                }
-            )
-        }
-
-        AnimatedContent(
-            targetState = currentPage,
-            label = "",
-            transitionSpec = {
-                if (targetState > initialState) {
-                    (slideInHorizontally { height -> height } + fadeIn()).togetherWith(
-                        slideOutHorizontally { height -> -height } + fadeOut())
-                } else {
-                    (slideInHorizontally { height -> -height } + fadeIn()).togetherWith(
-                        slideOutHorizontally { height -> height } + fadeOut())
-                }.using(
-                    SizeTransform(clip = false)
-                )
-            },
-        ) {
-            when (it) {
-                /*  0 -> {
-                      PersonalDebtsPage(
-                          periodState = debtsUiState.periodState,
-                          currentUserDebts = debtsUiState.currentUserDebts,
-                          onPeriodReset = onPeriodReset,
-                          onPeriodUpdate = onPeriodUpdate,
-                          usersMap = usersMap
-                      )
-                  }*/
-
-                1 -> {
-                    DebtsPage(
-                        spacesDebts = debtsUiState.spacesDebts,
-                        usersMap = usersMap,
-                        onPeriodReset = onPeriodReset,
-                        onPeriodUpdate = onPeriodUpdate,
-                    )
-                }
-            }
-
-        }
-    }
 }
 
 

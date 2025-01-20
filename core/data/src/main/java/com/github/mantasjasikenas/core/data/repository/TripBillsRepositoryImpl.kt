@@ -10,6 +10,7 @@ import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.snapshots
 import com.google.firebase.firestore.toObject
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
@@ -41,8 +42,12 @@ class TripBillsRepositoryImpl @Inject constructor(
                 }
             }
 
-    override fun getTripBills(spaceIds: List<String>): Flow<List<TripBill>> =
-        tripBillCollection
+    override fun getTripBills(spaceIds: List<String>): Flow<List<TripBill>> {
+        if (spaceIds.isEmpty()) {
+            return flowOf(emptyList())
+        }
+
+        return tripBillCollection
             .whereIn(SPACE_ID_FIELD, spaceIds)
             .orderBy(
                 ORDER_BY_FIELD,
@@ -54,6 +59,7 @@ class TripBillsRepositoryImpl @Inject constructor(
                     document.toObject<TripBill>()!!
                 }
             }
+    }
 
     override fun getTripBills(period: Period, spaceId: String): Flow<List<TripBill>> {
         return tripBillCollection
@@ -79,6 +85,10 @@ class TripBillsRepositoryImpl @Inject constructor(
     }
 
     override fun getTripBills(period: Period, spaceIds: List<String>): Flow<List<TripBill>> {
+        if (spaceIds.isEmpty()) {
+            return flowOf(emptyList())
+        }
+
         return tripBillCollection
             .orderBy(
                 ORDER_BY_FIELD,
@@ -182,6 +192,4 @@ class TripBillsRepositoryImpl @Inject constructor(
             fileName
         )
     }
-
-
 }

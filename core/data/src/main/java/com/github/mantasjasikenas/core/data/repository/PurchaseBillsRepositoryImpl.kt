@@ -10,6 +10,8 @@ import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.snapshots
 import com.google.firebase.firestore.toObject
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
@@ -42,8 +44,12 @@ class PurchaseBillsRepositoryImpl @Inject constructor(
                 }
             }
 
-    override fun getPurchaseBills(spaceIds: List<String>): Flow<List<PurchaseBill>> =
-        billsCollection
+    override fun getPurchaseBills(spaceIds: List<String>): Flow<List<PurchaseBill>> {
+        if (spaceIds.isEmpty()) {
+            return flowOf(emptyList())
+        }
+
+        return billsCollection
             .whereIn(SPACE_ID_FIELD, spaceIds)
             .orderBy(
                 ORDER_BY_FIELD,
@@ -55,6 +61,7 @@ class PurchaseBillsRepositoryImpl @Inject constructor(
                     document.toObject<PurchaseBill>()!!
                 }
             }
+    }
 
     override fun getPurchaseBills(period: Period): Flow<List<PurchaseBill>> =
         billsCollection
@@ -104,6 +111,10 @@ class PurchaseBillsRepositoryImpl @Inject constructor(
         period: Period,
         spaceIds: List<String>
     ): Flow<List<PurchaseBill>> {
+        if (spaceIds.isEmpty()) {
+            return  flowOf(emptyList())
+        }
+
         return billsCollection
             .whereIn(SPACE_ID_FIELD, spaceIds)
             .orderBy(

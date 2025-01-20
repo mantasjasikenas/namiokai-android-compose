@@ -58,8 +58,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -277,6 +279,7 @@ fun TextRow(
     endContent: (@Composable () -> Unit)? = null
 ) {
     val haptics = LocalHapticFeedback.current
+    val clipboardManager = LocalClipboardManager.current
 
     Row(
         modifier = modifier
@@ -307,6 +310,13 @@ fun TextRow(
             horizontalArrangement = Arrangement.End,
         ) {
             Text(
+                modifier = Modifier.combinedClickable(
+                    onClick = { },
+                    onLongClick = {
+                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                        clipboardManager.setText(AnnotatedString(value))
+                    }
+                ),
                 text = value,
                 style = valueTextStyle,
             )

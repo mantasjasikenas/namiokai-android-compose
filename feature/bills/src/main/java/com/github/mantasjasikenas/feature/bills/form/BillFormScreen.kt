@@ -1,4 +1,7 @@
-@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@file:OptIn(
+    ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class,
+    ExperimentalLayoutApi::class
+)
 
 package com.github.mantasjasikenas.feature.bills.form
 
@@ -65,6 +68,7 @@ import com.github.mantasjasikenas.core.ui.common.UsersPicker
 import com.github.mantasjasikenas.core.ui.component.NamiokaiDropdownMenu
 import com.github.mantasjasikenas.core.ui.component.NamiokaiNumberField
 import com.github.mantasjasikenas.core.ui.component.NamiokaiTextField
+import com.github.mantasjasikenas.core.ui.component.NoResultsFound
 import com.github.mantasjasikenas.feature.bills.R
 import com.github.mantasjasikenas.feature.bills.navigation.BillFormRoute
 
@@ -113,6 +117,11 @@ fun BillFormContent(
     billFormRoute: BillFormRoute,
     onNavigateUp: () -> Unit,
 ) {
+    if (uiState.spaces.isEmpty()) {
+        NoResultsFound(label = "No spaces found.\nPlease create a space first to add a bill.")
+        return
+    }
+
     val initialBill = uiState.initialBill
 
     val billType = when (initialBill) {
