@@ -62,6 +62,7 @@ import com.github.mantasjasikenas.core.domain.model.bills.FlatBill
 import com.github.mantasjasikenas.core.ui.common.ElevatedCardContainer
 import com.github.mantasjasikenas.core.ui.common.NamiokaiCircularProgressIndicator
 import com.github.mantasjasikenas.core.ui.common.NamiokaiSpacer
+import com.github.mantasjasikenas.core.ui.common.NamiokaiUiTokens
 import com.github.mantasjasikenas.core.ui.common.TextRow
 import com.github.mantasjasikenas.core.ui.common.VerticalDivider
 import com.github.mantasjasikenas.core.ui.common.bill.BillCard
@@ -132,9 +133,9 @@ fun FlatScreenContent(
         modifier = Modifier
             .fillMaxWidth(),
         columns = GridCells.Fixed(2),
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        contentPadding = PaddingValues(top = 5.dp, bottom = 80.dp, start = 16.dp, end = 16.dp)
+        horizontalArrangement = Arrangement.spacedBy(NamiokaiUiTokens.ItemSpacing),
+        verticalArrangement = Arrangement.spacedBy(NamiokaiUiTokens.ItemSpacing),
+        contentPadding = NamiokaiUiTokens.PageContentPaddingWithFab
     ) {
         item {
             LatestTwoBillsComparisonCard(
@@ -174,22 +175,25 @@ fun FlatScreenContent(
                 )
             }
 
-            item(span = {
-                GridItemSpan(maxLineSpan)
-            }) {
-                ElectricityChartContainer(
-                    electricity = flatUiState.electricitySummary?.electricityDifference
-                        ?: return@item,
-                    chartModelProducer = flatViewModel.electricityChartModelProducer
-                )
-            }
+            if (flatUiState.electricitySummary != null) {
+                if (flatUiState.electricitySummary.electricityDifference.size > 1) {
+                    item(span = {
+                        GridItemSpan(maxLineSpan)
+                    }) {
+                        ElectricityChartContainer(
+                            electricity = flatUiState.electricitySummary.electricityDifference,
+                            chartModelProducer = flatViewModel.electricityChartModelProducer
+                        )
+                    }
+                }
 
-            item(span = {
-                GridItemSpan(maxLineSpan)
-            }) {
-                ElectricitySummaryContainer(
-                    electricitySummary = flatUiState.electricitySummary ?: return@item,
-                )
+                item(span = {
+                    GridItemSpan(maxLineSpan)
+                }) {
+                    ElectricitySummaryContainer(
+                        electricitySummary = flatUiState.electricitySummary,
+                    )
+                }
             }
         }
     }
@@ -516,7 +520,7 @@ private fun CompactFlatCard(
             onSelect()
         },
         elevatedCardPadding = PaddingValues(0.dp),
-        columnPadding = PaddingValues(vertical = 6.dp),
+        innerPadding = PaddingValues(vertical = 6.dp),
         elevated = false
     ) {
         FlatBillCardContent(flatBill = flatBill)

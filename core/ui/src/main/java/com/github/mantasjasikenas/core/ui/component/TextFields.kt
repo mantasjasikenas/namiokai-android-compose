@@ -257,5 +257,16 @@ fun NamiokaiTextArea(
             text = it
             onValueChange(it.text)
         },
+        shape = MaterialTheme.shapes.medium,
+        colors = TextFieldDefaults.colors(
+            unfocusedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+            errorContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+            errorLeadingIconColor = MaterialTheme.colorScheme.error,
+            errorTrailingIconColor = MaterialTheme.colorScheme.error,
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent,
+            disabledIndicatorColor = Color.Transparent,
+            errorIndicatorColor = Color.Transparent
+        ),
     )
 }

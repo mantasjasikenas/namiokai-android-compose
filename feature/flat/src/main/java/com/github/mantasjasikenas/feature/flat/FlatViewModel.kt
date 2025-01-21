@@ -69,12 +69,13 @@ class FlatViewModel @Inject constructor(
                     val electricitySummary = calculateElectricityStats(flatBills)
 
                     val flatBillsChartJob = async { buildFlatBillsChart(flatBills = flatBills) }
-                    val electricityChartJob =
-                        async { buildElectricityChart(electricitySummary = electricitySummary) }
+
+                    if (electricitySummary != null) {
+                        async { buildElectricityChart(electricitySummary = electricitySummary) }.await()
+                    }
 
                     flatBillsChartJob.await()
-                    electricityChartJob.await()
-
+                    
                     _flatUiState.update { state ->
                         state.copy(
                             flatBills = flatBills,
@@ -195,7 +196,7 @@ class FlatViewModel @Inject constructor(
         )
     }
 
-    private fun calculateElectricityStats(bills: List<FlatBill>): ElectricitySummary {
+    private fun calculateElectricityStats(bills: List<FlatBill>): ElectricitySummary? {
         val electricityDifference = bills.zipWithNext { previous, current ->
             if (current.taxes == null || previous.taxes == null) {
                 return@zipWithNext null
@@ -213,6 +214,10 @@ class FlatViewModel @Inject constructor(
                 null
             }
         }.filterNotNull()
+
+        if (electricityDifference.isEmpty()) {
+            return null
+        }
 
         val (averageDifference, minDifference, maxDifference) = electricityDifference.fold(
             Triple(

@@ -34,23 +34,6 @@ sealed interface Route {
 
     @Serializable
     data object HomeGraph : Route
-
-    /*    companion object {
-            val routes = listOf(
-                HomeRoute,
-                DebtsRoute,
-                PurchaseBillRoute,
-                TripBillRoute,
-                FlatRoute,
-                FlatBillListRoute,
-                SettingsRoute,
-                NotificationsRoute,
-                LoginRoute,
-                TestRoute,
-                AdminPanelRoute,
-                ProfileRoute
-            )
-        }*/
 }
 
 sealed class TopLevelRoute(

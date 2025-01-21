@@ -39,6 +39,7 @@ import com.github.mantasjasikenas.core.domain.model.bills.BillType
 import com.github.mantasjasikenas.core.domain.model.bills.FlatBill
 import com.github.mantasjasikenas.core.ui.common.NamiokaiCircularProgressIndicator
 import com.github.mantasjasikenas.core.ui.common.NamiokaiSpacer
+import com.github.mantasjasikenas.core.ui.common.NamiokaiUiTokens
 import com.github.mantasjasikenas.core.ui.common.bill.SwipeBillCard
 import com.github.mantasjasikenas.core.ui.common.rememberState
 import com.github.mantasjasikenas.core.ui.component.FiltersRow
@@ -104,7 +105,11 @@ fun FlatBillScreenContent(
         )
     }
 
-    Column {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(NamiokaiUiTokens.PageContentPadding)
+    ) {
         FlatBillFiltersRow(
             spaceUsers = usersMap,
             flatUiState = flatUiState,
@@ -135,7 +140,9 @@ fun FlatBillScreenContent(
                     key = { it.documentId }
                 ) { flatBill ->
                     FlatBillCard(
-                        modifier = Modifier.animateItem(),
+                        modifier = Modifier
+                            .animateItem()
+                            .padding(bottom = NamiokaiUiTokens.ItemSpacing),
                         flatBill = flatBill,
                         isAllowedModification = (currentUser.admin || flatBill.createdByUid == currentUser.uid),
                         usersMap = usersMap,

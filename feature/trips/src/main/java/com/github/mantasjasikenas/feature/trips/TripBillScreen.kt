@@ -33,6 +33,7 @@ import com.github.mantasjasikenas.core.domain.model.bills.BillType
 import com.github.mantasjasikenas.core.domain.model.bills.TripBill
 import com.github.mantasjasikenas.core.ui.common.NamiokaiCircularProgressIndicator
 import com.github.mantasjasikenas.core.ui.common.NamiokaiSpacer
+import com.github.mantasjasikenas.core.ui.common.NamiokaiUiTokens
 import com.github.mantasjasikenas.core.ui.common.bill.SwipeBillCard
 import com.github.mantasjasikenas.core.ui.common.rememberState
 import com.github.mantasjasikenas.core.ui.component.FiltersRow
@@ -109,7 +110,7 @@ fun TripBillScreenContent(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(top = 5.dp)
+            .padding(NamiokaiUiTokens.PageContentPadding)
     ) {
         TripBillFiltersRow(
             fuelUiState = fuelUiState,
@@ -138,7 +139,7 @@ fun TripBillScreenContent(
                         Text(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .padding(start = 20.dp),
+                                .padding(bottom = NamiokaiUiTokens.ItemSpacing / 2),
                             text = "$month $year",
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.SemiBold,
@@ -151,7 +152,9 @@ fun TripBillScreenContent(
                         key = { it.documentId }
                     ) { trip ->
                         TripBillCard(
-                            modifier = Modifier.animateItem(),
+                            modifier = Modifier
+                                .animateItem()
+                                .padding(bottom = NamiokaiUiTokens.ItemSpacing),
                             tripBill = trip,
                             isAllowedModification = (currentUser.admin || trip.createdByUid == currentUser.uid),
                             usersMap = usersMap,

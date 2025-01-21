@@ -64,6 +64,7 @@ import com.github.mantasjasikenas.core.domain.model.allowedStartValues
 import com.github.mantasjasikenas.core.ui.common.NamiokaiBottomSheet
 import com.github.mantasjasikenas.core.ui.common.NamiokaiCircularProgressIndicator
 import com.github.mantasjasikenas.core.ui.common.NamiokaiSpacer
+import com.github.mantasjasikenas.core.ui.common.NamiokaiUiTokens
 import com.github.mantasjasikenas.core.ui.common.UsersPicker
 import com.github.mantasjasikenas.core.ui.component.NamiokaiDialog
 import com.github.mantasjasikenas.core.ui.component.NamiokaiDropdownMenu
@@ -390,7 +391,7 @@ fun SpaceFormContainerWrapper(
 ) {
     Column(
         modifier = modifier
-            .padding(32.dp)
+            .padding(NamiokaiUiTokens.PageContentPadding)
             .fillMaxSize()
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally,

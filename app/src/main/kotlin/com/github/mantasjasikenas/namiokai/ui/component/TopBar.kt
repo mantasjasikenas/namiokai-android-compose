@@ -72,7 +72,7 @@ internal fun TopBar(
     Surface {
         AnimatedVisibility(
             visible = showTopBar,
-            enter = EnterTransition.None, //fadeIn(),
+            enter = EnterTransition.None,
             exit = ExitTransition.None
         ) {
             TopAppBar(

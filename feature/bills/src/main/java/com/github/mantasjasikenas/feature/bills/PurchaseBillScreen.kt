@@ -33,6 +33,7 @@ import com.github.mantasjasikenas.core.domain.model.bills.BillType
 import com.github.mantasjasikenas.core.domain.model.bills.PurchaseBill
 import com.github.mantasjasikenas.core.ui.common.NamiokaiCircularProgressIndicator
 import com.github.mantasjasikenas.core.ui.common.NamiokaiSpacer
+import com.github.mantasjasikenas.core.ui.common.NamiokaiUiTokens
 import com.github.mantasjasikenas.core.ui.common.bill.SwipeBillCard
 import com.github.mantasjasikenas.core.ui.common.rememberState
 import com.github.mantasjasikenas.core.ui.component.FiltersRow
@@ -113,7 +114,7 @@ fun PurchaseBillScreenContent(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(top = 5.dp)
+            .padding(NamiokaiUiTokens.PageContentPadding)
     ) {
         PurchaseBillFiltersRow(
             billUiState = billUiState,
@@ -142,7 +143,7 @@ fun PurchaseBillScreenContent(
                         Text(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .padding(start = 20.dp),
+                                .padding(bottom = (NamiokaiUiTokens.ItemSpacing / 2)),
                             text = "$month $year",
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.SemiBold,
@@ -155,7 +156,9 @@ fun PurchaseBillScreenContent(
                         key = { it.documentId }
                     ) { bill ->
                         PurchaseBillCard(
-                            modifier = Modifier.animateItem(),
+                            modifier = Modifier
+                                .animateItem()
+                                .padding(bottom = NamiokaiUiTokens.ItemSpacing),
                             purchaseBill = bill,
                             isAllowedModification = (currentUser.admin || bill.createdByUid == currentUser.uid),
                             usersMap = spacesUsers,

@@ -33,6 +33,9 @@ import androidx.compose.ui.geometry.center
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 
+private val settingsPadding = 16.dp
+val settingsHorizontalSpacing = 16.dp
+
 @Composable
 fun SwitchSettingEntry(
     title: String,
@@ -69,7 +72,7 @@ fun SettingsEntry(
     var showDialog by remember { mutableStateOf(false) }
 
     Row(
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(settingsHorizontalSpacing),
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
             .clickable(enabled = isEnabled,
@@ -82,10 +85,9 @@ fun SettingsEntry(
                 })
             .alpha(if (isEnabled) 1f else 0.5f)
             .padding(
-                start = 16.dp,
-                end = 16.dp
+                horizontal = settingsPadding,
             )
-            .padding(all = 16.dp)
+            .padding(all = settingsPadding)
             .fillMaxWidth()
     ) {
         Column(
@@ -122,9 +124,9 @@ fun SettingsDescription(
         text = text,
         style = MaterialTheme.typography.bodyMedium,
         modifier = modifier
-            .padding(start = 16.dp)
+            .padding(start = settingsPadding)
             .padding(
-                horizontal = 16.dp,
+                horizontal = settingsPadding,
                 vertical = 8.dp
             )
     )
@@ -140,8 +142,8 @@ fun SettingsEntryGroupText(
         color = MaterialTheme.colorScheme.primary,
         style = MaterialTheme.typography.bodyMedium,
         modifier = modifier
-            .padding(start = 16.dp)
-            .padding(horizontal = 16.dp)
+            .padding(start = settingsPadding)
+            .padding(horizontal = settingsPadding)
     )
 }
 
@@ -163,9 +165,9 @@ fun ImportantSettingsDescription(
         text = text,
         style = MaterialTheme.typography.bodyMedium,
         modifier = modifier
-            .padding(start = 16.dp)
+            .padding(start = settingsPadding)
             .padding(
-                horizontal = 16.dp,
+                horizontal = settingsPadding,
                 vertical = 8.dp
             )
     )
@@ -266,7 +268,7 @@ inline fun <T> ValueSelectorDialog(
                     values.forEach { value ->
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(16.dp),
+                            horizontalArrangement = Arrangement.spacedBy(settingsHorizontalSpacing),
                             modifier = Modifier
                                 .clickable(onClick = {
                                     onDismiss()

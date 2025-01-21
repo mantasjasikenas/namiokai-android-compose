@@ -58,6 +58,7 @@ import coil.request.ImageRequest
 import com.github.mantasjasikenas.core.domain.model.User
 import com.github.mantasjasikenas.core.ui.R
 import com.github.mantasjasikenas.core.ui.common.NamiokaiCircularProgressIndicator
+import com.github.mantasjasikenas.core.ui.common.NamiokaiUiTokens
 import com.github.mantasjasikenas.core.ui.component.NoResultsFound
 
 @Composable
@@ -89,12 +90,11 @@ fun SearchUsersScreen(
     ) {
         Column(
             modifier = Modifier
-                .padding(horizontal = 20.dp)
+                .padding(NamiokaiUiTokens.PageContentPadding)
                 .fillMaxSize(),
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-
             SearchBox(
                 searchText = searchText,
                 onSearchTextChange = viewModel::onSearchTextChange
@@ -151,7 +151,7 @@ private fun SearchBox(
                 minHeight = InputFieldHeight,
             )
             .fillMaxWidth()
-            .padding(top = 8.dp, bottom = 16.dp),
+            .padding(bottom = 16.dp),
         value = searchText,
         shape = ShapeDefaults.ExtraLarge,
         onValueChange = onSearchTextChange,
@@ -242,10 +242,9 @@ private fun FilteredUsersColumn(
     onSelectedUserUpdate: (User, Boolean) -> Unit,
 ) {
     LazyColumn(
-        contentPadding = PaddingValues(bottom = 80.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+        contentPadding = PaddingValues(bottom = 80.dp), // 80.dp required because of search box
+        verticalArrangement = Arrangement.spacedBy(NamiokaiUiTokens.ItemSpacing),
     ) {
-
         if (selectedUsers.isNotEmpty()) {
             item(key = "selectedUsers") {
                 SelectedUsersFlowRow(

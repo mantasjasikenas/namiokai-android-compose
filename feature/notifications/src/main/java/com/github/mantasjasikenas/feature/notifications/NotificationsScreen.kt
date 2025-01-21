@@ -2,7 +2,6 @@ package com.github.mantasjasikenas.feature.notifications
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -28,6 +27,7 @@ import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
 import com.github.mantasjasikenas.core.database.Notification
 import com.github.mantasjasikenas.core.ui.common.NamiokaiSpacer
+import com.github.mantasjasikenas.core.ui.common.NamiokaiUiTokens
 import com.github.mantasjasikenas.core.ui.common.noRippleClickable
 import com.github.mantasjasikenas.core.ui.component.NoResultsFound
 import kotlinx.datetime.Clock
@@ -63,15 +63,13 @@ fun NotificationsScreen(
 
 
     LazyColumn(
-        contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+        contentPadding = NamiokaiUiTokens.PageContentPadding,
+        verticalArrangement = Arrangement.spacedBy(NamiokaiUiTokens.ItemSpacing),
     ) {
         items(notificationsUiState.notificationList) { notification ->
             NotificationItem(
                 notification = notification,
-                onClick = {
-                    //navController.navigate("notification/${notification.id}")
-                }
+                onClick = {}
             )
         }
 

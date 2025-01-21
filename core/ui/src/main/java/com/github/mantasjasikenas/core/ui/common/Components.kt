@@ -201,7 +201,7 @@ fun DateTimeCardColumn(
     month: String
 ) {
     Column(
-        modifier = modifier,
+        modifier = modifier.width(32.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(

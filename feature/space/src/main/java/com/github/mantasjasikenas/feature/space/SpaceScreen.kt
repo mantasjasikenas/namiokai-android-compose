@@ -1,10 +1,8 @@
 package com.github.mantasjasikenas.feature.space
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -33,6 +31,7 @@ import com.github.mantasjasikenas.core.domain.model.bills.SpaceFormArgs
 import com.github.mantasjasikenas.core.ui.common.ElevatedCardContainer
 import com.github.mantasjasikenas.core.ui.common.NamiokaiCircularProgressIndicator
 import com.github.mantasjasikenas.core.ui.common.NamiokaiSpacer
+import com.github.mantasjasikenas.core.ui.common.NamiokaiUiTokens
 import com.github.mantasjasikenas.core.ui.component.NoResultsFound
 
 @Composable
@@ -100,12 +99,11 @@ fun SpaceScreenContent(
 
     LazyVerticalGrid(
         modifier = modifier
-            .fillMaxSize()
-            .padding(top = 5.dp),
-        contentPadding = PaddingValues(top = 16.dp, start = 16.dp, end = 16.dp, bottom = 120.dp),
+            .fillMaxSize(),
+        contentPadding = NamiokaiUiTokens.PageContentPaddingWithFab,
         columns = GridCells.Fixed(2),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        verticalArrangement = Arrangement.spacedBy(NamiokaiUiTokens.ItemSpacing),
+        horizontalArrangement = Arrangement.spacedBy(NamiokaiUiTokens.ItemSpacing),
         content = {
             items(
                 items = uiState.spaces,

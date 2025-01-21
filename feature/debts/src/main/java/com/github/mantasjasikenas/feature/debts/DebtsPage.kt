@@ -29,7 +29,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Restore
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.HorizontalDivider
@@ -58,6 +57,7 @@ import com.github.mantasjasikenas.core.domain.model.User
 import com.github.mantasjasikenas.core.domain.model.UsersMap
 import com.github.mantasjasikenas.core.domain.model.debts.DebtBill
 import com.github.mantasjasikenas.core.domain.model.debts.SpaceDebts
+import com.github.mantasjasikenas.core.ui.common.NamiokaiUiTokens
 import com.github.mantasjasikenas.core.ui.component.NoResultsFound
 import kotlin.math.absoluteValue
 
@@ -73,11 +73,11 @@ internal fun DebtsPage(
         NoResultsFound(label = "No spaces found.\nPlease create a space first to add a bill.")
         return
     }
-    
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(all = 20.dp)
+            .padding(NamiokaiUiTokens.PageContentPadding)
             .verticalScroll(rememberScrollState()), // remove if lazy column is used
     ) {
         PeriodSelection(

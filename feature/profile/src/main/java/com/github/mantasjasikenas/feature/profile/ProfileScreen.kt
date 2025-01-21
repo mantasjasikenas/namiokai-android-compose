@@ -4,6 +4,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
@@ -26,6 +27,7 @@ import coil.request.ImageRequest
 import com.github.mantasjasikenas.core.domain.model.User
 import com.github.mantasjasikenas.core.ui.common.NamiokaiCircularProgressIndicator
 import com.github.mantasjasikenas.core.ui.common.NamiokaiSpacer
+import com.github.mantasjasikenas.core.ui.common.NamiokaiUiTokens
 
 @Composable
 fun ProfileRoute() {
@@ -58,7 +60,9 @@ private fun ProfileScreenContent(
     onLogout: () -> Unit
 ) {
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(NamiokaiUiTokens.PageContentPadding),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -88,18 +92,12 @@ private fun ProfileScreenContent(
             style = MaterialTheme.typography.titleLarge
         )
         Text(text = user.email)
+
         NamiokaiSpacer(height = 32)
 
-        /*Button(onClick = { showToast() }) {
-            Text(text = "Change display name")
-        }
-        Button(onClick = { showToast() }) {
-            Text(text = "Change profile picture")
-        }*/
         Button(onClick = onLogout) {
             Text(text = "Sign out")
         }
-
 
         NamiokaiSpacer(height = 64)
     }

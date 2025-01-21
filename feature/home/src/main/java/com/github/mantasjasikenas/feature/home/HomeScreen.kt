@@ -34,6 +34,7 @@ import com.github.mantasjasikenas.core.common.util.currentLocalDate
 import com.github.mantasjasikenas.core.domain.model.Space
 import com.github.mantasjasikenas.core.ui.common.NamiokaiCircularProgressIndicator
 import com.github.mantasjasikenas.core.ui.common.NamiokaiSpacer
+import com.github.mantasjasikenas.core.ui.common.NamiokaiUiTokens
 import com.github.mantasjasikenas.core.ui.component.NamiokaiElevatedCard
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
@@ -85,7 +86,7 @@ private fun HomeScreenContent(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(20.dp),
+            .padding(NamiokaiUiTokens.PageContentPadding),
     ) {
         Widgets(
             homeUiState = homeUiState,
@@ -106,8 +107,8 @@ private fun Widgets(
 
     LazyVerticalStaggeredGrid(
         columns = StaggeredGridCells.Fixed(2),
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
-        verticalItemSpacing = 16.dp,
+        horizontalArrangement = Arrangement.spacedBy(NamiokaiUiTokens.ItemSpacing),
+        verticalItemSpacing = NamiokaiUiTokens.ItemSpacing,
     ) {
         item(
             key = "welcome",

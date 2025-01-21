@@ -196,18 +196,15 @@ fun BillCard(
     currentUser: User,
     usersMap: Map<String, User>,
     onClick: () -> Unit,
-    elevatedCardPadding: PaddingValues = PaddingValues(
-        horizontal = 20.dp,
-        vertical = 5.dp
-    ),
-    columnPadding: PaddingValues = PaddingValues(15.dp),
+    elevatedCardPadding: PaddingValues = PaddingValues(),
+    innerPadding: PaddingValues = PaddingValues(15.dp),
     elevated: Boolean = true,
 ) {
     BillCard(
         bill = bill,
         currentUserUid = currentUser.uid,
         elevatedCardPadding = elevatedCardPadding,
-        columnPadding = columnPadding,
+        innerPadding = innerPadding,
         onClick = onClick,
         modifier = modifier,
         elevated = elevated
@@ -265,11 +262,8 @@ fun BillCard(
     currentUserUid: UserUid,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    elevatedCardPadding: PaddingValues = PaddingValues(
-        horizontal = 20.dp,
-        vertical = 5.dp
-    ),
-    columnPadding: PaddingValues = PaddingValues(15.dp),
+    elevatedCardPadding: PaddingValues = PaddingValues(),
+    innerPadding: PaddingValues = PaddingValues(15.dp),
     elevated: Boolean = true,
     content: @Composable ColumnScope.() -> Unit
 ) {
@@ -292,7 +286,7 @@ fun BillCard(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(columnPadding),
+                .padding(innerPadding),
             horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.Center
         ) {
@@ -303,6 +297,7 @@ fun BillCard(
                 modifier = Modifier.fillMaxSize()
             ) {
                 NamiokaiSpacer(width = 10)
+
                 DateTimeCardColumn(
                     day = billCreationDateTime.date.dayOfMonth.toString(),
                     month = billCreationDateTime.month.getDisplayName(

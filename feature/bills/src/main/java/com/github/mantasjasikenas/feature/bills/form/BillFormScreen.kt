@@ -65,6 +65,7 @@ import com.github.mantasjasikenas.core.domain.model.bills.PurchaseBill
 import com.github.mantasjasikenas.core.domain.model.bills.Taxes
 import com.github.mantasjasikenas.core.domain.model.bills.TripBill
 import com.github.mantasjasikenas.core.ui.common.NamiokaiCircularProgressIndicator
+import com.github.mantasjasikenas.core.ui.common.NamiokaiUiTokens
 import com.github.mantasjasikenas.core.ui.common.UsersPicker
 import com.github.mantasjasikenas.core.ui.component.NamiokaiDropdownMenu
 import com.github.mantasjasikenas.core.ui.component.NamiokaiNumberField
@@ -146,7 +147,7 @@ fun BillFormContent(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .padding(NamiokaiUiTokens.PageContentPadding)
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
