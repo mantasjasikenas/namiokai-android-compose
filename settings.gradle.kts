@@ -1,11 +1,5 @@
 @file:Suppress("UnstableApiUsage")
 
-include(":feature:search-users")
-
-
-include(":feature:space")
-
-
 pluginManagement {
     includeBuild("build-logic")
 
@@ -45,3 +39,5 @@ include(":feature:admin")
 include(":feature:notifications")
 include(":feature:login")
 include(":feature:settings")
+include(":feature:search-users")
+include(":feature:space")
