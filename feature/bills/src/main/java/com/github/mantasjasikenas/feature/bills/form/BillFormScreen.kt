@@ -99,7 +99,7 @@ fun BillFormScreen(
             BillFormContent(
                 modifier = modifier,
                 uiState = uiState as BillFormUiState.Success,
-                usersMap = sharedState.usersMap,
+                usersMap = sharedState.spaceUsers,
                 billFormViewModel = billFormViewModel,
                 billFormRoute = billFormViewModel.billFormRoute,
                 onNavigateUp = onNavigateUp,

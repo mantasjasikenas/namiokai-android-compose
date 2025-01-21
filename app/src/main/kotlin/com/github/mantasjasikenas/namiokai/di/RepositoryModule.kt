@@ -129,12 +129,13 @@ object RepositoryModule {
     fun provideUserDataRepository(
         preferencesRepository: PreferencesRepository,
         usersRepository: UsersRepository,
+        spaceRepository: SpaceRepository,
         periodRepository: PeriodRepository
     ): UserDataRepository =
         UserDataRepositoryImpl(
             preferencesRepository = preferencesRepository,
             usersRepository = usersRepository,
-            periodRepository = periodRepository
+            spaceRepository = spaceRepository,
         )
 
     @Provides

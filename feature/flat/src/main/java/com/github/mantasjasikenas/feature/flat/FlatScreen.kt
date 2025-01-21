@@ -112,7 +112,7 @@ fun FlatScreen(
         flatViewModel = flatViewModel,
         flatBills = flatBills,
         currentUser = sharedState.currentUser,
-        usersMap = sharedState.usersMap,
+        usersMap = sharedState.spaceUsers,
         onNavigateToFlatBill = onNavigateToFlatBill,
         onNavigateToCreateBill = onNavigateToCreateBill
     )

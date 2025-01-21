@@ -7,8 +7,7 @@ import com.github.mantasjasikenas.core.domain.repository.BaseFirebaseRepository
 import com.github.mantasjasikenas.core.domain.repository.UsersRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.snapshots
-import com.google.firebase.firestore.toObject
+import com.google.firebase.firestore.dataObjects
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
@@ -34,62 +33,49 @@ class UsersRepositoryImpl @Inject constructor(
     private val db: FirebaseFirestore,
     private val storage: FirebaseStorage,
     private val auth: FirebaseAuth
-) :
-    UsersRepository {
-
-    private fun getAuthState() = callbackFlow {
-        val authStateListener = FirebaseAuth.AuthStateListener { auth ->
-            trySend(auth.currentUser == null)
-        }
-
-        auth.addAuthStateListener(authStateListener)
-
-        awaitClose {
-            auth.removeAuthStateListener(authStateListener)
-        }
-    }
+) : UsersRepository {
+    private val usersCollection = db.collection(USERS_COLLECTION)
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override val currentUser: Flow<User> =
-        getAuthState().flatMapLatest { isUserLoggedOut ->
-            if (isUserLoggedOut) {
-                callbackFlow {
-                    trySend(User())
-                    awaitClose()
-                }
-            } else {
-                getUser(auth.currentUser!!.uid)
-            }
-        }
-
-    override fun getUsers(): Flow<List<User>> =
-        db.collection(USERS_COLLECTION)
-            .snapshots()
-            .map {
-                it.documents.map { document ->
-                    document.toObject<User>()!!
+        getAuthState()
+            .flatMapLatest { isUserLoggedOut ->
+                if (isUserLoggedOut) {
+                    callbackFlow {
+                        trySend(User())
+                        awaitClose()
+                    }
+                } else {
+                    getUser(auth.currentUser!!.uid).map { it ?: User() }
                 }
             }
 
-    override fun getUser(uid: String): Flow<User> = getUsers().map { userList ->
-        userList.firstOrNull { user ->
-            user.uid == uid
-        } ?: User()
+    override fun getUsers(): Flow<List<User>> = usersCollection.dataObjects<User>()
+
+    override fun getUsers(userIds: List<String>): Flow<List<User>> {
+        return usersCollection
+            .whereIn("uid", userIds)
+            .dataObjects<User>()
+    }
+
+    override fun getUser(uid: String): Flow<User?> {
+        return usersCollection
+            .document(uid)
+            .dataObjects<User>()
     }
 
     override suspend fun insertUser(user: User) {
-        db.collection(USERS_COLLECTION)
+        usersCollection
             .document(user.uid)
             .set(user)
     }
 
-
     override suspend fun clearUsers() {
-        db.collection(USERS_COLLECTION)
+        usersCollection
             .get()
             .addOnSuccessListener { documents ->
                 for (document in documents) {
-                    db.collection(USERS_COLLECTION)
+                    usersCollection
                         .document(document.id)
                         .delete()
                 }
@@ -134,7 +120,7 @@ class UsersRepositoryImpl @Inject constructor(
     override suspend fun changeCurrentUserImageUrlInFirestore(downloadUrl: Uri): Response<Boolean> {
         return try {
             auth.uid?.let { uid ->
-                db.collection(USERS_COLLECTION)
+                usersCollection
                     .document(uid)
                     .update(
                         PHOTO_URL_FIELD,
@@ -152,7 +138,7 @@ class UsersRepositoryImpl @Inject constructor(
     override suspend fun changeCurrentUserNameInFirestore(newUserName: String): Response<Boolean> {
         return try {
             auth.uid?.let { uid ->
-                db.collection(USERS_COLLECTION)
+                usersCollection
                     .document(uid)
                     .update(
                         USERNAME_FIELD,
@@ -175,4 +161,15 @@ class UsersRepositoryImpl @Inject constructor(
         )
     }
 
+    private fun getAuthState() = callbackFlow {
+        val authStateListener = FirebaseAuth.AuthStateListener { auth ->
+            trySend(auth.currentUser == null)
+        }
+
+        auth.addAuthStateListener(authStateListener)
+
+        awaitClose {
+            auth.removeAuthStateListener(authStateListener)
+        }
+    }
 }

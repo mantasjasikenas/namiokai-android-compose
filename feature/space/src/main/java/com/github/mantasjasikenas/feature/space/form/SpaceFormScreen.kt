@@ -108,7 +108,7 @@ fun SpaceFormScreen(
                 modifier = modifier,
                 uiState = uiState as SpaceFormUiState.Success,
                 invitedUsers = invitedUsers,
-                usersMap = sharedState.usersMap,
+                usersMap = sharedState.spaceUsers,
                 currentUser = sharedState.currentUser,
                 spaceFormViewModel = spaceFormViewModel,
                 spaceFormRoute = spaceFormViewModel.spaceFormRoute,

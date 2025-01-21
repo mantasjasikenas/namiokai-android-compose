@@ -4,10 +4,9 @@ import com.github.mantasjasikenas.core.domain.model.Space
 import com.github.mantasjasikenas.core.domain.repository.SpaceRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.snapshots
+import com.google.firebase.firestore.dataObjects
 import com.google.firebase.firestore.toObject
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
@@ -27,11 +26,7 @@ class SpaceRepositoryImpl @Inject constructor(
     }
 
     override fun getSpace(spaceId: String): Flow<Space?> {
-        return getSpaceDocumentReference(spaceId)
-            .snapshots()
-            .map {
-                it.toObject<Space>()
-            }
+        return getSpaceDocumentReference(spaceId).dataObjects<Space>()
     }
 
     override fun getCurrentUserSpaces(): Flow<List<Space>> {
@@ -41,10 +36,7 @@ class SpaceRepositoryImpl @Inject constructor(
     override fun getSpacesByUser(userId: String): Flow<List<Space>> {
         return spacesCollection
             .whereArrayContains(SPACE_MEMBERS_FIELD, userId)
-            .snapshots()
-            .map { snapshot ->
-                snapshot.documents.map { it.toObject<Space>()!! }
-            }
+            .dataObjects<Space>()
     }
 
     override suspend fun addUserToSpace(spaceId: String, userId: String) {

@@ -25,7 +25,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.github.mantasjasikenas.core.domain.model.PeriodState
 import com.github.mantasjasikenas.core.domain.model.SharedState
 import com.github.mantasjasikenas.core.domain.model.Space
 import com.github.mantasjasikenas.core.domain.model.User
@@ -62,8 +61,7 @@ fun SpaceScreen(
                 modifier = modifier,
                 viewModel = viewModel,
                 uiState = uiState as SpaceUiState.Success,
-                periodState = sharedState.periodState,
-                usersMap = sharedState.usersMap,
+                usersMap = sharedState.spaceUsers,
                 currentUser = sharedState.currentUser,
                 onNavigateToCreateSpace = onNavigateToCreateSpace,
             )
@@ -80,7 +78,6 @@ fun SpaceScreenContent(
     modifier: Modifier = Modifier,
     viewModel: SpaceViewModel,
     uiState: SpaceUiState.Success,
-    periodState: PeriodState,
     usersMap: UsersMap,
     currentUser: User,
     onNavigateToCreateSpace: (SpaceFormArgs) -> Unit,

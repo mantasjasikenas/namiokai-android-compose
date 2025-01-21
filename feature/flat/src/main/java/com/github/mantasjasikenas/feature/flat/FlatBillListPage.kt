@@ -78,7 +78,7 @@ fun FlatBillListPage(
         flatViewModel = flatViewModel,
         onNavigateToCreateBill = onNavigateToCreateBill,
         currentUser = sharedState.currentUser,
-        usersMap = sharedState.usersMap
+        usersMap = sharedState.spaceUsers
     )
 }
 

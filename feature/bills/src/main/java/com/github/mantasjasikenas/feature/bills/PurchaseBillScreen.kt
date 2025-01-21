@@ -25,15 +25,12 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.github.mantasjasikenas.core.domain.model.Filter
-import com.github.mantasjasikenas.core.domain.model.period.Period
-import com.github.mantasjasikenas.core.domain.model.PeriodState
 import com.github.mantasjasikenas.core.domain.model.SharedState
 import com.github.mantasjasikenas.core.domain.model.User
 import com.github.mantasjasikenas.core.domain.model.UsersMap
 import com.github.mantasjasikenas.core.domain.model.bills.BillFormArgs
 import com.github.mantasjasikenas.core.domain.model.bills.BillType
 import com.github.mantasjasikenas.core.domain.model.bills.PurchaseBill
-import com.github.mantasjasikenas.core.domain.model.period.contains
 import com.github.mantasjasikenas.core.ui.common.NamiokaiCircularProgressIndicator
 import com.github.mantasjasikenas.core.ui.common.NamiokaiSpacer
 import com.github.mantasjasikenas.core.ui.common.bill.SwipeBillCard
@@ -82,8 +79,7 @@ fun PurchaseBillScreen(
         modifier = modifier,
         billUiState = billUiState,
         groupedBills = groupedBills,
-        periodState = sharedState.periodState,
-        usersMap = sharedState.usersMap,
+        usersMap = sharedState.spaceUsers,
         currentUser = sharedState.currentUser,
         viewModel = viewModel,
         onNavigateToCreateBill = onNavigateToCreateBill
@@ -95,7 +91,6 @@ fun PurchaseBillScreenContent(
     modifier: Modifier = Modifier,
     billUiState: BillUiState,
     groupedBills: Map<Pair<String, String>, List<PurchaseBill>>,
-    periodState: PeriodState,
     usersMap: UsersMap,
     currentUser: User,
     viewModel: PurchaseBillViewModel,
@@ -122,7 +117,6 @@ fun PurchaseBillScreenContent(
     ) {
         PurchaseBillFiltersRow(
             billUiState = billUiState,
-            periodState = periodState,
             usersMap = usersMap,
             onFiltersChanged = {
                 viewModel.onFiltersChanged(it)
@@ -226,7 +220,6 @@ private fun PurchaseBillCard(
 private fun PurchaseBillFiltersRow(
     billUiState: BillUiState,
     usersMap: UsersMap,
-    periodState: PeriodState,
     onFiltersChanged: (List<Filter<PurchaseBill, Any>>) -> Unit,
 ) {
     val usersDisplayNames = remember(usersMap) {
@@ -253,14 +246,6 @@ private fun PurchaseBillFiltersRow(
                     filterName = "splitter",
                     values = usersDisplayNames,
                     predicate = { bill, value -> bill.splitUsersUid.contains(getUserUid(value as String)) }),
-                Filter(
-                    displayLabel = "Period",
-                    filterName = "period",
-                    values = periodState.periods.sortedByDescending { it.start },
-//                    selectedValue = periodState.currentPeriod,
-                    predicate = { bill, value ->
-                        (value as Period).contains(bill.date)
-                    }),
             )
         }
     }

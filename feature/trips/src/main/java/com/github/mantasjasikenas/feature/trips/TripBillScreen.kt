@@ -25,15 +25,12 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.github.mantasjasikenas.core.domain.model.Filter
-import com.github.mantasjasikenas.core.domain.model.period.Period
-import com.github.mantasjasikenas.core.domain.model.PeriodState
 import com.github.mantasjasikenas.core.domain.model.SharedState
 import com.github.mantasjasikenas.core.domain.model.User
 import com.github.mantasjasikenas.core.domain.model.UsersMap
 import com.github.mantasjasikenas.core.domain.model.bills.BillFormArgs
 import com.github.mantasjasikenas.core.domain.model.bills.BillType
 import com.github.mantasjasikenas.core.domain.model.bills.TripBill
-import com.github.mantasjasikenas.core.domain.model.period.contains
 import com.github.mantasjasikenas.core.ui.common.NamiokaiCircularProgressIndicator
 import com.github.mantasjasikenas.core.ui.common.NamiokaiSpacer
 import com.github.mantasjasikenas.core.ui.common.bill.SwipeBillCard
@@ -78,8 +75,7 @@ fun TripBillScreen(
         modifier = modifier,
         viewModel = viewModel,
         fuelUiState = fuelUiState,
-        periodState = sharedState.periodState,
-        usersMap = sharedState.usersMap,
+        usersMap = sharedState.spaceUsers,
         currentUser = sharedState.currentUser,
         onNavigateToCreateBill = onNavigateToCreateBill,
         groupedTrips = groupedTrips
@@ -91,7 +87,6 @@ fun TripBillScreenContent(
     modifier: Modifier = Modifier,
     viewModel: FuelViewModel,
     fuelUiState: FuelUiState,
-    periodState: PeriodState,
     usersMap: UsersMap,
     currentUser: User,
     onNavigateToCreateBill: (BillFormArgs) -> Unit,
@@ -118,7 +113,6 @@ fun TripBillScreenContent(
     ) {
         TripBillFiltersRow(
             fuelUiState = fuelUiState,
-            periodState = periodState,
             usersMap = usersMap,
             onFiltersChanged = {
                 viewModel.onFiltersChanged(it)
@@ -221,7 +215,6 @@ private fun TripBillCard(
 @Composable
 private fun TripBillFiltersRow(
     fuelUiState: FuelUiState,
-    periodState: PeriodState,
     usersMap: UsersMap,
     onFiltersChanged: (List<Filter<TripBill, Any>>) -> Unit
 ) {
@@ -250,13 +243,7 @@ private fun TripBillFiltersRow(
                     filterName = "passengers",
                     values = usersDisplayNames,
                     predicate = { bill, value -> bill.splitUsersUid.contains(getUserUid(value as String)) }
-                ),
-                Filter(
-                    displayLabel = "Period",
-                    filterName = "period",
-                    values = periodState.periods.sortedByDescending { it.start },
-                    //selectedValue = periodUiState.currentPeriod,
-                    predicate = { bill, value -> (value as Period).contains(bill.date) }),
+                )
             )
         }
     }
