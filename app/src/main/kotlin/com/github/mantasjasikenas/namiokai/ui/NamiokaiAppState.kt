@@ -18,14 +18,13 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navOptions
 import com.github.mantasjasikenas.core.common.util.SnackbarController
 import com.github.mantasjasikenas.core.domain.model.SharedState
 import com.github.mantasjasikenas.core.domain.model.isNotLoggedIn
 import com.github.mantasjasikenas.namiokai.navigation.TopLevelRoute
+import com.github.mantasjasikenas.namiokai.navigation.navigateToTopLevelRoute
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -114,15 +113,7 @@ class NamiokaiAppState(
         }
 
     fun navigateToTopLevelRoute(topLevelRoute: TopLevelRoute) {
-        val topLevelNavOptions = navOptions {
-            popUpTo(navController.graph.findStartDestination().id) {
-                saveState = true
-            }
-            launchSingleTop = true
-            restoreState = true
-        }
-
-        navController.navigate(topLevelRoute.route, topLevelNavOptions)
+        navController.navigateToTopLevelRoute(topLevelRoute)
     }
 
     val topLevelDestinations: List<TopLevelRoute> = TopLevelRoute.routes

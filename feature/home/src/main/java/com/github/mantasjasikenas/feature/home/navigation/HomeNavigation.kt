@@ -4,8 +4,8 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
+import com.github.mantasjasikenas.core.domain.model.Space
 import com.github.mantasjasikenas.feature.home.HomeRoute
-import com.github.mantasjasikenas.feature.home.navigation.HomeRoute
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -17,8 +17,14 @@ fun NavController.navigateToHome(
     navigate(route = HomeRoute, navOptions)
 }
 
-fun NavGraphBuilder.homeScreen() {
+fun NavGraphBuilder.homeScreen(
+    onNavigateToSpaceForm: (Space?) -> Unit,
+    onNavigateToSpaceScreen: () -> Unit,
+) {
     composable<HomeRoute> {
-        HomeRoute()
+        HomeRoute(
+            onNavigateToSpace = onNavigateToSpaceForm,
+            onNavigateToSpaceScreen = onNavigateToSpaceScreen,
+        )
     }
 }

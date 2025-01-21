@@ -1,6 +1,7 @@
 package com.github.mantasjasikenas.core.domain.model.period
 
 import com.github.mantasjasikenas.core.common.util.applyIf
+import com.github.mantasjasikenas.core.common.util.currentLocalDate
 import com.github.mantasjasikenas.core.domain.model.RecurrenceUnit
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate

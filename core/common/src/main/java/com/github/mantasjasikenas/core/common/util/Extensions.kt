@@ -3,9 +3,13 @@ package com.github.mantasjasikenas.core.common.util
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import kotlinx.datetime.Clock
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.Month
+import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toJavaLocalDateTime
+import kotlinx.datetime.toLocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.Locale
@@ -133,5 +137,23 @@ fun String.toYearMonthPair(): Pair<String, String> {
         )
 
     return Pair(year, month)
+}
+
+/**
+ * Gets the current [LocalDate] in the specified [TimeZone].
+ */
+fun currentLocalDate(
+    timeZone: TimeZone = TimeZone.currentSystemDefault()
+): LocalDate {
+    return currentLocalDateTime(timeZone = timeZone).date
+}
+
+/**
+ * Gets the current [LocalDateTime] in the specified [TimeZone].
+ */
+fun currentLocalDateTime(
+    timeZone: TimeZone = TimeZone.currentSystemDefault()
+): LocalDateTime {
+    return Clock.System.now().toLocalDateTime(timeZone = timeZone)
 }
 

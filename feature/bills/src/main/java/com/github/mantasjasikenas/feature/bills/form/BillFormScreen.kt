@@ -5,7 +5,6 @@
 
 package com.github.mantasjasikenas.feature.bills.form
 
-import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Arrangement
@@ -41,10 +40,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
@@ -53,6 +52,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.github.mantasjasikenas.core.common.util.SnackbarController
+import com.github.mantasjasikenas.core.common.util.SnackbarEvent
 import com.github.mantasjasikenas.core.common.util.Uid
 import com.github.mantasjasikenas.core.domain.model.SharedState
 import com.github.mantasjasikenas.core.domain.model.Space
@@ -71,6 +72,7 @@ import com.github.mantasjasikenas.core.ui.component.NamiokaiTextField
 import com.github.mantasjasikenas.core.ui.component.NoResultsFound
 import com.github.mantasjasikenas.feature.bills.R
 import com.github.mantasjasikenas.feature.bills.navigation.BillFormRoute
+import kotlinx.coroutines.launch
 
 @Composable
 fun BillFormRoute(
@@ -155,7 +157,7 @@ fun BillFormContent(
                 )
             )
         }
-        val options = BillType.entries
+        val billTypes = BillType.entries
 
         Text(
             text = stringResource(R.string.type),
@@ -167,9 +169,12 @@ fun BillFormContent(
         SingleChoiceSegmentedButtonRow(
             modifier = Modifier.fillMaxWidth()
         ) {
-            options.forEachIndexed { index, label ->
+            billTypes.forEachIndexed { index, label ->
                 SegmentedButton(
-                    shape = SegmentedButtonDefaults.itemShape(index = index, count = options.size),
+                    shape = SegmentedButtonDefaults.itemShape(
+                        index = index,
+                        count = billTypes.size
+                    ),
                     onClick = { selectedIndex = index },
                     selected = index == selectedIndex,
                     enabled = initialBill == null
@@ -241,7 +246,7 @@ fun PurchaseBillContent(
     usersMap: UsersMap,
     spaces: List<Space>
 ) {
-    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
 
     val bill by remember(initialPurchaseBill) {
         mutableStateOf(initialPurchaseBill ?: PurchaseBill())
@@ -249,6 +254,38 @@ fun PurchaseBillContent(
 
     val selectedSpace = remember {
         mutableStateOf(spaces.firstOrNull { it.spaceId == bill.spaceId } ?: spaces.firstOrNull())
+    }
+
+    val onBillSave: () -> Unit = onBillSave@{
+        bill.spaceId = selectedSpace.value?.spaceId ?: ""
+
+        if (!bill.isValid()) {
+            scope.launch {
+                SnackbarController.sendEvent(
+                    SnackbarEvent(
+                        message = "Please fill all fields"
+                    )
+                )
+            }
+            return@onBillSave
+        }
+
+        onSaveClick(bill)
+
+        scope.launch {
+            SnackbarController.sendEvent(
+                SnackbarEvent(
+                    message = "Bill saved"
+                )
+            )
+        }
+    }
+
+    val onSpaceSelected: (Space) -> Unit = { space: Space ->
+        selectedSpace.value = space
+        bill.spaceId = space.spaceId
+        bill.paymasterUid = ""
+        bill.splitUsersUid = emptyList()
     }
 
     SpaceContainer(
@@ -259,12 +296,7 @@ fun PurchaseBillContent(
         usersMap = usersMap,
         paymasterTitle = stringResource(R.string.paymaster),
         splitUsersTitle = stringResource(R.string.split_bill_with),
-        onSpaceSelected = { space ->
-            selectedSpace.value = space
-            bill.spaceId = space.spaceId
-            bill.paymasterUid = ""
-            bill.splitUsersUid = emptyList()
-        },
+        onSpaceSelected = onSpaceSelected,
         onPaymasterSelected = {
             bill.paymasterUid = it
         },
@@ -304,22 +336,9 @@ fun PurchaseBillContent(
 
     Spacer(modifier = Modifier.height(32.dp))
 
-    Button(onClick = {
-        bill.spaceId = selectedSpace.value?.spaceId ?: ""
-
-        if (!bill.isValid()) {
-            Toast.makeText(
-                context, R.string.please_fill_all_fields, Toast.LENGTH_SHORT
-            ).show()
-            return@Button
-        }
-
-        onSaveClick(bill)
-
-        Toast.makeText(
-            context, R.string.bill_saved, Toast.LENGTH_SHORT
-        ).show()
-    }) {
+    Button(
+        onClick = onBillSave
+    ) {
         Text(text = if (initialPurchaseBill == null) "Save" else "Update")
     }
 }
@@ -331,7 +350,7 @@ private fun TripBillContent(
     usersMap: UsersMap,
     spaces: List<Space>
 ) {
-    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
 
     val trip by remember(initialTripBill) { mutableStateOf(initialTripBill ?: TripBill()) }
 
@@ -344,6 +363,57 @@ private fun TripBillContent(
             ?: selectedSpace?.destinations?.firstOrNull())
     }
 
+    val onBillSave: () -> Unit = onBillSave@{
+        if (selectedDestination == null) {
+            scope.launch {
+                SnackbarController.sendEvent(
+                    SnackbarEvent(
+                        message = "Please select destination first"
+                    )
+                )
+            }
+            return@onBillSave
+        }
+
+        trip.spaceId = selectedSpace?.spaceId ?: ""
+        trip.tripDestination = selectedDestination.name
+        trip.tripPricePerUser = when (trip.splitUsersUid.count()) {
+            1 -> selectedDestination.tripPriceAlone
+            else -> selectedDestination.tripPriceWithOthers
+        }
+
+        if (!trip.isValid()) {
+            scope.launch {
+                SnackbarController.sendEvent(
+                    SnackbarEvent(
+                        message = "Please fill all fields"
+                    )
+                )
+            }
+            return@onBillSave
+        }
+
+        onSaveClick(trip)
+
+        scope.launch {
+            SnackbarController.sendEvent(
+                SnackbarEvent(
+                    message = "Bill saved"
+                )
+            )
+        }
+    }
+
+    val onSpaceSelected: (Space) -> Unit = { space: Space ->
+        selectedSpace = space
+
+        trip.spaceId = space.spaceId
+        trip.paymasterUid = ""
+        trip.splitUsersUid = emptyList()
+        trip.tripDestination = ""
+        trip.tripPricePerUser = 0.0
+    }
+
     SpaceContainer(
         selectedSpace = selectedSpace,
         paymasterUid = trip.paymasterUid,
@@ -352,15 +422,7 @@ private fun TripBillContent(
         usersMap = usersMap,
         paymasterTitle = stringResource(R.string.driver),
         splitUsersTitle = stringResource(R.string.passengers),
-        onSpaceSelected = { space ->
-            selectedSpace = space
-
-            trip.spaceId = space.spaceId
-            trip.paymasterUid = ""
-            trip.splitUsersUid = emptyList()
-            trip.tripDestination = ""
-            trip.tripPricePerUser = 0.0
-        },
+        onSpaceSelected = onSpaceSelected,
         onPaymasterSelected = {
             trip.paymasterUid = it
         },
@@ -428,34 +490,7 @@ private fun TripBillContent(
 
     Spacer(modifier = Modifier.height(32.dp))
 
-    Button(onClick = {
-        if (selectedDestination == null) {
-            Toast.makeText(
-                context, "Please select destination first", Toast.LENGTH_SHORT
-            ).show()
-            return@Button
-        }
-
-        trip.spaceId = selectedSpace?.spaceId ?: ""
-        trip.tripDestination = selectedDestination.name
-        trip.tripPricePerUser = when (trip.splitUsersUid.count()) {
-            1 -> selectedDestination.tripPriceAlone
-            else -> selectedDestination.tripPriceWithOthers
-        }
-
-        if (!trip.isValid()) {
-            Toast.makeText(
-                context, R.string.please_fill_all_fields, Toast.LENGTH_SHORT
-            ).show()
-            return@Button
-        }
-
-        onSaveClick(trip)
-
-        Toast.makeText(
-            context, R.string.fuel_saved, Toast.LENGTH_SHORT
-        ).show()
-    }) {
+    Button(onClick = onBillSave) {
         Text(text = if (initialTripBill == null) "Save" else "Update")
     }
 }
@@ -467,7 +502,7 @@ private fun FlatBillContent(
     usersMap: UsersMap,
     spaces: List<Space>
 ) {
-    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
 
     var flatBill by remember(initialFlatBill) {
         mutableStateOf(initialFlatBill ?: FlatBill())
@@ -477,6 +512,31 @@ private fun FlatBillContent(
             ?: spaces.firstOrNull())
     }
     val (includeTaxes, onIncludeTaxesChange) = remember { mutableStateOf(flatBill.taxes != null) }
+
+    val onBillSave: () -> Unit = onBillSave@{
+        flatBill.spaceId = selectedSpace.value?.spaceId ?: ""
+
+        if (!flatBill.isValid()) {
+            scope.launch {
+                SnackbarController.sendEvent(
+                    SnackbarEvent(
+                        message = "Please fill all fields"
+                    )
+                )
+            }
+            return@onBillSave
+        }
+
+        onSaveClick(flatBill)
+
+        scope.launch {
+            SnackbarController.sendEvent(
+                SnackbarEvent(
+                    message = "Bill saved"
+                )
+            )
+        }
+    }
 
     SpaceContainer(
         selectedSpace = selectedSpace.value,
@@ -580,22 +640,7 @@ private fun FlatBillContent(
 
     Spacer(modifier = Modifier.height(32.dp))
 
-    Button(onClick = {
-        flatBill.spaceId = selectedSpace.value?.spaceId ?: ""
-
-        if (!flatBill.isValid()) {
-            Toast.makeText(
-                context, R.string.please_fill_all_fields, Toast.LENGTH_SHORT
-            ).show()
-            return@Button
-        }
-
-        onSaveClick(flatBill)
-
-        Toast.makeText(
-            context, R.string.bill_saved, Toast.LENGTH_SHORT
-        ).show()
-    }) {
+    Button(onClick = onBillSave) {
         Text(text = if (initialFlatBill == null) "Save" else "Update")
     }
 }

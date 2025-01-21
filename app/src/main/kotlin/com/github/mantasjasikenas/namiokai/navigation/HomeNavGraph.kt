@@ -29,7 +29,16 @@ fun NavGraphBuilder.homeNavGraph(
     sharedState: SharedState,
     navController: NavController
 ) {
-    homeScreen()
+    homeScreen(
+        onNavigateToSpaceScreen = {
+            navController.navigateToTopLevelRoute(TopLevelRoute.Space)
+        },
+        onNavigateToSpaceForm = {
+            navController.navigate(SpaceFormRoute(spaceId = it?.spaceId)) {
+                launchSingleTop = true
+            }
+        }
+    )
 
     debtsScreen()
 

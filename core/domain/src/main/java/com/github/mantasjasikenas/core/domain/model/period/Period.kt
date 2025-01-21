@@ -1,6 +1,6 @@
 package com.github.mantasjasikenas.core.domain.model.period
 
-import kotlinx.datetime.Clock
+import com.github.mantasjasikenas.core.common.util.currentLocalDate
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
@@ -8,7 +8,6 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.daysUntil
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
-import kotlinx.datetime.toLocalDateTime
 
 data class Period(
     val start: LocalDate = LocalDate(1, 1, 1),
@@ -88,14 +87,3 @@ fun Period.Companion.getPeriod(
     )
 }
 
-internal fun currentLocalDate(
-    timeZone: TimeZone = TimeZone.currentSystemDefault()
-): LocalDate {
-    return currentLocalDateTime(timeZone = timeZone).date
-}
-
-internal fun currentLocalDateTime(
-    timeZone: TimeZone = TimeZone.currentSystemDefault()
-): LocalDateTime {
-    return Clock.System.now().toLocalDateTime(timeZone = timeZone)
-}
