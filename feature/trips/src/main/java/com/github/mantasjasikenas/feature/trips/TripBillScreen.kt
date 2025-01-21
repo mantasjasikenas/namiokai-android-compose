@@ -113,7 +113,7 @@ fun TripBillScreenContent(
     ) {
         TripBillFiltersRow(
             fuelUiState = fuelUiState,
-            usersMap = usersMap,
+            spaceUsers = usersMap,
             onFiltersChanged = {
                 viewModel.onFiltersChanged(it)
             }
@@ -215,44 +215,39 @@ private fun TripBillCard(
 @Composable
 private fun TripBillFiltersRow(
     fuelUiState: FuelUiState,
-    usersMap: UsersMap,
+    spaceUsers: UsersMap,
     onFiltersChanged: (List<Filter<TripBill, Any>>) -> Unit
 ) {
-    val usersDisplayNames = remember(usersMap) {
-        usersMap.map { (_, user) ->
-            user.displayName
-        }
-    }
-    val getUserUid = { displayName: String ->
-        usersMap.values.firstOrNull { user ->
-            user.displayName == displayName
-        }?.uid
+    val users = remember(spaceUsers) {
+        spaceUsers.values.toList()
     }
 
     var filters by rememberState {
         fuelUiState.filters.ifEmpty {
-            mutableStateListOf<Filter<TripBill, Any>>(
+            mutableStateListOf<Filter<TripBill, *>>(
                 Filter(
                     displayLabel = "Driver",
                     filterName = "driver",
-                    values = usersDisplayNames,
-                    predicate = { bill, value -> bill.paymasterUid == getUserUid(value as String) }
+                    displayValue = { it.displayName },
+                    values = users,
+                    predicate = { bill, user -> bill.paymasterUid == user.uid }
                 ),
                 Filter(
                     displayLabel = "Passengers",
                     filterName = "passengers",
-                    values = usersDisplayNames,
-                    predicate = { bill, value -> bill.splitUsersUid.contains(getUserUid(value as String)) }
+                    displayValue = { it.displayName },
+                    values = users,
+                    predicate = { bill, user -> bill.splitUsersUid.contains(user.uid) }
                 )
             )
         }
     }
 
     FiltersRow(
-        filters = filters,
+        filters = filters.filterIsInstance<Filter<TripBill, Any>>(),
         onFilterChanged = {
             filters = it.toMutableStateList()
-            onFiltersChanged(filters)
+            onFiltersChanged(filters.filterIsInstance<Filter<TripBill, Any>>())
         },
     )
 }

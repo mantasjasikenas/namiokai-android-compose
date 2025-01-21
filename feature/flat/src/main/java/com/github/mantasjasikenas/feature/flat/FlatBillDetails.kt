@@ -135,7 +135,7 @@ private fun TaxesDetailsRow(
     taxesFields.forEach { (label, value, endText) ->
         TextRow(
             label = label,
-            value = value.format(2),
+            value = value.toString(),
             labelTextStyle = MaterialTheme.typography.labelMedium,
             valueTextStyle = MaterialTheme.typography.labelMedium,
             endContent = {

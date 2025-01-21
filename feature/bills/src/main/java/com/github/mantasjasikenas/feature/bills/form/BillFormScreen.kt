@@ -476,7 +476,7 @@ private fun FlatBillContent(
         mutableStateOf(spaces.firstOrNull { it.spaceId == flatBill.spaceId }
             ?: spaces.firstOrNull())
     }
-    val (includeTaxes, onIncludeTaxesChange) = remember { mutableStateOf(false) }
+    val (includeTaxes, onIncludeTaxesChange) = remember { mutableStateOf(flatBill.taxes != null) }
 
     SpaceContainer(
         selectedSpace = selectedSpace.value,

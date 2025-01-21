@@ -106,7 +106,7 @@ fun FlatBillScreenContent(
 
     Column {
         FlatBillFiltersRow(
-            usersMap = usersMap,
+            spaceUsers = usersMap,
             flatUiState = flatUiState,
             onFiltersChanged = {
                 flatViewModel.onFiltersChanged(it)
@@ -171,45 +171,48 @@ fun FlatBillScreenContent(
 
 @Composable
 private fun FlatBillFiltersRow(
-    usersMap: UsersMap,
+    spaceUsers: UsersMap,
     flatUiState: FlatUiState,
     onFiltersChanged: (List<Filter<FlatBill, Any>>) -> Unit
 ) {
-    val usersDisplayNames = remember(usersMap) {
-        usersMap.map { (_, user) ->
-            user.displayName
-        }
-    }
-    val getUserUid = { displayName: String ->
-        usersMap.values.firstOrNull { user ->
-            user.displayName == displayName
-        }?.uid
+    val users = remember(spaceUsers) {
+        spaceUsers.values.toList()
     }
 
     var filters by rememberState {
         flatUiState.filters.ifEmpty {
-            mutableStateListOf<Filter<FlatBill, Any>>(
+            mutableStateListOf<Filter<FlatBill, *>>(
                 Filter(
                     displayLabel = "Paymaster",
                     filterName = "paymaster",
-                    values = usersDisplayNames,
-                    predicate = { bill, value -> bill.paymasterUid == getUserUid(value as String) }
+                    displayValue = { it.displayName },
+                    values = users,
+                    predicate = { bill, user -> bill.paymasterUid == user.uid }
                 ),
                 Filter(
                     displayLabel = "Splitter",
                     filterName = "splitter",
-                    values = usersDisplayNames,
-                    predicate = { bill, value -> bill.splitUsersUid.contains(getUserUid(value as String)) }
+                    displayValue = { it.displayName },
+                    values = users,
+                    predicate = { bill, user -> bill.splitUsersUid.contains(user.uid) }
                 ),
+                Filter(
+                    displayLabel = "Space",
+                    displayValue = { it.spaceName },
+                    filterName = "space",
+                    values = flatUiState.spaces,
+                    predicate = { bill, value -> bill.spaceId == value.spaceId }
+                )
             )
         }
     }
 
+
     FiltersRow(
-        filters = filters,
+        filters = filters.filterIsInstance<Filter<FlatBill, Any>>(),
         onFilterChanged = {
             filters = it.toMutableStateList()
-            onFiltersChanged(filters)
+            onFiltersChanged(filters.filterIsInstance<Filter<FlatBill, Any>>())
         },
     )
 }

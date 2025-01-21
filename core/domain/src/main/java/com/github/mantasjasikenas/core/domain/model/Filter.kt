@@ -5,6 +5,7 @@ data class Filter<T, V>(
     val filterName: String,
     val values: List<V>,
     var selectedValue: V? = null,
+    val displayValue: (V) -> String = { it.toString() },
     val predicate: ((T, V) -> Boolean)? = null,
 )
 

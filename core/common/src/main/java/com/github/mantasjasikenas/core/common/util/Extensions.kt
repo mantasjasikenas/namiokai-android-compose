@@ -11,56 +11,99 @@ import java.time.format.TextStyle
 import java.util.Locale
 import kotlin.math.round
 
-fun <K, V> Map<K, V>.toMutableStateMap() = SnapshotStateMap<K, V>().also { it.putAll(this) }
+/**
+ * Converts a [Map] to a [SnapshotStateMap].
+ */
+fun <K, V> Map<K, V>.toMutableStateMap(): SnapshotStateMap<K, V> {
+    return SnapshotStateMap<K, V>().also { it.putAll(this) }
+}
 
+/**
+ * Rounds a [Double] to a specified number of decimal places.
+ */
 fun Double.round(decimals: Int): Double {
     var multiplier = 1.0
     repeat(decimals) { multiplier *= 10 }
     return round(this * multiplier) / multiplier
 }
 
-fun Double.format(digits: Int) = String.Companion.format(
-    "%#,.${digits}f",
-    this
-)
-
-fun LocalDateTime.Companion.tryParse(isoString: String) = try {
-    parse(isoString)
-} catch (e: Exception) {
-    null
+/**
+ * Formats a [Double] to a string with a specified number of decimal places.
+ */
+fun Double.format(digits: Int): String {
+    return String.Companion.format(
+        "%#,.${digits}f",
+        this
+    )
 }
 
-fun String.parseLocalDateTime() = LocalDateTime.tryParse(this)
+/**
+ * Try to parse a [LocalDateTime] from an ISO string.
+ */
+fun LocalDateTime.Companion.tryParse(isoString: String): LocalDateTime? {
+    return try {
+        parse(isoString)
+    } catch (e: Exception) {
+        null
+    }
+}
 
-fun LocalDateTime.format(format: String = Constants.DATE_TIME_DISPLAY_FORMAT): String =
-    DateTimeFormatter.ofPattern(format)
+/**
+ * Try to parse a [LocalDateTime] from a string.
+ */
+fun String.parseLocalDateTime(): LocalDateTime? {
+    return LocalDateTime.tryParse(this)
+}
+
+/**
+ * Formats a [LocalDateTime] to a string.
+ */
+fun LocalDateTime.format(format: String = Constants.DATE_TIME_DISPLAY_FORMAT): String {
+    return DateTimeFormatter.ofPattern(format)
         .format(this.toJavaLocalDateTime())
+}
 
+/**
+ * Filters a list of items by multiple predicates. Returns a list of items that satisfy all predicates.
+ */
 fun <T> Iterable<T>.filterAll(vararg predicates: (T) -> Boolean): List<T> {
     return filter { candidate ->
         predicates.all { it(candidate) }
     }
 }
 
+/**
+ * Filters a collection of items by multiple predicates. Returns a list of items that satisfy all predicates.
+ */
 fun <T> Iterable<T>.filterAll(predicates: List<(T) -> Boolean>): List<T> {
     return filter { candidate ->
         predicates.all { it(candidate) }
     }
 }
 
+/**
+ * Filters a collection of items by multiple predicates. Returns a list of items that satisfy all predicates.
+ */
 fun <T> Collection<T>.filterAll(predicates: MutableCollection<(T) -> Boolean>): List<T> {
     return filter { candidate ->
         predicates.all { it(candidate) }
     }
 }
 
-inline fun <T> T.applyIf(predicate: T.() -> Boolean, block: T.() -> T): T =
-    if (predicate()) {
+/**
+ * Applies a block to an object if a predicate is true. Returns the object.
+ */
+inline fun <T> T.applyIf(predicate: T.() -> Boolean, block: T.() -> T): T {
+    return if (predicate()) {
         block(this)
     } else {
         this
     }
+}
 
+/**
+ * Converts a [Color] to a hex string.
+ */
 fun Color.toHex(): String {
     return String.format(
         "#%06X",
@@ -68,6 +111,9 @@ fun Color.toHex(): String {
     )
 }
 
+/**
+ * Converts an integer to a hex string.
+ */
 fun Int.toHex(): String {
     return String.format(
         "#%06X",
@@ -75,25 +121,17 @@ fun Int.toHex(): String {
     )
 }
 
+/**
+ * Converts string to a pair of year and month. Example: "2021-01" -> ("2021", "January")
+ */
 fun String.toYearMonthPair(): Pair<String, String> {
-    val year = this.substring(
-        0,
-        4
-    )
-    val month = Month(
-        this.substring(
-            5,
-            7
+    val year = this.substring(0, 4)
+    val month = Month(this.substring(5, 7).toInt())
+        .getDisplayName(
+            TextStyle.FULL,
+            Locale.getDefault()
         )
-            .toInt()
-    ).getDisplayName(
-        TextStyle.FULL,
-        Locale.getDefault()
-    )
 
-    return Pair(
-        year,
-        month
-    )
+    return Pair(year, month)
 }
 

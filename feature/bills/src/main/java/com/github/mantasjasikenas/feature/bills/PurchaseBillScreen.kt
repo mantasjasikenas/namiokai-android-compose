@@ -79,7 +79,7 @@ fun PurchaseBillScreen(
         modifier = modifier,
         billUiState = billUiState,
         groupedBills = groupedBills,
-        usersMap = sharedState.spaceUsers,
+        spacesUsers = sharedState.spaceUsers,
         currentUser = sharedState.currentUser,
         viewModel = viewModel,
         onNavigateToCreateBill = onNavigateToCreateBill
@@ -91,7 +91,7 @@ fun PurchaseBillScreenContent(
     modifier: Modifier = Modifier,
     billUiState: BillUiState,
     groupedBills: Map<Pair<String, String>, List<PurchaseBill>>,
-    usersMap: UsersMap,
+    spacesUsers: UsersMap,
     currentUser: User,
     viewModel: PurchaseBillViewModel,
     onNavigateToCreateBill: (BillFormArgs) -> Unit,
@@ -117,7 +117,7 @@ fun PurchaseBillScreenContent(
     ) {
         PurchaseBillFiltersRow(
             billUiState = billUiState,
-            usersMap = usersMap,
+            spaceUsers = spacesUsers,
             onFiltersChanged = {
                 viewModel.onFiltersChanged(it)
             })
@@ -158,7 +158,7 @@ fun PurchaseBillScreenContent(
                             modifier = Modifier.animateItem(),
                             purchaseBill = bill,
                             isAllowedModification = (currentUser.admin || bill.createdByUid == currentUser.uid),
-                            usersMap = usersMap,
+                            usersMap = spacesUsers,
                             currentUser = currentUser,
                             onEdit = { onBillEdit(bill) },
                             onSelect = {
@@ -174,7 +174,7 @@ fun PurchaseBillScreenContent(
         selectedPurchaseBill?.let { bill ->
             PurchaseBillBottomSheet(
                 purchaseBill = bill,
-                usersMap = usersMap,
+                usersMap = spacesUsers,
                 isAllowedModification = (currentUser.admin || bill.createdByUid == currentUser.uid),
                 onEdit = { onBillEdit(bill) },
                 onDismiss = {
@@ -219,42 +219,46 @@ private fun PurchaseBillCard(
 @Composable
 private fun PurchaseBillFiltersRow(
     billUiState: BillUiState,
-    usersMap: UsersMap,
+    spaceUsers: UsersMap,
     onFiltersChanged: (List<Filter<PurchaseBill, Any>>) -> Unit,
 ) {
-    val usersDisplayNames = remember(usersMap) {
-        usersMap.map { (_, user) ->
-            user.displayName
-        }
-    }
-    val getUserUid = { displayName: String ->
-        usersMap.values.firstOrNull { user ->
-            user.displayName == displayName
-        }?.uid
+    val users = remember(spaceUsers) {
+        spaceUsers.values.toList()
     }
 
     var filters by rememberState {
         billUiState.filters.ifEmpty {
-            mutableStateListOf<Filter<PurchaseBill, Any>>(
+            mutableStateListOf<Filter<PurchaseBill, *>>(
                 Filter(
                     displayLabel = "Paymaster",
                     filterName = "paymaster",
-                    values = usersDisplayNames,
-                    predicate = { bill, value -> bill.paymasterUid == getUserUid(value as String) }),
+                    displayValue = { it.displayName },
+                    values = users,
+                    predicate = { bill, user -> bill.paymasterUid == user.uid }
+                ),
                 Filter(
                     displayLabel = "Splitter",
                     filterName = "splitter",
-                    values = usersDisplayNames,
-                    predicate = { bill, value -> bill.splitUsersUid.contains(getUserUid(value as String)) }),
+                    displayValue = { it.displayName },
+                    values = users,
+                    predicate = { bill, user -> bill.splitUsersUid.contains(user.uid) }
+                ),
+                Filter(
+                    displayLabel = "Space",
+                    displayValue = { it.spaceName },
+                    filterName = "space",
+                    values = billUiState.spaces,
+                    predicate = { bill, value -> bill.spaceId == value.spaceId }
+                )
             )
         }
     }
 
     FiltersRow(
-        filters = filters,
+        filters = filters.filterIsInstance<Filter<PurchaseBill, Any>>(),
         onFilterChanged = {
             filters = it.toMutableStateList()
-            onFiltersChanged(filters)
+            onFiltersChanged(filters.filterIsInstance<Filter<PurchaseBill, Any>>())
         },
     )
 }
