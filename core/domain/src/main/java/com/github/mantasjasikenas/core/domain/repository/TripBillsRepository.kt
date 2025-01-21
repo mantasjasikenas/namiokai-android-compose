@@ -11,7 +11,7 @@ interface TripBillsRepository {
     fun getTripBills(period: Period): Flow<List<TripBill>>
     fun getTripBills(period: Period, spaceId: String): Flow<List<TripBill>>
     fun getTripBills(period: Period, spaceIds: List<String>): Flow<List<TripBill>>
-    fun getTripBill(id: String): Flow<TripBill>
+    fun getTripBill(id: String): Flow<TripBill?>
     suspend fun clearTripBills()
     suspend fun insertTripBill(tripBill: TripBill)
     suspend fun updateTripBill(tripBill: TripBill)

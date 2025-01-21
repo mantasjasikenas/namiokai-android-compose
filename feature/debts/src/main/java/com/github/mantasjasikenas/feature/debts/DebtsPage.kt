@@ -60,7 +60,6 @@ import com.github.mantasjasikenas.core.domain.model.User
 import com.github.mantasjasikenas.core.domain.model.UsersMap
 import com.github.mantasjasikenas.core.domain.model.debts.DebtBill
 import com.github.mantasjasikenas.core.domain.model.debts.SpaceDebts
-import com.github.mantasjasikenas.core.domain.model.period.Period
 import com.github.mantasjasikenas.core.ui.component.NoResultsFound
 import kotlin.math.absoluteValue
 
@@ -70,8 +69,6 @@ internal fun DebtsPage(
     spacesDebts: List<SpaceDebts>,
     usersMap: UsersMap,
     periodOffset: Int,
-    onPeriodReset: () -> Unit,
-    onPeriodUpdate: (Period) -> Unit,
     onPeriodOffsetUpdate: (Int) -> Unit,
 ) {
     if (spacesDebts.isEmpty()) {

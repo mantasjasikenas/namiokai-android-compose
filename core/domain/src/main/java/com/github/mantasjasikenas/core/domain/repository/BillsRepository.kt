@@ -10,7 +10,7 @@ interface BillsRepository {
     fun getBills(period: Period): Flow<List<Bill>>
     fun getBills(period: Period, spaceId: String): Flow<List<Bill>>
     fun getBills(period: Period, spaces: List<String>): Flow<List<Bill>>
-    fun getBill(id: String, type: BillType): Flow<Bill>
+    fun getBill(id: String, type: BillType): Flow<Bill?>
     suspend fun updateBill(bill: Bill)
     suspend fun insertBill(bill: Bill)
 }

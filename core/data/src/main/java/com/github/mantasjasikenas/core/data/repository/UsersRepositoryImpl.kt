@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.github.mantasjasikenas.core.data.repository
 
 import android.net.Uri
@@ -25,36 +27,40 @@ private const val BACKUP_USERS_PATH = "backup/users"
 private const val IMAGES_STORAGE_PATH = "images"
 private const val PHOTO_URL_FIELD = "photoUrl"
 private const val USERNAME_FIELD = "displayName"
+private const val UID_FIELD = "uid"
 
 const val USERS_IMPORT_FILE_NAME = "users.json"
 
 class UsersRepositoryImpl @Inject constructor(
     private val baseFirebaseRepository: BaseFirebaseRepository,
-    private val db: FirebaseFirestore,
     private val storage: FirebaseStorage,
-    private val auth: FirebaseAuth
+    private val auth: FirebaseAuth,
+    db: FirebaseFirestore
 ) : UsersRepository {
     private val usersCollection = db.collection(USERS_COLLECTION)
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    override val currentUser: Flow<User> =
-        getAuthState()
-            .flatMapLatest { isUserLoggedOut ->
-                if (isUserLoggedOut) {
-                    callbackFlow {
-                        trySend(User())
-                        awaitClose()
+    override val currentUser: Flow<User>
+        get() {
+            return getAuthState()
+                .flatMapLatest { isUserLoggedOut ->
+                    if (isUserLoggedOut) {
+                        callbackFlow {
+                            trySend(User())
+                            awaitClose()
+                        }
+                    } else {
+                        getUser(auth.currentUser!!.uid).map { it ?: User() }
                     }
-                } else {
-                    getUser(auth.currentUser!!.uid).map { it ?: User() }
                 }
-            }
+        }
 
-    override fun getUsers(): Flow<List<User>> = usersCollection.dataObjects<User>()
+    override fun getUsers(): Flow<List<User>> {
+        return usersCollection.dataObjects<User>()
+    }
 
     override fun getUsers(userIds: List<String>): Flow<List<User>> {
         return usersCollection
-            .whereIn("uid", userIds)
+            .whereIn(UID_FIELD, userIds)
             .dataObjects<User>()
     }
 
@@ -87,6 +93,7 @@ class UsersRepositoryImpl @Inject constructor(
             val usersJson =
                 baseFirebaseRepository.getFileFromStorage("$BACKUP_USERS_PATH/$fileName")
             val users = Json.decodeFromString<List<User>>(usersJson)
+
             users.forEach { insertUser(it) }
 
             Response.Success(true)

@@ -5,13 +5,12 @@ import com.github.mantasjasikenas.core.domain.model.bills.TripBill
 import com.github.mantasjasikenas.core.domain.model.period.Period
 import com.github.mantasjasikenas.core.domain.repository.BaseFirebaseRepository
 import com.github.mantasjasikenas.core.domain.repository.TripBillsRepository
+import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
-import com.google.firebase.firestore.snapshots
-import com.google.firebase.firestore.toObject
+import com.google.firebase.firestore.dataObjects
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
 
@@ -29,18 +28,29 @@ class TripBillsRepositoryImpl @Inject constructor(
 
     private val tripBillCollection = db.collection(TRIP_BILL_COLLECTION)
 
-    override fun getTripBills(): Flow<List<TripBill>> =
-        tripBillCollection
-            .orderBy(
-                ORDER_BY_FIELD,
-                Query.Direction.DESCENDING
+    private fun CollectionReference.orderByDate(direction: Query.Direction = Query.Direction.DESCENDING): Query {
+        return this.orderBy(ORDER_BY_FIELD, direction)
+    }
+
+    private fun Query.orderByDate(direction: Query.Direction = Query.Direction.DESCENDING): Query {
+        return this.orderBy(ORDER_BY_FIELD, direction)
+    }
+
+    private fun Query.whereInPeriod(period: Period): Query {
+        return this
+            .whereGreaterThanOrEqualTo(
+                ORDER_BY_FIELD, period.start.toString() + "T00:00:00"
             )
-            .snapshots()
-            .map {
-                it.documents.map { document ->
-                    document.toObject<TripBill>()!!
-                }
-            }
+            .whereLessThanOrEqualTo(
+                ORDER_BY_FIELD, period.end.toString() + "T23:59:59"
+            )
+    }
+
+    override fun getTripBills(): Flow<List<TripBill>> {
+        return tripBillCollection
+            .orderByDate()
+            .dataObjects<TripBill>()
+    }
 
     override fun getTripBills(spaceIds: List<String>): Flow<List<TripBill>> {
         if (spaceIds.isEmpty()) {
@@ -49,39 +59,16 @@ class TripBillsRepositoryImpl @Inject constructor(
 
         return tripBillCollection
             .whereIn(SPACE_ID_FIELD, spaceIds)
-            .orderBy(
-                ORDER_BY_FIELD,
-                Query.Direction.DESCENDING
-            )
-            .snapshots()
-            .map {
-                it.documents.map { document ->
-                    document.toObject<TripBill>()!!
-                }
-            }
+            .orderByDate()
+            .dataObjects<TripBill>()
     }
 
     override fun getTripBills(period: Period, spaceId: String): Flow<List<TripBill>> {
         return tripBillCollection
-            .orderBy(
-                ORDER_BY_FIELD,
-                Query.Direction.DESCENDING
-            )
+            .orderByDate()
             .whereEqualTo(SPACE_ID_FIELD, spaceId)
-            .whereGreaterThanOrEqualTo(
-                ORDER_BY_FIELD,
-                period.start.toString() + "T00:00:00"
-            )
-            .whereLessThanOrEqualTo(
-                ORDER_BY_FIELD,
-                period.end.toString() + "T23:59:59"
-            )
-            .snapshots()
-            .map {
-                it.documents.map { document ->
-                    document.toObject<TripBill>()!!
-                }
-            }
+            .whereInPeriod(period)
+            .dataObjects<TripBill>()
     }
 
     override fun getTripBills(period: Period, spaceIds: List<String>): Flow<List<TripBill>> {
@@ -90,75 +77,47 @@ class TripBillsRepositoryImpl @Inject constructor(
         }
 
         return tripBillCollection
-            .orderBy(
-                ORDER_BY_FIELD,
-                Query.Direction.DESCENDING
-            )
+            .orderByDate()
             .whereIn(SPACE_ID_FIELD, spaceIds)
-            .whereGreaterThanOrEqualTo(
-                ORDER_BY_FIELD,
-                period.start.toString() + "T00:00:00"
-            )
-            .whereLessThanOrEqualTo(
-                ORDER_BY_FIELD,
-                period.end.toString() + "T23:59:59"
-            )
-            .snapshots()
-            .map {
-                it.documents.map { document ->
-                    document.toObject<TripBill>()!!
-                }
-            }
+            .whereInPeriod(period)
+            .dataObjects<TripBill>()
     }
 
-    override fun getTripBills(period: Period): Flow<List<TripBill>> =
-        tripBillCollection
-            .orderBy(
-                ORDER_BY_FIELD,
-                Query.Direction.DESCENDING
-            )
-            .whereGreaterThanOrEqualTo(
-                ORDER_BY_FIELD,
-                period.start.toString() + "T00:00:00"
-            )
-            .whereLessThanOrEqualTo(
-                ORDER_BY_FIELD,
-                period.end.toString() + "T23:59:59"
-            )
-            .snapshots()
-            .map {
-                it.documents.map { document ->
-                    document.toObject<TripBill>()!!
-                }
-            }
+    override fun getTripBills(period: Period): Flow<List<TripBill>> {
+        return tripBillCollection
+            .orderByDate()
+            .whereInPeriod(period)
+            .dataObjects<TripBill>()
+    }
 
-    override fun getTripBill(id: String): Flow<TripBill> =
-        tripBillCollection
+    override fun getTripBill(id: String): Flow<TripBill?> {
+        return tripBillCollection
             .document(id)
-            .snapshots()
-            .map {
-                it.toObject<TripBill>()!!
-            }
+            .dataObjects<TripBill>()
+    }
 
     override suspend fun insertTripBill(tripBill: TripBill) {
-        tripBillCollection
-            .add(tripBill)
+        tripBillCollection.add(tripBill)
     }
 
     override suspend fun updateTripBill(tripBill: TripBill) {
-        if (tripBill.documentId.isNotEmpty()) {
-            tripBillCollection
-                .document(tripBill.documentId)
-                .set(tripBill)
+        if (tripBill.documentId.isEmpty()) {
+            return
         }
+
+        tripBillCollection
+            .document(tripBill.documentId)
+            .set(tripBill)
     }
 
     override suspend fun deleteTripBill(tripBill: TripBill) {
-        if (tripBill.documentId.isNotEmpty()) {
-            tripBillCollection
-                .document(tripBill.documentId)
-                .delete()
+        if (tripBill.documentId.isEmpty()) {
+            return
         }
+
+        tripBillCollection
+            .document(tripBill.documentId)
+            .delete()
     }
 
     override suspend fun clearTripBills() {
@@ -177,6 +136,7 @@ class TripBillsRepositoryImpl @Inject constructor(
         return try {
             val fuelJson = baseFirebaseRepository.getFileFromStorage("$BACKUP_FUEL_PATH/$fileName")
             val tripBill = Json.decodeFromString<List<TripBill>>(fuelJson)
+
             tripBill.forEach { insertTripBill(it) }
 
             Response.Success(true)

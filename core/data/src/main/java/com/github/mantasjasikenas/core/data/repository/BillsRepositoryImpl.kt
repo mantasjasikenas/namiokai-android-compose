@@ -62,7 +62,7 @@ class BillsRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun getBill(id: String, type: BillType): Flow<Bill> = flow {
+    override fun getBill(id: String, type: BillType): Flow<Bill?> = flow {
         val billFlow = when (type) {
             BillType.Purchase -> purchaseBillsRepository.getPurchaseBill(id)
             BillType.Trip -> tripBillsRepository.getTripBill(id)

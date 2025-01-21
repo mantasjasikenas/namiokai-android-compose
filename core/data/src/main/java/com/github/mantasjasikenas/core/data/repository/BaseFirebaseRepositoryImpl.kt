@@ -21,15 +21,17 @@ class BaseFirebaseRepositoryImpl @Inject constructor(
         collectionPath: String,
         backupPath: String,
         fileName: String
-    ) =
+    ) {
         coroutineScope {
             val deferredCollection = async { jsonSerializeCollection(collectionPath) }
             val collectionJson = deferredCollection.await()
+
             uploadJsonToStorage(
                 collectionJson,
                 "$backupPath/$fileName.json"
             )
         }
+    }
 
     override suspend fun uploadJsonToStorage(
         json: String,
@@ -70,38 +72,4 @@ class BaseFirebaseRepositoryImpl @Inject constructor(
                 "/"
             )
     }
-
-    /*override suspend fun backupCollections() =
-        coroutineScope {
-            val deferredUsers = async { jsonSerializeCollection(USERS_COLLECTION) }
-            val deferredBills = async { jsonSerializeCollection(BILLS_COLLECTION) }
-            val deferredFuel = async { jsonSerializeCollection(FUEL_COLLECTION) }
-            val deferredFlatBill = async { jsonSerializeCollection(FLAT_BILLS_COLLECTION) }
-
-            val usersJson = deferredUsers.await()
-            val billsJson = deferredBills.await()
-            val fuelJson = deferredFuel.await()
-            val flatBillJson = deferredFlatBill.await()
-
-            val currentDateTime = LocalDateTime.now()
-                .toString()
-
-            uploadJsonToStorage(
-                usersJson,
-                "$USERS_PATH/$currentDateTime.json"
-            )
-            uploadJsonToStorage(
-                billsJson,
-                "$BILLS_PATH/$currentDateTime.json"
-            )
-            uploadJsonToStorage(
-                fuelJson,
-                "$FUEL_PATH/$currentDateTime.json"
-            )
-            uploadJsonToStorage(
-                flatBillJson,
-                "$FLAT_BILLS_COLLECTION/$currentDateTime.json"
-            )
-
-        }*/
 }

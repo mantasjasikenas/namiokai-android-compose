@@ -4,13 +4,12 @@ import com.github.mantasjasikenas.core.domain.model.bills.FlatBill
 import com.github.mantasjasikenas.core.domain.model.period.Period
 import com.github.mantasjasikenas.core.domain.repository.BaseFirebaseRepository
 import com.github.mantasjasikenas.core.domain.repository.FlatBillsRepository
+import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
-import com.google.firebase.firestore.snapshots
-import com.google.firebase.firestore.toObject
+import com.google.firebase.firestore.dataObjects
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 private const val FLAT_BILLS_COLLECTION = "flatBills"
@@ -25,18 +24,29 @@ class FlatBillsRepositoryImpl @Inject constructor(
 
     private val flatBillsCollection = db.collection(FLAT_BILLS_COLLECTION)
 
-    override fun getFlatBills(): Flow<List<FlatBill>> =
-        flatBillsCollection
-            .orderBy(
-                ORDER_BY_FIELD,
-                Query.Direction.ASCENDING
+    private fun CollectionReference.orderByDate(direction: Query.Direction = Query.Direction.DESCENDING): Query {
+        return this.orderBy(ORDER_BY_FIELD, direction)
+    }
+
+    private fun Query.orderByDate(direction: Query.Direction = Query.Direction.DESCENDING): Query {
+        return this.orderBy(ORDER_BY_FIELD, direction)
+    }
+
+    private fun Query.whereInPeriod(period: Period): Query {
+        return this
+            .whereGreaterThanOrEqualTo(
+                ORDER_BY_FIELD, period.start.toString() + "T00:00:00"
             )
-            .snapshots()
-            .map {
-                it.documents.map { document ->
-                    document.toObject<FlatBill>()!!
-                }
-            }
+            .whereLessThanOrEqualTo(
+                ORDER_BY_FIELD, period.end.toString() + "T23:59:59"
+            )
+    }
+
+    override fun getFlatBills(): Flow<List<FlatBill>> {
+        return flatBillsCollection
+            .orderByDate()
+            .dataObjects<FlatBill>()
+    }
 
     override fun getFlatBills(spaceIds: List<String>): Flow<List<FlatBill>> {
         if (spaceIds.isEmpty()) {
@@ -45,61 +55,24 @@ class FlatBillsRepositoryImpl @Inject constructor(
 
         return flatBillsCollection
             .whereIn(SPACE_ID_FIELD, spaceIds)
-            .orderBy(
-                ORDER_BY_FIELD,
-                Query.Direction.DESCENDING
-            )
-            .snapshots()
-            .map {
-                it.documents.map { document ->
-                    document.toObject<FlatBill>()!!
-                }
-            }
+            .orderByDate()
+            .dataObjects<FlatBill>()
     }
 
 
-    override fun getFlatBills(period: Period): Flow<List<FlatBill>> =
-        flatBillsCollection
-            .orderBy(
-                ORDER_BY_FIELD,
-                Query.Direction.ASCENDING
-            )
-            .whereGreaterThanOrEqualTo(
-                ORDER_BY_FIELD,
-                period.start.toString() + "T00:00:00"
-            )
-            .whereLessThanOrEqualTo(
-                ORDER_BY_FIELD,
-                period.end.toString() + "T23:59:59"
-            )
-            .snapshots()
-            .map {
-                it.documents.map { document ->
-                    document.toObject<FlatBill>()!!
-                }
-            }
+    override fun getFlatBills(period: Period): Flow<List<FlatBill>> {
+        return flatBillsCollection
+            .orderByDate()
+            .whereInPeriod(period)
+            .dataObjects<FlatBill>()
+    }
 
     override fun getFlatBills(period: Period, spaceId: String): Flow<List<FlatBill>> {
         return flatBillsCollection
             .whereEqualTo(SPACE_ID_FIELD, spaceId)
-            .orderBy(
-                ORDER_BY_FIELD,
-                Query.Direction.DESCENDING
-            )
-            .whereGreaterThanOrEqualTo(
-                ORDER_BY_FIELD,
-                period.start.toString() + "T00:00:00"
-            )
-            .whereLessThanOrEqualTo(
-                ORDER_BY_FIELD,
-                period.end.toString() + "T23:59:59"
-            )
-            .snapshots()
-            .map {
-                it.documents.map { document ->
-                    document.toObject<FlatBill>()!!
-                }
-            }
+            .orderByDate()
+            .whereInPeriod(period)
+            .dataObjects<FlatBill>()
     }
 
     override fun getFlatBills(period: Period, spaceIds: List<String>): Flow<List<FlatBill>> {
@@ -108,56 +81,41 @@ class FlatBillsRepositoryImpl @Inject constructor(
         }
 
         return flatBillsCollection
-            .orderBy(
-                ORDER_BY_FIELD,
-                Query.Direction.DESCENDING
-            )
+            .orderByDate()
             .whereIn(SPACE_ID_FIELD, spaceIds)
-            .whereGreaterThanOrEqualTo(
-                ORDER_BY_FIELD,
-                period.start.toString() + "T00:00:00"
-            )
-            .whereLessThanOrEqualTo(
-                ORDER_BY_FIELD,
-                period.end.toString() + "T23:59:59"
-            )
-            .snapshots()
-            .map {
-                it.documents.map { document ->
-                    document.toObject<FlatBill>()!!
-                }
-            }
+            .whereInPeriod(period)
+            .dataObjects<FlatBill>()
     }
 
-    override fun getFlatBill(id: String): Flow<FlatBill> =
+    override fun getFlatBill(id: String): Flow<FlatBill?> =
         flatBillsCollection
             .document(id)
-            .snapshots()
-            .map {
-                it.toObject<FlatBill>()!!
-            }
+            .dataObjects<FlatBill>()
 
     override suspend fun insertFlatBill(flatBill: FlatBill) {
-        flatBillsCollection
-            .add(flatBill)
+        flatBillsCollection.add(flatBill)
     }
 
 
     override suspend fun updateFlatBill(flatBill: FlatBill) {
-        if (flatBill.documentId.isNotEmpty()) {
-            flatBillsCollection
-                .document(flatBill.documentId)
-                .set(flatBill)
+        if (flatBill.documentId.isEmpty()) {
+            return
         }
+
+        flatBillsCollection
+            .document(flatBill.documentId)
+            .set(flatBill)
     }
 
 
     override suspend fun deleteFlatBill(flatBill: FlatBill) {
-        if (flatBill.documentId.isNotEmpty()) {
-            flatBillsCollection
-                .document(flatBill.documentId)
-                .delete()
+        if (flatBill.documentId.isEmpty()) {
+            return
         }
+
+        flatBillsCollection
+            .document(flatBill.documentId)
+            .delete()
     }
 
     override suspend fun clearFlatBills() {

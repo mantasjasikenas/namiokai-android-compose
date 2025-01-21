@@ -5,14 +5,12 @@ import com.github.mantasjasikenas.core.domain.model.bills.PurchaseBill
 import com.github.mantasjasikenas.core.domain.model.period.Period
 import com.github.mantasjasikenas.core.domain.repository.BaseFirebaseRepository
 import com.github.mantasjasikenas.core.domain.repository.PurchaseBillsRepository
+import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
-import com.google.firebase.firestore.snapshots
-import com.google.firebase.firestore.toObject
+import com.google.firebase.firestore.dataObjects
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
 
@@ -26,23 +24,33 @@ const val BILL_IMPORT_FILE_NAME = "bills.json"
 class PurchaseBillsRepositoryImpl @Inject constructor(
     private val baseFirebaseRepository: BaseFirebaseRepository,
     db: FirebaseFirestore
-) :
-    PurchaseBillsRepository {
+) : PurchaseBillsRepository {
 
     private val billsCollection = db.collection(BILLS_COLLECTION)
 
-    override fun getPurchaseBills(): Flow<List<PurchaseBill>> =
-        billsCollection
-            .orderBy(
-                ORDER_BY_FIELD,
-                Query.Direction.DESCENDING
+    private fun CollectionReference.orderByDate(direction: Query.Direction = Query.Direction.DESCENDING): Query {
+        return this.orderBy(ORDER_BY_FIELD, direction)
+    }
+
+    private fun Query.orderByDate(direction: Query.Direction = Query.Direction.DESCENDING): Query {
+        return this.orderBy(ORDER_BY_FIELD, direction)
+    }
+
+    private fun Query.whereInPeriod(period: Period): Query {
+        return this
+            .whereGreaterThanOrEqualTo(
+                ORDER_BY_FIELD, period.start.toString() + "T00:00:00"
             )
-            .snapshots()
-            .map {
-                it.documents.map { document ->
-                    document.toObject<PurchaseBill>()!!
-                }
-            }
+            .whereLessThanOrEqualTo(
+                ORDER_BY_FIELD, period.end.toString() + "T23:59:59"
+            )
+    }
+
+    override fun getPurchaseBills(): Flow<List<PurchaseBill>> {
+        return billsCollection
+            .orderByDate()
+            .dataObjects<PurchaseBill>()
+    }
 
     override fun getPurchaseBills(spaceIds: List<String>): Flow<List<PurchaseBill>> {
         if (spaceIds.isEmpty()) {
@@ -51,60 +59,23 @@ class PurchaseBillsRepositoryImpl @Inject constructor(
 
         return billsCollection
             .whereIn(SPACE_ID_FIELD, spaceIds)
-            .orderBy(
-                ORDER_BY_FIELD,
-                Query.Direction.DESCENDING
-            )
-            .snapshots()
-            .map {
-                it.documents.map { document ->
-                    document.toObject<PurchaseBill>()!!
-                }
-            }
+            .orderByDate()
+            .dataObjects<PurchaseBill>()
     }
 
-    override fun getPurchaseBills(period: Period): Flow<List<PurchaseBill>> =
-        billsCollection
-            .orderBy(
-                ORDER_BY_FIELD,
-                Query.Direction.DESCENDING
-            )
-            .whereGreaterThanOrEqualTo(
-                ORDER_BY_FIELD,
-                period.start.toString() + "T00:00:00"
-            )
-            .whereLessThanOrEqualTo(
-                ORDER_BY_FIELD,
-                period.end.toString() + "T23:59:59"
-            )
-            .snapshots()
-            .map {
-                it.documents.map { document ->
-                    document.toObject<PurchaseBill>()!!
-                }
-            }
+    override fun getPurchaseBills(period: Period): Flow<List<PurchaseBill>> {
+        return billsCollection
+            .orderByDate()
+            .whereInPeriod(period)
+            .dataObjects<PurchaseBill>()
+    }
 
     override fun getPurchaseBills(period: Period, spaceId: String): Flow<List<PurchaseBill>> {
         return billsCollection
-            .orderBy(
-                ORDER_BY_FIELD,
-                Query.Direction.DESCENDING
-            )
+            .orderByDate()
             .whereEqualTo(SPACE_ID_FIELD, spaceId)
-            .whereGreaterThanOrEqualTo(
-                ORDER_BY_FIELD,
-                period.start.toString() + "T00:00:00"
-            )
-            .whereLessThanOrEqualTo(
-                ORDER_BY_FIELD,
-                period.end.toString() + "T23:59:59"
-            )
-            .snapshots()
-            .map {
-                it.documents.map { document ->
-                    document.toObject<PurchaseBill>()!!
-                }
-            }
+            .whereInPeriod(period)
+            .dataObjects<PurchaseBill>()
     }
 
     override fun getPurchaseBills(
@@ -112,58 +83,44 @@ class PurchaseBillsRepositoryImpl @Inject constructor(
         spaceIds: List<String>
     ): Flow<List<PurchaseBill>> {
         if (spaceIds.isEmpty()) {
-            return  flowOf(emptyList())
+            return flowOf(emptyList())
         }
 
         return billsCollection
             .whereIn(SPACE_ID_FIELD, spaceIds)
-            .orderBy(
-                ORDER_BY_FIELD,
-                Query.Direction.DESCENDING
-            )
-            .whereGreaterThanOrEqualTo(
-                ORDER_BY_FIELD,
-                period.start.toString() + "T00:00:00"
-            )
-            .whereLessThanOrEqualTo(
-                ORDER_BY_FIELD,
-                period.end.toString() + "T23:59:59"
-            )
-            .snapshots()
-            .map {
-                it.documents.map { document ->
-                    document.toObject<PurchaseBill>()!!
-                }
-            }
+            .orderByDate()
+            .whereInPeriod(period)
+            .dataObjects<PurchaseBill>()
     }
 
-    override fun getPurchaseBill(id: String): Flow<PurchaseBill> =
-        billsCollection
+    override fun getPurchaseBill(id: String): Flow<PurchaseBill?> {
+        return billsCollection
             .document(id)
-            .snapshots()
-            .map {
-                it.toObject<PurchaseBill>()!!
-            }
+            .dataObjects<PurchaseBill>()
+    }
 
     override suspend fun insertPurchaseBill(purchaseBill: PurchaseBill) {
-        billsCollection
-            .add(purchaseBill)
+        billsCollection.add(purchaseBill)
     }
 
     override suspend fun updatePurchaseBill(purchaseBill: PurchaseBill) {
-        if (purchaseBill.documentId.isNotEmpty()) {
-            billsCollection
-                .document(purchaseBill.documentId)
-                .set(purchaseBill)
+        if (purchaseBill.documentId.isEmpty()) {
+            return
         }
+
+        billsCollection
+            .document(purchaseBill.documentId)
+            .set(purchaseBill)
     }
 
     override suspend fun deletePurchaseBill(purchaseBill: PurchaseBill) {
-        if (purchaseBill.documentId.isNotEmpty()) {
-            billsCollection
-                .document(purchaseBill.documentId)
-                .delete()
+        if (purchaseBill.documentId.isEmpty()) {
+            return
         }
+
+        billsCollection
+            .document(purchaseBill.documentId)
+            .delete()
     }
 
     override suspend fun clearPurchaseBills() {
@@ -183,6 +140,7 @@ class PurchaseBillsRepositoryImpl @Inject constructor(
             val billsJson =
                 baseFirebaseRepository.getFileFromStorage("$BACKUP_BILLS_PATH/$fileName")
             val purchaseBills = Json.decodeFromString<List<PurchaseBill>>(billsJson)
+
             purchaseBills.forEach { insertPurchaseBill(it) }
 
             Response.Success(true)

@@ -11,7 +11,7 @@ interface PurchaseBillsRepository {
     fun getPurchaseBills(period: Period, spaceId: String): Flow<List<PurchaseBill>>
     fun getPurchaseBills(period: Period, spaceIds: List<String>): Flow<List<PurchaseBill>>
     fun getPurchaseBills(spaceIds: List<String>): Flow<List<PurchaseBill>>
-    fun getPurchaseBill(id: String): Flow<PurchaseBill>
+    fun getPurchaseBill(id: String): Flow<PurchaseBill?>
     suspend fun insertPurchaseBill(purchaseBill: PurchaseBill)
     suspend fun updatePurchaseBill(purchaseBill: PurchaseBill)
     suspend fun deletePurchaseBill(purchaseBill: PurchaseBill)

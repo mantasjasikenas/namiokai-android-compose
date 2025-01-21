@@ -55,6 +55,7 @@ data class Invitation(
     val spaceId: String = "",
     val invitedUserId: String = "",
     val invitingUserId: String = "",
+    val date: String = "",
     val status: InvitationStatus = InvitationStatus.PENDING
 )
 

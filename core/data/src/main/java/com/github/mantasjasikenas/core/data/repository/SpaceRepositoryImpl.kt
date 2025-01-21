@@ -40,40 +40,44 @@ class SpaceRepositoryImpl @Inject constructor(
     }
 
     override suspend fun addUserToSpace(spaceId: String, userId: String) {
-        val spaceRef = spacesCollection.document(spaceId)
+        val spaceRef = getSpaceDocumentReference(spaceId)
 
         db.runTransaction { transaction ->
             val space = transaction.get(spaceRef).toObject<Space>()
 
             if (space != null && !space.memberIds.contains(userId)) {
                 val updatedUserIds = space.memberIds.toMutableList().apply { add(userId) }
-
                 transaction.update(spaceRef, SPACE_MEMBERS_FIELD, updatedUserIds)
             }
         }.await()
     }
 
     override suspend fun removeUserFromSpace(spaceId: String, userId: String) {
-        val spaceRef = spacesCollection.document(spaceId)
+        val spaceRef = getSpaceDocumentReference(spaceId)
 
         db.runTransaction { transaction ->
             val space = transaction.get(spaceRef).toObject<Space>()
 
             if (space != null && space.memberIds.contains(userId)) {
                 val updatedUserIds = space.memberIds.toMutableList().apply { remove(userId) }
-
                 transaction.update(spaceRef, SPACE_MEMBERS_FIELD, updatedUserIds)
             }
         }.await()
     }
 
     override suspend fun deleteSpace(spaceId: String) {
-        spacesCollection.document(spaceId).delete()
+        if (spaceId.isEmpty()) {
+            return
+        }
+
+        getSpaceDocumentReference(spaceId).delete()
     }
 
     override suspend fun updateSpace(space: Space) {
-        if (space.spaceId.isNotEmpty()) {
-            spacesCollection.document(space.spaceId).set(space)
+        if (space.spaceId.isEmpty()) {
+            return
         }
+
+        getSpaceDocumentReference(space.spaceId).set(space)
     }
 }

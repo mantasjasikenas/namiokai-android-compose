@@ -11,7 +11,6 @@ import com.github.mantasjasikenas.core.domain.model.debts.SpaceDebts
 import com.github.mantasjasikenas.core.domain.model.period.Period
 import com.github.mantasjasikenas.core.domain.model.period.nextPeriod
 import com.github.mantasjasikenas.core.domain.model.period.previousPeriod
-import com.github.mantasjasikenas.core.domain.repository.PeriodRepository
 import com.github.mantasjasikenas.core.domain.repository.SpaceRepository
 import com.github.mantasjasikenas.core.domain.repository.UsersRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -24,7 +23,6 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.math.absoluteValue
 
@@ -34,7 +32,6 @@ class DebtsViewModel @Inject constructor(
     debtsService: DebtsService,
     usersRepository: UsersRepository,
     spacesRepository: SpaceRepository,
-    private val periodRepository: PeriodRepository
 ) : ViewModel() {
 
     private val _periodOffset = MutableStateFlow(0)
@@ -94,18 +91,6 @@ class DebtsViewModel @Inject constructor(
             started = SharingStarted.WhileSubscribed(5_000),
             initialValue = DebtsUiState.Loading
         )
-
-    fun onPeriodReset() {
-        viewModelScope.launch {
-            periodRepository.resetUserSelectedPeriod()
-        }
-    }
-
-    fun onPeriodUpdate(period: Period) {
-        viewModelScope.launch {
-            periodRepository.updateUserSelectedPeriod(period)
-        }
-    }
 
     fun onPeriodOffsetUpdate(offset: Int) {
         _periodOffset.update {

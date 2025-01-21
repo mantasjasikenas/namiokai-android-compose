@@ -7,19 +7,24 @@ import kotlinx.coroutines.flow.Flow
 
 class NotificationsRepositoryImpl(private val notificationDao: NotificationDao) :
     NotificationsRepository {
-    override fun getAllNotificationsStream(): Flow<List<Notification>> =
-        notificationDao.getAllNotifications()
+    override fun getAllNotificationsStream(): Flow<List<Notification>> {
+        return notificationDao.getAllNotifications()
+    }
 
-    override fun getNotificationStream(id: Int): Flow<Notification?> =
-        notificationDao.getNotification(id)
+    override fun getNotificationStream(id: Int): Flow<Notification?> {
+        return notificationDao.getNotification(id)
+    }
 
-    override suspend fun insertNotification(notification: Notification) =
+    override suspend fun insertNotification(notification: Notification) {
         notificationDao.insert(notification)
+    }
 
-    override suspend fun deleteNotification(notification: Notification) =
+    override suspend fun deleteNotification(notification: Notification) {
         notificationDao.delete(notification)
+    }
 
-    override suspend fun updateNotification(notification: Notification) =
+    override suspend fun updateNotification(notification: Notification) {
         notificationDao.update(notification)
+    }
 }
 

@@ -10,7 +10,7 @@ interface FlatBillsRepository {
     fun getFlatBills(period: Period): Flow<List<FlatBill>>
     fun getFlatBills(period: Period, spaceId: String): Flow<List<FlatBill>>
     fun getFlatBills(period: Period, spaceIds: List<String>): Flow<List<FlatBill>>
-    fun getFlatBill(id: String): Flow<FlatBill>
+    fun getFlatBill(id: String): Flow<FlatBill?>
     suspend fun insertFlatBill(flatBill: FlatBill)
     suspend fun updateFlatBill(flatBill: FlatBill)
     suspend fun deleteFlatBill(flatBill: FlatBill)

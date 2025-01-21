@@ -5,7 +5,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.github.mantasjasikenas.core.domain.model.period.Period
 import com.github.mantasjasikenas.core.ui.common.NamiokaiCircularProgressIndicator
 
 @Composable
@@ -33,8 +32,6 @@ fun DebtsScreen(
             DebtsScreenContent(
                 debtsUiState = debtsUiState as DebtsUiState.Success,
                 periodOffset = periodOffset,
-                onPeriodReset = debtsViewModel::onPeriodReset,
-                onPeriodUpdate = debtsViewModel::onPeriodUpdate,
                 onPeriodOffsetUpdate = debtsViewModel::onPeriodOffsetUpdate,
             )
         }
@@ -45,16 +42,12 @@ fun DebtsScreen(
 fun DebtsScreenContent(
     debtsUiState: DebtsUiState.Success,
     periodOffset: Int,
-    onPeriodReset: () -> Unit,
-    onPeriodUpdate: (Period) -> Unit,
     onPeriodOffsetUpdate: (Int) -> Unit,
 ) {
     DebtsPage(
         spacesDebts = debtsUiState.spacesDebts,
         usersMap = debtsUiState.usersMap,
         periodOffset = periodOffset,
-        onPeriodReset = onPeriodReset,
-        onPeriodUpdate = onPeriodUpdate,
         onPeriodOffsetUpdate = onPeriodOffsetUpdate
     )
 }

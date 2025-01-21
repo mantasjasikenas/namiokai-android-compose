@@ -5,7 +5,6 @@ import com.github.mantasjasikenas.core.data.repository.BaseFirebaseRepositoryImp
 import com.github.mantasjasikenas.core.data.repository.BillsRepositoryImpl
 import com.github.mantasjasikenas.core.data.repository.FlatBillsRepositoryImpl
 import com.github.mantasjasikenas.core.data.repository.InvitationRepositoryImpl
-import com.github.mantasjasikenas.core.data.repository.PeriodRepositoryImpl
 import com.github.mantasjasikenas.core.data.repository.PurchaseBillsRepositoryImpl
 import com.github.mantasjasikenas.core.data.repository.SpaceRepositoryImpl
 import com.github.mantasjasikenas.core.data.repository.TripBillsRepositoryImpl
@@ -18,7 +17,6 @@ import com.github.mantasjasikenas.core.domain.repository.BillsRepository
 import com.github.mantasjasikenas.core.domain.repository.DebtsRepository
 import com.github.mantasjasikenas.core.domain.repository.FlatBillsRepository
 import com.github.mantasjasikenas.core.domain.repository.InvitationRepository
-import com.github.mantasjasikenas.core.domain.repository.PeriodRepository
 import com.github.mantasjasikenas.core.domain.repository.PurchaseBillsRepository
 import com.github.mantasjasikenas.core.domain.repository.SpaceRepository
 import com.github.mantasjasikenas.core.domain.repository.TripBillsRepository
@@ -53,15 +51,6 @@ object RepositoryModule {
     fun providePreferencesRepository(@ApplicationContext context: Context): PreferencesRepository {
         return PreferencesRepository(context)
     }
-
-    @Provides
-    @Singleton
-    fun providePeriodRepository(
-        spaceRepository: SpaceRepository
-    ): PeriodRepository {
-        return PeriodRepositoryImpl(spaceRepository = spaceRepository)
-    }
-
 
     @Provides
     @Singleton
@@ -130,7 +119,6 @@ object RepositoryModule {
         preferencesRepository: PreferencesRepository,
         usersRepository: UsersRepository,
         spaceRepository: SpaceRepository,
-        periodRepository: PeriodRepository
     ): UserDataRepository =
         UserDataRepositoryImpl(
             preferencesRepository = preferencesRepository,
