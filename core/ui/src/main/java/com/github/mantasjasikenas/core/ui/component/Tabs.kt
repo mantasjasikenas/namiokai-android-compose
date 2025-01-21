@@ -4,6 +4,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -43,21 +44,11 @@ fun FancyIndicatorTabs(
     selectedIndex: Int,
     onValueChange: (Int) -> Unit,
 ) {
-//    val indicator: @Composable TabIndicatorScope.() -> Unit = {
-//        FancyIndicator(
-//            color = MaterialTheme.colorScheme.primary,
-//            modifier = Modifier.tabIndicatorOffset(
-//                selectedIndex
-//            ),
-//        )
-//    }
-
     Column {
-        NamiokaiElevatedCard(padding = 0.dp) {
+        NamiokaiElevatedCard(contentPadding = PaddingValues(0.dp)) {
             PrimaryTabRow(
                 modifier = Modifier.clip(MaterialTheme.shapes.small),
                 selectedTabIndex = selectedIndex,
-//                indicator = indicator,
                 divider = {},
             ) {
                 values.forEachIndexed { index, title ->

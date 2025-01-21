@@ -566,10 +566,7 @@ fun ElevatedCardContainer(
     onClick: (() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    ElevatedCard(
-        modifier = modifier,
-        onClick = onClick ?: {},
-    ) {
+    val cardContent: @Composable() (ColumnScope.() -> Unit) = {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -604,6 +601,19 @@ fun ElevatedCardContainer(
 
             content()
         }
+    }
+
+    if (onClick == null) {
+        ElevatedCard(
+            modifier = modifier,
+            content = cardContent
+        )
+    } else {
+        ElevatedCard(
+            modifier = modifier,
+            onClick = onClick,
+            content = cardContent
+        )
     }
 }
 

@@ -1,12 +1,17 @@
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.github.mantasjasikenas.core.data.repository
 
 import com.github.mantasjasikenas.core.domain.model.Space
 import com.github.mantasjasikenas.core.domain.repository.SpaceRepository
+import com.github.mantasjasikenas.core.domain.repository.UsersRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.dataObjects
 import com.google.firebase.firestore.toObject
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
@@ -15,7 +20,8 @@ internal const val SPACE_MEMBERS_FIELD = "memberIds"
 
 class SpaceRepositoryImpl @Inject constructor(
     private val db: FirebaseFirestore,
-    private val auth: FirebaseAuth
+    private val auth: FirebaseAuth,
+    private val usersRepository: UsersRepository
 ) : SpaceRepository {
     private val spacesCollection = db.collection(SPACE_COLLECTION)
 
@@ -30,7 +36,9 @@ class SpaceRepositoryImpl @Inject constructor(
     }
 
     override fun getCurrentUserSpaces(): Flow<List<Space>> {
-        return getSpacesByUser(auth.currentUser!!.uid)
+        return usersRepository.currentUser.flatMapLatest { user ->
+            getSpacesByUser(user.uid)
+        }
     }
 
     override fun getSpacesByUser(userId: String): Flow<List<Space>> {

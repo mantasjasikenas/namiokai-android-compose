@@ -8,6 +8,7 @@ import com.github.mantasjasikenas.core.domain.model.User
 import com.github.mantasjasikenas.core.domain.repository.BaseFirebaseRepository
 import com.github.mantasjasikenas.core.domain.repository.UsersRepository
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.dataObjects
 import com.google.firebase.storage.FirebaseStorage
@@ -16,6 +17,7 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
 import kotlinx.serialization.json.Json
@@ -39,19 +41,15 @@ class UsersRepositoryImpl @Inject constructor(
 ) : UsersRepository {
     private val usersCollection = db.collection(USERS_COLLECTION)
 
-    override val currentUser: Flow<User>
-        get() {
-            return getAuthState()
-                .flatMapLatest { isUserLoggedOut ->
-                    if (isUserLoggedOut) {
-                        callbackFlow {
-                            trySend(User())
-                            awaitClose()
-                        }
-                    } else {
-                        getUser(auth.currentUser!!.uid).map { it ?: User() }
-                    }
+    override val currentUser: Flow<User> = getAuthState()
+        .flatMapLatest { firebaseUser ->
+            if (firebaseUser == null) {
+                flowOf(User())
+            } else {
+                getUser(firebaseUser.uid).map {
+                    it ?: User(uid = firebaseUser.uid)
                 }
+            }
         }
 
     override fun getUsers(): Flow<List<User>> {
@@ -59,6 +57,10 @@ class UsersRepositoryImpl @Inject constructor(
     }
 
     override fun getUsers(userIds: List<String>): Flow<List<User>> {
+        if (userIds.isEmpty()) {
+            return flowOf(emptyList())
+        }
+
         return usersCollection
             .whereIn(UID_FIELD, userIds)
             .dataObjects<User>()
@@ -168,15 +170,17 @@ class UsersRepositoryImpl @Inject constructor(
         )
     }
 
-    private fun getAuthState() = callbackFlow {
-        val authStateListener = FirebaseAuth.AuthStateListener { auth ->
-            trySend(auth.currentUser == null)
-        }
+    private fun getAuthState(): Flow<FirebaseUser?> {
+        return callbackFlow {
+            val authStateListener = FirebaseAuth.AuthStateListener { auth ->
+                trySend(auth.currentUser)
+            }
 
-        auth.addAuthStateListener(authStateListener)
+            auth.addAuthStateListener(authStateListener)
 
-        awaitClose {
-            auth.removeAuthStateListener(authStateListener)
+            awaitClose {
+                auth.removeAuthStateListener(authStateListener)
+            }
         }
     }
 }

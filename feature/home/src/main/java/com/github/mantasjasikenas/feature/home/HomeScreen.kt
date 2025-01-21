@@ -26,6 +26,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -105,6 +106,12 @@ private fun Widgets(
     val currentUser = homeUiState.currentUser
     val sharedState = homeUiState.sharedState
 
+    val borderModifier = Modifier.border(
+        width = 1.dp,
+        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
+        shape = CardDefaults.elevatedShape
+    )
+
     LazyVerticalStaggeredGrid(
         columns = StaggeredGridCells.Fixed(2),
         horizontalArrangement = Arrangement.spacedBy(NamiokaiUiTokens.ItemSpacing),
@@ -115,6 +122,7 @@ private fun Widgets(
             span = StaggeredGridItemSpan.FullLine
         ) {
             WelcomeCard(
+                modifier = borderModifier,
                 displayName = currentUser.displayName
             )
         }
@@ -124,11 +132,7 @@ private fun Widgets(
                 key = "spaces"
             ) {
                 WidgetCard(
-                    modifier = Modifier.border(
-                        width = 1.dp,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        shape = CardDefaults.elevatedShape
-                    ),
+                    modifier = borderModifier,
                     label = "Your spaces",
                     onClick = {
                         onNavigateToSpaceScreen()
@@ -148,6 +152,7 @@ private fun Widgets(
             ) {
                 WidgetCard(
                     label = "Create a space",
+                    modifier = borderModifier,
                     onClick = {
                         onNavigateToSpace(null)
                     }
@@ -168,6 +173,7 @@ private fun Widgets(
 
             WidgetCard(
                 label = space.spaceName,
+                modifier = borderModifier,
                 onClick = { onNavigateToSpace(space) }
             ) {
                 TextLine(
@@ -179,19 +185,29 @@ private fun Widgets(
                     trailingText = space.destinations.size.toString()
                 )
 
-                TextLine(
-                    leadingText = "Period ends in",
-                    trailingText = "${currentLocalDate().daysUntil(period.end)} days"
+                Text(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    text = "Current period",
+                    textAlign = TextAlign.Center,
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.bodySmall,
                 )
 
                 TextLine(
-                    leadingText = "Period start",
+                    leadingText = "Start",
                     trailingText = "${period.start}"
                 )
 
                 TextLine(
-                    leadingText = "Period end",
+                    leadingText = "End",
                     trailingText = "${period.end}"
+                )
+
+                TextLine(
+                    leadingText = "Ends in",
+                    trailingText = "${currentLocalDate().daysUntil(period.end)} days"
                 )
             }
         }
@@ -242,7 +258,7 @@ private fun IconText(
 private fun WidgetCard(
     modifier: Modifier = Modifier,
     label: String,
-    onClick: () -> Unit = {},
+    onClick: (() -> Unit)? = null,
     content: @Composable () -> Unit
 ) {
     NamiokaiElevatedCard(
@@ -298,19 +314,21 @@ private fun TextLine(
 
 @Composable
 private fun WelcomeCard(
+    modifier: Modifier = Modifier,
     displayName: String
 ) {
     val currentHour = Clock.System.now()
         .toLocalDateTime(TimeZone.currentSystemDefault()).hour
 
     val greeting = when (currentHour) {
-        in 0..11 -> "Good morning"
-        in 12..17 -> "Good afternoon"
-        in 18..23 -> "Good evening"
+        in 5..11 -> "Good morning"
+        in 12..16 -> "Good afternoon"
+        in 17..23, in 0..4 -> "Good evening"
         else -> "Hello"
     }
 
     WidgetCard(
+        modifier = modifier,
         label = greeting
     ) {
         Text(
