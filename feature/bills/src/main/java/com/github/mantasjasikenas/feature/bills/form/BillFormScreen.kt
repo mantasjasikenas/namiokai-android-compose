@@ -304,6 +304,13 @@ fun PurchaseBillContent(
             bill.splitUsersUid = it
         })
 
+    Text(
+        text = "Shopping list",
+        style = MaterialTheme.typography.titleSmall,
+        textAlign = TextAlign.Center,
+        modifier = Modifier.padding(bottom = 7.dp)
+    )
+
     NamiokaiTextField(
         label = stringResource(R.string.shopping_list),
         initialTextFieldValue = bill.shoppingList,
@@ -318,6 +325,13 @@ fun PurchaseBillContent(
         })
 
     Spacer(modifier = Modifier.height(20.dp))
+
+    Text(
+        text = "Total price",
+        style = MaterialTheme.typography.titleSmall,
+        textAlign = TextAlign.Center,
+        modifier = Modifier.padding(bottom = 7.dp)
+    )
 
     NamiokaiNumberField(
         label = stringResource(R.string.total_price),
@@ -559,6 +573,13 @@ private fun FlatBillContent(
             flatBill.splitUsersUid = it
         })
 
+    Text(
+        text = "Rent",
+        style = MaterialTheme.typography.titleSmall,
+        textAlign = TextAlign.Center,
+        modifier = Modifier.padding(bottom = 7.dp)
+    )
+
     NamiokaiNumberField(
         label = "Rent",
         initialTextFieldValue = (if (flatBill.rentTotal == 0.0) "" else flatBill.rentTotal.toString()),
@@ -574,6 +595,13 @@ private fun FlatBillContent(
         })
 
     Spacer(modifier = Modifier.height(20.dp))
+
+    Text(
+        text = "Taxes",
+        style = MaterialTheme.typography.titleSmall,
+        textAlign = TextAlign.Center,
+        modifier = Modifier.padding(bottom = 7.dp)
+    )
 
     NamiokaiNumberField(
         label = "Taxes",
@@ -622,6 +650,13 @@ private fun FlatBillContent(
 
     if (includeTaxes && flatBill.taxes != null) {
         Spacer(modifier = Modifier.height(20.dp))
+
+        Text(
+            text = "Electricity",
+            style = MaterialTheme.typography.titleSmall,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(bottom = 7.dp)
+        )
 
         NamiokaiNumberField(
             label = "Electricity",

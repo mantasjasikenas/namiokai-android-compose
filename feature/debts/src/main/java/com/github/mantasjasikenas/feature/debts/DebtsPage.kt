@@ -11,6 +11,7 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -24,18 +25,18 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowLeft
 import androidx.compose.material.icons.automirrored.outlined.ArrowRight
-import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.outlined.Check
-import androidx.compose.material.icons.outlined.Remove
 import androidx.compose.material.icons.outlined.Restore
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -45,11 +46,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
@@ -75,7 +73,7 @@ internal fun DebtsPage(
         NoResultsFound(label = "No spaces found.\nPlease create a space first to add a bill.")
         return
     }
-
+    
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -83,7 +81,7 @@ internal fun DebtsPage(
             .verticalScroll(rememberScrollState()), // remove if lazy column is used
     ) {
         PeriodSelection(
-            modifier = Modifier.padding(bottom = 24.dp),
+            modifier = Modifier.padding(bottom = 16.dp),
             onPeriodOffsetUpdate = onPeriodOffsetUpdate,
             periodOffset = periodOffset
         )
@@ -102,18 +100,11 @@ internal fun DebtsPage(
                 )
             },
         ) {
-            Column {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(24.dp),
+            ) {
                 spacesDebts.forEach { spaceDebt ->
-                    val usersDebts = spaceDebt.debts
-
-                    SpaceDebtHeader(spaceDebt = spaceDebt)
-
-                    if (usersDebts.isEmpty()) {
-                        NoDebtsFound()
-                        return@forEach
-                    }
-
-                    SpaceDebtsContainer(usersDebts = usersDebts, usersMap = usersMap)
+                    SpaceDebtColumn(spaceDebt = spaceDebt, usersMap = usersMap)
                 }
             }
         }
@@ -122,19 +113,19 @@ internal fun DebtsPage(
 
 @Composable
 private fun PeriodSelection(
-    modifier: Modifier = Modifier,
-    onPeriodOffsetUpdate: (Int) -> Unit,
-    periodOffset: Int
+    modifier: Modifier = Modifier, onPeriodOffsetUpdate: (Int) -> Unit, periodOffset: Int
 ) {
-    Card(
-        modifier = modifier,
-        border = CardDefaults.outlinedCardBorder(),
+    Column(
+        modifier = modifier
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
         ) {
             IconButton(
                 onClick = { onPeriodOffsetUpdate(-1) },
+                colors = IconButtonDefaults.iconButtonColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                )
             ) {
                 Icon(
                     modifier = Modifier.size(48.dp),
@@ -145,58 +136,61 @@ private fun PeriodSelection(
             }
 
             Column(
-                modifier = Modifier.weight(1f),
-                horizontalAlignment = Alignment.CenterHorizontally
+                modifier = Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(
-                    text = "Selected period",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold
-                )
-
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     if (periodOffset != 0) {
                         Icon(
                             imageVector = when {
-                                periodOffset > 0 -> Icons.Outlined.Add
-                                else -> Icons.Outlined.Remove
+                                periodOffset > 0 -> Icons.Default.Add
+                                else -> Icons.Default.Remove
                             },
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(18.dp)
+                            modifier = Modifier.size(24.dp)
                         )
                         Text(
                             text = "${periodOffset.absoluteValue} periods",
-                            color = MaterialTheme.colorScheme.primary,
-                            style = MaterialTheme.typography.labelLarge,
+                            style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold
                         )
                     } else {
                         Text(
                             text = "Current period",
-                            color = MaterialTheme.colorScheme.primary,
-                            style = MaterialTheme.typography.labelLarge,
+                            style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold
                         )
                     }
                 }
 
+                val enabledReset = periodOffset != 0
+
                 Row(
                     modifier = Modifier.clickable(
-                        enabled = periodOffset != 0,
+                        enabled = enabledReset,
                     ) { onPeriodOffsetUpdate(periodOffset * -1) },
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     Icon(
+                        modifier = Modifier.size(18.dp),
                         imageVector = Icons.Outlined.Restore,
                         contentDescription = null,
-                        modifier = Modifier.size(18.dp)
+                        tint = if (enabledReset) {
+                            MaterialTheme.colorScheme.onSurface
+                        } else {
+                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                        }
                     )
                     Text(
-                        text = "Restore",
+                        color = if (enabledReset) {
+                            MaterialTheme.colorScheme.onSurface
+                        } else {
+                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                        },
+                        text = "Reset",
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.Bold,
                     )
@@ -204,7 +198,9 @@ private fun PeriodSelection(
             }
 
             IconButton(
-                onClick = { onPeriodOffsetUpdate(1) },
+                onClick = { onPeriodOffsetUpdate(1) }, colors = IconButtonDefaults.iconButtonColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                )
             ) {
                 Icon(
                     modifier = Modifier.size(48.dp),
@@ -218,60 +214,57 @@ private fun PeriodSelection(
 }
 
 @Composable
-private fun SpaceDebtsContainer(
-    usersDebts: List<Pair<String, Map<String, List<DebtBill>>>>,
-    usersMap: UsersMap
+private fun SpaceDebtColumn(
+    spaceDebt: SpaceDebts, usersMap: UsersMap
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 8.dp, bottom = 24.dp),
-        horizontalAlignment = Alignment.Start,
-        verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
-    ) {
-        usersDebts.forEach { (user, debts) ->
-            if (debts.isEmpty() || usersMap[user] == null) {
-                return@forEach
+    val usersDebts = spaceDebt.debts.toList()
+
+    val header = buildAnnotatedString {
+        append(spaceDebt.space.spaceName)
+        append("\n")
+        withStyle(MaterialTheme.typography.bodyMedium.toSpanStyle()) {
+            append("${spaceDebt.period}")
+        }
+    }
+
+    Column {
+        Text(
+            modifier = Modifier.padding(start = 16.dp, bottom = 8.dp),
+            text = header,
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f),
+        )
+
+        ElevatedCard {
+            if (usersDebts.isEmpty()) {
+                NoDebtsFound()
+            } else {
+                SpaceDebtsContainer(usersDebts = usersDebts, usersMap = usersMap)
             }
-
-            DebtorCard(
-                debtorUser = usersMap[user]!!,
-                userDebts = debts,
-                usersMap = usersMap
-            )
-
         }
     }
 }
 
 @Composable
-private fun SpaceDebtHeader(spaceDebt: SpaceDebts) {
-    OutlinedCard(
-        colors = CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
+private fun SpaceDebtsContainer(
+    usersDebts: List<Pair<String, Map<String, List<DebtBill>>>>, usersMap: UsersMap
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.Start,
+        verticalArrangement = Arrangement.spacedBy(0.dp, Alignment.CenterVertically),
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.Center,
-        ) {
-            val spaceText = buildAnnotatedString {
-                append("Space ")
-                withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary)) {
-                    append(spaceDebt.space.spaceName)
-                }
+        usersDebts.forEachIndexed { index, (user, debts) ->
+            if (debts.isEmpty() || usersMap[user] == null) {
+                return@forEachIndexed
             }
 
-            Text(
-                text = spaceText,
-                style = MaterialTheme.typography.titleMedium,
-                textAlign = TextAlign.Start,
-            )
-
-            Text(
-                text = "${spaceDebt.period}",
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.Bold
+            DebtorCard(
+                debtorUser = usersMap[user]!!,
+                userDebts = debts,
+                usersMap = usersMap,
+                bottomDividerVisible = index != usersDebts.size - 1
             )
         }
     }
@@ -283,26 +276,27 @@ private fun DebtorCard(
     debtorUser: User,
     userDebts: Map<UserUid, List<DebtBill>>,
     usersMap: UsersMap,
+    bottomDividerVisible: Boolean = true
 ) {
     val expandedState = remember { mutableStateOf(false) }
     val expandAll = remember { mutableStateOf(false) }
 
-    ElevatedCard(
-        modifier = Modifier.animateContentSize(),
-        onClick = { expandedState.value = !expandedState.value },
+    Column(
+        modifier = Modifier
+            .animateContentSize()
+            .clickable { expandedState.value = !expandedState.value },
     ) {
         Row(
             modifier = Modifier
                 .sizeIn(minHeight = 48.dp)
                 .padding(horizontal = 16.dp)
                 .fillMaxWidth(),
-            horizontalArrangement = Arrangement.Start,
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             SubcomposeAsyncImage(
                 model = ImageRequest.Builder(LocalContext.current)
-                    .data(debtorUser.photoUrl.ifEmpty { R.drawable.profile })
-                    .crossfade(true)
+                    .data(debtorUser.photoUrl.ifEmpty { R.drawable.profile }).crossfade(true)
                     .build(),
                 contentDescription = null,
                 loading = {
@@ -311,29 +305,21 @@ private fun DebtorCard(
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .clip(CircleShape)
-                    .size(24.dp)
+                    .size(22.dp)
             )
 
-            Row(
-                modifier = Modifier
-                    .padding(start = 20.dp)
-                    .weight(1f),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = stringResource(R.string.debtor),
-                    style = MaterialTheme.typography.labelLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary,
-                )
-                Text(
-                    text = debtorUser.displayName,
-                    style = MaterialTheme.typography.labelLarge,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
+            Text(
+                text = debtorUser.displayName,
+                style = MaterialTheme.typography.labelLarge,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+
+        if (bottomDividerVisible) {
+            HorizontalDivider(
+                modifier = Modifier.padding(horizontal = 16.dp)
+            )
         }
     }
 
@@ -350,10 +336,8 @@ private fun DebtorCard(
 
 @Composable
 private fun NoDebtsFound() {
-    ElevatedCard(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 8.dp, bottom = 24.dp),
+    Box(
+        modifier = Modifier.fillMaxWidth()
     ) {
         Row(
             modifier = Modifier
@@ -372,7 +356,7 @@ private fun NoDebtsFound() {
             )
 
             Text(
-                text = "No debts was found. You are all good!",
+                text = "No debts. You are all good!",
                 style = MaterialTheme.typography.labelLarge,
                 fontWeight = FontWeight.Bold,
             )
