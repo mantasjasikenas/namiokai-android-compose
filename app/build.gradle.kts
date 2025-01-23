@@ -20,6 +20,7 @@ plugins {
     alias(libs.plugins.compose)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.baselineprofile)
+    alias(libs.plugins.firebase.crashlytics)
 }
 
 android {
