@@ -16,4 +16,5 @@ interface FlatBillsRepository {
     suspend fun deleteFlatBill(flatBill: FlatBill)
     suspend fun clearFlatBills()
     suspend fun backupCollection(fileName: String)
+    suspend fun updateFlatBills(update: (FlatBill) -> FlatBill)
 }

@@ -18,4 +18,5 @@ interface TripBillsRepository {
     suspend fun deleteTripBill(tripBill: TripBill)
     suspend fun loadTripsFromStorage(fileName: String): Response<Boolean>
     suspend fun backupCollection(fileName: String)
+    suspend fun updateTripBills(update: (TripBill) -> TripBill)
 }

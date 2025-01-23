@@ -9,8 +9,10 @@ import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.dataObjects
+import com.google.firebase.firestore.toObject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.tasks.await
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
 
@@ -151,5 +153,18 @@ class PurchaseBillsRepositoryImpl @Inject constructor(
 
     override suspend fun backupCollection(fileName: String) {
         baseFirebaseRepository.backupCollection(BILLS_COLLECTION, BACKUP_BILLS_PATH, fileName)
+    }
+
+    override suspend fun updatePurchaseBills(update: (PurchaseBill) -> PurchaseBill) {
+        val documents = billsCollection
+            .get()
+            .await()
+
+        for (document in documents) {
+            val purchaseBill = document.toObject<PurchaseBill>()
+            val updatedPurchaseBill = update(purchaseBill)
+
+            updatePurchaseBill(updatedPurchaseBill)
+        }
     }
 }

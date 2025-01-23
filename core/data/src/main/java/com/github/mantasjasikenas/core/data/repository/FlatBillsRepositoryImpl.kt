@@ -8,8 +8,10 @@ import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.dataObjects
+import com.google.firebase.firestore.toObject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 private const val FLAT_BILLS_COLLECTION = "flatBills"
@@ -24,11 +26,11 @@ class FlatBillsRepositoryImpl @Inject constructor(
 
     private val flatBillsCollection = db.collection(FLAT_BILLS_COLLECTION)
 
-    private fun CollectionReference.orderByDate(direction: Query.Direction = Query.Direction.DESCENDING): Query {
+    private fun CollectionReference.orderByDate(direction: Query.Direction = Query.Direction.ASCENDING): Query {
         return this.orderBy(ORDER_BY_FIELD, direction)
     }
 
-    private fun Query.orderByDate(direction: Query.Direction = Query.Direction.DESCENDING): Query {
+    private fun Query.orderByDate(direction: Query.Direction = Query.Direction.ASCENDING): Query {
         return this.orderBy(ORDER_BY_FIELD, direction)
     }
 
@@ -136,5 +138,18 @@ class FlatBillsRepositoryImpl @Inject constructor(
             BACKUP_FLAT_BILLS_PATH,
             fileName
         )
+    }
+
+    override suspend fun updateFlatBills(update: (FlatBill) -> FlatBill) {
+        val documents = flatBillsCollection
+            .get()
+            .await()
+
+        for (document in documents) {
+            val flatBill = document.toObject<FlatBill>()
+            val updatedFlatBill = update(flatBill)
+
+            updateFlatBill(updatedFlatBill)
+        }
     }
 }

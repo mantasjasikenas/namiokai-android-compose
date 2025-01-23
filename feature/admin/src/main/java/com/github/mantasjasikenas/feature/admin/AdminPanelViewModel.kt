@@ -10,9 +10,11 @@ import com.github.mantasjasikenas.core.data.repository.USERS_IMPORT_FILE_NAME
 import com.github.mantasjasikenas.core.domain.model.User
 import com.github.mantasjasikenas.core.domain.repository.FlatBillsRepository
 import com.github.mantasjasikenas.core.domain.repository.PurchaseBillsRepository
+import com.github.mantasjasikenas.core.domain.repository.SpaceRepository
 import com.github.mantasjasikenas.core.domain.repository.TripBillsRepository
 import com.github.mantasjasikenas.core.domain.repository.UsersRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.util.UUID
@@ -24,7 +26,8 @@ class AdminPanelViewModel @Inject constructor(
     private val purchaseBillsRepository: PurchaseBillsRepository,
     private val tripBillsRepository: TripBillsRepository,
     private val flatBillsRepository: FlatBillsRepository,
-    private val usersRepository: UsersRepository
+    private val usersRepository: UsersRepository,
+    private val spaceRepository: SpaceRepository
 ) : ViewModel() {
 
     fun backupDatabase() {
@@ -172,4 +175,20 @@ class AdminPanelViewModel @Inject constructor(
             }
     }
 
+    suspend fun assignSpaceToBills(spaceId: String) {
+        spaceRepository.getSpace(spaceId).firstOrNull() ?: run {
+            toastManager.show("Space not found")
+            return
+        }
+
+        try {
+            purchaseBillsRepository.updatePurchaseBills { it.copy(spaceId = spaceId) }
+            tripBillsRepository.updateTripBills { it.copy(spaceId = spaceId) }
+            flatBillsRepository.updateFlatBills { it.copy(spaceId = spaceId) }
+        } catch (e: Exception) {
+            toastManager.show("Space assign failed")
+        } finally {
+            toastManager.show("Space assigned")
+        }
+    }
 }

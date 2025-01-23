@@ -9,8 +9,10 @@ import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.dataObjects
+import com.google.firebase.firestore.toObject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.tasks.await
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
 
@@ -151,5 +153,18 @@ class TripBillsRepositoryImpl @Inject constructor(
             BACKUP_FUEL_PATH,
             fileName
         )
+    }
+
+    override suspend fun updateTripBills(update: (TripBill) -> TripBill) {
+        val documents = tripBillCollection
+            .get()
+            .await()
+
+        for (document in documents) {
+            val tripBill = document.toObject<TripBill>()
+            val updatedTripBill = update(tripBill)
+
+            updateTripBill(updatedTripBill)
+        }
     }
 }
