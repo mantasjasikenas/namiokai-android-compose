@@ -45,6 +45,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -70,7 +71,7 @@ internal fun DebtsPage(
     onPeriodOffsetUpdate: (Int) -> Unit,
 ) {
     if (spacesDebts.isEmpty()) {
-        NoResultsFound(label = "No spaces found.\nPlease create a space first to add a bill.")
+        NoResultsFound(label = stringResource(R.string.no_spaces_found))
         return
     }
 
@@ -152,13 +153,13 @@ private fun PeriodSelection(
                             modifier = Modifier.size(24.dp)
                         )
                         Text(
-                            text = "${periodOffset.absoluteValue} periods",
+                            text = stringResource(R.string.periods, periodOffset.absoluteValue),
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold
                         )
                     } else {
                         Text(
-                            text = "Current period",
+                            text = stringResource(R.string.current_period),
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold
                         )
@@ -190,7 +191,7 @@ private fun PeriodSelection(
                         } else {
                             MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                         },
-                        text = "Reset",
+                        text = stringResource(R.string.reset),
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.Bold,
                     )
@@ -356,7 +357,7 @@ private fun NoDebtsFound() {
             )
 
             Text(
-                text = "No debts. You are all good!",
+                text = stringResource(R.string.no_debts_you_are_all_good),
                 style = MaterialTheme.typography.labelLarge,
                 fontWeight = FontWeight.Bold,
             )

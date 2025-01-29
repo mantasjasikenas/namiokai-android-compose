@@ -100,7 +100,7 @@ fun SignInContent(
 
                 )
                 Text(
-                    text = "Sign in to continue",
+                    text = stringResource(R.string.sign_in_to_continue),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                 )
@@ -132,13 +132,13 @@ fun SignInContent(
                         uriHandler.openUri(Constants.GITHUB_URL)
 
                     },
-                    text = "Namiokai Corporation",
+                    text = stringResource(R.string.namiokai_corporation),
                     style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.Center,
                     fontWeight = FontWeight.Bold,
                 )
                 Text(
-                    text = "All rights reserved",
+                    text = stringResource(R.string.all_rights_reserved),
                     style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.Center,
                 )

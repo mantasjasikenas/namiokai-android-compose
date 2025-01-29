@@ -15,6 +15,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import com.github.mantasjasikenas.core.ui.R
 import com.github.mantasjasikenas.core.ui.common.NamiokaiBottomSheet
 import com.github.mantasjasikenas.core.ui.common.NamiokaiSpacer
 import com.github.mantasjasikenas.core.ui.component.NamiokaiConfirmDialog
@@ -56,12 +58,12 @@ fun BillDetailsBottomSheetWrapper(
                     onEdit()
                     onDismiss()
                 }) {
-                    Text(text = "Edit")
+                    Text(text = stringResource(R.string.edit))
                 }
                 TextButton(onClick = {
                     confirmDialog = true
                 }) {
-                    Text(text = "Delete")
+                    Text(text = stringResource(R.string.delete))
                 }
             }
             NamiokaiSpacer(height = 30)

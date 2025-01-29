@@ -51,6 +51,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.SubcomposeAsyncImage
@@ -131,7 +132,12 @@ fun SearchUsersScreen(
                 },
                 border = ButtonDefaults.outlinedButtonBorder(enabled = true),
             ) {
-                Text(text = "Continue • ${selectedUsers.size}")
+                Text(
+                    text = stringResource(
+                        com.github.mantasjasikenas.feature.search_users.R.string.continue_text,
+                        selectedUsers.size
+                    )
+                )
             }
         }
     }
@@ -155,7 +161,7 @@ private fun SearchBox(
         value = searchText,
         shape = ShapeDefaults.ExtraLarge,
         onValueChange = onSearchTextChange,
-        placeholder = { Text("Search and select users") },
+        placeholder = { Text(stringResource(com.github.mantasjasikenas.feature.search_users.R.string.search_and_select_users)) },
         singleLine = true,
         colors = TextFieldDefaults.colors().copy(
             focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
@@ -259,7 +265,7 @@ private fun FilteredUsersColumn(
 
         if (filteredUsers.isEmpty()) {
             item(key = "noResultsFound") {
-                NoResultsFound(label = "No users found")
+                NoResultsFound(label = stringResource(com.github.mantasjasikenas.feature.search_users.R.string.no_users_found))
             }
         }
 

@@ -23,12 +23,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.github.mantasjasikenas.core.ui.R
 
 @Composable
 fun Stepper(
@@ -68,7 +70,7 @@ fun Stepper(
         ) {
             Icon(
                 imageVector = Icons.Outlined.Remove,
-                contentDescription = "Decrease"
+                contentDescription = stringResource(R.string.decrease)
             )
         }
 
@@ -88,7 +90,7 @@ fun Stepper(
         ) {
             Icon(
                 imageVector = Icons.Outlined.Add,
-                contentDescription = "Increase"
+                contentDescription = stringResource(R.string.increase)
             )
         }
     }
@@ -135,16 +137,16 @@ internal fun StepperButton(
 ) {
     Box(
         modifier =
-            modifier
-                .minimumInteractiveComponentSize()
-                .size(size)
-                .clip(shape)
-                .background(color = if (enabled) colors.containerColor else colors.disabledContainerColor)
-                .clickable(
-                    onClick = onClick,
-                    enabled = enabled,
-                    role = Role.Button,
-                ),
+        modifier
+            .minimumInteractiveComponentSize()
+            .size(size)
+            .clip(shape)
+            .background(color = if (enabled) colors.containerColor else colors.disabledContainerColor)
+            .clickable(
+                onClick = onClick,
+                enabled = enabled,
+                role = Role.Button,
+            ),
         contentAlignment = Alignment.Center
     ) {
         content()

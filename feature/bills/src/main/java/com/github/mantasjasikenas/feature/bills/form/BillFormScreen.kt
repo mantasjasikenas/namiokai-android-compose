@@ -44,6 +44,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
@@ -121,7 +122,7 @@ fun BillFormContent(
     onNavigateUp: () -> Unit,
 ) {
     if (uiState.spaces.isEmpty()) {
-        NoResultsFound(label = "No spaces found.\nPlease create a space first to add a bill.")
+        NoResultsFound(label = stringResource(R.string.no_spaces_found))
         return
     }
 
@@ -248,6 +249,7 @@ fun PurchaseBillContent(
     spaces: List<Space>
 ) {
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
 
     val bill by remember(initialPurchaseBill) {
         mutableStateOf(initialPurchaseBill ?: PurchaseBill())
@@ -264,7 +266,7 @@ fun PurchaseBillContent(
             scope.launch {
                 SnackbarController.sendEvent(
                     SnackbarEvent(
-                        message = "Please fill all fields"
+                        message = context.getString(R.string.please_fill_all_fields)
                     )
                 )
             }
@@ -276,7 +278,7 @@ fun PurchaseBillContent(
         scope.launch {
             SnackbarController.sendEvent(
                 SnackbarEvent(
-                    message = "Bill saved"
+                    message = context.getString(R.string.bill_saved)
                 )
             )
         }
@@ -306,7 +308,7 @@ fun PurchaseBillContent(
         })
 
     Text(
-        text = "Shopping list",
+        text = stringResource(R.string.shopping_list),
         style = MaterialTheme.typography.titleSmall,
         textAlign = TextAlign.Center,
         modifier = Modifier.padding(bottom = 7.dp)
@@ -328,7 +330,7 @@ fun PurchaseBillContent(
     Spacer(modifier = Modifier.height(20.dp))
 
     Text(
-        text = "Total price",
+        text = stringResource(R.string.total_price),
         style = MaterialTheme.typography.titleSmall,
         textAlign = TextAlign.Center,
         modifier = Modifier.padding(bottom = 7.dp)
@@ -354,7 +356,14 @@ fun PurchaseBillContent(
     Button(
         onClick = onBillSave
     ) {
-        Text(text = if (initialPurchaseBill == null) "Save" else "Update")
+        Text(
+            text = if (initialPurchaseBill == null)
+                stringResource(R.string.save)
+            else
+                stringResource(
+                    R.string.update
+                )
+        )
     }
 }
 
@@ -366,6 +375,7 @@ private fun TripBillContent(
     spaces: List<Space>
 ) {
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
 
     val trip by remember(initialTripBill) { mutableStateOf(initialTripBill ?: TripBill()) }
 
@@ -383,7 +393,7 @@ private fun TripBillContent(
             scope.launch {
                 SnackbarController.sendEvent(
                     SnackbarEvent(
-                        message = "Please select destination first"
+                        message = context.getString(R.string.please_select_destination_first)
                     )
                 )
             }
@@ -401,7 +411,7 @@ private fun TripBillContent(
             scope.launch {
                 SnackbarController.sendEvent(
                     SnackbarEvent(
-                        message = "Please fill all fields"
+                        message = context.getString(R.string.please_fill_all_fields)
                     )
                 )
             }
@@ -413,7 +423,7 @@ private fun TripBillContent(
         scope.launch {
             SnackbarController.sendEvent(
                 SnackbarEvent(
-                    message = "Bill saved"
+                    message = context.getString(R.string.bill_saved)
                 )
             )
         }
@@ -454,14 +464,14 @@ private fun TripBillContent(
     Column {
         if (selectedSpace == null) {
             Text(
-                text = "Please select space first",
+                text = stringResource(R.string.please_select_space_first),
                 style = MaterialTheme.typography.labelLarge,
                 textAlign = TextAlign.Center
             )
         } else {
             selectedSpace?.destinations?.takeIf { it.isNotEmpty() } ?: run {
                 Text(
-                    text = "No destinations found!",
+                    text = stringResource(R.string.no_destinations_found),
                     color = MaterialTheme.colorScheme.error,
                     style = MaterialTheme.typography.labelLarge,
                     textAlign = TextAlign.Center,
@@ -506,7 +516,7 @@ private fun TripBillContent(
     Spacer(modifier = Modifier.height(32.dp))
 
     Button(onClick = onBillSave) {
-        Text(text = if (initialTripBill == null) "Save" else "Update")
+        Text(text = if (initialTripBill == null) stringResource(R.string.save) else stringResource(R.string.update))
     }
 }
 
@@ -518,6 +528,7 @@ private fun FlatBillContent(
     spaces: List<Space>
 ) {
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
 
     var flatBill by remember(initialFlatBill) {
         mutableStateOf(initialFlatBill ?: FlatBill())
@@ -535,7 +546,7 @@ private fun FlatBillContent(
             scope.launch {
                 SnackbarController.sendEvent(
                     SnackbarEvent(
-                        message = "Please fill all fields"
+                        message = context.getString(R.string.please_fill_all_fields)
                     )
                 )
             }
@@ -547,7 +558,7 @@ private fun FlatBillContent(
         scope.launch {
             SnackbarController.sendEvent(
                 SnackbarEvent(
-                    message = "Bill saved"
+                    message = context.getString(R.string.bill_saved)
                 )
             )
         }
@@ -575,14 +586,14 @@ private fun FlatBillContent(
         })
 
     Text(
-        text = "Rent",
+        text = stringResource(R.string.rent),
         style = MaterialTheme.typography.titleSmall,
         textAlign = TextAlign.Center,
         modifier = Modifier.padding(bottom = 7.dp)
     )
 
     NamiokaiNumberField(
-        label = "Rent",
+        label = stringResource(R.string.rent),
         initialTextFieldValue = (if (flatBill.rentTotal == 0.0) "" else flatBill.rentTotal.toString()),
         onValueChange = { flatBill.rentTotal = it },
         keyboardType = KeyboardType.Number,
@@ -598,14 +609,14 @@ private fun FlatBillContent(
     Spacer(modifier = Modifier.height(20.dp))
 
     Text(
-        text = "Taxes",
+        text = stringResource(R.string.taxes),
         style = MaterialTheme.typography.titleSmall,
         textAlign = TextAlign.Center,
         modifier = Modifier.padding(bottom = 7.dp)
     )
 
     NamiokaiNumberField(
-        label = "Taxes",
+        label = stringResource(R.string.taxes),
         initialTextFieldValue = (if (flatBill.taxesTotal == 0.0) "" else flatBill.taxesTotal.toString()),
         onValueChange = { flatBill.taxesTotal = it },
         keyboardType = KeyboardType.Number,
@@ -643,7 +654,7 @@ private fun FlatBillContent(
             },
         )
         Text(
-            text = "Include taxes",
+            text = stringResource(R.string.include_taxes),
             style = MaterialTheme.typography.bodyLarge,
             modifier = Modifier.padding(start = 8.dp)
         )
@@ -653,14 +664,14 @@ private fun FlatBillContent(
         Spacer(modifier = Modifier.height(20.dp))
 
         Text(
-            text = "Electricity",
+            text = stringResource(R.string.electricity),
             style = MaterialTheme.typography.titleSmall,
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(bottom = 7.dp)
         )
 
         NamiokaiNumberField(
-            label = "Electricity",
+            label = stringResource(R.string.electricity),
             initialTextFieldValue = (if (flatBill.taxes!!.electricity == 0.0) "" else flatBill.taxes!!.electricity.toString()),
             onValueChange = { flatBill.taxes!!.electricity = it },
             keyboardType = KeyboardType.Number,
@@ -677,7 +688,7 @@ private fun FlatBillContent(
     Spacer(modifier = Modifier.height(32.dp))
 
     Button(onClick = onBillSave) {
-        Text(text = if (initialFlatBill == null) "Save" else "Update")
+        Text(text = if (initialFlatBill == null) stringResource(R.string.save) else stringResource(R.string.update))
     }
 }
 
@@ -701,14 +712,14 @@ private fun SpaceContainer(
     }
 
     Text(
-        text = "Space",
+        text = stringResource(R.string.space),
         style = MaterialTheme.typography.titleSmall,
         textAlign = TextAlign.Center,
         modifier = Modifier.padding(bottom = 7.dp)
     )
 
     NamiokaiDropdownMenu(
-        label = "Space",
+        label = stringResource(R.string.space),
         items = spaces,
         initialSelectedItem = spaces.firstOrNull { it.spaceId == selectedSpace?.spaceId }
             ?: selectedSpace,

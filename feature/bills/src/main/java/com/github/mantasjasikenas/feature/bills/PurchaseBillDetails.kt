@@ -41,12 +41,12 @@ fun PurchaseBillBottomSheet(
         onDelete = onDelete
     ) {
         CardText(
-            label = "Paymaster",
+            label = stringResource(R.string.paymaster),
             value = usersMap[purchaseBill.paymasterUid]?.displayName ?: "-"
         )
 
         CardText(
-            label = "Date",
+            label = stringResource(R.string.date),
             value = purchaseBill.formatDateTime()
         )
 

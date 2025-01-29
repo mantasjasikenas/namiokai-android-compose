@@ -31,7 +31,7 @@ class AdminPanelViewModel @Inject constructor(
 ) : ViewModel() {
 
     fun backupDatabase() {
-        toastManager.show("Backup started")
+        toastManager.show(R.string.backup_started)
 
         viewModelScope.launch {
             val currentDateTime = LocalDateTime.now()
@@ -44,14 +44,14 @@ class AdminPanelViewModel @Inject constructor(
         }
             .invokeOnCompletion { throwable ->
                 if (throwable != null)
-                    toastManager.show("Backup failed")
+                    toastManager.show(R.string.backup_failed)
                 else
-                    toastManager.show("Backup successful")
+                    toastManager.show(R.string.backup_successful)
             }
     }
 
     fun clearBills() {
-        toastManager.show("Records clear started")
+        toastManager.show(R.string.records_clear_started)
         viewModelScope.launch {
             purchaseBillsRepository.clearPurchaseBills()
             tripBillsRepository.clearTripBills()
@@ -59,65 +59,65 @@ class AdminPanelViewModel @Inject constructor(
         }
             .invokeOnCompletion { throwable ->
                 if (throwable != null)
-                    toastManager.show("Records clear failed")
+                    toastManager.show(R.string.records_clear_failed)
                 else
-                    toastManager.show("Records cleared")
+                    toastManager.show(R.string.records_cleared)
             }
     }
 
     fun clearPurchaseBills() {
-        toastManager.show("Purchase bills clear started")
+        toastManager.show(R.string.purchase_bills_clear_started)
 
         viewModelScope.launch {
             purchaseBillsRepository.clearPurchaseBills()
         }
             .invokeOnCompletion { throwable ->
                 if (throwable != null)
-                    toastManager.show("Purchase bills clear failed")
+                    toastManager.show(R.string.purchase_bills_clear_failed)
                 else
-                    toastManager.show("Purchase bills cleared")
+                    toastManager.show(R.string.purchase_bills_cleared)
             }
     }
 
     fun clearFuel() {
-        toastManager.show("Fuel clear started")
+        toastManager.show(R.string.fuel_clear_started)
 
         viewModelScope.launch {
             tripBillsRepository.clearTripBills()
         }
             .invokeOnCompletion { throwable ->
                 if (throwable != null)
-                    toastManager.show("Fuel clear failed")
+                    toastManager.show(R.string.fuel_clear_failed)
                 else
-                    toastManager.show("Fuel cleared")
+                    toastManager.show(R.string.fuel_cleared)
             }
     }
 
     fun clearFlatBills() {
-        toastManager.show("Flat bills clear started")
+        toastManager.show(R.string.flat_bills_clear_started)
 
         viewModelScope.launch {
             flatBillsRepository.clearFlatBills()
         }
             .invokeOnCompletion { throwable ->
                 if (throwable != null)
-                    toastManager.show("Flat bills clear failed")
+                    toastManager.show(R.string.flat_bills_clear_failed)
                 else
-                    toastManager.show("Flat bills cleared")
+                    toastManager.show(R.string.flat_bills_cleared)
             }
     }
 
     fun clearUsers() {
-        toastManager.show("Users clear started")
+        toastManager.show(R.string.users_clear_started)
 
         viewModelScope.launch {
             usersRepository.clearUsers()
         }
             .invokeOnCompletion { throwable ->
                 if (throwable != null)
-                    toastManager.show("Users clear failed")
+                    toastManager.show(R.string.users_clear_failed)
                 else
-                    toastManager.show("Users cleared")
+                    toastManager.show(R.string.users_cleared)
             }
     }
 
@@ -133,9 +133,9 @@ class AdminPanelViewModel @Inject constructor(
         }
             .invokeOnCompletion { throwable ->
                 if (throwable != null)
-                    toastManager.show("User add failed")
+                    toastManager.show(R.string.user_add_failed)
                 else
-                    toastManager.show("User added")
+                    toastManager.show(R.string.user_added)
             }
     }
 
@@ -145,9 +145,9 @@ class AdminPanelViewModel @Inject constructor(
         }
             .invokeOnCompletion { throwable ->
                 if (throwable != null)
-                    toastManager.show("Bills import failed")
+                    toastManager.show(R.string.bills_import_failed)
                 else
-                    toastManager.show("Bills imported")
+                    toastManager.show(R.string.bills_imported)
             }
     }
 
@@ -157,9 +157,9 @@ class AdminPanelViewModel @Inject constructor(
         }
             .invokeOnCompletion { throwable ->
                 if (throwable != null)
-                    toastManager.show("Fuel import failed")
+                    toastManager.show(R.string.fuel_import_failed)
                 else
-                    toastManager.show("Fuel imported")
+                    toastManager.show(R.string.fuel_imported)
             }
     }
 
@@ -169,15 +169,15 @@ class AdminPanelViewModel @Inject constructor(
         }
             .invokeOnCompletion { throwable ->
                 if (throwable != null)
-                    toastManager.show("Users import failed")
+                    toastManager.show(R.string.users_import_failed)
                 else
-                    toastManager.show("Users imported")
+                    toastManager.show(R.string.users_imported)
             }
     }
 
     suspend fun assignSpaceToBills(spaceId: String) {
         spaceRepository.getSpace(spaceId).firstOrNull() ?: run {
-            toastManager.show("Space not found")
+            toastManager.show(R.string.space_not_found)
             return
         }
 
@@ -186,9 +186,9 @@ class AdminPanelViewModel @Inject constructor(
             tripBillsRepository.updateTripBills { it.copy(spaceId = spaceId) }
             flatBillsRepository.updateFlatBills { it.copy(spaceId = spaceId) }
         } catch (e: Exception) {
-            toastManager.show("Space assign failed")
+            toastManager.show(R.string.space_assign_failed)
         } finally {
-            toastManager.show("Space assigned")
+            toastManager.show(R.string.space_assigned)
         }
     }
 }

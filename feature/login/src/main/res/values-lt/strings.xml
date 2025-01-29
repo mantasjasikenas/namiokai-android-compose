@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sign_in_failed">Prisijungimas nepavyko</string>
+    <string name="welcome">Sveiki, %1$s</string>
+    <string name="sign_in_with_google">Prisijungti su Google</string>
+    <string name="sign_in_to_continue">Prisijunkite, kad tęstumėte</string>
+    <string name="namiokai_corporation">Namiokai korporacija</string>
+    <string name="all_rights_reserved">Visos teisės saugomos</string>
+</resources>

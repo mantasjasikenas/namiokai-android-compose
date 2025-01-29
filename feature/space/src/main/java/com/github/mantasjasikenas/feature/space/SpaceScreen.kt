@@ -19,6 +19,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -82,7 +83,7 @@ fun SpaceScreenContent(
     onNavigateToCreateSpace: (SpaceFormArgs) -> Unit,
 ) {
     if (uiState.spaces.isEmpty()) {
-        NoResultsFound(label = "No spaces found. Create a new space.")
+        NoResultsFound(label = stringResource(R.string.no_spaces_found))
     }
 
     var selectedSpace by remember {
@@ -160,7 +161,7 @@ internal fun SpaceCard(
             NamiokaiSpacer(width = 7)
 
             Text(
-                text = "${space.memberIds.size} members",
+                text = stringResource(R.string.members, space.memberIds.size),
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.Bold
             )

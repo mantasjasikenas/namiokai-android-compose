@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="continue_text">Tęsti • %1$s</string>
+    <string name="search_and_select_users">Ieškoti ir pasirinkti naudotojus</string>
+    <string name="no_users_found">Naudotojų nerasta</string>
+</resources>

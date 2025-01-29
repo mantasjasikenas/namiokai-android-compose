@@ -30,8 +30,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.center
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import com.github.mantasjasikenas.core.ui.R
 
 private val settingsPadding = 16.dp
 val settingsHorizontalSpacing = 16.dp
@@ -173,29 +175,6 @@ fun ImportantSettingsDescription(
     )
 }
 
-//region ValueSelector
-@Composable
-inline fun <reified T : Enum<T>> EnumValueSelectorSettingsEntry(
-    title: String,
-    selectedValue: T,
-    crossinline onValueSelected: (T) -> Unit,
-    modifier: Modifier = Modifier,
-    isEnabled: Boolean = true,
-    crossinline valueText: (T) -> String = Enum<T>::name,
-    noinline trailingContent: (@Composable () -> Unit)? = null
-) {
-    ValueSelectorSettingsEntry(
-        title = title,
-        selectedValue = selectedValue,
-        values = enumValues<T>().toList(),
-        onValueSelected = onValueSelected,
-        modifier = modifier,
-        isEnabled = isEnabled,
-        valueText = valueText,
-        trailingContent = trailingContent,
-    )
-}
-
 @Composable
 inline fun <T> ValueSelectorSettingsEntry(
     title: String,
@@ -324,7 +303,7 @@ inline fun <T> ValueSelectorDialog(
                         onClick = onDismiss,
                         modifier = Modifier.padding(top = 16.dp)
                     ) {
-                        Text(text = "Cancel")
+                        Text(text = stringResource(id = R.string.cancel))
                     }
                 }
             }

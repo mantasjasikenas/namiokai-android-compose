@@ -19,6 +19,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -72,7 +73,7 @@ fun PurchaseBillScreen(
     }
 
     if (billUiState.purchaseBills.isEmpty()) {
-        NoResultsFound(label = "No bills found.")
+        NoResultsFound(label = stringResource(R.string.no_bills_found))
         return
     }
 
@@ -132,7 +133,7 @@ fun PurchaseBillScreenContent(
                 item {
                     NoResultsFound(
                         modifier = Modifier.padding(top = 30.dp),
-                        label = "No results found."
+                        label = stringResource(R.string.no_results_found)
                     )
                 }
             } else {
@@ -233,21 +234,21 @@ private fun PurchaseBillFiltersRow(
         billUiState.filters.ifEmpty {
             mutableStateListOf<Filter<PurchaseBill, *>>(
                 Filter(
-                    displayLabel = "Paymaster",
+                    displayLabelResId = R.string.paymaster,
                     filterName = "paymaster",
                     displayValue = { it.displayName },
                     values = users,
                     predicate = { bill, user -> bill.paymasterUid == user.uid }
                 ),
                 Filter(
-                    displayLabel = "Splitter",
+                    displayLabelResId = R.string.splitter,
                     filterName = "splitter",
                     displayValue = { it.displayName },
                     values = users,
                     predicate = { bill, user -> bill.splitUsersUid.contains(user.uid) }
                 ),
                 Filter(
-                    displayLabel = "Space",
+                    displayLabelResId = R.string.space,
                     displayValue = { it.spaceName },
                     filterName = "space",
                     values = billUiState.spaces,

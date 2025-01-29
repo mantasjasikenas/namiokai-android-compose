@@ -1,7 +1,9 @@
 package com.github.mantasjasikenas.core.domain.model
 
+import androidx.annotation.StringRes
+
 data class Filter<T, V>(
-    val displayLabel: String,
+    @StringRes val displayLabelResId: Int,
     val filterName: String,
     val values: List<V>,
     var selectedValue: V? = null,

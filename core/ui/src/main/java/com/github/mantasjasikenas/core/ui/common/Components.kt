@@ -61,6 +61,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -74,6 +75,7 @@ import com.github.mantasjasikenas.core.common.util.Uid
 import com.github.mantasjasikenas.core.common.util.toMutableStateMap
 import com.github.mantasjasikenas.core.domain.model.UsersMap
 import com.github.mantasjasikenas.core.domain.model.period.Period
+import com.github.mantasjasikenas.core.ui.R
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -502,10 +504,10 @@ fun NamiokaiDateRangePicker(
         properties = DialogProperties(dismissOnClickOutside = true),
         dismissButton = {
             TextButton(onClick = onResetRequest) {
-                Text(text = "Reset")
+                Text(text = stringResource(R.string.reset))
             }
             TextButton(onClick = onDismissRequest) {
-                Text(text = "Cancel")
+                Text(text = stringResource(R.string.cancel))
             }
         },
         confirmButton = {
@@ -524,7 +526,7 @@ fun NamiokaiDateRangePicker(
                 },
                 enabled = state.selectedEndDateMillis != null
             ) {
-                Text(text = "Save")
+                Text(text = stringResource(R.string.save))
             }
         }) {
 

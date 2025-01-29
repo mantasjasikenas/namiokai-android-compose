@@ -56,7 +56,7 @@ fun FlatBillBottomSheet(
             )
             NamiokaiSpacer(width = 30)
             CardTextColumn(
-                label = "Taxes",
+                label = stringResource(R.string.taxes),
                 value = "€${flatBill.taxesTotal.format(2)}"
             )
         }
@@ -66,7 +66,7 @@ fun FlatBillBottomSheet(
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             CardTextColumn(
-                label = "Total",
+                label = stringResource(R.string.total),
                 value = "€${flatBill.total.format(2)}"
             )
             NamiokaiSpacer(width = 30)
@@ -120,11 +120,11 @@ private fun TaxesDetailsRow(
     taxes: Taxes
 ) {
     val taxesFields = listOf(
-        Triple("Electricity", (taxes.electricity), "kWh"),
+        Triple(stringResource(R.string.electricity), (taxes.electricity), "kWh"),
     )
 
     Text(
-        text = "Taxes",
+        text = stringResource(R.string.taxes),
         style = MaterialTheme.typography.labelMedium,
         color = MaterialTheme.colorScheme.primary,
         fontWeight = FontWeight.Bold

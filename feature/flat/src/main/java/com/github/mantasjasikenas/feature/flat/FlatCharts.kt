@@ -4,6 +4,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.github.mantasjasikenas.core.common.util.format
 import com.github.mantasjasikenas.core.domain.model.bills.FlatBill
@@ -21,6 +23,7 @@ import java.util.Locale
 internal fun FlatBillsChart(
     modifier: Modifier, chartModelProducer: CartesianChartModelProducer, flatBills: List<FlatBill>
 ) {
+    val context = LocalContext.current
     val indicatorMarker = rememberSmallIndicatorMarker()
     val avgLineColor = avgLineColor()
 
@@ -32,15 +35,24 @@ internal fun FlatBillsChart(
         yAxisValueFormatter = { y -> "${y.toInt()}€" },
         fieldsProvider = { selectedBill ->
             listOf(
-                Triple("Date", selectedBill?.date?.split("T")?.firstOrNull(), null),
-                Triple("Taxes", selectedBill?.taxesTotal?.format(2), "€"),
-                Triple("Total", selectedBill?.total?.format(2), "€"),
-                Triple("Total split", selectedBill?.splitPricePerUser()?.format(2), "€")
+                Triple(
+                    context.getString(R.string.date),
+                    selectedBill?.date?.split("T")?.firstOrNull(),
+                    null
+                ),
+                Triple(context.getString(R.string.taxes), selectedBill?.taxesTotal?.format(2), "€"),
+                Triple(context.getString(R.string.total), selectedBill?.total?.format(2), "€"),
+                Triple(
+                    context.getString(R.string.total_split),
+                    selectedBill?.splitPricePerUser()?.format(2),
+                    "€"
+                )
             )
         },
         legendItems = { colors ->
             listOf(
-                ("Total split" to colors.first()), ("Avg split" to avgLineColor)
+                (stringResource(R.string.total_split) to colors.first()),
+                (stringResource(R.string.avg_split) to avgLineColor)
             )
         },
         decorations = listOf(
@@ -68,6 +80,7 @@ internal fun ElectricityChart(
     chartModelProducer: CartesianChartModelProducer,
     electricity: List<BillDifference>
 ) {
+    val context = LocalContext.current
     val indicatorMarker = rememberSmallIndicatorMarker()
     val avgLineColor = avgLineColor()
 
@@ -83,14 +96,23 @@ internal fun ElectricityChart(
         yAxisValueFormatter = { y -> "${y.toInt()}kWh" },
         fieldsProvider = { selected ->
             listOf(
-                Triple("Start date", selected?.firstBillDate?.split("T")?.firstOrNull(), null),
-                Triple("End date", selected?.secondBillDate?.split("T")?.firstOrNull(), null),
-                Triple("Amount", selected?.difference?.format(2), "kWh"),
+                Triple(
+                    context.getString(R.string.start_date),
+                    selected?.firstBillDate?.split("T")?.firstOrNull(),
+                    null
+                ),
+                Triple(
+                    context.getString(R.string.end_date),
+                    selected?.secondBillDate?.split("T")?.firstOrNull(),
+                    null
+                ),
+                Triple(context.getString(R.string.amount), selected?.difference?.format(2), "kWh"),
             )
         },
         legendItems = { colors ->
             listOf(
-                ("Electricity" to colors.first()), ("Avg" to avgLineColor)
+                (stringResource(R.string.electricity) to colors.first()),
+                (stringResource(R.string.avg) to avgLineColor)
             )
         },
         decorations = listOf(

@@ -10,12 +10,13 @@ import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.github.mantasjasikenas.core.domain.model.RecurrenceUnit
 import com.github.mantasjasikenas.core.domain.model.Space
 import com.github.mantasjasikenas.core.domain.model.UsersMap
-import com.github.mantasjasikenas.core.domain.model.allowedStartValues
 import com.github.mantasjasikenas.core.ui.common.CardText
 import com.github.mantasjasikenas.core.ui.common.NamiokaiSpacer
 import com.github.mantasjasikenas.core.ui.common.bill.BillDetailsBottomSheetWrapper
@@ -31,52 +32,54 @@ fun SpaceBottomSheet(
     onDismiss: () -> Unit,
     onDelete: () -> Unit
 ) {
+    val context = LocalContext.current
     val recurrenceStartLabel = { unit: RecurrenceUnit ->
-        val range = unit.allowedStartValues().run { "[$first - $last]" }
-
         when (unit) {
-            RecurrenceUnit.WEEKLY -> "(week day)"
-            RecurrenceUnit.MONTHLY -> "(day of month)"
+            RecurrenceUnit.WEEKLY -> context.getString(R.string.week_day)
+            RecurrenceUnit.MONTHLY -> context.getString(R.string.day_of_month)
             else -> ""
         }
     }
 
     BillDetailsBottomSheetWrapper(
-        title = "Space details",
+        title = stringResource(R.string.space_details),
         isAllowedModification = isAllowedModification,
         onDismiss = onDismiss,
         onEdit = onEdit,
         onDelete = onDelete
     ) {
         CardText(
-            label = "Name",
+            label = stringResource(R.string.name),
             value = space.spaceName
         )
 
         CardText(
-            label = "Created by",
+            label = stringResource(R.string.created_by),
             value = usersMap[space.createdBy]?.displayName ?: "-"
         )
 
         CardText(
-            label = "Recurrence unit",
+            label = stringResource(R.string.recurrence_unit),
             value = space.recurrenceUnit.title
         )
 
         CardText(
-            label = "Recurrence start ${recurrenceStartLabel(space.recurrenceUnit)}",
+            label = stringResource(
+                R.string.recurrence_start_range,
+                recurrenceStartLabel(space.recurrenceUnit)
+            ),
             value = space.recurrenceStart.toString()
         )
 
         OutlinedCardFlowRow(
-            title = "Destinations",
+            title = stringResource(R.string.destinations),
             items = space.destinations.map { it.name }
         )
 
         NamiokaiSpacer(height = 10)
 
         OutlinedCardFlowRow(
-            title = "Members",
+            title = stringResource(R.string.members),
             items = usersMap.filter { space.memberIds.contains(it.key) }.values.map { it.displayName }
         )
     }
@@ -99,7 +102,7 @@ private fun OutlinedCardFlowRow(
 
     if (items.isEmpty()) {
         Text(
-            text = "Please add ${title.lowercase(Locale.ROOT)} to this space.",
+            text = stringResource(R.string.please_add_to_this_space, title.lowercase(Locale.ROOT)),
             color = MaterialTheme.colorScheme.error,
             style = MaterialTheme.typography.labelLarge,
             fontWeight = FontWeight.Bold

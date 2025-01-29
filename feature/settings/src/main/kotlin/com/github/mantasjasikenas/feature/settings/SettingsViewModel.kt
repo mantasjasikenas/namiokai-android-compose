@@ -1,5 +1,6 @@
 package com.github.mantasjasikenas.feature.settings
 
+import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -14,6 +15,7 @@ import com.github.mantasjasikenas.core.domain.repository.AuthRepository
 import com.github.mantasjasikenas.core.domain.repository.UserDataRepository
 import com.github.mantasjasikenas.core.domain.repository.UsersRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -31,7 +33,8 @@ class SettingsViewModel @Inject constructor(
     private val accentColorRepository: AccentColorRepository,
     private val userDataRepository: UserDataRepository,
     private val toastManager: ToastManager,
-    private val localizationManager: LocalizationManager
+    private val localizationManager: LocalizationManager,
+    @ApplicationContext private val context: Context
 ) : ViewModel() {
 
     val settingsUiState: StateFlow<SettingsUiState> =
@@ -63,19 +66,19 @@ class SettingsViewModel @Inject constructor(
     }
 
     fun addImageToStorage(imageUri: Uri) = viewModelScope.launch {
-        toastManager.show("Uploading image...")
+        toastManager.show(context.getString(R.string.uploading_image))
 
         when (val response = usersRepository.addImageToFirebaseStorage(imageUri)) {
             is Response.Success -> {
                 response.data?.let { uri ->
                     usersRepository.changeCurrentUserImageUrlInFirestore(uri)
                 }
-                toastManager.show("Image uploaded successfully")
+                toastManager.show(context.getString(R.string.image_uploaded_successfully))
             }
 
             is Response.Failure -> {
                 println(response.e)
-                toastManager.show("Image upload failed")
+                toastManager.show(context.getString(R.string.image_upload_failed))
             }
 
             else -> {}
@@ -83,17 +86,17 @@ class SettingsViewModel @Inject constructor(
     }
 
     fun updateDisplayName(newName: String) = viewModelScope.launch {
-        toastManager.show("Updating name...")
+        toastManager.show(context.getString(R.string.updating_name))
 
         val response = usersRepository.changeCurrentUserNameInFirestore(newName)
 
         when (response) {
             is Response.Success -> {
-                toastManager.show("Name changed successfully")
+                toastManager.show(context.getString(R.string.name_changed_successfully))
             }
 
             else -> {
-                toastManager.show("Name change failed")
+                toastManager.show(context.getString(R.string.name_change_failed))
             }
         }
     }
@@ -138,14 +141,14 @@ class SettingsViewModel @Inject constructor(
         newDisplayName: String
     ): Boolean {
         if (newDisplayName.isBlank()) {
-            toastManager.show("Name cannot be blank")
+            toastManager.show(context.getString(R.string.name_cannot_be_blank))
             return false
         }
 
         if (settingsUiState.value is SettingsUiState.Success) {
             val userData = (settingsUiState.value as SettingsUiState.Success).userData
             if (newDisplayName == userData.user.displayName) {
-                toastManager.show("Name is the same as before")
+                toastManager.show(context.getString(R.string.name_is_the_same_as_before))
                 return false
             }
         }

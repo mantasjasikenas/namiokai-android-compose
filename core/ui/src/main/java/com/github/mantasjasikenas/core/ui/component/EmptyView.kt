@@ -55,7 +55,7 @@ fun NoResultsFound(
         )
         NamiokaiSpacer(height = 16)
         Text(
-            text = "Whoops!",
+            text = stringResource(R.string.whoops),
             style = MaterialTheme.typography.headlineMedium,
             color = MaterialTheme.colorScheme.primary,
             fontWeight = FontWeight.Bold,

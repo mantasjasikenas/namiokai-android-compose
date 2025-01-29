@@ -1,4 +1,7 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
+@file:OptIn(
+    ExperimentalMaterial3Api::class, ExperimentalMaterial3Api::class,
+    ExperimentalMaterial3Api::class
+)
 
 package com.github.mantasjasikenas.feature.space.form
 
@@ -44,6 +47,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -70,6 +75,7 @@ import com.github.mantasjasikenas.core.ui.component.NamiokaiDialog
 import com.github.mantasjasikenas.core.ui.component.NamiokaiDropdownMenu
 import com.github.mantasjasikenas.core.ui.component.NamiokaiNumberField
 import com.github.mantasjasikenas.core.ui.component.NamiokaiTextField
+import com.github.mantasjasikenas.feature.space.R
 import com.github.mantasjasikenas.feature.space.navigation.SpaceFormRoute
 import kotlinx.coroutines.launch
 
@@ -167,6 +173,7 @@ private fun SpaceContent(
     onNavigateToInviteUsers: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
 
     var space by remember(initialSpace) {
         mutableStateOf(
@@ -190,7 +197,7 @@ private fun SpaceContent(
             scope.launch {
                 SnackbarController.sendEvent(
                     event = SnackbarEvent(
-                        message = "Creator must be in members",
+                        message = context.getString(R.string.creator_must_be_in_members),
                     )
                 )
             }
@@ -201,7 +208,7 @@ private fun SpaceContent(
             scope.launch {
                 SnackbarController.sendEvent(
                     event = SnackbarEvent(
-                        message = "Please fill in all fields",
+                        message = context.getString(R.string.please_fill_in_all_fields),
                     )
                 )
             }
@@ -213,7 +220,7 @@ private fun SpaceContent(
         scope.launch {
             SnackbarController.sendEvent(
                 event = SnackbarEvent(
-                    message = "Space saved",
+                    message = context.getString(R.string.space_saved),
                 )
             )
         }
@@ -224,21 +231,21 @@ private fun SpaceContent(
         val range = unit.allowedStartValues().run { "[$first - $last]" }
 
         when (unit) {
-            RecurrenceUnit.WEEKLY -> "Week day $range"
-            RecurrenceUnit.MONTHLY -> "Day of month $range"
-            else -> "Recurrence start"
+            RecurrenceUnit.WEEKLY -> context.getString(R.string.week_day_range, range)
+            RecurrenceUnit.MONTHLY -> context.getString(R.string.day_of_month_range, range)
+            else -> context.getString(R.string.recurrence_start)
         }
     }
 
     Text(
-        text = "Space name",
+        text = stringResource(R.string.space_name),
         style = MaterialTheme.typography.titleSmall,
         textAlign = TextAlign.Center,
         modifier = Modifier.padding(bottom = 7.dp)
     )
 
     NamiokaiTextField(
-        label = "Name",
+        label = stringResource(R.string.name),
         initialTextFieldValue = space.spaceName,
         onValueChange = { space.spaceName = it },
         leadingIcon = {
@@ -254,14 +261,14 @@ private fun SpaceContent(
     Spacer(modifier = Modifier.height(20.dp))
 
     Text(
-        text = "Recurrence",
+        text = stringResource(R.string.recurrence),
         style = MaterialTheme.typography.titleSmall,
         textAlign = TextAlign.Center,
         modifier = Modifier.padding(bottom = 7.dp)
     )
 
     NamiokaiDropdownMenu(
-        label = "Recurrence",
+        label = stringResource(R.string.recurrence),
         items = RecurrenceUnit.entries.toList(),
         initialSelectedItem = space.recurrenceUnit,
         onItemSelected = { space = space.copy(recurrenceUnit = it) },
@@ -282,7 +289,7 @@ private fun SpaceContent(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Recurrence start",
+                text = stringResource(R.string.recurrence_start),
                 style = MaterialTheme.typography.titleSmall,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(bottom = 7.dp)
@@ -311,7 +318,7 @@ private fun SpaceContent(
     }
 
     Text(
-        text = "Trip destinations",
+        text = stringResource(R.string.trip_destinations),
         style = MaterialTheme.typography.titleSmall,
         textAlign = TextAlign.Center,
         modifier = Modifier.padding(bottom = 7.dp)
@@ -343,7 +350,7 @@ private fun SpaceContent(
         FilledTonalButton(
             onClick = { showTripDestinationsBottomSheet.value = true }
         ) {
-            Text(text = "Modify")
+            Text(text = stringResource(R.string.modify))
         }
     }
 
@@ -351,7 +358,7 @@ private fun SpaceContent(
 
     // TODO: migrate to bottom sheet because of the long list and add search functionality
     UserPickerContainer(
-        title = "Current members",
+        title = stringResource(R.string.current_members),
         usersMap = remember(space.memberIds) { usersMap.filter { it.value.uid in space.memberIds } },
         isMultipleSelectEnabled = true,
         initialSelectedUsers = space.memberIds,
@@ -363,13 +370,13 @@ private fun SpaceContent(
     FilledTonalButton(
         onClick = onNavigateToInviteUsers
     ) {
-        Text(text = "Add new members") // TODO: replace with invite when invite is implemented
+        Text(text = stringResource(R.string.add_new_members))
     }
 
     Spacer(modifier = Modifier.height(32.dp))
 
     Button(onClick = onSpaceSave) {
-        Text(text = if (initialSpace == null) "Save" else "Update")
+        Text(text = if (initialSpace == null) stringResource(R.string.save) else stringResource(R.string.update))
     }
 
     if (showTripDestinationsBottomSheet.value) {
@@ -412,10 +419,15 @@ private fun TripDestinationsBottomSheet(
     val addDestinationDialogState = remember { mutableStateOf(false) }
 
     val destinations = remember(destinationList) { mutableListOf(*destinationList.toTypedArray()) }
-    val headerItems = listOf("Name", "One passenger", "More passengers", "Actions")
+    val headerItems = listOf(
+        stringResource(R.string.name),
+        stringResource(R.string.one_passenger),
+        stringResource(R.string.more_passengers),
+        stringResource(R.string.actions)
+    )
 
     NamiokaiBottomSheet(
-        title = "Trip destinations",
+        title = stringResource(R.string.trip_destinations),
         onDismiss = onDismiss,
         bottomSheetState = bottomSheetState
     ) {
@@ -495,7 +507,7 @@ private fun TripDestinationsBottomSheet(
             onClick = {
                 addDestinationDialogState.value = true
             }) {
-            Text(text = "Add new destination")
+            Text(text = stringResource(R.string.add_new_destination))
         }
     }
 
@@ -517,6 +529,7 @@ fun AddDestinationDialog(
     onDestinationSave: (Destination) -> Unit
 ) {
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
     val destination = remember { mutableStateOf(Destination()) }
 
     val onSaveClick = onSaveClick@{
@@ -524,7 +537,7 @@ fun AddDestinationDialog(
             scope.launch {
                 SnackbarController.sendEvent(
                     event = SnackbarEvent(
-                        message = "Please fill in all fields",
+                        message = context.getString(R.string.please_fill_in_all_fields),
                     )
                 )
             }
@@ -537,7 +550,7 @@ fun AddDestinationDialog(
     }
 
     NamiokaiDialog(
-        title = "Add new destination",
+        title = stringResource(R.string.add_new_destination),
         onSaveClick = onSaveClick,
         onDismiss = onDismiss
     ) {
@@ -547,7 +560,7 @@ fun AddDestinationDialog(
                 .padding(horizontal = 16.dp)
         ) {
             NamiokaiTextField(
-                label = "Name",
+                label = stringResource(R.string.name),
                 onValueChange = { destination.value.name = it },
                 leadingIcon = {
                     Icon(
@@ -562,7 +575,7 @@ fun AddDestinationDialog(
             Spacer(modifier = Modifier.height(20.dp))
 
             NamiokaiNumberField(
-                label = "Trip price alone",
+                label = stringResource(R.string.trip_price_alone),
                 initialTextFieldValue = destination.value.tripPriceAlone.toString(),
                 onValueChange = { destination.value.tripPriceAlone = it },
                 leadingIcon = {
@@ -578,7 +591,7 @@ fun AddDestinationDialog(
             Spacer(modifier = Modifier.height(20.dp))
 
             NamiokaiNumberField(
-                label = "Trip price with others",
+                label = stringResource(R.string.trip_price_with_others),
                 initialTextFieldValue = destination.value.tripPriceWithOthers.toString(),
                 onValueChange = { destination.value.tripPriceWithOthers = it },
                 leadingIcon = {

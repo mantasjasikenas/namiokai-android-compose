@@ -1,7 +1,24 @@
 <resources>
     <string name="no_data_available">No data available</string>
-    <string name="display_name">Display name</string>
-    <string name="email">Email</string>
-    <string name="photo">Photo</string>
-    <string name="uid">Uid</string>
+    <string name="reset">Reset</string>
+    <string name="cancel">Cancel</string>
+    <string name="save">Save</string>
+    <string name="edit">Edit</string>
+    <string name="delete">Delete</string>
+    <string name="are_you_sure">Are you sure?</string>
+    <string name="this_action_cannot_be_undone">This action cannot be undone</string>
+    <string name="confirm">Confirm</string>
+    <string name="ok">OK</string>
+    <string name="whoops">Whoops!</string>
+    <string name="bug_report">Bug Report</string>
+    <string name="feature_request">Feature Request</string>
+    <string name="other">Other</string>
+    <string name="type">Type</string>
+    <string name="please_fill_in_all_fields">Please fill in all fields</string>
+    <string name="issue_type">Issue type</string>
+    <string name="description">Description</string>
+    <string name="detailed_description">Detailed description</string>
+    <string name="decrease">Decrease</string>
+    <string name="increase">Increase</string>
+    <string name="two_values_is">%1$s is %2$s</string>
 </resources>

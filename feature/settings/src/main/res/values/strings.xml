@@ -25,4 +25,12 @@
     <string name="feature_settings_mode">Mode</string>
     <string name="feature_settings_general">General</string>
     <string name="feature_settings_language">Language</string>
+    <string name="uploading_image">Uploading image…</string>
+    <string name="image_uploaded_successfully">Image uploaded successfully</string>
+    <string name="image_upload_failed">Image upload failed</string>
+    <string name="updating_name">Updating name…</string>
+    <string name="name_changed_successfully">Name changed successfully</string>
+    <string name="name_change_failed">Name change failed</string>
+    <string name="name_cannot_be_blank">Name cannot be blank</string>
+    <string name="name_is_the_same_as_before">Name is the same as before</string>
 </resources>

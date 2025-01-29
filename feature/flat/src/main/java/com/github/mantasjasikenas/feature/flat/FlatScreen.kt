@@ -45,6 +45,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.takeOrElse
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -104,7 +105,7 @@ fun FlatScreen(
     }
 
     if (flatUiState.flatBills.isEmpty()) {
-        NoResultsFound(label = "No flat bills found.")
+        NoResultsFound(label = stringResource(R.string.no_flat_bills_found))
         return
     }
 
@@ -206,7 +207,7 @@ fun LatestBillCard(
 ) {
     ElevatedCardContainer(
         modifier = modifier,
-        title = "Latest bill"
+        title = stringResource(R.string.latest_bill)
     ) {
         Column {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -288,7 +289,7 @@ fun LatestTwoBillsComparisonCard(
 
     ElevatedCardContainer(
         modifier = modifier,
-        title = "Last two bills comparison",
+        title = stringResource(R.string.last_two_bills_comparison),
     ) {
         Column(
             modifier = Modifier.fillMaxWidth(),
@@ -333,16 +334,16 @@ fun ElectricitySummaryContainer(
     electricitySummary: ElectricitySummary,
 ) {
     val fields = listOf(
-        "Average" to electricitySummary.averageDifference,
-        "Minimum" to electricitySummary.minDifference,
-        "Maximum" to electricitySummary.maxDifference
+        stringResource(R.string.average) to electricitySummary.averageDifference,
+        stringResource(R.string.minimum) to electricitySummary.minDifference,
+        stringResource(R.string.maximum) to electricitySummary.maxDifference
     )
 
     val expanded = remember { mutableStateOf(false) }
 
     ElevatedCardContainer(
         modifier = modifier,
-        title = "Electricity consumption",
+        title = stringResource(R.string.electricity_consumption),
     ) {
         Column {
             fields.forEach { (label, value) ->
@@ -413,7 +414,7 @@ fun ElectricitySummaryContainer(
 
             }
             Text(
-                text = if (expanded.value) "Show less" else "Show more",
+                text = if (expanded.value) stringResource(R.string.show_less) else stringResource(R.string.show_more),
                 modifier = Modifier
                     .padding(top = 8.dp)
                     .fillMaxWidth()
@@ -453,7 +454,7 @@ fun FlatBillSummary(
 
     ElevatedCardContainer(
         modifier = modifier,
-        title = "Flat bills",
+        title = stringResource(R.string.flat_bills),
     ) {
         Column {
             visibleBills.forEach { flatBill ->
@@ -473,7 +474,7 @@ fun FlatBillSummary(
         }
 
         Text(
-            text = "See all",
+            text = stringResource(R.string.see_all),
             modifier = Modifier
                 .padding(top = 8.dp)
                 .fillMaxWidth()
@@ -561,8 +562,8 @@ internal fun FlatStatisticsContainer(
 
     var selectedIndex by remember { mutableIntStateOf(0) }
     val options = listOf(
-        "Total",
-        "Split",
+        stringResource(R.string.total),
+        stringResource(R.string.split),
     )
     var data by remember {
         mutableStateOf(
@@ -574,11 +575,11 @@ internal fun FlatStatisticsContainer(
     }
 
     val selectedRecordFields = listOf(
-        "Date" to (selectedRecord?.date?.split("T")?.firstOrNull() ?: "-"),
-        "Rent" to "${(selectedRecord?.rentTotal ?: 0.0).format(2)}€",
-        "Taxes" to "${(selectedRecord?.taxesTotal ?: 0.0).format(2)}€",
-        "Total" to "${(selectedRecord?.total ?: 0.0).format(2)}€",
-        "Split" to "${(selectedRecord?.splitPricePerUser() ?: 0.0).format(2)}€",
+        stringResource(R.string.date) to (selectedRecord?.date?.split("T")?.firstOrNull() ?: "-"),
+        stringResource(R.string.rent) to "${(selectedRecord?.rentTotal ?: 0.0).format(2)}€",
+        stringResource(R.string.taxes) to "${(selectedRecord?.taxesTotal ?: 0.0).format(2)}€",
+        stringResource(R.string.total) to "${(selectedRecord?.total ?: 0.0).format(2)}€",
+        stringResource(R.string.split) to "${(selectedRecord?.splitPricePerUser() ?: 0.0).format(2)}€",
     )
 
     ElevatedCardContainer(
@@ -686,9 +687,11 @@ internal fun ElectricityStatisticsContainer(
     }
 
     val statisticsFields = listOf(
-        "Start date" to (selectedRecord?.firstBillDate?.split("T")?.firstOrNull() ?: "-"),
-        "End date" to (selectedRecord?.secondBillDate?.split("T")?.firstOrNull() ?: "-"),
-        "Amount" to (selectedRecord?.difference ?: 0.0).format(2),
+        stringResource(R.string.start_date) to (selectedRecord?.firstBillDate?.split("T")
+            ?.firstOrNull() ?: "-"),
+        stringResource(R.string.end_date) to (selectedRecord?.secondBillDate?.split("T")
+            ?.firstOrNull() ?: "-"),
+        stringResource(R.string.amount) to (selectedRecord?.difference ?: 0.0).format(2),
     )
 
     ElevatedCardContainer(
@@ -701,7 +704,7 @@ internal fun ElectricityStatisticsContainer(
                 value = value.format(2),
                 labelTextStyle = MaterialTheme.typography.labelMedium,
                 valueTextStyle = MaterialTheme.typography.labelMedium,
-                endContent = if (label == "Amount") {
+                endContent = if (label == stringResource(R.string.amount)) {
                     {
                         Text(
                             text = "kWh",
@@ -745,7 +748,7 @@ private fun FlatBillsChartContainer(
     }
 
     ElevatedCardContainer(
-        title = "Flat bills chart",
+        title = stringResource(R.string.flat_bills_chart),
     ) {
         FlatBillsChart(
             modifier = Modifier.fillMaxWidth(),
@@ -765,7 +768,7 @@ private fun ElectricityChartContainer(
     }
 
     ElevatedCardContainer(
-        title = "Electricity consumption",
+        title = stringResource(R.string.electricity_consumption),
     ) {
         ElectricityChart(
             modifier = Modifier.fillMaxWidth(),

@@ -19,6 +19,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -68,7 +69,7 @@ fun TripBillScreen(
     }
 
     if (fuelUiState.tripBills.isEmpty()) {
-        NoResultsFound(label = "No trips found.")
+        NoResultsFound(label = stringResource(R.string.no_trips_found))
         return
     }
 
@@ -128,7 +129,7 @@ fun TripBillScreenContent(
                 item {
                     NoResultsFound(
                         modifier = Modifier.padding(top = 30.dp),
-                        label = "No results found."
+                        label = stringResource(R.string.no_results_found)
                     )
                 }
             } else {
@@ -229,14 +230,14 @@ private fun TripBillFiltersRow(
         fuelUiState.filters.ifEmpty {
             mutableStateListOf<Filter<TripBill, *>>(
                 Filter(
-                    displayLabel = "Driver",
+                    displayLabelResId = R.string.driver,
                     filterName = "driver",
                     displayValue = { it.displayName },
                     values = users,
                     predicate = { bill, user -> bill.paymasterUid == user.uid }
                 ),
                 Filter(
-                    displayLabel = "Passengers",
+                    displayLabelResId = R.string.passengers,
                     filterName = "passengers",
                     displayValue = { it.displayName },
                     values = users,

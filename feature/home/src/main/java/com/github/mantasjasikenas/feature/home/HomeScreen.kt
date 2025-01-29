@@ -24,6 +24,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -133,7 +134,7 @@ private fun Widgets(
             ) {
                 WidgetCard(
                     modifier = borderModifier,
-                    label = "Your spaces",
+                    label = stringResource(R.string.your_spaces),
                     onClick = {
                         onNavigateToSpaceScreen()
                     }
@@ -151,14 +152,14 @@ private fun Widgets(
                 span = StaggeredGridItemSpan.FullLine
             ) {
                 WidgetCard(
-                    label = "Create a space",
+                    label = stringResource(R.string.create_a_space),
                     modifier = borderModifier,
                     onClick = {
                         onNavigateToSpace(null)
                     }
                 ) {
                     Text(
-                        text = "Tap to create a space. Spaces are required to start tracking expenses.",
+                        text = stringResource(R.string.tap_to_create_a_space),
                         style = MaterialTheme.typography.bodySmall
                     )
                 }
@@ -177,11 +178,11 @@ private fun Widgets(
                 onClick = { onNavigateToSpace(space) }
             ) {
                 TextLine(
-                    leadingText = "Members",
+                    leadingText = stringResource(R.string.members),
                     trailingText = space.memberIds.size.toString()
                 )
                 TextLine(
-                    leadingText = "Destinations",
+                    leadingText = stringResource(R.string.destinations),
                     trailingText = space.destinations.size.toString()
                 )
 
@@ -189,25 +190,28 @@ private fun Widgets(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 8.dp),
-                    text = "Current period",
+                    text = stringResource(R.string.current_period),
                     textAlign = TextAlign.Center,
                     fontWeight = FontWeight.Bold,
                     style = MaterialTheme.typography.bodySmall,
                 )
 
                 TextLine(
-                    leadingText = "Start",
+                    leadingText = stringResource(R.string.start),
                     trailingText = "${period.start}"
                 )
 
                 TextLine(
-                    leadingText = "End",
+                    leadingText = stringResource(R.string.end),
                     trailingText = "${period.end}"
                 )
 
                 TextLine(
-                    leadingText = "Ends in",
-                    trailingText = "${currentLocalDate().daysUntil(period.end)} days"
+                    leadingText = stringResource(R.string.ends_in),
+                    trailingText = stringResource(
+                        R.string.days_until,
+                        currentLocalDate().daysUntil(period.end)
+                    )
                 )
             }
         }
@@ -321,10 +325,10 @@ private fun WelcomeCard(
         .toLocalDateTime(TimeZone.currentSystemDefault()).hour
 
     val greeting = when (currentHour) {
-        in 5..11 -> "Good morning"
-        in 12..16 -> "Good afternoon"
-        in 17..23, in 0..4 -> "Good evening"
-        else -> "Hello"
+        in 5..11 -> stringResource(R.string.good_morning)
+        in 12..16 -> stringResource(R.string.good_afternoon)
+        in 17..23, in 0..4 -> stringResource(R.string.good_evening)
+        else -> stringResource(R.string.hello)
     }
 
     WidgetCard(

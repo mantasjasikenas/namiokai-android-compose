@@ -19,9 +19,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.github.mantasjasikenas.core.common.util.Constants.EMAIL_ADDRESS
+import com.github.mantasjasikenas.core.ui.R
 import com.github.mantasjasikenas.core.ui.common.NamiokaiSpacer
 import com.github.mantasjasikenas.core.ui.common.rememberState
 
@@ -73,11 +75,11 @@ fun ReportBugDialog(
     var bugDetails by rememberState { "" }
 
     val items = listOf(
-        "Bug Report",
-        "Feature Request",
-        "Other",
+        stringResource(R.string.bug_report),
+        stringResource(R.string.feature_request),
+        stringResource(R.string.other),
     )
-    var selectedType by remember { mutableStateOf("Type") }
+    var selectedType by remember { mutableStateOf("") }
 
     NamiokaiDialog(
         title = "Report issue",
@@ -85,7 +87,7 @@ fun ReportBugDialog(
             if (bugTopic.isEmpty() || bugDetails.isEmpty() || !items.contains(selectedType)) {
                 Toast.makeText(
                     context,
-                    "Please fill in all fields",
+                    context.getString(R.string.please_fill_in_all_fields),
                     Toast.LENGTH_SHORT
                 )
                     .show()
@@ -105,14 +107,14 @@ fun ReportBugDialog(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(
-                text = "Issue type",
+                text = stringResource(R.string.issue_type),
                 style = MaterialTheme.typography.titleSmall,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(bottom = 7.dp)
             )
 
             NamiokaiDropdownMenu(
-                label = "Issue type",
+                label = stringResource(R.string.issue_type),
                 items = items,
                 onItemSelected = {
                     selectedType = it
@@ -124,27 +126,27 @@ fun ReportBugDialog(
             NamiokaiSpacer(height = 16)
 
             Text(
-                text = "Type",
+                text = stringResource(R.string.type),
                 style = MaterialTheme.typography.titleSmall,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(bottom = 7.dp)
             )
             NamiokaiTextField(
                 modifier = Modifier,
-                label = "Title",
+                label = stringResource(R.string.type),
                 onValueChange = { bugTopic = it },
             )
 
             NamiokaiSpacer(height = 16)
 
             Text(
-                text = "Description",
+                text = stringResource(R.string.description),
                 style = MaterialTheme.typography.titleSmall,
                 textAlign = TextAlign.Center,
             )
             NamiokaiTextArea(
                 modifier = Modifier.height(150.dp),
-                label = "Detailed description",
+                label = stringResource(R.string.detailed_description),
                 onValueChange = { bugDetails = it },
             )
         }

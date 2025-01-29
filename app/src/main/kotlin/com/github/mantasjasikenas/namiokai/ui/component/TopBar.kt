@@ -190,7 +190,7 @@ private fun TopBarDropdownMenu(
                 )
             })
         DropdownMenuItem(
-            text = { Text(text = "New issue") },
+            text = { Text(text = stringResource(R.string.new_issue)) },
             onClick = {
                 reportBugDialog = true
                 expanded = false

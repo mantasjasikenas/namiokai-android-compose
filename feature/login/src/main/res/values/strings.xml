@@ -3,4 +3,7 @@
     <string name="sign_in_failed">Sign in failed</string>
     <string name="welcome">Welcome, %1$s</string>
     <string name="sign_in_with_google">Sign in with Google</string>
+    <string name="sign_in_to_continue">Sign in to continue</string>
+    <string name="namiokai_corporation">Namiokai Corporation</string>
+    <string name="all_rights_reserved">All rights reserved</string>
 </resources>

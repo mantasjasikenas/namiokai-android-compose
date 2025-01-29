@@ -25,6 +25,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -70,7 +71,7 @@ fun FlatBillListPage(
     }
 
     if (flatUiState.flatBills.isEmpty()) {
-        NoResultsFound(label = "No flat bills found.")
+        NoResultsFound(label = stringResource(id = R.string.no_flat_bills_found))
         return
     }
 
@@ -129,7 +130,7 @@ fun FlatBillScreenContent(
                 item {
                     NoResultsFound(
                         modifier = Modifier.padding(top = 30.dp),
-                        label = "No results found."
+                        label = stringResource(R.string.no_results_found)
                     )
                 }
             } else {
@@ -190,21 +191,21 @@ private fun FlatBillFiltersRow(
         flatUiState.filters.ifEmpty {
             mutableStateListOf<Filter<FlatBill, *>>(
                 Filter(
-                    displayLabel = "Paymaster",
+                    displayLabelResId = R.string.paymaster,
                     filterName = "paymaster",
                     displayValue = { it.displayName },
                     values = users,
                     predicate = { bill, user -> bill.paymasterUid == user.uid }
                 ),
                 Filter(
-                    displayLabel = "Splitter",
+                    displayLabelResId = R.string.splitter,
                     filterName = "splitter",
                     displayValue = { it.displayName },
                     values = users,
                     predicate = { bill, user -> bill.splitUsersUid.contains(user.uid) }
                 ),
                 Filter(
-                    displayLabel = "Space",
+                    displayLabelResId = R.string.space,
                     displayValue = { it.spaceName },
                     filterName = "space",
                     values = flatUiState.spaces,

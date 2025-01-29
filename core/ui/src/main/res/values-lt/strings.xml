@@ -1,0 +1,24 @@
+<resources>
+    <string name="no_data_available">Nėra duomenų</string>
+    <string name="reset">Atstatyti</string>
+    <string name="cancel">Atšaukti</string>
+    <string name="save">Išsaugoti</string>
+    <string name="edit">Redaguoti</string>
+    <string name="delete">Ištrinti</string>
+    <string name="are_you_sure">Ar esate tikri?</string>
+    <string name="this_action_cannot_be_undone">Šio veiksmo negalima atšaukti</string>
+    <string name="confirm">Patvirtinti</string>
+    <string name="ok">Gerai</string>
+    <string name="whoops">Oi!</string>
+    <string name="bug_report">Klaidos pranešimas</string>
+    <string name="feature_request">Funkcijos užklausa</string>
+    <string name="other">Kita</string>
+    <string name="type">Tipas</string>
+    <string name="please_fill_in_all_fields">Prašome užpildyti visus laukus</string>
+    <string name="issue_type">Problemos tipas</string>
+    <string name="description">Aprašymas</string>
+    <string name="detailed_description">Išsamus aprašymas</string>
+    <string name="decrease">Sumažinti</string>
+    <string name="increase">Padidinti</string>
+    <string name="two_values_is">%1$s yra %2$s</string>
+</resources>

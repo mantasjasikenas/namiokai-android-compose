@@ -25,4 +25,13 @@
     <string name="feature_settings_mode">Režimas</string>
     <string name="feature_settings_general">Bendrieji</string>
     <string name="feature_settings_language">Kalba</string>
+    <string name="uploading_image">Įkeliama nuotrauka…</string>
+    <string name="image_uploaded_successfully">Nuotrauka sėkmingai įkelta</string>
+    <string name="image_upload_failed">Nuotraukos įkėlimas nepavyko</string>
+    <string name="updating_name">Atnaujinamas vardas…</string>
+    <string name="name_changed_successfully">Vardas sėkmingai pakeistas</string>
+    <string name="name_change_failed">Vardo pakeitimas nepavyko</string>
+    <string name="name_cannot_be_blank">Vardas negali būti tuščias</string>
+    <string name="name_is_the_same_as_before">Vardas yra toks pat kaip anksčiau</string>
+
 </resources>

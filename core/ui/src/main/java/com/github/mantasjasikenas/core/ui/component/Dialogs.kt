@@ -16,9 +16,11 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import com.github.mantasjasikenas.core.ui.R
 
 @Composable
 fun NamiokaiConfirmDialog(
@@ -27,19 +29,19 @@ fun NamiokaiConfirmDialog(
 ) {
     AlertDialog(onDismissRequest = onDismiss,
         title = {
-            Text(text = "Are you sure?")
+            Text(text = stringResource(R.string.are_you_sure))
         },
         text = {
-            Text(text = "This action cannot be undone")
+            Text(text = stringResource(R.string.this_action_cannot_be_undone))
         },
         confirmButton = {
             TextButton(onClick = onConfirm) {
-                Text(text = "Confirm")
+                Text(text = stringResource(R.string.confirm))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text(text = "Cancel")
+                Text(text = stringResource(R.string.cancel))
             }
         })
 }
@@ -111,11 +113,11 @@ fun <T> NamiokaiDialog(
                         TextButton(
                             onClick = onDismiss
                         ) {
-                            Text(text = "Cancel")
+                            Text(text = stringResource(R.string.cancel))
                         }
                         Spacer(modifier = Modifier.width(10.dp))
                         TextButton(onClick = { onSaveClick(selectedValue) }) {
-                            Text(text = "OK")
+                            Text(text = stringResource(R.string.ok))
                         }
                     }
                 }

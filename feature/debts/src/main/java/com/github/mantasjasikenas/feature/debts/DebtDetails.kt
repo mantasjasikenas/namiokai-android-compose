@@ -32,7 +32,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -64,14 +64,14 @@ internal fun DebtsDetailsSheet(
     expandAll: MutableState<Boolean>
 ) {
     NamiokaiBottomSheet(
-        title = "Debts details",
+        title = stringResource(R.string.debts_details),
         onDismiss = { expandedState.value = false },
         bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     ) {
         Column {
             if (userDebts.isEmpty()) {
                 Text(
-                    text = "No debts",
+                    text = stringResource(R.string.no_debts),
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.Bold,
@@ -120,8 +120,6 @@ private fun ExpandableDebtDetailsRow(
     value: Double,
     debtBills: List<DebtBill>
 ) {
-    val clipboardManager = LocalClipboardManager.current
-
     ExpandableSection(
         initialExpandState = expandAll.value,
         header = {
@@ -197,7 +195,7 @@ private fun DebtsDetailsHeader(
                     append(displayName)
                 }
                 withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary)) {
-                    append(" owes")
+                    append(stringResource(R.string.owes))
                 }
             }
 
@@ -238,7 +236,7 @@ private fun DebtsDetailsFooter(
     ) {
         EuroIconTextRow(
             modifier = Modifier.padding(8.dp),
-            label = "Total",
+            label = stringResource(R.string.total),
             value = totalDebt.format(2),
             labelTextStyle = MaterialTheme.typography.titleMedium,
         )
@@ -273,10 +271,11 @@ private fun ExpandableSection(
     }
 }
 
+@Composable
 private fun Bill.getBillDescription(): String {
     return when (this) {
         is TripBill -> {
-            "Trip to $tripDestination"
+            stringResource(R.string.trip_to, tripDestination)
         }
 
         is PurchaseBill -> {
@@ -284,11 +283,11 @@ private fun Bill.getBillDescription(): String {
         }
 
         is FlatBill -> {
-            date.parseLocalDateTime()?.format() ?: "Flat bill"
+            date.parseLocalDateTime()?.format() ?: stringResource(R.string.flat_bill)
         }
 
         else -> {
-            "Bill"
+            stringResource(R.string.bill)
         }
     }
 }

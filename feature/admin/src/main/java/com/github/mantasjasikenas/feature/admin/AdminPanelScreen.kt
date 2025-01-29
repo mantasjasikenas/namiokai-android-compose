@@ -12,6 +12,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.github.mantasjasikenas.core.common.util.SnackbarController
@@ -76,11 +78,11 @@ private fun GenericSettingsGroup(
 ) {
     SettingsGroupSpacer()
 
-    SettingsEntryGroupText(title = "Generic")
+    SettingsEntryGroupText(title = stringResource(R.string.generic))
 
     SwitchSettingEntry(
-        title = "Advanced mode",
-        text = "Toggles advanced mode",
+        title = stringResource(R.string.advanced_mode),
+        text = stringResource(R.string.toggles_advanced_mode),
         isChecked = advancedMode,
         onCheckedChange = { setAdvancedMode(!advancedMode) })
 }
@@ -88,22 +90,24 @@ private fun GenericSettingsGroup(
 @Composable
 private fun DatabaseSettingsGroup(viewModel: AdminPanelViewModel) {
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+
     val (assignSpaceToBillDialog, setAssignSpaceToBillDialog) = remember { mutableStateOf(false) }
 
     SettingsGroupSpacer()
 
-    SettingsEntryGroupText(title = "Database")
+    SettingsEntryGroupText(title = stringResource(R.string.database))
 
     SettingsEntry(
-        title = "Backup database",
-        text = "Backup database to Firebase storage",
+        title = stringResource(R.string.backup_database),
+        text = stringResource(R.string.backup_database_to_firebase_storage),
         confirmClick = true,
         onClick = { viewModel.backupDatabase() })
 
     // assign space to bill
     SettingsEntry(
-        title = "Assign space to bill",
-        text = "Assign space to bill",
+        title = stringResource(R.string.assign_space_to_bill),
+        text = stringResource(R.string.assign_space_to_bill),
         confirmClick = false,
         onClick = { setAssignSpaceToBillDialog(true) })
 
@@ -114,7 +118,7 @@ private fun DatabaseSettingsGroup(viewModel: AdminPanelViewModel) {
                     scope.launch {
                         SnackbarController.sendEvent(
                             SnackbarEvent(
-                                message = "Space ID cannot be empty",
+                                message = context.getString(R.string.space_id_cannot_be_empty),
                             )
                         )
                     }
@@ -135,35 +139,35 @@ private fun DatabaseSettingsGroup(viewModel: AdminPanelViewModel) {
 private fun ClearDatabaseSettingsGroup(viewModel: AdminPanelViewModel) {
     SettingsGroupSpacer()
 
-    SettingsEntryGroupText(title = "Clear database")
+    SettingsEntryGroupText(title = stringResource(R.string.clear_database))
 
     SettingsEntry(
-        title = "Clear bills",
-        text = "Clear purchase, trip and flat bills from database",
+        title = stringResource(R.string.clear_bills),
+        text = stringResource(R.string.clear_purchase_trip_and_flat_bills_from_database),
         confirmClick = true,
         onClick = { viewModel.clearBills() })
 
     SettingsEntry(
-        title = "Clear purchase bills",
-        text = "Clear all bills from database",
+        title = stringResource(R.string.clear_purchase_bills),
+        text = stringResource(R.string.clear_all_bills_from_database),
         confirmClick = true,
         onClick = { viewModel.clearPurchaseBills() })
 
     SettingsEntry(
-        title = "Clear fuel",
-        text = "Clear all fuel from database",
+        title = stringResource(R.string.clear_fuel),
+        text = stringResource(R.string.clear_all_fuel_from_database),
         confirmClick = true,
         onClick = { viewModel.clearFuel() })
 
     SettingsEntry(
-        title = "Clear flat bills",
-        text = "Clear all flat bills from database",
+        title = stringResource(R.string.clear_flat_bills),
+        text = stringResource(R.string.clear_all_flat_bills_from_database),
         confirmClick = true,
         onClick = { viewModel.clearFlatBills() })
 
     SettingsEntry(
-        title = "Clear users",
-        text = "Clear all users from database",
+        title = stringResource(R.string.clear_users),
+        text = stringResource(R.string.clear_all_users_from_database),
         confirmClick = true,
         onClick = { viewModel.clearUsers() })
 }
@@ -172,11 +176,11 @@ private fun ClearDatabaseSettingsGroup(viewModel: AdminPanelViewModel) {
 private fun UsersSettingsGroup(viewModel: AdminPanelViewModel) {
     SettingsGroupSpacer()
 
-    SettingsEntryGroupText(title = "Users")
+    SettingsEntryGroupText(title = stringResource(R.string.users))
 
     SettingsEntry(
-        title = "Add user",
-        text = "Add empty user to database",
+        title = stringResource(R.string.add_user),
+        text = stringResource(R.string.add_empty_user_to_database),
         confirmClick = true,
         onClick = {
             viewModel.addUser()
@@ -187,23 +191,23 @@ private fun UsersSettingsGroup(viewModel: AdminPanelViewModel) {
 private fun ImportSettingsGroup(viewModel: AdminPanelViewModel) {
     SettingsGroupSpacer()
 
-    SettingsEntryGroupText(title = "Import")
+    SettingsEntryGroupText(title = stringResource(R.string.import_label))
 
     SettingsEntry(
-        title = "Import bills",
-        text = "Import bills from Firebase storage",
+        title = stringResource(R.string.import_bills),
+        text = stringResource(R.string.import_bills_from_firebase_storage),
         confirmClick = true,
         onClick = { viewModel.importBills() })
 
     SettingsEntry(
-        title = "Import fuel",
-        text = "Import fuel from Firebase storage",
+        title = stringResource(R.string.import_fuel),
+        text = stringResource(R.string.import_fuel_from_firebase_storage),
         confirmClick = true,
         onClick = { viewModel.importFuel() })
 
     SettingsEntry(
-        title = "Import users",
-        text = "Import users from Firebase storage",
+        title = stringResource(R.string.import_users),
+        text = stringResource(R.string.import_users_from_firebase_storage),
         confirmClick = true,
         onClick = { viewModel.importUsers() })
 }
@@ -216,7 +220,7 @@ private fun AssignSpaceToBillDialog(
     val spaceId = remember { mutableStateOf("") }
 
     NamiokaiDialog(
-        title = "Assign space to bill",
+        title = stringResource(R.string.assign_space_to_bill),
         selectedValue = spaceId.value,
         onSaveClick = onSaveClick,
         onDismiss = onDismiss
@@ -226,7 +230,7 @@ private fun AssignSpaceToBillDialog(
                 vertical = 10.dp,
                 horizontal = 30.dp
             ),
-            label = "Space ID",
+            label = stringResource(R.string.space_id),
             onValueChange = { spaceId.value = it })
     }
 }

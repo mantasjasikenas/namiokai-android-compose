@@ -28,12 +28,14 @@ import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.github.keelar.exprk.Expressions
 import com.github.mantasjasikenas.core.common.util.format
+import com.github.mantasjasikenas.core.ui.R
 import com.github.mantasjasikenas.core.ui.common.rememberState
 
 @Composable
@@ -174,7 +176,7 @@ fun NamiokaiNumberField(
             number.takeIf { it == 0.0 }
                 ?.let {
                     Text(text = label)
-                } ?: Text(text = "$label is ${number.format(2)}")
+                } ?: Text(text = stringResource(R.string.two_values_is, label, number.format(2)))
         },
         keyboardOptions = KeyboardOptions(
             imeAction = ImeAction.Next,

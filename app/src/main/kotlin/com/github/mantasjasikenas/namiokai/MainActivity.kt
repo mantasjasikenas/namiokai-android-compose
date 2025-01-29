@@ -115,7 +115,7 @@ class MainActivity : AppCompatActivity(), AnalyticsLogger by AnalyticsLoggerImpl
         if (state.installStatus() == InstallStatus.DOWNLOADED) {
             Toast.makeText(
                 applicationContext,
-                "Download successful. Restarting app in 5 seconds.",
+                getString(R.string.download_successful),
                 Toast.LENGTH_LONG
             )
                 .show()

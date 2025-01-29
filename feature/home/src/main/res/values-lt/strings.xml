@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="your_spaces">Jūsų erdvės</string>
+    <string name="create_a_space">Sukurti erdvę</string>
+    <string name="tap_to_create_a_space">Bakstelėkite, kad sukurtumėte erdvę. Erdvės reikalingos išlaidų sekimui pradėti.</string>
+    <string name="members">Nariai</string>
+    <string name="destinations">Paskirties vietos</string>
+    <string name="current_period">Dabartinis laikotarpis</string>
+    <string name="start">Pradžia</string>
+    <string name="end">Pabaiga</string>
+    <string name="ends_in">Baigiasi po</string>
+    <string name="days_until">%1$s dienos</string>
+    <string name="good_morning">Labas rytas</string>
+    <string name="good_afternoon">Laba diena</string>
+    <string name="good_evening">Labas vakaras</string>
+    <string name="hello">Sveiki</string>
+</resources>
