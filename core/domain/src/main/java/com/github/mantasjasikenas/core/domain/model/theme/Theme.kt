@@ -1,15 +1,17 @@
 package com.github.mantasjasikenas.core.domain.model.theme
 
+import androidx.annotation.StringRes
+import com.github.mantasjasikenas.core.domain.R
+
 enum class Theme(
-    val title: String,
+    @StringRes val titleResId: Int,
 ) {
-    DEFAULT("Default"),
-    DYNAMIC("Dynamic"),
-    CUSTOM("Custom"),
-    AMOLED("Amoled");
+    DEFAULT(R.string.theme_default),
+    DYNAMIC(R.string.theme_dynamic),
+    CUSTOM(R.string.theme_custom),
+    AMOLED(R.string.theme_amoled);
 
     companion object {
-
         val darkColorThemes = listOf(
             DEFAULT,
             DYNAMIC,
@@ -22,10 +24,5 @@ enum class Theme(
             DYNAMIC,
             CUSTOM,
         )
-
-        fun valueOfOrDefault(
-            value: String,
-            defaultValue: Theme = DEFAULT
-        ) = entries.find { it.title == value || it.name == value } ?: defaultValue
     }
 }

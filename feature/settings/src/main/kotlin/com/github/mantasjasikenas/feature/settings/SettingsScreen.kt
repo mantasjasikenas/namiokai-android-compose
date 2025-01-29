@@ -40,6 +40,7 @@ import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -50,12 +51,14 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.github.mantasjasikenas.core.common.localization.Language
 import com.github.mantasjasikenas.core.common.util.Constants
 import com.github.mantasjasikenas.core.common.util.toHex
 import com.github.mantasjasikenas.core.database.AccentColor
@@ -106,9 +109,9 @@ fun SettingsScreen(
                 onImageAddToStorage = viewModel::addImageToStorage,
                 onUpdateDisplayName = viewModel::updateDisplayName,
                 validateNewDisplayName = viewModel::validateDisplayName,
-                onLogoutClick = {
-                    viewModel.logout()
-                },
+                onLogoutClick = viewModel::logout,
+                currentLanguageIso = viewModel.currentLanguageIso,
+                onLanguageUpdate = viewModel::updateLanguage
             )
         }
     }
@@ -125,6 +128,8 @@ private fun SettingsScreen(
     onUpdateDisplayName: (String) -> Unit,
     validateNewDisplayName: (String) -> Boolean,
     onLogoutClick: () -> Unit,
+    currentLanguageIso: String,
+    onLanguageUpdate: (String) -> Unit
 ) {
 
     Column(
@@ -134,6 +139,11 @@ private fun SettingsScreen(
             .padding()
     ) {
         SettingsGroupSpacer()
+
+        GeneralSettingsGroup(
+            currentLanguageIso = currentLanguageIso,
+            onLanguageUpdate = onLanguageUpdate
+        )
 
         AppearanceSettingsGroup(
             themePreferences = uiState.userData.themePreferences,
@@ -172,28 +182,31 @@ private fun ProfileSettingsGroup(
 
     AnimatedVisibility(visible = currentUser.uid.isNotEmpty()) {
         Column {
-            SettingsEntryGroupText(title = "Profile")
+            SettingsEntryGroupText(title = stringResource(R.string.feature_settings_profile_group_title))
             SettingsEntry(
-                title = "Change profile picture",
-                text = "Update your profile picture",
+                title = stringResource(R.string.feature_settings_change_profile_picture),
+                text = stringResource(R.string.feature_settings_update_your_profile_picture),
                 onClick = {
                     galleryLauncher.launch(Constants.IMAGES_TYPE)
                 })
             SettingsEntry(
-                title = "Change display name",
-                text = "Update display name",
+                title = stringResource(R.string.feature_settings_change_display_name),
+                text = stringResource(R.string.feature_settings_update_display_name),
                 onClick = {
                     setUpdateNameDialogState(true)
                 })
             SettingsGroupSpacer()
-            SettingsEntryGroupText(title = "Account")
+            SettingsEntryGroupText(title = stringResource(R.string.feature_settings_account))
             SettingsEntry(
-                title = "Email",
-                text = currentUser.email.ifEmpty { "Not logged in" },
+                title = stringResource(R.string.feature_settings_email),
+                text = currentUser.email.ifEmpty { stringResource(R.string.feature_settings_not_logged_in) },
                 onClick = { })
             SettingsEntry(
-                title = "Log out",
-                text = "You are logged in as ${currentUser.displayName}",
+                title = stringResource(R.string.feature_settings_log_out),
+                text = stringResource(
+                    R.string.feature_settings_you_are_logged_in_as,
+                    currentUser.displayName
+                ),
                 onClick = onLogoutClick
             )
         }
@@ -214,6 +227,49 @@ private fun ProfileSettingsGroup(
             },
             onDismiss = { setUpdateNameDialogState(false) })
     }
+}
+
+@Composable
+private fun ColumnScope.GeneralSettingsGroup(
+    currentLanguageIso: String,
+    onLanguageUpdate: (String) -> Unit
+) {
+    val languages = Language.entries.toList()
+    var selectedLanguageIndex by remember {
+        mutableIntStateOf(
+            languages.indexOfFirst { it.iso == currentLanguageIso }.coerceAtLeast(0)
+        )
+    }
+
+    SettingsEntryGroupText(title = stringResource(R.string.feature_settings_general))
+
+    Column(
+        modifier = Modifier.padding(
+            horizontal = 32.dp,
+            vertical = 16.dp
+        )
+    ) {
+        Text(
+            modifier = Modifier.padding(bottom = 8.dp),
+            text = stringResource(R.string.feature_settings_language),
+            style = typography.titleMedium,
+        )
+
+        FancyIndicatorTabs(
+            values = languages,
+            selectedIndex = selectedLanguageIndex,
+            onValueChange = { index ->
+                selectedLanguageIndex = index
+
+                onLanguageUpdate(
+                    languages.getOrNull(index)?.iso ?: Language.English.iso
+                )
+            },
+            textForValue = { stringResource(it.titleResourceId) }
+        )
+    }
+
+    SettingsGroupSpacer()
 }
 
 
@@ -261,7 +317,8 @@ private fun ColumnScope.AppearanceSettingsGroup(
         onColorsDialogDismiss()
     }
 
-    SettingsEntryGroupText(title = "Appearance")
+    SettingsEntryGroupText(title = stringResource(R.string.feature_settings_appearance))
+
     Column(
         modifier = Modifier.padding(
             horizontal = 32.dp,
@@ -270,15 +327,15 @@ private fun ColumnScope.AppearanceSettingsGroup(
     ) {
         Text(
             modifier = Modifier.padding(bottom = 8.dp),
-            text = "Mode",
+            text = stringResource(R.string.feature_settings_mode),
             style = typography.titleMedium,
         )
-        val values = ThemeType.entries
-            .map { it.title }
+
+        val themes = ThemeType.entries.toList()
 
         FancyIndicatorTabs(
-            values = values,
-            selectedIndex = values.indexOf(themePreferences.themeType.title),
+            values = themes,
+            selectedIndex = themes.indexOf(themePreferences.themeType),
             onValueChange = {
                 val themeType = ThemeType.entries[it]
 
@@ -287,7 +344,8 @@ private fun ColumnScope.AppearanceSettingsGroup(
                         themeType = themeType
                     )
                 )
-            }
+            },
+            textForValue = { stringResource(it.titleResourceId) }
         )
     }
 
@@ -300,7 +358,7 @@ private fun ColumnScope.AppearanceSettingsGroup(
                 .padding(horizontal = 32.dp),
         ) {
             Text(
-                text = "Colour",
+                text = stringResource(R.string.feature_settings_colour),
                 style = typography.titleMedium,
             )
             LazyRow(
@@ -354,7 +412,7 @@ private fun ColumnScope.AppearanceSettingsGroup(
                         )
                         NamiokaiSpacer(height = 8)
                         Text(
-                            text = theme.title,
+                            text = stringResource(theme.titleResId),
                             style = typography.labelMedium,
                             textAlign = TextAlign.Center
                         )
@@ -366,8 +424,8 @@ private fun ColumnScope.AppearanceSettingsGroup(
             ) {
                 SettingsEntry(
                     modifier = Modifier.offset(x = (-32).dp),
-                    title = "Change accent color",
-                    text = "Update custom theme accent color.",
+                    title = stringResource(R.string.feature_settings_change_accent_color),
+                    text = stringResource(R.string.feature_settings_update_custom_theme_accent_color),
                     onClick = onColorsDialogOpen
                 )
 
@@ -415,7 +473,7 @@ private fun ColorPickerDialog(
     }
 
     NamiokaiDialog(
-        title = "Pick a color",
+        title = stringResource(R.string.feature_settings_pick_a_color),
         selectedValue = selectedColor.value,
         onSaveClick = onSaveClick,
         onDismiss = onDismiss
@@ -484,7 +542,7 @@ private fun ColorPickerDialog(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Recent colors",
+                        text = stringResource(R.string.feature_settings_recent_colors),
                         style = typography.labelLarge,
                     )
 
@@ -492,14 +550,14 @@ private fun ColorPickerDialog(
                         IconButton(onClick = { expanded = true }) {
                             Icon(
                                 imageVector = Icons.Default.MoreVert,
-                                contentDescription = "More",
+                                contentDescription = stringResource(R.string.feature_settings_more),
                             )
                         }
                         DropdownMenu(
                             expanded = expanded,
                             onDismissRequest = { expanded = false }) {
                             DropdownMenuItem(
-                                text = { Text("Pin all") },
+                                text = { Text(stringResource(R.string.feature_settings_pin_all)) },
                                 onClick = {
                                     expanded = false
                                     accentColors.forEach {
@@ -511,7 +569,7 @@ private fun ColorPickerDialog(
                                 }
                             )
                             DropdownMenuItem(
-                                text = { Text("Unpin all") },
+                                text = { Text(stringResource(R.string.feature_settings_unpin_all)) },
                                 onClick = {
                                     expanded = false
                                     accentColors.forEach {
@@ -523,7 +581,7 @@ private fun ColorPickerDialog(
                                 }
                             )
                             DropdownMenuItem(
-                                text = { Text("Clear unpinned") },
+                                text = { Text(stringResource(R.string.feature_settings_clear_unpinned)) },
                                 onClick = {
                                     expanded = false
                                     onClearAccentColorsClick()
@@ -616,7 +674,7 @@ private fun ChangeDisplayNameDialog(
     val newDisplayName = remember { mutableStateOf("") }
 
     NamiokaiDialog(
-        title = "Type your new display name",
+        title = stringResource(R.string.feature_settings_type_your_new_display_name),
         selectedValue = newDisplayName.value,
         onSaveClick = onSaveClick,
         onDismiss = onDismiss
@@ -626,7 +684,7 @@ private fun ChangeDisplayNameDialog(
                 vertical = 10.dp,
                 horizontal = 30.dp
             ),
-            label = "Display name",
+            label = stringResource(R.string.feature_settings_display_name),
             onValueChange = { newDisplayName.value = it })
     }
 }

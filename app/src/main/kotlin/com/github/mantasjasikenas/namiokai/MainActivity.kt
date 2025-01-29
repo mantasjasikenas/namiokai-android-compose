@@ -5,10 +5,10 @@ package com.github.mantasjasikenas.namiokai
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.getValue
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -38,7 +38,7 @@ import kotlin.time.Duration.Companion.seconds
 private const val TAG = "MainActivity"
 
 @AndroidEntryPoint
-class MainActivity : ComponentActivity(), AnalyticsLogger by AnalyticsLoggerImpl() {
+class MainActivity : AppCompatActivity(), AnalyticsLogger by AnalyticsLoggerImpl() {
 
     private lateinit var appUpdateManager: AppUpdateManager
     private val updateType = AppUpdateType.FLEXIBLE

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feature_settings_profile_group_title">Profile</string>
+    <string name="feature_settings_change_profile_picture">Change profile picture</string>
+    <string name="feature_settings_update_your_profile_picture">Update your profile picture</string>
+    <string name="feature_settings_change_display_name">Change display name</string>
+    <string name="feature_settings_update_display_name">Update display name</string>
+    <string name="feature_settings_account">Account</string>
+    <string name="feature_settings_not_logged_in">Not logged in</string>
+    <string name="feature_settings_log_out">Log out</string>
+    <string name="feature_settings_you_are_logged_in_as">You are logged in as %1$s</string>
+    <string name="feature_settings_appearance">Appearance</string>
+    <string name="feature_settings_colour">Colour</string>
+    <string name="feature_settings_change_accent_color">Change accent color</string>
+    <string name="feature_settings_update_custom_theme_accent_color">Update custom theme accent color.</string>
+    <string name="feature_settings_pick_a_color">Pick a color</string>
+    <string name="feature_settings_recent_colors">Recent colors</string>
+    <string name="feature_settings_pin_all">Pin all</string>
+    <string name="feature_settings_unpin_all">Unpin all</string>
+    <string name="feature_settings_more">More</string>
+    <string name="feature_settings_clear_unpinned">Clear unpinned</string>
+    <string name="feature_settings_type_your_new_display_name">Type your new display name</string>
+    <string name="feature_settings_display_name">Display name</string>
+    <string name="feature_settings_email">Email</string>
+    <string name="feature_settings_mode">Mode</string>
+    <string name="feature_settings_general">General</string>
+    <string name="feature_settings_language">Language</string>
+</resources>

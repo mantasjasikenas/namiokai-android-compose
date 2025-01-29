@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feature_settings_profile_group_title">Profilis</string>
+    <string name="feature_settings_change_profile_picture">Keisti profilio nuotrauką</string>
+    <string name="feature_settings_update_your_profile_picture">Atnaujinti profilio nuotrauką</string>
+    <string name="feature_settings_change_display_name">Keisti rodomą vardą</string>
+    <string name="feature_settings_update_display_name">Atnaujinti rodomą vardą</string>
+    <string name="feature_settings_account">Paskyra</string>
+    <string name="feature_settings_not_logged_in">Neprisijungęs</string>
+    <string name="feature_settings_log_out">Atsijungti</string>
+    <string name="feature_settings_you_are_logged_in_as">Prisijungęs kaip %1$s</string>
+    <string name="feature_settings_appearance">Išvaizda</string>
+    <string name="feature_settings_colour">Spalva</string>
+    <string name="feature_settings_change_accent_color">Keisti akcento spalvą</string>
+    <string name="feature_settings_update_custom_theme_accent_color">Atnaujinti pasirinktinės temos akcento spalvą</string>
+    <string name="feature_settings_pick_a_color">Pasirinkti spalvą</string>
+    <string name="feature_settings_recent_colors">Naujausios spalvos</string>
+    <string name="feature_settings_pin_all">Prisegti viską</string>
+    <string name="feature_settings_unpin_all">Atsegti viską</string>
+    <string name="feature_settings_more">Daugiau</string>
+    <string name="feature_settings_clear_unpinned">Išvalyti neatsegtus</string>
+    <string name="feature_settings_type_your_new_display_name">Įveskite naują rodomą vardą</string>
+    <string name="feature_settings_display_name">Rodymo vardas</string>
+    <string name="feature_settings_email">El. paštas</string>
+    <string name="feature_settings_mode">Režimas</string>
+    <string name="feature_settings_general">Bendrieji</string>
+    <string name="feature_settings_language">Kalba</string>
+</resources>

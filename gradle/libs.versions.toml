@@ -1,6 +1,6 @@
 [versions]
-versionCode = "40"
-versionName = "0.4.0"
+versionCode = "41"
+versionName = "0.4.1"
 
 jvm = "21"
 compileSdk = "35"
@@ -52,6 +52,7 @@ androidxTestExt = "1.2.1"
 androidxTestRules = "1.6.1"
 androidxTestRunner = "1.6.2"
 androidxUiAutomator = "2.3.0"
+junit = "4.13.2"
 
 [libraries]
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "android-gradle" }
@@ -127,6 +128,7 @@ androidx-test-uiautomator = { group = "androidx.test.uiautomator", name = "uiaut
 junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junitJupiterApi" }
 junit-jupiter-params = { module = "org.junit.jupiter:junit-jupiter-params", version.ref = "junitJupiterApi" }
 junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junitJupiterApi" }
+junit = { group = "junit", name = "junit", version.ref = "junit" }
 
 [bundles]
 compose = ["compose-ui",

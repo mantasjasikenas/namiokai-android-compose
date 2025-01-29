@@ -2,4 +2,11 @@
 <resources>
     <string name="no_credentials_found_please_add_a_google_account_to_your_device">No credentials found. Please add a Google account to your device.</string>
     <string name="sign_in_failed">Sign in failed</string>
+    <string name="theme_type_dark">Dark</string>
+    <string name="theme_type_light">Light</string>
+    <string name="theme_type_automatic">Automatic</string>
+    <string name="theme_default">Default</string>
+    <string name="theme_dynamic">Dynamic</string>
+    <string name="theme_custom">Custom</string>
+    <string name="theme_amoled">Amoled</string>
 </resources>

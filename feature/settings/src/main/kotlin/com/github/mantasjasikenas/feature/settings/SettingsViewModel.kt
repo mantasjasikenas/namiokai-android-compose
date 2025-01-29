@@ -3,6 +3,7 @@ package com.github.mantasjasikenas.feature.settings
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.github.mantasjasikenas.core.common.localization.LocalizationManager
 import com.github.mantasjasikenas.core.common.util.ToastManager
 import com.github.mantasjasikenas.core.database.AccentColor
 import com.github.mantasjasikenas.core.domain.model.Response
@@ -29,7 +30,8 @@ class SettingsViewModel @Inject constructor(
     private val usersRepository: UsersRepository,
     private val accentColorRepository: AccentColorRepository,
     private val userDataRepository: UserDataRepository,
-    private val toastManager: ToastManager
+    private val toastManager: ToastManager,
+    private val localizationManager: LocalizationManager
 ) : ViewModel() {
 
     val settingsUiState: StateFlow<SettingsUiState> =
@@ -50,6 +52,9 @@ class SettingsViewModel @Inject constructor(
                 started = SharingStarted.WhileSubscribed(5_000),
                 initialValue = SettingsUiState.Loading
             )
+
+    val currentLanguageIso: String
+        get() = localizationManager.getLanguageCode()
 
     fun logout() {
         viewModelScope.launch {
@@ -146,6 +151,10 @@ class SettingsViewModel @Inject constructor(
         }
 
         return true
+    }
+
+    fun updateLanguage(languageIso: String) {
+        localizationManager.applyLanguage(languageIso)
     }
 }
 

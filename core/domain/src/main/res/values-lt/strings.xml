@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="no_credentials_found_please_add_a_google_account_to_your_device">Nerasta paskyra. Prašome pridėti „Google“ paskyrą prie savo įrenginio.</string>
+    <string name="sign_in_failed">Prisijungimas nepavyko</string>
+    <string name="theme_type_dark">Tamsi</string>
+    <string name="theme_type_light">Šviesi</string>
+    <string name="theme_type_automatic">Automatinė</string>
+    <string name="theme_default">Numatytoji</string>
+    <string name="theme_dynamic">Dinaminė</string>
+    <string name="theme_custom">Pasirinktinė</string>
+    <string name="theme_amoled">Amoled</string>
+</resources>

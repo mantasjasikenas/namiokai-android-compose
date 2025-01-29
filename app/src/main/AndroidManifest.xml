@@ -23,10 +23,12 @@
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="${appName}"
+        android:localeConfig="@xml/locales_config"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Namiokai"
-        tools:targetApi="31">
+        tools:targetApi="35">
+
         <profileable android:shell="true" />
 
         <meta-data
@@ -50,6 +52,7 @@
 
         <activity
             android:name=".MainActivity"
+            android:configChanges="locale|layoutDirection"
             android:exported="true"
             android:theme="@style/Theme.App.AppSplash">
             <intent-filter>
