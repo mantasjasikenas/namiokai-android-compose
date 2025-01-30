@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="no_spaces_found">Erdvių nerasta. Sukurkite naują erdvę.</string>
-    <string name="members">%1$s nariai</string>
+    <string name="feature_space_members">%1$s nariai</string>
     <string name="week_day">(savaitės diena)</string>
     <string name="day_of_month">(mėnesio diena)</string>
     <string name="space_details">Erdvės detalės</string>
     <string name="name">Vardas</string>
     <string name="created_by">Sukurta</string>
-    <string name="recurrence_unit">Pasikartojimo vienetas</string>
+    <string name="recurrence_unit">Pasikartojimo dažnumas</string>
     <string name="recurrence_start_range">Pasikartojimo pradžia %1$s</string>
     <string name="destinations">Kelionės tikslai</string>
     <string name="please_add_to_this_space">Prašome pridėti %1$s į šią erdvę.</string>
@@ -31,4 +31,5 @@
     <string name="add_new_destination">Pridėti naują tikslą</string>
     <string name="trip_price_alone">Kelionės kaina vienam</string>
     <string name="trip_price_with_others">Kelionės kaina su kitais</string>
+    <string name="members">Nariai</string>
 </resources>

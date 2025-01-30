@@ -53,6 +53,7 @@ import com.github.mantasjasikenas.feature.profile.navigation.ProfileRoute
 import com.github.mantasjasikenas.feature.settings.navigation.SettingsRoute
 import com.github.mantasjasikenas.feature.test.navigation.TestRoute
 import com.github.mantasjasikenas.namiokai.R
+import com.github.mantasjasikenas.core.ui.R.drawable as UiDrawable
 
 /**
  * Composable that displays the topBar and displays back button if back navigation is possible.
@@ -130,7 +131,7 @@ private fun TopBarDropdownMenu(
     IconButton(onClick = { expanded = true }) {
         SubcomposeAsyncImage(
             model = ImageRequest.Builder(LocalContext.current)
-                .data(photoUrl.ifEmpty { R.drawable.profile })
+                .data(photoUrl.ifEmpty { UiDrawable.profile })
                 .crossfade(true)
                 .build(),
             contentDescription = null,

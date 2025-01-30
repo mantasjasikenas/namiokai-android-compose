@@ -47,10 +47,6 @@
  @kotlinx.serialization.SerialName <fields>;
 }
 
--keepnames class com.path.to.your.ParcelableArg
--keepnames class com.path.to.your.SerializableArg
--keepnames class com.path.to.your.EnumArg
-
 -dontwarn org.bouncycastle.jsse.BCSSLParameters
 -dontwarn org.bouncycastle.jsse.BCSSLSocket
 -dontwarn org.bouncycastle.jsse.provider.BouncyCastleJsseProvider

@@ -3,7 +3,7 @@
     <string name="your_spaces">Your spaces</string>
     <string name="create_a_space">Create a space</string>
     <string name="tap_to_create_a_space">Tap to create a space. Spaces are required to start tracking expenses.</string>
-    <string name="members">Members</string>
+    <string name="feature_home_members">Members</string>
     <string name="destinations">Destinations</string>
     <string name="current_period">Current period</string>
     <string name="start">Start</string>

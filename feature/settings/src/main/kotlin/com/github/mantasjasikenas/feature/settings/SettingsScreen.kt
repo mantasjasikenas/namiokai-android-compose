@@ -230,7 +230,7 @@ private fun ProfileSettingsGroup(
 }
 
 @Composable
-private fun ColumnScope.GeneralSettingsGroup(
+private fun GeneralSettingsGroup(
     currentLanguageIso: String,
     onLanguageUpdate: (String) -> Unit
 ) {

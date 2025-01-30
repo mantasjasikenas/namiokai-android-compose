@@ -12,14 +12,13 @@ app-update = "2.1.0"
 hilt = "2.54"
 hilt-navigation-compose = "1.2.0"
 activity-compose = "1.10.0"
-adaptive = "1.1.0-alpha09"
+adaptive = "1.1.0-beta01"
 androidx-datastore-preferences = "1.1.2"
 androidx-junit = "1.2.1"
 coil-compose = "2.7.0"
 colorpicker-compose = "1.0.7"
 core-ktx = "1.15.0"
 core-splashscreen = "1.0.1"
-google-services = "4.4.2"
 gmsPlugin = "4.4.2"
 credentials = "1.3.0"
 googleid = "1.1.1"
@@ -27,8 +26,8 @@ lifecycle = "2.8.7"
 play-services-auth = "21.3.0"
 room = "2.6.1"
 material = "1.13.0-alpha10"
-navigation-compose = "2.8.5"
-ui = "1.7.6"
+navigation-compose = "2.8.6"
+ui = "1.7.7"
 compose-material3 = "1.3.1"
 work-runtime-ktx = "2.10.0"
 firebase-bom = "33.8.0"
@@ -39,7 +38,7 @@ ksp = "2.1.0-1.0.29"
 kotlinx-datetime-jvm = "0.6.1"
 kotlinx-serialization-json = "1.7.3"
 appcompat = "1.7.0"
-androidx-ui-graphics-android = "1.7.6"
+androidx-ui-graphics-android = "1.7.7"
 dependency-analysis = "1.31.0"
 vico = "2.0.0-beta.4"
 firebase-crashlytics = "3.0.2"
@@ -52,7 +51,6 @@ androidxTestExt = "1.2.1"
 androidxTestRules = "1.6.1"
 androidxTestRunner = "1.6.2"
 androidxUiAutomator = "2.3.0"
-junit = "4.13.2"
 
 [libraries]
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "android-gradle" }
@@ -82,9 +80,6 @@ app-update-ktx = { module = "com.google.android.play:app-update-ktx", version.re
 app-update = { module = "com.google.android.play:app-update", version.ref = "app-update" }
 core-ktx = { module = "androidx.core:core-ktx", version.ref = "core-ktx" }
 datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "androidx-datastore-preferences" }
-google-services = { module = "com.google.gms:google-services", version.ref = "google-services" }
-hilt-android-gradle-plugin = { module = "com.google.dagger:hilt-android-gradle-plugin", version.ref = "hilt" }
-hilt-android-testing = { module = "com.google.dagger:hilt-android-testing", version.ref = "hilt" }
 hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hilt" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin-reflect" }
@@ -128,7 +123,6 @@ androidx-test-uiautomator = { group = "androidx.test.uiautomator", name = "uiaut
 junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junitJupiterApi" }
 junit-jupiter-params = { module = "org.junit.jupiter:junit-jupiter-params", version.ref = "junitJupiterApi" }
 junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junitJupiterApi" }
-junit = { group = "junit", name = "junit", version.ref = "junit" }
 
 [bundles]
 compose = ["compose-ui",
@@ -149,8 +143,6 @@ firebase = ["firebase-auth",
 [plugins]
 android-application = { id = "com.android.application", version.ref = "android-gradle" }
 androidLibrary = { id = "com.android.library", version.ref = "android-gradle" }
-google-gms-services = { id = "com.google.gms.google-services" }
-dagger-hilt-android = { id = "com.google.dagger.hilt.android" }
 android-kotlin = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 gms = { id = "com.google.gms.google-services", version.ref = "gmsPlugin" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }

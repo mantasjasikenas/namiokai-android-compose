@@ -1,3 +1,5 @@
+@file:Suppress("unused") // Used in build-logic but IDE doesn't see it
+
 import org.gradle.api.DefaultTask
 import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.tasks.TaskAction

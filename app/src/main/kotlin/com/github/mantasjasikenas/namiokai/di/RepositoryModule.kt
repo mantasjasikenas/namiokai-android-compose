@@ -12,6 +12,7 @@ import com.github.mantasjasikenas.core.data.repository.UserDataRepositoryImpl
 import com.github.mantasjasikenas.core.data.repository.UsersRepositoryImpl
 import com.github.mantasjasikenas.core.data.repository.debts.DebtsRepositoryImpl
 import com.github.mantasjasikenas.core.data.repository.preferences.PreferencesRepository
+import com.github.mantasjasikenas.core.data.repository.preferences.PreferencesRepositoryImpl
 import com.github.mantasjasikenas.core.domain.repository.BaseFirebaseRepository
 import com.github.mantasjasikenas.core.domain.repository.BillsRepository
 import com.github.mantasjasikenas.core.domain.repository.DebtsRepository
@@ -49,7 +50,7 @@ object RepositoryModule {
     @Provides
     @Singleton
     fun providePreferencesRepository(@ApplicationContext context: Context): PreferencesRepository {
-        return PreferencesRepository(context)
+        return PreferencesRepositoryImpl(context)
     }
 
     @Provides
@@ -136,12 +137,10 @@ object RepositoryModule {
     @Singleton
     fun provideSpaceRepository(
         db: FirebaseFirestore,
-        auth: FirebaseAuth,
         usersRepository: UsersRepository
     ): SpaceRepository =
         SpaceRepositoryImpl(
             db = db,
-            auth = auth,
             usersRepository = usersRepository
         )
 

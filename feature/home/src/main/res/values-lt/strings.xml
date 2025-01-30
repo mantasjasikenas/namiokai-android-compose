@@ -3,8 +3,8 @@
     <string name="your_spaces">Jūsų erdvės</string>
     <string name="create_a_space">Sukurti erdvę</string>
     <string name="tap_to_create_a_space">Bakstelėkite, kad sukurtumėte erdvę. Erdvės reikalingos išlaidų sekimui pradėti.</string>
-    <string name="members">Nariai</string>
-    <string name="destinations">Paskirties vietos</string>
+    <string name="feature_home_members">Nariai</string>
+    <string name="destinations">Kelionių vietos</string>
     <string name="current_period">Dabartinis laikotarpis</string>
     <string name="start">Pradžia</string>
     <string name="end">Pabaiga</string>

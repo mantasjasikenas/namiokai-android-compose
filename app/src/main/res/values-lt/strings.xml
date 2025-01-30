@@ -29,6 +29,6 @@
     <string name="notifications_menu_label">Pranešimai</string>
     <string name="profile_label">Profilis</string>
     <string name="space_label">Erdvės</string>
-    <string name="new_issue">Nauja problema</string>
+    <string name="new_issue">Pranešti problemą</string>
     <string name="download_successful">Atsisiuntimas sėkmingas. Programėlė bus paleista iš naujo po 5 sekundžių.</string>
 </resources>

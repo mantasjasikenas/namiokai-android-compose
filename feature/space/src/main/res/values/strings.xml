@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="no_spaces_found">No spaces found. Create a new space.</string>
-    <string name="members">%1$s members</string>
+    <string name="feature_space_members">%1$s members</string>
     <string name="week_day">(week day)</string>
     <string name="day_of_month">(day of month)</string>
     <string name="space_details">Space details</string>
@@ -31,4 +31,5 @@
     <string name="add_new_destination">Add new destination</string>
     <string name="trip_price_alone">Trip price alone</string>
     <string name="trip_price_with_others">Trip price with others</string>
+    <string name="members">Members</string>
 </resources>

@@ -1,5 +1,6 @@
 package com.github.mantasjasikenas.namiokai.di
 
+import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Context
 import androidx.credentials.CredentialManager
@@ -36,6 +37,7 @@ object AuthModule {
         context = context,
     )
 
+    @SuppressLint("CredentialManagerSignInWithGoogle")
     @Provides
     @Singleton
     fun provideGoogleIdOption(

@@ -1,3 +1,5 @@
+@file:Suppress("unused") // Used in build-logic but IDE doesn't see it
+
 import com.github.mantasjasikenas.namiokai.configureKotlin
 import org.gradle.api.Plugin
 import org.gradle.api.Project

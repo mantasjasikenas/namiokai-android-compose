@@ -9,4 +9,7 @@
     <string name="theme_dynamic">Dinaminė</string>
     <string name="theme_custom">Pasirinktinė</string>
     <string name="theme_amoled">Amoled</string>
+    <string name="daily">Kasdien</string>
+    <string name="weekly">Kas savaitę</string>
+    <string name="monthly">Kas mėnesį</string>
 </resources>

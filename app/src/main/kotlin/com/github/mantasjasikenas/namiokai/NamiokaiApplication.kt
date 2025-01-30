@@ -24,7 +24,7 @@ class NamiokaiApplication : Application(), ImageLoaderFactory {
             NotificationManager.IMPORTANCE_HIGH
         )
 
-        val notificationManager = getSystemService(NotificationManager::class.java)
+        val notificationManager = getSystemService(NotificationManager::class.kotlin)
         notificationManager.createNotificationChannel(channel)
     }*/
 }

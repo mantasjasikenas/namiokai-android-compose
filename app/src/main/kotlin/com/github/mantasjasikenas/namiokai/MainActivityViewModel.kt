@@ -12,8 +12,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
-private const val TAG = "MainActivityViewModel"
-
 @HiltViewModel
 class MainActivityViewModel @Inject constructor(
     userDataRepository: UserDataRepository

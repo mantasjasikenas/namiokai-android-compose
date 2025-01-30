@@ -132,14 +132,3 @@ private fun NavController.navigateToBillFormRoute(
         launchSingleTop = true
     }
 }
-
-/*@Composable
-inline fun <reified T : ViewModel> NavBackStackEntry.sharedViewModel(navController: NavHostController): T {
-    val navGraphRoute = destination.parent?.route ?: return hiltViewModel()
-
-    val parentEntry = remember(this) {
-        navController.getBackStackEntry(navGraphRoute)
-    }
-
-    return hiltViewModel(parentEntry)
-}*/

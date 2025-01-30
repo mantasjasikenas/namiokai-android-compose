@@ -1,6 +1,7 @@
 package com.github.mantasjasikenas.namiokai.ui
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.res.Configuration
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
@@ -13,6 +14,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
@@ -20,6 +22,9 @@ import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.github.mantasjasikenas.core.common.util.BaseSnackbarEvent
+import com.github.mantasjasikenas.core.common.util.MessageSnackbarEvent
+import com.github.mantasjasikenas.core.common.util.ResourceSnackbarEvent
 import com.github.mantasjasikenas.core.common.util.SnackbarController
 import com.github.mantasjasikenas.core.domain.model.SharedState
 import com.github.mantasjasikenas.core.domain.model.isNotLoggedIn
@@ -38,6 +43,7 @@ fun rememberNamiokaiAppState(
     onNavigateToAuthGraph: () -> Unit,
     coroutineScope: CoroutineScope = rememberCoroutineScope(),
     navController: NavHostController = rememberNavController(),
+    context: Context = LocalContext.current,
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
 ): NamiokaiAppState {
     UserLoginLaunchedEffect(
@@ -47,7 +53,8 @@ fun rememberNamiokaiAppState(
 
     ObserveSnackbarEvents(
         snackbarHostState = snackbarHostState,
-        coroutineScope = coroutineScope
+        coroutineScope = coroutineScope,
+        context = context
     )
 
     return remember(
@@ -66,6 +73,7 @@ fun rememberNamiokaiAppState(
 class NamiokaiAppState(
     val navController: NavHostController,
     val snackbarHostState: SnackbarHostState,
+    @Suppress("unused")
     coroutineScope: CoroutineScope,
 ) {
     private val previousDestination = mutableStateOf<NavDestination?>(null)
@@ -131,17 +139,28 @@ private fun UserLoginLaunchedEffect(sharedState: SharedState, onNavigateToAuthGr
 @Composable
 private fun ObserveSnackbarEvents(
     snackbarHostState: SnackbarHostState,
-    coroutineScope: CoroutineScope
+    coroutineScope: CoroutineScope,
+    context: Context,
 ) {
     ObserveAsEvents(
         flow = SnackbarController.events,
         snackbarHostState
-    ) { event ->
+    ) { event: BaseSnackbarEvent ->
         coroutineScope.launch {
             snackbarHostState.currentSnackbarData?.dismiss()
 
+            val message = when (event) {
+                is MessageSnackbarEvent -> event.message
+                is ResourceSnackbarEvent -> context.getString(event.resId)
+                else -> null
+            }
+
+            if (message == null) {
+                return@launch
+            }
+
             val result = snackbarHostState.showSnackbar(
-                message = event.message,
+                message = message,
                 actionLabel = event.action?.name,
                 duration = SnackbarDuration.Long
             )
